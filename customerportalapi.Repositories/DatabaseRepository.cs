@@ -12,11 +12,10 @@ namespace customerportalapi.Repositories
         private readonly IConfiguration _config;
         protected IMongoDatabase Database { get; }
 
-        public DatabaseRepository(IConfiguration config) //, IMapper mapper
+        public DatabaseRepository(IConfiguration config) 
         {
             _config = config;
-            //_mapper = mapper;
-
+            
             var client = new MongoClient(_config.GetConnectionString("customerportaldb"));
             this.Database = client.GetDatabase("customerportal");
         }
