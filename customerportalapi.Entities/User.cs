@@ -15,6 +15,8 @@ namespace customerportalapi.Entities
         [BsonElement("email")]
         public string email { get; set; }
         [BsonElement("language")]
-        public int language { get; set; }
+        public string language { get; set; }
+        [BsonElement("profilepicture")]
+        public string profilepicture { get; set; }
     }
 }

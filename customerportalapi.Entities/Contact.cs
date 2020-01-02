@@ -42,6 +42,8 @@ namespace customerportalapi.Entities
 
         public string Customer { get; set; }
 
-        public int LanguageCode { get; set; }
+        public string LanguageCode { get; set; }
+
+        public string Avatar { get; set; }
     }
 }

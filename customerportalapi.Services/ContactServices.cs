@@ -32,6 +32,7 @@ namespace customerportalapi.Services
             Contact entity = new Contact();
             entity = await _contactRepository.GetContactAsync(dni);
             entity.LanguageCode = user.language;
+            entity.Avatar = user.profilepicture;
 
             return entity;
         }
