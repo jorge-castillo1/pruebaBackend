@@ -9,5 +9,7 @@ namespace customerportalapi.Services.interfaces
     public interface IContactServices
     {
         Task<Contact> GetContactAsync(string dni);
+
+        Task<Contact> UpdateContactAsync(Contact contact);
     }
 }

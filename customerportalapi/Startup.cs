@@ -19,6 +19,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using Serilog;
 
 namespace customerportalapi
@@ -72,7 +73,8 @@ namespace customerportalapi
                 //Credentials = GetCredentials()
             });
 
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddMvc()
+                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             services.AddCors(options =>
             {

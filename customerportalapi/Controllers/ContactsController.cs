@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoWrapper.Wrappers;
+using customerportalapi.Entities;
 using customerportalapi.Services.interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -45,9 +46,19 @@ namespace customerportalapi.Controllers
         //}
 
         // POST api/values
-        [HttpPost]
-        public void Post([FromBody] string value)
+        [HttpPatch]
+        public async Task<ApiResponse> PatchAsync([FromBody] Contact value)
         {
+            try
+            {
+                var entity = await _services.UpdateContactAsync(value);
+                return new ApiResponse(entity);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
         }
 
         //// PUT api/values/5

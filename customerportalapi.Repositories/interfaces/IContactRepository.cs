@@ -9,5 +9,7 @@ namespace customerportalapi.Repositories.interfaces
     public interface IContactRepository
     {
        Task<Contact> GetContactAsync(string dni);
+
+        Task<Contact> UpdateContactAsync(Contact contact);
     }
 }
