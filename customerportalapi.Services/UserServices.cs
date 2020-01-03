@@ -31,7 +31,7 @@ namespace customerportalapi.Services
             //Invoke repository
             Profile entity = new Profile();
             entity = await _profileRepository.GetProfileAsync(dni);
-            entity.LanguageCode = user.language;
+            entity.Language = user.language;
             entity.Avatar = user.profilepicture;
 
             return entity;
@@ -44,15 +44,25 @@ namespace customerportalapi.Services
             if (user._id == null)
                 throw new ArgumentException("User does not exist.");
 
-            //1. Compare language, email and image for backend changes
-            if (user.language.ToLower() != profile.LanguageCode.ToLower() ||
-                user.profilepicture.ToLower() != profile.Avatar.ToLower() ||
-                user.email.ToLower() != profile.EmailAddress1.ToLower())
+            //TODO: Validate Principal Email
+            string emailToUpdate = string.Empty;
+            if (!string.IsNullOrEmpty(profile.EmailAddress1))
+                emailToUpdate = profile.EmailAddress1;
+            else
             {
-                if (user.language.ToLower() != profile.LanguageCode.ToLower())
-                    user.language = profile.LanguageCode;
+                if (!string.IsNullOrEmpty(profile.EmailAddress2))
+                    emailToUpdate = profile.EmailAddress2;
+            }
 
-                if (user.email.ToLower() != profile.EmailAddress1.ToLower())
+            //1. Compare language, email and image for backend changes
+            if (user.language.ToLower() != profile.Language.ToLower() ||
+                user.profilepicture.ToLower() != profile.Avatar.ToLower() ||
+                user.email.ToLower() != emailToUpdate.ToLower())
+            {
+                if (user.language.ToLower() != profile.Language.ToLower())
+                    user.language = profile.Language;
+
+                if (user.email.ToLower() != emailToUpdate.ToLower() && !string.IsNullOrEmpty(emailToUpdate))
                     user.email = profile.EmailAddress1;
 
                 if (user.profilepicture.ToLower() != profile.Avatar.ToLower())
@@ -64,7 +74,7 @@ namespace customerportalapi.Services
             //2. Invoke repository for other changes
             Profile entity = new Profile();
             entity = await _profileRepository.UpdateProfileAsync(profile);
-            entity.LanguageCode = user.language;
+            entity.Language = user.language;
             entity.Avatar = user.profilepicture;
 
             return entity;

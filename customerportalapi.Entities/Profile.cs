@@ -42,7 +42,7 @@ namespace customerportalapi.Entities
 
         public string Customer { get; set; }
 
-        public string LanguageCode { get; set; }
+        public string Language { get; set; }
 
         public string Avatar { get; set; }
     }
