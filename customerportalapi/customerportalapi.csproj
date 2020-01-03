@@ -8,6 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="customerportalapi-20200102.txt" />
+    <None Remove="customerportalapi-20200103.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AutoWrapper.Core" Version="2.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />

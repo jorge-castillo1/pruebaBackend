@@ -19,6 +19,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using Serilog;
 
 namespace customerportalapi
@@ -48,10 +49,10 @@ namespace customerportalapi
         {
             //Register Repositories
             services.AddScoped<IUserRepository, UserRepository>();
-            services.AddScoped<IContactRepository, ContactRepository>();
+            services.AddScoped<IProfileRepository, ProfileRepository>();
 
             //Register Business Services
-            services.AddTransient<IContactServices, ContactServices>();
+            services.AddTransient<IUserServices, UserServices>();
 
             services.AddHttpClient("httpClientCRM", c =>
             {
@@ -72,7 +73,18 @@ namespace customerportalapi
                 //Credentials = GetCredentials()
             });
 
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddMvc()
+                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll", p =>
+                {
+                    p.AllowAnyOrigin()
+                    .AllowAnyHeader()
+                    .AllowAnyMethod();
+                });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -91,6 +103,7 @@ namespace customerportalapi
                 app.UseHsts();
             }
 
+            app.UseCors("AllowAll");
             app.UseHttpsRedirection();
             app.UseMvc();
             app.UseApiResponseAndExceptionWrapper(

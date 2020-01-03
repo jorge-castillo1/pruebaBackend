@@ -2,7 +2,7 @@
 
 namespace customerportalapi.Entities
 {
-    public class Contact
+    public class Profile
     {
         public string Fullname { get; set; }
 
@@ -42,6 +42,8 @@ namespace customerportalapi.Entities
 
         public string Customer { get; set; }
 
-        public int LanguageCode { get; set; }
+        public string LanguageCode { get; set; }
+
+        public string Avatar { get; set; }
     }
 }
