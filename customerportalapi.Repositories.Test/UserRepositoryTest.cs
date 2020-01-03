@@ -66,7 +66,7 @@ namespace customerportalapi.Repositories.Test
         }
 
         [TestCleanup]
-        public void Finalize()
+        public void Clean()
         {
             User testUser = GetTestUser();
 

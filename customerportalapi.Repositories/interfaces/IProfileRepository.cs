@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace customerportalapi.Repositories.interfaces
 {
-    public interface IContactRepository
+    public interface IProfileRepository
     {
-       Task<Contact> GetContactAsync(string dni);
+       Task<Profile> GetProfileAsync(string dni);
 
-        Task<Contact> UpdateContactAsync(Contact contact);
+        Task<Profile> UpdateProfileAsync(Profile profile);
     }
 }

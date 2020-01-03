@@ -9,7 +9,7 @@ namespace customerportalapi.Repositories.Test
 {
 
     [TestClass]
-    public class ContactRepositoryTest
+    public class ProfileRepositoryTest
     {
         IConfiguration _configurations;
         IHttpClientFactory _clientFactory;
@@ -27,7 +27,7 @@ namespace customerportalapi.Repositories.Test
         }
 
         [TestMethod]
-        public void AlHacerUnaLlamadaExternaDeContactos_NoDevuelveErrores()
+        public void AlHacerUnaLlamadaGetExternaDeDatos_NoDevuelveErrores()
         {
             //Arrange
             Mock.Get(_clientFactory).Setup(x => x.CreateClient("httpClientCRM"))
@@ -38,14 +38,39 @@ namespace customerportalapi.Repositories.Test
 
             var response = new HttpResponseMessage
             {
-                Content = new StringContent("{ \"result\": { \"fullname\": \"fake contact\"}}")
+                Content = new StringContent("{ \"result\": { \"fullname\": \"fake profile\"}}")
             };
             _handler.SetupAnyRequest()
                 .ReturnsAsync(response);
 
             //Act
-            ContactRepository repository = new ContactRepository(_configurations, _clientFactory);
-            var result = repository.GetContactAsync("fake dni");
+            ProfileRepository repository = new ProfileRepository(_configurations, _clientFactory);
+            var result = repository.GetProfileAsync("fake dni");
+
+            //Assert
+            Assert.IsNotNull(result);
+        }
+
+        [TestMethod]
+        public void AlHacerUnaLlamadaSendExternaDeDatos_NoDevuelveErrores()
+        {
+            //Arrange
+            Mock.Get(_clientFactory).Setup(x => x.CreateClient("httpClientCRM"))
+                .Returns(() =>
+                {
+                    return _handler.CreateClient();
+                });
+
+            var response = new HttpResponseMessage
+            {
+                Content = new StringContent("{ \"result\": { \"fullname\": \"fake profile\"}}")
+            };
+            _handler.SetupAnyRequest()
+                .ReturnsAsync(response);
+
+            //Act
+            ProfileRepository repository = new ProfileRepository(_configurations, _clientFactory);
+            var result = repository.UpdateProfileAsync(new Entities.Profile());
 
             //Assert
             Assert.IsNotNull(result);

@@ -12,12 +12,12 @@ namespace customerportalapi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ContactsController : ControllerBase
+    public class UsersController : ControllerBase
     {
-        private readonly IContactServices _services;
-        private readonly ILogger<ContactsController> _logger;
+        private readonly IUserServices _services;
+        private readonly ILogger<UsersController> _logger;
 
-        public ContactsController(IContactServices services, ILogger<ContactsController> logger)
+        public UsersController(IUserServices services, ILogger<UsersController> logger)
         {
             _services = services;
             _logger = logger;
@@ -28,7 +28,7 @@ namespace customerportalapi.Controllers
         {
             try
             {
-                var entity = await _services.GetContactAsync(dni);
+                var entity = await _services.GetProfileAsync(dni);
                 return new ApiResponse(entity);
             }
             catch (Exception ex)
@@ -47,11 +47,11 @@ namespace customerportalapi.Controllers
 
         // POST api/values
         [HttpPatch]
-        public async Task<ApiResponse> PatchAsync([FromBody] Contact value)
+        public async Task<ApiResponse> PatchAsync([FromBody] Profile value)
         {
             try
             {
-                var entity = await _services.UpdateContactAsync(value);
+                var entity = await _services.UpdateProfileAsync(value);
                 return new ApiResponse(entity);
             }
             catch (Exception ex)

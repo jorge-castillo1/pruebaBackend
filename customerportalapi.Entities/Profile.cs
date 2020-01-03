@@ -2,7 +2,7 @@
 
 namespace customerportalapi.Entities
 {
-    public class Contact
+    public class Profile
     {
         public string Fullname { get; set; }
 

@@ -10,47 +10,47 @@ using System.Text;
 
 namespace customerportalapi.Repositories
 {
-    public class ContactRepository : IContactRepository
+    public class ProfileRepository : IProfileRepository
     {
         readonly IConfiguration _configuration;
         readonly IHttpClientFactory _clientFactory;
 
-        public ContactRepository(IConfiguration configuration, IHttpClientFactory clientFactory)
+        public ProfileRepository(IConfiguration configuration, IHttpClientFactory clientFactory)
         {
             _configuration = configuration;
             _clientFactory = clientFactory;
         }
 
-        public async Task<Contact> GetContactAsync(string dni)
+        public async Task<Profile> GetProfileAsync(string dni)
         {
             var httpClient = _clientFactory.CreateClient("httpClientCRM");
-            httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["ContactsAPI"]);
+            httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["ProfileAPI"]);
 
             var response = await httpClient.GetAsync(dni, HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
-            if (!response.IsSuccessStatusCode) return new Contact();
+            if (!response.IsSuccessStatusCode) return new Profile();
             var content = await response.Content.ReadAsStringAsync();
             JObject result = JObject.Parse(content);
 
-            return JsonConvert.DeserializeObject<Contact>(result.GetValue("result").ToString());
+            return JsonConvert.DeserializeObject<Profile>(result.GetValue("result").ToString());
         }
 
-        public async Task<Contact> UpdateContactAsync(Contact contact)
+        public async Task<Profile> UpdateProfileAsync(Profile profile)
         {
             var httpClient = _clientFactory.CreateClient("httpClientCRM");
             var method = new HttpMethod("PATCH");
-            var request = new HttpRequestMessage(method, new Uri(_configuration["GatewayUrl"] + _configuration["ContactsAPI"]))
+            var request = new HttpRequestMessage(method, new Uri(_configuration["GatewayUrl"] + _configuration["ProfileAPI"]))
             {
-                Content = new StringContent(JsonConvert.SerializeObject(contact), Encoding.UTF8, "application/json")
+                Content = new StringContent(JsonConvert.SerializeObject(profile), Encoding.UTF8, "application/json")
             };
 
             var response = await httpClient.SendAsync(request);
             response.EnsureSuccessStatusCode();
-            if (!response.IsSuccessStatusCode) return new Contact();
+            if (!response.IsSuccessStatusCode) return new Profile();
             var content = await response.Content.ReadAsStringAsync();
             JObject result = JObject.Parse(content);
 
-            return JsonConvert.DeserializeObject<Contact>(result.GetValue("result").ToString());
+            return JsonConvert.DeserializeObject<Profile>(result.GetValue("result").ToString());
         }
     }
 }

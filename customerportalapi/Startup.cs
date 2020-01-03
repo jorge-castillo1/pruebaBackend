@@ -49,10 +49,10 @@ namespace customerportalapi
         {
             //Register Repositories
             services.AddScoped<IUserRepository, UserRepository>();
-            services.AddScoped<IContactRepository, ContactRepository>();
+            services.AddScoped<IProfileRepository, ProfileRepository>();
 
             //Register Business Services
-            services.AddTransient<IContactServices, ContactServices>();
+            services.AddTransient<IUserServices, UserServices>();
 
             services.AddHttpClient("httpClientCRM", c =>
             {
