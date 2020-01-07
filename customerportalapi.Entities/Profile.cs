@@ -12,7 +12,11 @@ namespace customerportalapi.Entities
 
         public string EmailAddress1 { get; set; }
 
+        public bool EmailAddress1Principal { get; set; }
+
         public string EmailAddress2 { get; set; }
+
+        public bool EmailAddress2Principal { get; set; }
 
         public string Phone1 { get; set; }
 

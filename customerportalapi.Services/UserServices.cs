@@ -31,6 +31,15 @@ namespace customerportalapi.Services
             //Invoke repository
             Profile entity = new Profile();
             entity = await _profileRepository.GetProfileAsync(dni);
+
+            //3. Set Email Principal according to external data. No two principal emails allowed
+            entity.EmailAddress1Principal = false;
+            entity.EmailAddress2Principal = false;
+            if (entity.EmailAddress1 == user.email)
+                entity.EmailAddress1Principal = true;
+            else 
+                entity.EmailAddress2Principal = true;
+            
             entity.Language = user.language;
             entity.Avatar = user.profilepicture;
 
@@ -44,29 +53,30 @@ namespace customerportalapi.Services
             if (user._id == null)
                 throw new ArgumentException("User does not exist.");
 
-            //TODO: Validate Principal Email
+            //3. Set Email Principal according to external data
+            if (String.IsNullOrEmpty(profile.EmailAddress1) && String.IsNullOrEmpty(profile.EmailAddress2))
+                throw new ArgumentException("Email field can not be null.");
+
+            if (profile.EmailAddress1Principal && String.IsNullOrEmpty(profile.EmailAddress1))
+                throw new ArgumentException("Principal email can not be null.");
+
+            if (profile.EmailAddress2Principal && String.IsNullOrEmpty(profile.EmailAddress2))
+                throw new ArgumentException("Principal email can not be null.");
+
             string emailToUpdate = string.Empty;
-            if (!string.IsNullOrEmpty(profile.EmailAddress1))
+            if (profile.EmailAddress1Principal)
                 emailToUpdate = profile.EmailAddress1;
             else
-            {
-                if (!string.IsNullOrEmpty(profile.EmailAddress2))
-                    emailToUpdate = profile.EmailAddress2;
-            }
-
+                emailToUpdate = profile.EmailAddress2;
+            
             //1. Compare language, email and image for backend changes
-            if (user.language.ToLower() != profile.Language.ToLower() ||
-                user.profilepicture.ToLower() != profile.Avatar.ToLower() ||
-                user.email.ToLower() != emailToUpdate.ToLower())
+            if (user.language != profile.Language ||
+                user.profilepicture != profile.Avatar ||
+                user.email != emailToUpdate)
             {
-                if (user.language.ToLower() != profile.Language.ToLower())
-                    user.language = profile.Language;
-
-                if (user.email.ToLower() != emailToUpdate.ToLower() && !string.IsNullOrEmpty(emailToUpdate))
-                    user.email = profile.EmailAddress1;
-
-                if (user.profilepicture.ToLower() != profile.Avatar.ToLower())
-                    user.profilepicture = profile.Avatar;
+                user.language = profile.Language;
+                user.email = emailToUpdate;
+                user.profilepicture = profile.Avatar;
 
                 user = _userRepository.update(user);
             }
@@ -76,6 +86,10 @@ namespace customerportalapi.Services
             entity = await _profileRepository.UpdateProfileAsync(profile);
             entity.Language = user.language;
             entity.Avatar = user.profilepicture;
+            if (entity.EmailAddress1 == user.email)
+                entity.EmailAddress1Principal = true;
+            else
+                entity.EmailAddress2Principal = true;
 
             return entity;
         }

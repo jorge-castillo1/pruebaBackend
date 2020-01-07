@@ -15,7 +15,7 @@ namespace customerportalapi.Services.Test.FakeData
             db.Setup(x => x.getCurrentUser(It.IsAny<string>())).Returns(new Entities.User()
             {
                 dni = "12345678A",
-                email = "user email",
+                email = "fake email",
                 language = "fake lang",
                 profilepicture = "fake profile image"
             }).Verifiable();
@@ -30,7 +30,7 @@ namespace customerportalapi.Services.Test.FakeData
             {
                 _id = "b02fc244-40e4-e511-80bf-00155d018a4f",
                 dni = "12345678A",
-                email = "user email",
+                email = "fake email 1",
                 language = "fake lang",
                 profilepicture = "fake profile image"
             }).Verifiable();
@@ -39,7 +39,7 @@ namespace customerportalapi.Services.Test.FakeData
             {
                 _id = "b02fc244-40e4-e511-80bf-00155d018a4f",
                 dni = "12345678A",
-                email = "user email",
+                email = "fake email 1 modified",
                 language = "fake lang modified",
                 profilepicture = "fake profile image modified"
             }).Verifiable();
