@@ -50,9 +50,11 @@ namespace customerportalapi
             //Register Repositories
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IProfileRepository, ProfileRepository>();
+            services.AddScoped<IContractRepository, ContractRepository>();
 
             //Register Business Services
             services.AddTransient<IUserServices, UserServices>();
+            services.AddTransient<ISiteServices, SiteServices>();
 
             services.AddHttpClient("httpClientCRM", c =>
             {
@@ -103,6 +105,16 @@ namespace customerportalapi
                 app.UseHsts();
             }
 
+            //  GET https://localhost:44332/api/users/X8028916F net::ERR_INVALID_HTTP_RESPONSE
+            // https://stackoverflow.com/questions/53906866/neterr-invalid-http-response-error-after-post-request-with-angular-7
+            app.Use(async (ctx, next) =>
+            {
+                await next();
+                if (ctx.Response.StatusCode == 204)
+                {
+                    ctx.Response.ContentLength = 0;
+                }
+            });
             app.UseCors("AllowAll");
             app.UseHttpsRedirection();
             app.UseMvc();
