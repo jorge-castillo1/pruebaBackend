@@ -3,7 +3,7 @@ container('dotnetcore') {
 
     stage('build') { gitlabCommitStatus(name: 'build') {
       sh """
-      dotnet build "customerportalapi.csproj" -c Release -o /app
+      dotnet build -c Release -o /app
       """  }}
 
 
