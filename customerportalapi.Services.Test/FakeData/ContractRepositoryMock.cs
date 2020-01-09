@@ -18,25 +18,21 @@ namespace customerportalapi.Services.Test.FakeData
                 new Contract() {
                    ContractNumber = "1234567890",
                    ContractDate = "01/01/2020",
-                   ContractStatus = 1,
                    Store = "Fake Store"
                 },
                 new Contract() {
                    ContractNumber = "1234567891",
                    ContractDate = "01/01/2019",
-                   ContractStatus = 2,
                    Store = "Fake Store"
                 },
                 new Contract() {
                    ContractNumber = "1234567892",
                    ContractDate = "01/01/2020",
-                   ContractStatus = 1,
                    Store = "Fake Store 2"
                 },
                 new Contract() {
                    ContractNumber = "1234567893",
                    ContractDate = "01/01/2020",
-                   ContractStatus = 1,
                    Store = "Fake Store 2"
                 },
             })).Verifiable();
