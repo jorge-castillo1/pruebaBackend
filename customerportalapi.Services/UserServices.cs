@@ -4,6 +4,8 @@ using customerportalapi.Services.interfaces;
 using System;
 using System.Threading.Tasks;
 using customerportalapi.Repositories;
+using System.Collections.Generic;
+using System.Net.Mail;
 
 namespace customerportalapi.Services
 {
@@ -11,11 +13,13 @@ namespace customerportalapi.Services
     {
         readonly IUserRepository _userRepository;
         readonly IProfileRepository  _profileRepository;
+        readonly IMailRepository _mailRepository;
 
-        public UserServices(IUserRepository userRepository, IProfileRepository profileRepository)
+        public UserServices(IUserRepository userRepository, IProfileRepository profileRepository, IMailRepository mailRepository)
         {
             _userRepository = userRepository;
             _profileRepository = profileRepository;
+            _mailRepository = mailRepository;
         }
 
 
@@ -35,9 +39,10 @@ namespace customerportalapi.Services
             //3. Set Email Principal according to external data. No two principal emails allowed
             entity.EmailAddress1Principal = false;
             entity.EmailAddress2Principal = false;
+
             if (entity.EmailAddress1 == user.email)
                 entity.EmailAddress1Principal = true;
-            else 
+            else if (entity.EmailAddress2 == user.email)
                 entity.EmailAddress2Principal = true;
             
             entity.Language = user.language;
@@ -92,6 +97,61 @@ namespace customerportalapi.Services
                 entity.EmailAddress2Principal = true;
 
             return entity;
+        }
+
+        public async Task<bool> InviteUserAsync(Invitation value)
+        {
+            bool result = false;
+
+            //1. Validate email not empty
+            if (string.IsNullOrEmpty(value.Email))
+                throw new ArgumentException("User must have a valid email address.");
+            //2. Validate dni not empty
+            if (string.IsNullOrEmpty(value.Dni))
+                throw new ArgumentException("User must have a valid document number.");
+
+            //3. If no user exists create user
+            User user = _userRepository.getCurrentUser(value.Dni);
+            if (user._id == null)
+            {
+                //4. TODO Create user in autentication system
+
+                //5. Create user in portal database
+                User newUser = new User();
+                newUser.dni = value.Dni;
+                newUser.email = value.Email;
+                newUser.language = InvitationUtils.GetLanguage(value.Language);
+                newUser.usertype = InvitationUtils.GetUserType(value.CustomerType);
+                newUser.emailverified = false;
+
+                result = await _userRepository.create(newUser);
+            }
+            else
+            {
+                //6. If emailverified is false resend email invitation otherwise throw error
+                if (user.emailverified)
+                    throw new InvalidOperationException("Invitation user fails. User already exist");
+
+                //7. Update invitation data
+                user.email = value.Email;
+                user.language = InvitationUtils.GetLanguage(value.Language);
+                user.usertype = InvitationUtils.GetUserType(value.CustomerType);
+                _userRepository.update(user);
+            }
+
+            //4. Sens email invitation
+            Email message = new Email();
+            message.To.Add(user.email);
+            message.Subject = InvitationUtils.GetWelcomeMessage(value.Language);
+            message.Body = "Aquí irá un texto y la url.";
+            result = await _mailRepository.Send(message);
+
+            return result;
+        }
+
+        public void DesInvitar()
+        {
+            //Establecer email verified a false para que no pueda acceder al portal
         }
     }
 }

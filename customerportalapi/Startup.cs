@@ -5,10 +5,12 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Net.Mail;
 using System.Threading.Tasks;
 using AutoWrapper;
 using customerportalapi.Repositories;
 using customerportalapi.Repositories.interfaces;
+using customerportalapi.Repositories.utils;
 using customerportalapi.Services;
 using customerportalapi.Services.interfaces;
 using Microsoft.AspNetCore.Builder;
@@ -47,10 +49,28 @@ namespace customerportalapi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            //Mail service
+            services.AddScoped<SmtpClient>((serviceProvider) =>
+            {
+                var config = serviceProvider.GetRequiredService<IConfiguration>();
+                return new SmtpClient()
+                {
+                    Host = config.GetValue<String>("Email:Smtp:Host"),
+                    Port = config.GetValue<int>("Email:Smtp:Port"),
+                    EnableSsl = config.GetValue<bool>("Email:Smtp:EnableSSL"),
+                    Credentials = new NetworkCredential(
+                            config.GetValue<String>("Email:Smtp:Username"),
+                            config.GetValue<String>("Email:Smtp:Password")
+                        )
+                };
+            });
+
             //Register Repositories
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IProfileRepository, ProfileRepository>();
             services.AddScoped<IContractRepository, ContractRepository>();
+            services.AddScoped<IMailClient, MailClientWrapper>();
+            services.AddScoped<IMailRepository, MailRepository>();
 
             //Register Business Services
             services.AddTransient<IUserServices, UserServices>();

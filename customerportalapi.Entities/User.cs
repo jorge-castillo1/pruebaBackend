@@ -18,5 +18,9 @@ namespace customerportalapi.Entities
         public string language { get; set; }
         [BsonElement("profilepicture")]
         public string profilepicture { get; set; }
+        [BsonElement("usertype")]
+        public int usertype { get; set; }
+        [BsonElement("emailverified")]
+        public bool emailverified { get; set; }
     }
 }
