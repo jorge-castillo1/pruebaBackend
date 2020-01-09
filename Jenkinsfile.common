@@ -1,0 +1,63 @@
+container('dotnetcore') {
+  gitlabBuilds(builds: ['build', 'test', 'sonarqube', 'quality_gate', 'docker', 'artifacts']) {
+
+    stage('build') { gitlabCommitStatus(name: 'build') {
+      sh """
+      dotnet build "customerportalapi.csproj" -c Release -o /app
+      """  }}
+
+
+    stage('test') { gitlabCommitStatus(name: 'test') {
+      container('chromeheadlesstest') {
+        sh """
+        dotnet test
+        """
+      }
+    }}
+
+    stage('sonarqube') {
+      gitlabCommitStatus(name: 'sonarqube')  {
+        container('java') {
+          def scannerHome = tool 'QuantionSonarqube';
+          withSonarQubeEnv('QuantionSonarqubeScanner') {
+            sh "${scannerHome}/bin/sonar-scanner"
+          }
+        }
+      }
+    }
+    stage("quality_gate"){
+      gitlabCommitStatus(name: 'quality_gate')  {
+        container('java') {
+          timeout(time: 10, unit: 'MINUTES') {
+              def qg = waitForQualityGate()
+              if (qg.status != 'OK') {
+                  error "Pipeline aborted due to quality gate failure"
+              }
+          }
+        }
+      }
+    }
+
+    stage("docker") {
+      gitlabCommitStatus(name: 'docker')  {
+        container('docker') {
+          def registry = 'registry.quantion.com'
+          def service = 'bluespace-customerportal-web'
+
+          script {
+            docker.withRegistry('https://registry.quantion.com', 'registry_docker_credentials') {
+
+              def image = docker.build("${registry}/${service}/backend:v${BUILD_NUMBER}", "--network container:\$(docker ps | grep \$(hostname) | grep k8s_jnlp | cut -d\" \" -f1) -f Dockerfile .")
+              image.push()
+            }
+          }
+        }
+      }
+    }
+
+
+    stage('artifacts') { gitlabCommitStatus(name: 'artifacts') {
+      archiveArtifacts artifacts: 'dist/**/*.*', fingerprint: true, onlyIfSuccessful: true
+    }}
+  }
+}

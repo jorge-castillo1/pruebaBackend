@@ -341,3 +341,4 @@ healthchecksdb
 *.txt
 
 .vscode/
+global.json
