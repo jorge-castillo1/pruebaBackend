@@ -19,6 +19,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using Serilog;
 
 namespace customerportalapi
@@ -48,10 +49,12 @@ namespace customerportalapi
         {
             //Register Repositories
             services.AddScoped<IUserRepository, UserRepository>();
-            services.AddScoped<IContactRepository, ContactRepository>();
+            services.AddScoped<IProfileRepository, ProfileRepository>();
+            services.AddScoped<IContractRepository, ContractRepository>();
 
             //Register Business Services
-            services.AddTransient<IContactServices, ContactServices>();
+            services.AddTransient<IUserServices, UserServices>();
+            services.AddTransient<ISiteServices, SiteServices>();
 
             services.AddHttpClient("httpClientCRM", c =>
             {
@@ -72,7 +75,18 @@ namespace customerportalapi
                 //Credentials = GetCredentials()
             });
 
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddMvc()
+                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll", p =>
+                {
+                    p.AllowAnyOrigin()
+                    .AllowAnyHeader()
+                    .AllowAnyMethod();
+                });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -91,6 +105,17 @@ namespace customerportalapi
                 app.UseHsts();
             }
 
+            //  GET https://localhost:44332/api/users/X8028916F net::ERR_INVALID_HTTP_RESPONSE
+            // https://stackoverflow.com/questions/53906866/neterr-invalid-http-response-error-after-post-request-with-angular-7
+            app.Use(async (ctx, next) =>
+            {
+                await next();
+                if (ctx.Response.StatusCode == 204)
+                {
+                    ctx.Response.ContentLength = 0;
+                }
+            });
+            app.UseCors("AllowAll");
             app.UseHttpsRedirection();
             app.UseMvc();
             app.UseApiResponseAndExceptionWrapper(

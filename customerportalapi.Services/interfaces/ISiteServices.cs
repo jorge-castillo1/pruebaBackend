@@ -4,10 +4,10 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace customerportalapi.Repositories.interfaces
+namespace customerportalapi.Services.interfaces
 {
-    public interface IContactRepository
+    public interface ISiteServices
     {
-       Task<Contact> GetContactAsync(string dni);
+        Task<List<Site>> GetContractsAsync(string dni);
     }
 }

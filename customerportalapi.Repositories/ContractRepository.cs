@@ -6,32 +6,37 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Text;
+using System.Collections.Generic;
 
 namespace customerportalapi.Repositories
 {
-    public class ContactRepository : IContactRepository
+    public class ContractRepository : IContractRepository
     {
         readonly IConfiguration _configuration;
         readonly IHttpClientFactory _clientFactory;
 
-        public ContactRepository(IConfiguration configuration, IHttpClientFactory clientFactory)
+        public ContractRepository(IConfiguration configuration, IHttpClientFactory clientFactory)
         {
             _configuration = configuration;
             _clientFactory = clientFactory;
         }
 
-        public async Task<Contact> GetContactAsync(string dni)
+        public async Task<List<Contract>> GetContractsAsync(string dni)
         {
+            var entitylist = new List<Contract>();
+            
             var httpClient = _clientFactory.CreateClient("httpClientCRM");
-            httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["ContactsAPI"]);
+            httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["ContractsAPI"]);
 
             var response = await httpClient.GetAsync(dni, HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
-            if (!response.IsSuccessStatusCode) return new Contact();
+            if (!response.IsSuccessStatusCode) return entitylist;
             var content = await response.Content.ReadAsStringAsync();
             JObject result = JObject.Parse(content);
+            var contractList = JsonConvert.DeserializeObject<List<Contract>>(result.GetValue("result").ToString());
 
-            return JsonConvert.DeserializeObject<Contact>(result.GetValue("result").ToString());
+            return contractList;
         }
     }
 }

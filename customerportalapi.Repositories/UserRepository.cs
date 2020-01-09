@@ -34,7 +34,7 @@ namespace customerportalapi.Repositories
         {
             //update User
             var filter = Builders<User>.Filter.Eq(s => s.dni, user.dni);
-            var result = _users.ReplaceOneAsync(filter, user);
+            var result = _users.ReplaceOne(filter, user);
 
             return user;
         }
