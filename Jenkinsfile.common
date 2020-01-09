@@ -56,7 +56,7 @@ container('dotnetcore') {
 
 
     stage('artifacts') { gitlabCommitStatus(name: 'artifacts') {
-      archiveArtifacts artifacts: 'dist/**/*.*', fingerprint: true, onlyIfSuccessful: true
+      archiveArtifacts artifacts: 'customerapi/bin/**/*.*', fingerprint: true, onlyIfSuccessful: true
     }}
   }
 }
