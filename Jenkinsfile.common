@@ -8,11 +8,10 @@ container('dotnetcore') {
 
 
     stage('test') { gitlabCommitStatus(name: 'test') {
-      container('chromeheadlesstest') {
-        sh """
-        dotnet test
-        """
-      }
+      
+      sh """
+      dotnet test
+      """
     }}
 
     stage('sonarqube') {
