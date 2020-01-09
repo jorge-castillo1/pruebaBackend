@@ -8,6 +8,8 @@ namespace customerportalapi.Entities
     {
         public string UnitName { get; set; }
 
+        public string SmUnitId { get; set; }
+
         public string Size { get; set; }
 
         public string UnitCategory { get; set; }
