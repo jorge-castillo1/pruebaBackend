@@ -10,7 +10,7 @@ container('dotnetcore') {
     stage('test') { gitlabCommitStatus(name: 'test') {
       
       sh """
-      dotnet test
+      dotnet test "./customerportalapi.Services.Test/customerportalapi.Services.Test.csproj"
       """
     }}
 
