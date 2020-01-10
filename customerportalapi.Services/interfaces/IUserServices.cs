@@ -11,5 +11,7 @@ namespace customerportalapi.Services.interfaces
         Task<Profile> GetProfileAsync(string dni);
 
         Task<Profile> UpdateProfileAsync(Profile profile);
+
+        Task<bool> InviteUserAsync(Invitation value);
     }
 }

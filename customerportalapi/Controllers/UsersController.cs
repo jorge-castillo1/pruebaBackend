@@ -23,6 +23,7 @@ namespace customerportalapi.Controllers
             _logger = logger;
         }
 
+        // GET api/users/{dni}
         [HttpGet("{dni}")]
         public async Task<ApiResponse> GetAsync(string dni)
         {
@@ -38,14 +39,7 @@ namespace customerportalapi.Controllers
             }
         }
 
-        //// GET api/values/5
-        //[HttpGet("{id}")]
-        //public ActionResult<string> Get(int id)
-        //{
-        //    return "value";
-        //}
-
-        // POST api/values
+        // POST api/users
         [HttpPatch]
         public async Task<ApiResponse> PatchAsync([FromBody] Profile value)
         {
@@ -61,13 +55,29 @@ namespace customerportalapi.Controllers
             }
         }
 
-        //// PUT api/values/5
+        // POST api/users/invite
+        [HttpPost("invite")]
+        public async Task<ApiResponse> Invite([FromBody] Invitation value)
+        {
+            try
+            {
+                var entity = await _services.InviteUserAsync(value);
+                return new ApiResponse(entity);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+
+        //// PUT api/users/5
         //[HttpPut("{id}")]
         //public void Put(int id, [FromBody] string value)
         //{
         //}
 
-        //// DELETE api/values/5
+        //// DELETE api/users/5
         //[HttpDelete("{id}")]
         //public void Delete(int id)
         //{

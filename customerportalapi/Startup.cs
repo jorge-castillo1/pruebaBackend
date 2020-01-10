@@ -9,8 +9,10 @@ using System.Threading.Tasks;
 using AutoWrapper;
 using customerportalapi.Repositories;
 using customerportalapi.Repositories.interfaces;
+using customerportalapi.Repositories.utils;
 using customerportalapi.Services;
 using customerportalapi.Services.interfaces;
+using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -47,10 +49,28 @@ namespace customerportalapi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            //Mail service
+            services.AddScoped<SmtpClient>((serviceProvider) =>
+            {
+                var config = serviceProvider.GetRequiredService<IConfiguration>();
+                SmtpClient client = new SmtpClient();
+                client.ServerCertificateValidationCallback = (s, c, h, e) => true;
+                client.Connect(config.GetValue<String>("Email:Smtp:Host"),
+                            config.GetValue<int>("Email:Smtp:Port"),
+                            config.GetValue<bool>("Email:Smtp:EnableSSL"));
+
+                // Note: only needed if the SMTP server requires authentication
+                //client.Authenticate(config.GetValue<String>("Email:Smtp:Username"), config.GetValue<String>("Email:Smtp:Password"));
+                client.Authenticate("developmentquantion@gmail.com", "Q@dev2019");
+                return client;
+            });
+
             //Register Repositories
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IProfileRepository, ProfileRepository>();
             services.AddScoped<IContractRepository, ContractRepository>();
+            services.AddScoped<IMailClient, MailClientWrapper>();
+            services.AddScoped<IMailRepository, MailRepository>();
 
             //Register Business Services
             services.AddTransient<IUserServices, UserServices>();
