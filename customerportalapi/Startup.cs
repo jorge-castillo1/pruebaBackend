@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using AutoWrapper;
+using customerportalapi.Entities;
 using customerportalapi.Repositories;
 using customerportalapi.Repositories.interfaces;
 using customerportalapi.Repositories.utils;
@@ -21,6 +22,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using MongoDB.Driver;
 using Newtonsoft.Json;
 using Serilog;
 
@@ -49,6 +51,19 @@ namespace customerportalapi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            //Mongo Database services
+            services.AddScoped<IMongoCollectionWrapper<User>>((serviceProvider) =>
+            {
+                IMongoDatabase database = GetDatabase();
+                return new MongoCollectionWrapper<User>(database, "users");
+            });
+            /* CUANDO SE DEBAN REGISTRAR MAS SERVICIOS CONTRA MONGO
+             * services.AddScoped<IMongoCollectionWrapper<MailTemplate>>(serviceProvider =>
+            {
+                IMongoDatabase database = GetDatabase();
+                return new MongoCollectionWrapper<MailTemplate>(database, "mailtemplates");
+            });*/
+
             //Mail service
             services.AddScoped<SmtpClient>((serviceProvider) =>
             {
@@ -145,6 +160,12 @@ namespace customerportalapi
                     IsApiOnly = true,
                     IsDebug = env.IsDevelopment()
                 });
+        }
+
+        private IMongoDatabase GetDatabase()
+        {
+            MongoClient client = new MongoClient(Configuration.GetConnectionString("customerportaldb"));
+            return client.GetDatabase(Configuration["DatabaseName"]);
         }
     }
 }

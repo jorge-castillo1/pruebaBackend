@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace customerportalapi.Repositories.interfaces
 {
-    public interface IUserRepository : IDisposable
+    public interface IUserRepository
     {
         User getCurrentUser(string account);
         User update(User user);
