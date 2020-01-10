@@ -1,6 +1,13 @@
 using customerportalapi.Entities;
+using customerportalapi.Repositories.interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using MongoDB.Driver;
+using Moq;
+using System;
+using System.Collections.Generic;
+using System.Linq.Expressions;
+using System.Threading.Tasks;
 
 namespace customerportalapi.Repositories.Test
 {
@@ -8,6 +15,7 @@ namespace customerportalapi.Repositories.Test
     public class UserRepositoryTest
     {
         IConfigurationRoot _configurations;
+        Mock<IMongoCollectionWrapper<User>> _users;
 
         [TestInitialize]
         public void Setup()
@@ -16,10 +24,16 @@ namespace customerportalapi.Repositories.Test
             builder.AddJsonFile("appsettings.json");
             _configurations = builder.Build();
 
-            User testUser = GetTestUser();
-
-            UserRepository _userRepository = new UserRepository(_configurations);
-            _userRepository.create(testUser);
+            _users = new Mock<IMongoCollectionWrapper<User>>();
+            _users.Setup(x => x.FindOne(It.IsAny<Expression<Func<User, bool>>>(), It.IsAny<FindOptions>())).Returns(
+                new List<User>() {
+                new User() {
+                    dni = "12345678Z",
+                    email = "fakeuser@email.com"
+                }});
+            _users.Setup(x => x.InsertOne(It.IsAny<User>())).Verifiable();
+            _users.Setup(x => x.ReplaceOne(It.IsAny<FilterDefinition<User>>(), It.IsAny<User>())).Returns(new Mock<ReplaceOneResult>().Object).Verifiable();
+            _users.Setup(x => x.DeleteOneAsync(It.IsAny<FilterDefinition<User>>())).Returns(Task.FromResult(new Mock<DeleteResult>().Object)).Verifiable();
         }
 
         [TestMethod]
@@ -27,7 +41,7 @@ namespace customerportalapi.Repositories.Test
         {
             //Arrange
             User user = new User();
-            UserRepository _userRepository = new UserRepository(_configurations);
+            UserRepository _userRepository = new UserRepository(_configurations, _users.Object);
             
             //Act
             user = _userRepository.getCurrentUser("12345678Z");
@@ -41,7 +55,11 @@ namespace customerportalapi.Repositories.Test
         {
             //Arrange
             User user = new User();
-            UserRepository _userRepository = new UserRepository(_configurations);
+            Mock<IMongoCollectionWrapper<User>> _usersInvalid = new Mock<IMongoCollectionWrapper<User>>();
+            _usersInvalid.Setup(x => x.FindOne(It.IsAny<Expression<Func<User, bool>>>(), It.IsAny<FindOptions>())).Returns(
+                new List<User>());
+
+            UserRepository _userRepository = new UserRepository(_configurations, _usersInvalid.Object);
 
             //Act
             user = _userRepository.getCurrentUser("00000000Z");
@@ -54,7 +72,7 @@ namespace customerportalapi.Repositories.Test
         public void AlActualizarUnUsuario_NoSeProducenErrores()
         {
             //Arrange
-            UserRepository _userRepository = new UserRepository(_configurations);
+            UserRepository _userRepository = new UserRepository(_configurations, _users.Object);
             User testUser =_userRepository.getCurrentUser("12345678Z");
             
             //Act
@@ -65,12 +83,12 @@ namespace customerportalapi.Repositories.Test
             Assert.AreEqual("fakeuser@changed.com", modifiedUser.email);
         }
 
-        [TestCleanup]
-        public void Clean()
+        [TestMethod]
+        public void AlEliminarUnUsuario_NoSeProducenErrores()
         {
             User testUser = GetTestUser();
 
-            UserRepository _userRepository = new UserRepository(_configurations);
+            UserRepository _userRepository = new UserRepository(_configurations, _users.Object);
             _userRepository.delete(testUser);
         }
 

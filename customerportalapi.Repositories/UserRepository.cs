@@ -3,27 +3,24 @@ using MongoDB.Driver;
 using System.Threading.Tasks;
 using customerportalapi.Entities;
 using customerportalapi.Repositories.interfaces;
+using customerportalapi.Repositories.utils;
 
 namespace customerportalapi.Repositories
 {
-    public class UserRepository : DatabaseRepository, IUserRepository
+    public class UserRepository : IUserRepository
     {
-        private readonly IMongoCollection<User> _users;
+        private readonly IMongoCollectionWrapper<User> _users;
 
-        public UserRepository(IConfiguration config) : base(config)
+        public UserRepository(IConfiguration config, IMongoCollectionWrapper<User> users)
         {
-            _users = Database.GetCollection<User>("users");
-        }
-        public void Dispose()
-        {
-
+            _users = users;
         }
 
         public User getCurrentUser(string dni)
         {
             User user = new User();
 
-            var usersInfo = _users.Find(t => t.dni == dni).Limit(1).ToList();
+            var usersInfo = _users.FindOne(t => t.dni == dni);
             foreach (var u in usersInfo)
             {
                 user = u;
