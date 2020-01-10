@@ -53,10 +53,5 @@ container('dotnetcore') {
         }
       }
     }
-
-
-    stage('artifacts') { gitlabCommitStatus(name: 'artifacts') {
-      archiveArtifacts artifacts: './app/**/*.*', fingerprint: true, onlyIfSuccessful: true
-    }}
   }
 }
