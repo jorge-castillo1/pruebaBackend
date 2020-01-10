@@ -2,10 +2,10 @@
 using customerportalapi.Repositories.interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using MimeKit;
 using Moq;
 using System;
 using System.Collections.Generic;
-using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -25,7 +25,9 @@ namespace customerportalapi.Repositories.Test
             _configurations = builder.Build();
 
             _mailclient = new Mock<IMailClient>();
-            _mailclient.Setup(x => x.SendMailAsync(It.IsAny<MailMessage>())).Returns(Task.CompletedTask);
+            _mailclient.Setup(x => x.SendAsync(It.IsAny<MimeMessage>())).Returns(Task.CompletedTask);
+            _mailclient.Setup(x => x.Disconnect(It.IsAny<bool>())).Verifiable();
+            _mailclient.Setup(x => x.Dispose()).Verifiable();
         }
 
         [TestMethod]
@@ -54,7 +56,8 @@ namespace customerportalapi.Repositories.Test
 
             //Assert
             Assert.IsTrue(result);
-            //_smtpclient.Verify(x => x.Send(It.IsAny<MailMessage>()));
+            _mailclient.Verify(x => x.SendAsync(It.IsAny<MimeMessage>()));
+            _mailclient.Verify(x => x.Disconnect(It.IsAny<bool>()));
         }
     }
 }

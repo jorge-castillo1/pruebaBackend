@@ -5,7 +5,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Net.Mail;
 using System.Threading.Tasks;
 using AutoWrapper;
 using customerportalapi.Repositories;
@@ -13,6 +12,7 @@ using customerportalapi.Repositories.interfaces;
 using customerportalapi.Repositories.utils;
 using customerportalapi.Services;
 using customerportalapi.Services.interfaces;
+using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -53,16 +53,16 @@ namespace customerportalapi
             services.AddScoped<SmtpClient>((serviceProvider) =>
             {
                 var config = serviceProvider.GetRequiredService<IConfiguration>();
-                return new SmtpClient()
-                {
-                    Host = config.GetValue<String>("Email:Smtp:Host"),
-                    Port = config.GetValue<int>("Email:Smtp:Port"),
-                    EnableSsl = config.GetValue<bool>("Email:Smtp:EnableSSL"),
-                    Credentials = new NetworkCredential(
-                            config.GetValue<String>("Email:Smtp:Username"),
-                            config.GetValue<String>("Email:Smtp:Password")
-                        )
-                };
+                SmtpClient client = new SmtpClient();
+                client.ServerCertificateValidationCallback = (s, c, h, e) => true;
+                client.Connect(config.GetValue<String>("Email:Smtp:Host"),
+                            config.GetValue<int>("Email:Smtp:Port"),
+                            config.GetValue<bool>("Email:Smtp:EnableSSL"));
+
+                // Note: only needed if the SMTP server requires authentication
+                //client.Authenticate(config.GetValue<String>("Email:Smtp:Username"), config.GetValue<String>("Email:Smtp:Password"));
+                client.Authenticate("developmentquantion@gmail.com", "Q@dev2019");
+                return client;
             });
 
             //Register Repositories

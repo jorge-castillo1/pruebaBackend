@@ -24,14 +24,40 @@ namespace customerportalapi.Repositories
 
         public async Task<bool> Send(Email messageData)
         {
-            MailMessage message = new MailMessage();
-            message.From = new MailAddress(_configuration["MailFrom"]);
-            message.To.Add(string.Join(",", messageData.To));
+            MimeMessage message = new MimeMessage();
+            message.From.Add(new MailboxAddress(_configuration["MailFrom"]));
+
+            foreach (string address in messageData.To)
+                message.To.Add(new MailboxAddress(address));
+
+            if (messageData.Cc.Count == 1 && messageData.Cc[0] == "")
+            {
+                foreach (string address in messageData.To)
+                    message.Cc.Add(new MailboxAddress(address));
+            }
+            else
+            {
+                foreach (string address in messageData.Cc)
+                    message.Cc.Add(new MailboxAddress(address));
+            }
             message.Subject = string.IsNullOrEmpty(messageData.Subject) ? " " : messageData.Subject;
-            message.Body = messageData.Body;
-            message.IsBodyHtml = true;
-            
-            await _mailClient.SendMailAsync(message);
+            if (!string.IsNullOrEmpty(messageData.Body))
+            {
+                message.Body = new TextPart(TextFormat.Html)
+                {
+                    Text = messageData.Body
+                };
+            }
+            else
+            {
+                message.Body = new TextPart(TextFormat.Html)
+                {
+                    Text = " "
+                };
+            }
+
+            await _mailClient.SendAsync(message);
+            _mailClient.Disconnect(true);
 
             return true;
         }

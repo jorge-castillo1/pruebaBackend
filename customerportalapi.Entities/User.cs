@@ -22,5 +22,7 @@ namespace customerportalapi.Entities
         public int usertype { get; set; }
         [BsonElement("emailverified")]
         public bool emailverified { get; set; }
+        [BsonElement("invitationtoken")]
+        public string invitationtoken { get; set; }
     }
 }
