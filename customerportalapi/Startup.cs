@@ -57,12 +57,11 @@ namespace customerportalapi
                 IMongoDatabase database = GetDatabase();
                 return new MongoCollectionWrapper<User>(database, "users");
             });
-            /* CUANDO SE DEBAN REGISTRAR MAS SERVICIOS CONTRA MONGO
-             * services.AddScoped<IMongoCollectionWrapper<MailTemplate>>(serviceProvider =>
+            services.AddScoped<IMongoCollectionWrapper<EmailTemplate>>(serviceProvider =>
             {
                 IMongoDatabase database = GetDatabase();
-                return new MongoCollectionWrapper<MailTemplate>(database, "mailtemplates");
-            });*/
+                return new MongoCollectionWrapper<EmailTemplate>(database, "emailtemplates");
+            });
 
             //Mail service
             services.AddScoped<SmtpClient>((serviceProvider) =>
@@ -86,6 +85,7 @@ namespace customerportalapi
             services.AddScoped<IContractRepository, ContractRepository>();
             services.AddScoped<IMailClient, MailClientWrapper>();
             services.AddScoped<IMailRepository, MailRepository>();
+            services.AddScoped<IEmailTemplateRepository, EmailTemplateRepository>();
 
             //Register Business Services
             services.AddTransient<IUserServices, UserServices>();
