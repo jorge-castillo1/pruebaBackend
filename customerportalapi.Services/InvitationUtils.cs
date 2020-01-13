@@ -12,15 +12,15 @@ namespace customerportalapi.Services
             switch(invitationLanguage.ToLower())
             {
                 case "spanish":
-                    return "es";
+                    return LanguageTypes.es.ToString();
                 case "english":
-                    return "en";
+                    return LanguageTypes.en.ToString();
                 case "portuguese":
-                    return "pt";
+                    return LanguageTypes.pt.ToString();
                 case "french":
-                    return "fr";
+                    return LanguageTypes.fr.ToString();
                 default:
-                    return "en";
+                    return LanguageTypes.en.ToString();
             }
         }
 
@@ -34,23 +34,6 @@ namespace customerportalapi.Services
                     return (int)UserTypes.Business;
                 default:
                     return (int)UserTypes.Residential; 
-            }
-        }
-
-        public static string GetWelcomeMessage(string invitationLanguage)
-        {
-            switch (invitationLanguage.ToLower())
-            {
-                case "spanish":
-                    return "Bienvenido a la área privada de clientes de Bluespace.";
-                case "english":
-                    return "Welcome Bluespace private customer portal.";
-                case "portuguese":
-                    return "Bem-vindo ao portal privado do cliente da Bluespace.";
-                case "french":
-                    return "Bienvenue sur le portail client privé de Bluespace.";
-                default:
-                    return "Welcome Bluespace private customer portal.";
             }
         }
     }
