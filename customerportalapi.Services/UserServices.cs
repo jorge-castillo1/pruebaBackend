@@ -7,6 +7,7 @@ using customerportalapi.Repositories;
 using System.Collections.Generic;
 using System.Net.Mail;
 using customerportalapi.Entities.enums;
+using Microsoft.Extensions.Configuration;
 
 namespace customerportalapi.Services
 {
@@ -16,14 +17,15 @@ namespace customerportalapi.Services
         readonly IProfileRepository  _profileRepository;
         readonly IMailRepository _mailRepository;
         readonly IEmailTemplateRepository _emailTemplateRepository;
+        readonly IConfiguration _config;
 
-
-        public UserServices(IUserRepository userRepository, IProfileRepository profileRepository, IMailRepository mailRepository, IEmailTemplateRepository emailTemplateRepository)
+        public UserServices(IUserRepository userRepository, IProfileRepository profileRepository, IMailRepository mailRepository, IEmailTemplateRepository emailTemplateRepository, IConfiguration config)
         {
             _userRepository = userRepository;
             _profileRepository = profileRepository;
             _mailRepository = mailRepository;
             _emailTemplateRepository = emailTemplateRepository;
+            _config = config;
         }
 
 
@@ -158,7 +160,7 @@ namespace customerportalapi.Services
                 Email message = new Email();
                 message.To.Add(user.email);
                 message.Subject = invitationTemplate.subject;
-                message.Body = String.Format(invitationTemplate.body, value.Fullname, value.Dni, value.Dni, string.Format("http://localhost:44332/users/invite/{0}", user.invitationtoken), "Aceptar Invitación");
+                message.Body = String.Format(invitationTemplate.body, value.Fullname, value.Dni, value.Dni, string.Format("{0}{1}", _config["InviteConfirmation"], user.invitationtoken));
                 result = await _mailRepository.Send(message);
             }
 
