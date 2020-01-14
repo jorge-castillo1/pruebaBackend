@@ -47,7 +47,7 @@ namespace customerportalapi
         public void ConfigureServices(IServiceCollection services)
         {
             //Mongo Database services
-            services.AddScoped<IMongoCollectionWrapper<User>>((serviceProvider) =>
+            services.AddScoped<IMongoCollectionWrapper<User>>(serviceProvider =>
             {
                 IMongoDatabase database = GetDatabase();
                 return new MongoCollectionWrapper<User>(database, "users");
@@ -59,7 +59,7 @@ namespace customerportalapi
             });
 
             //Mail service
-            services.AddScoped<SmtpClient>((serviceProvider) =>
+            services.AddScoped(serviceProvider =>
             {
                 var config = serviceProvider.GetRequiredService<IConfiguration>();
                 SmtpClient client = new SmtpClient {ServerCertificateValidationCallback = (s, c, h, e) => true};
@@ -68,8 +68,7 @@ namespace customerportalapi
                             config.GetValue<bool>("Email:Smtp:EnableSSL"));
 
                 // Note: only needed if the SMTP server requires authentication
-                //client.Authenticate(config.GetValue<String>("Email:Smtp:Username"), config.GetValue<String>("Email:Smtp:Password"));
-                client.Authenticate("developmentquantion@gmail.com", "Q@dev2019");
+                client.Authenticate(config.GetValue<string>("Email:Smtp:Username"), config.GetValue<string>("Email:Smtp:Password"));
                 return client;
             });
 
