@@ -147,14 +147,14 @@ namespace customerportalapi.Services
                 _userRepository.update(user);
             }
 
-            //4. Get Email Invitation Template
+/*             //4. Get Email Invitation Template
             EmailTemplate invitationTemplate = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.Invitation, user.language);
             if (invitationTemplate._id == null)
             {
                 invitationTemplate = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.Invitation, LanguageTypes.en.ToString());
-            }
+            } */
 
-            if (invitationTemplate._id != null)
+/*             if (invitationTemplate._id != null)
             {
                 //5. Sens email invitation
                 Email message = new Email();
@@ -162,7 +162,7 @@ namespace customerportalapi.Services
                 message.Subject = invitationTemplate.subject;
                 message.Body = String.Format(invitationTemplate.body, value.Fullname, value.Dni, value.Dni, string.Format("{0}{1}", _config["InviteConfirmation"], user.invitationtoken));
                 result = await _mailRepository.Send(message);
-            }
+            } */
 
             return result;
         }
