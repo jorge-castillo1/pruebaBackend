@@ -65,7 +65,7 @@ namespace customerportalapi
             });
 
             //Mail service
-            services.AddScoped<SmtpClient>((serviceProvider) =>
+/*             services.AddScoped<SmtpClient>((serviceProvider) =>
             {
                 var config = serviceProvider.GetRequiredService<IConfiguration>();
                 SmtpClient client = new SmtpClient();
@@ -78,7 +78,7 @@ namespace customerportalapi
                 //client.Authenticate(config.GetValue<String>("Email:Smtp:Username"), config.GetValue<String>("Email:Smtp:Password"));
                 client.Authenticate("developmentquantion@gmail.com", "Q@dev2019");
                 return client;
-            });
+            }); */
 
             //Register Repositories
             services.AddScoped<IUserRepository, UserRepository>();

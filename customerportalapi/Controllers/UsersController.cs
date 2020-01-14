@@ -29,6 +29,7 @@ namespace customerportalapi.Controllers
         {
             try
             {
+                _logger.LogInformation("Controller Users Dni!!!!!!!!!!!!!!");
                 var entity = await _services.GetProfileAsync(dni);
                 return new ApiResponse(entity);
             }
