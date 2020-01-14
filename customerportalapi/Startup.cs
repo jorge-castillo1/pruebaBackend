@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Threading.Tasks;
 using AutoWrapper;
 using customerportalapi.Entities;
 using customerportalapi.Repositories;
@@ -16,15 +13,13 @@ using customerportalapi.Services.interfaces;
 using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using MongoDB.Driver;
-using Newtonsoft.Json;
 using Serilog;
+using Swashbuckle.AspNetCore.Swagger;
 
 namespace customerportalapi
 {
@@ -67,9 +62,8 @@ namespace customerportalapi
             services.AddScoped<SmtpClient>((serviceProvider) =>
             {
                 var config = serviceProvider.GetRequiredService<IConfiguration>();
-                SmtpClient client = new SmtpClient();
-                client.ServerCertificateValidationCallback = (s, c, h, e) => true;
-                client.Connect(config.GetValue<String>("Email:Smtp:Host"),
+                SmtpClient client = new SmtpClient {ServerCertificateValidationCallback = (s, c, h, e) => true};
+                client.Connect(config.GetValue<string>("Email:Smtp:Host"),
                             config.GetValue<int>("Email:Smtp:Port"),
                             config.GetValue<bool>("Email:Smtp:EnableSSL"));
 
@@ -122,6 +116,11 @@ namespace customerportalapi
                     .AllowAnyMethod();
                 });
             });
+
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new Info { Title = "CustomerPortalAPI", Version = "v1" });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -136,6 +135,7 @@ namespace customerportalapi
             }
             else
             {
+                app.UseExceptionHandler("/Error");
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
@@ -152,14 +152,18 @@ namespace customerportalapi
             });
             app.UseCors("AllowAll");
             app.UseHttpsRedirection();
+            app.UseApiResponseAndExceptionWrapper(new AutoWrapperOptions { IsDebug = env.IsDevelopment(), IsApiOnly = true, ShowStatusCode = true });
             app.UseMvc();
-            app.UseApiResponseAndExceptionWrapper(
-                new AutoWrapperOptions
-                {
-                    ShowStatusCode = true,
-                    IsApiOnly = true,
-                    IsDebug = env.IsDevelopment()
-                });
+
+            // Enable middleware to serve generated Swagger as a JSON endpoint.
+            app.UseSwagger();
+
+            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.), 
+            // specifying the Swagger JSON endpoint.
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "CustomerPortalAPI V1");
+            });
         }
 
         private IMongoDatabase GetDatabase()
