@@ -1,7 +1,4 @@
 ﻿using customerportalapi.Entities;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace customerportalapi.Services.interfaces
@@ -13,5 +10,7 @@ namespace customerportalapi.Services.interfaces
         Task<Profile> UpdateProfileAsync(Profile profile);
 
         Task<bool> InviteUserAsync(Invitation value);
+
+        Task<bool> ConfirmUserAsync(string invitationToken);
     }
 }

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using AutoWrapper.Wrappers;
 using customerportalapi.Entities;
@@ -62,6 +60,22 @@ namespace customerportalapi.Controllers
             try
             {
                 var entity = await _services.InviteUserAsync(value);
+                return new ApiResponse(entity);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+
+        // PUT api/users/confirm/{invitationToken}
+        [HttpPut("confirm/{invitationToken}")]
+        public async Task<ApiResponse> Confirm(string invitationToken)
+        {
+            try
+            {
+                var entity = await _services.ConfirmUserAsync(invitationToken);
                 return new ApiResponse(entity);
             }
             catch (Exception ex)
