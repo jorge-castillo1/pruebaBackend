@@ -37,8 +37,9 @@ namespace customerportalapi
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true)
                 .AddEnvironmentVariables();
-            configuration = builder.Build();
-            Configuration = configuration;
+            //configuration = builder.Build();
+            //Configuration = configuration;
+            Configuration = builder.BuildAndReplacePlaceholders();
 
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
