@@ -7,6 +7,7 @@ using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Text;
+using Microsoft.Extensions.Logging;
 
 namespace customerportalapi.Repositories
 {
@@ -15,15 +16,21 @@ namespace customerportalapi.Repositories
         readonly IConfiguration _configuration;
         readonly IHttpClientFactory _clientFactory;
 
-        public ProfileRepository(IConfiguration configuration, IHttpClientFactory clientFactory)
+        private readonly ILogger<ProfileRepository> _logger;
+
+        public ProfileRepository(IConfiguration configuration, IHttpClientFactory clientFactory, ILogger<ProfileRepository> logger)
         {
             _configuration = configuration;
             _clientFactory = clientFactory;
+            _logger = logger;
         }
 
         public async Task<Profile> GetProfileAsync(string dni)
         {
+            _logger.LogWarning("Entro al Get Profile");
             var httpClient = _clientFactory.CreateClient("httpClientCRM");
+            _logger.LogWarning("GatewayURL: " + _configuration["GatewayUrl"]);
+            _logger.LogWarning("ProfileAPI: " + _configuration["ProfileAPI"]);
             httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["ProfileAPI"]);
 
             var response = await httpClient.GetAsync(dni, HttpCompletionOption.ResponseHeadersRead);
