@@ -27,19 +27,26 @@ namespace customerportalapi.Repositories
 
         public async Task<Profile> GetProfileAsync(string dni)
         {
-            _logger.LogWarning("Entro al Get Profile");
             var httpClient = _clientFactory.CreateClient("httpClientCRM");
-            _logger.LogWarning("GatewayURL: " + _configuration["GatewayUrl"]);
-            _logger.LogWarning("ProfileAPI: " + _configuration["ProfileAPI"]);
             httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["ProfileAPI"]);
+            _logger.LogWarning("Base Address: " + httpClient.BaseAddress.AbsolutePath);
+            try
+            {
+               var response = await httpClient.GetAsync(dni, HttpCompletionOption.ResponseHeadersRead);
+                response.EnsureSuccessStatusCode();
+                if (!response.IsSuccessStatusCode) return new Profile();
+                var content = await response.Content.ReadAsStringAsync();
+                JObject result = JObject.Parse(content);
 
-            var response = await httpClient.GetAsync(dni, HttpCompletionOption.ResponseHeadersRead);
-            response.EnsureSuccessStatusCode();
-            if (!response.IsSuccessStatusCode) return new Profile();
-            var content = await response.Content.ReadAsStringAsync();
-            JObject result = JObject.Parse(content);
+                return JsonConvert.DeserializeObject<Profile>(result.GetValue("result").ToString());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return new Profile();
+            }
+            
 
-            return JsonConvert.DeserializeObject<Profile>(result.GetValue("result").ToString());
         }
 
         public async Task<Profile> UpdateProfileAsync(Profile profile)
