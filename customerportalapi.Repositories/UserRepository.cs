@@ -3,7 +3,6 @@ using MongoDB.Driver;
 using System.Threading.Tasks;
 using customerportalapi.Entities;
 using customerportalapi.Repositories.interfaces;
-using customerportalapi.Repositories.utils;
 
 namespace customerportalapi.Repositories
 {
@@ -16,7 +15,7 @@ namespace customerportalapi.Repositories
             _users = users;
         }
 
-        public User getCurrentUser(string dni)
+        public User GetCurrentUser(string dni)
         {
             User user = new User();
 
@@ -27,7 +26,8 @@ namespace customerportalapi.Repositories
             }
             return user;
         }
-        public User update(User user)
+
+        public User Update(User user)
         {
             //update User
             var filter = Builders<User>.Filter.Eq(s => s.dni, user.dni);
@@ -35,21 +35,34 @@ namespace customerportalapi.Repositories
 
             return user;
         }
-        public Task<bool> create(User user)
+
+        public Task<bool> Create(User user)
         {
             //update User
             _users.InsertOne(user);
 
-            return Task.FromResult<bool>(true);
+            return Task.FromResult(true);
         }
 
-        public Task<bool> delete(User user)
+        public Task<bool> Delete(User user)
         {
             //update User
             var filter = Builders<User>.Filter.Eq("dni", user.dni);
             _users.DeleteOneAsync(filter);
 
-            return Task.FromResult<bool>(true);
+            return Task.FromResult(true);
+        }
+
+        public User GetUserByInvitationToken(string invitationToken)
+        {
+            User user = new User();
+
+            var usersInfo = _users.FindOne(t => t.invitationtoken == invitationToken);
+            foreach (var u in usersInfo)
+            {
+                user = u;
+            }
+            return user;
         }
     }
 }

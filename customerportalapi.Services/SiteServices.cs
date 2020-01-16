@@ -3,7 +3,6 @@ using customerportalapi.Entities;
 using customerportalapi.Services.interfaces;
 using System;
 using System.Threading.Tasks;
-using customerportalapi.Repositories;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -11,8 +10,8 @@ namespace customerportalapi.Services
 {
     public class SiteServices : ISiteServices
     {
-        readonly IUserRepository _userRepository;
-        readonly IContractRepository  _contractRepository;
+        private readonly IUserRepository _userRepository;
+        private readonly IContractRepository  _contractRepository;
 
         public SiteServices(IUserRepository userRepository, IContractRepository contractRepository)
         {
@@ -24,7 +23,7 @@ namespace customerportalapi.Services
         public async Task<List<Site>> GetContractsAsync(string dni)
         {
             //Add customer portal Business Logic
-            User user = _userRepository.getCurrentUser(dni);
+            User user = _userRepository.GetCurrentUser(dni);
             if (user._id == null)
                 throw new ArgumentException("User does not exist.");
 
@@ -37,8 +36,7 @@ namespace customerportalapi.Services
             List<Site> stores = new List<Site>();
             foreach(var storegroup in entitylist.GroupBy(x => x.Store))
             {
-                Site store = new Site();
-                store.Name = storegroup.Key;
+                Site store = new Site {Name = storegroup.Key};
                 foreach (var contract in storegroup)
                     store.Contracts.Add(contract);
 
