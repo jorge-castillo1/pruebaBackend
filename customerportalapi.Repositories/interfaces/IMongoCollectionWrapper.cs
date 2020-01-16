@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace customerportalapi.Repositories.interfaces
@@ -13,5 +12,6 @@ namespace customerportalapi.Repositories.interfaces
         ReplaceOneResult ReplaceOne(FilterDefinition<T> filter, T replacement);
         void InsertOne(T data);
         Task<DeleteResult> DeleteOneAsync(FilterDefinition<T> filter);
+        List<T> FindAll(Expression<Func<T, bool>> filter);
     }
 }
