@@ -174,7 +174,8 @@ namespace customerportalapi.Services
             //2. Validate user by invitationToken
             User user = _userRepository.GetUserByInvitationToken(invitationToken);
             if (user._id == null)
-                throw new InvalidOperationException("InvitationToken is obsolete.");
+                //throw new AuthenticationException("InvitationToken is obsolete.");
+                return Task.FromResult(false);
 
             //3. Update email verification data
             user.emailverified = true;

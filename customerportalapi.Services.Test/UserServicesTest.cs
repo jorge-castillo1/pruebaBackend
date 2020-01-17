@@ -301,8 +301,8 @@ namespace customerportalapi.Services.Test
         }
 
         [TestMethod]
-        [ExpectedException(typeof(System.InvalidOperationException), "No se ha producido la excepción esperada.")]
-        public async Task AlConfirmarUnUsuarioExistente_Activo_DevuelveError()
+        //[ExpectedException(typeof(AuthenticationException), "No se ha producido la excepción esperada.")]
+        public async Task AlConfirmarUnUsuarioExistente_Activo_DevuelveFalse()
         {
             //Arrange
             string invitationToken = "8e8b9c6c-8943-4482-891d-b92d7414d283";
@@ -310,7 +310,10 @@ namespace customerportalapi.Services.Test
             //Act
             Mock<IUserRepository> userRepositoryInvalid = UserRepositoryMock.Invalid_ActiveUserByToken_Repository();
             UserServices service = new UserServices(userRepositoryInvalid.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _config.Object);
-            await service.ConfirmUserAsync(invitationToken);
+            bool result = await service.ConfirmUserAsync(invitationToken);
+
+            //Assert
+            Assert.IsFalse(result);
         }
 
         [TestMethod]
