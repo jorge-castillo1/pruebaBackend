@@ -1,7 +1,6 @@
 ﻿using customerportalapi.Entities;
 using customerportalapi.Repositories.interfaces;
 using System.Collections.Generic;
-using MongoDB.Bson;
 
 namespace customerportalapi.Repositories
 {
