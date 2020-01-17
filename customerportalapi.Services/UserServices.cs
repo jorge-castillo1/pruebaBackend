@@ -3,9 +3,6 @@ using customerportalapi.Entities;
 using customerportalapi.Services.interfaces;
 using System;
 using System.Threading.Tasks;
-using customerportalapi.Repositories;
-using System.Collections.Generic;
-using System.Net.Mail;
 using customerportalapi.Entities.enums;
 using Microsoft.Extensions.Configuration;
 
@@ -13,11 +10,11 @@ namespace customerportalapi.Services
 {
     public class UserServices : IUserServices
     {
-        readonly IUserRepository _userRepository;
-        readonly IProfileRepository  _profileRepository;
-        readonly IMailRepository _mailRepository;
-        readonly IEmailTemplateRepository _emailTemplateRepository;
-        readonly IConfiguration _config;
+        private readonly IUserRepository _userRepository;
+        private readonly IProfileRepository _profileRepository;
+        private readonly IMailRepository _mailRepository;
+        private readonly IEmailTemplateRepository _emailTemplateRepository;
+        private readonly IConfiguration _config;
 
         public UserServices(IUserRepository userRepository, IProfileRepository profileRepository, IMailRepository mailRepository, IEmailTemplateRepository emailTemplateRepository, IConfiguration config)
         {
@@ -32,7 +29,7 @@ namespace customerportalapi.Services
         public async Task<Profile> GetProfileAsync(string dni)
         {
             //Add customer portal Business Logic
-            User user = _userRepository.getCurrentUser(dni);
+            User user = _userRepository.GetCurrentUser(dni);
             if (user._id == null)
                 throw new ArgumentException("User does not exist.");
 
@@ -50,7 +47,7 @@ namespace customerportalapi.Services
                 entity.EmailAddress1Principal = true;
             else if (entity.EmailAddress2 == user.email)
                 entity.EmailAddress2Principal = true;
-            
+
             entity.Language = user.language;
             entity.Avatar = user.profilepicture;
 
@@ -60,18 +57,18 @@ namespace customerportalapi.Services
         public async Task<Profile> UpdateProfileAsync(Profile profile)
         {
             //Add customer portal Business Logic
-            User user = _userRepository.getCurrentUser(profile.DocumentNumber);
+            User user = _userRepository.GetCurrentUser(profile.DocumentNumber);
             if (user._id == null)
                 throw new ArgumentException("User does not exist.");
 
             //3. Set Email Principal according to external data
-            if (String.IsNullOrEmpty(profile.EmailAddress1) && String.IsNullOrEmpty(profile.EmailAddress2))
+            if (string.IsNullOrEmpty(profile.EmailAddress1) && string.IsNullOrEmpty(profile.EmailAddress2))
                 throw new ArgumentException("Email field can not be null.");
 
-            if (profile.EmailAddress1Principal && String.IsNullOrEmpty(profile.EmailAddress1))
+            if (profile.EmailAddress1Principal && string.IsNullOrEmpty(profile.EmailAddress1))
                 throw new ArgumentException("Principal email can not be null.");
 
-            if (profile.EmailAddress2Principal && String.IsNullOrEmpty(profile.EmailAddress2))
+            if (profile.EmailAddress2Principal && string.IsNullOrEmpty(profile.EmailAddress2))
                 throw new ArgumentException("Principal email can not be null.");
 
             string emailToUpdate = string.Empty;
@@ -79,7 +76,7 @@ namespace customerportalapi.Services
                 emailToUpdate = profile.EmailAddress1;
             else
                 emailToUpdate = profile.EmailAddress2;
-            
+
             //1. Compare language, email and image for backend changes
             if (user.language != profile.Language ||
                 user.profilepicture != profile.Avatar ||
@@ -89,7 +86,7 @@ namespace customerportalapi.Services
                 user.email = emailToUpdate;
                 user.profilepicture = profile.Avatar;
 
-                user = _userRepository.update(user);
+                user = _userRepository.Update(user);
             }
 
             //2. Invoke repository for other changes
@@ -117,7 +114,7 @@ namespace customerportalapi.Services
                 throw new ArgumentException("User must have a valid document number.");
 
             //3. If no user exists create user
-            User user = _userRepository.getCurrentUser(value.Dni);
+            User user = _userRepository.GetCurrentUser(value.Dni);
             if (user._id == null)
             {
                 //4. TODO Create user in autentication system
@@ -131,7 +128,7 @@ namespace customerportalapi.Services
                 newUser.emailverified = false;
                 newUser.invitationtoken = Guid.NewGuid().ToString();
 
-                result = await _userRepository.create(newUser);
+                result = await _userRepository.Create(newUser);
             }
             else
             {
@@ -144,7 +141,7 @@ namespace customerportalapi.Services
                 user.language = InvitationUtils.GetLanguage(value.Language);
                 user.usertype = InvitationUtils.GetUserType(value.CustomerType);
                 user.invitationtoken = Guid.NewGuid().ToString();
-                _userRepository.update(user);
+                _userRepository.Update(user);
             }
 
             //4. Get Email Invitation Template
@@ -160,11 +157,31 @@ namespace customerportalapi.Services
                 Email message = new Email();
                 message.To.Add(user.email);
                 message.Subject = invitationTemplate.subject;
-                message.Body = String.Format(invitationTemplate.body, value.Fullname, value.Dni, value.Dni, string.Format("{0}{1}", _config["InviteConfirmation"], user.invitationtoken));
+                message.Body = string.Format(invitationTemplate.body, value.Fullname, value.Dni, value.Dni,
+                    $"{_config["InviteConfirmation"]}{user.invitationtoken}");
                 result = await _mailRepository.Send(message);
             }
 
             return result;
+        }
+
+        public Task<bool> ConfirmUserAsync(string invitationToken)
+        {
+            //1. Validate invitationToken not empty
+            if (string.IsNullOrEmpty(invitationToken))
+                throw new ArgumentException("User must have a invitationToken.");
+
+            //2. Validate user by invitationToken
+            User user = _userRepository.GetUserByInvitationToken(invitationToken);
+            if (user._id == null)
+                throw new InvalidOperationException("InvitationToken is obsolete.");
+
+            //3. Update email verification data
+            user.emailverified = true;
+            user.invitationtoken = null;
+            _userRepository.Update(user);
+
+            return Task.FromResult(true);
         }
 
         public void DesInvitar()

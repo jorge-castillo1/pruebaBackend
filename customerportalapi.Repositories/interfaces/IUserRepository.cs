@@ -1,16 +1,14 @@
 ﻿using customerportalapi.Entities;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace customerportalapi.Repositories.interfaces
 {
     public interface IUserRepository
     {
-        User getCurrentUser(string account);
-        User update(User user);
-        Task<bool> create(User user);
-        Task<bool> delete(User user);
+        User GetCurrentUser(string account);
+        User Update(User user);
+        Task<bool> Create(User user);
+        Task<bool> Delete(User user);
+        User GetUserByInvitationToken(string invitationToken);
     }
 }
