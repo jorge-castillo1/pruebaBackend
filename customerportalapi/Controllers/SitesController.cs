@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using AutoWrapper.Wrappers;
 using customerportalapi.Entities;
@@ -16,6 +14,7 @@ namespace customerportalapi.Controllers
     {
         private readonly ISiteServices _services;
         private readonly ILogger<SitesController> _logger;
+        
 
         public SitesController(ISiteServices services, ILogger<SitesController> logger)
         {
@@ -29,6 +28,51 @@ namespace customerportalapi.Controllers
             try
             {
                 var entity = await _services.GetContractsAsync(dni);
+                return new ApiResponse(entity);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+
+        [HttpGet]
+        public async Task<ApiResponse> GetAsync([FromBody] StoreSearchFilter filter)
+        {
+            try
+            {
+                var entity = await _services.GetStoresAsync(filter);
+                return new ApiResponse(entity);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+
+        [HttpGet("countries")]
+        public async Task<ApiResponse> GetCountriesAsync()
+        {
+            try
+            {
+                var entity = await _services.GetStoresCountriesAsync();
+                return new ApiResponse(entity);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+
+        [HttpGet("cities")]
+        public async Task<ApiResponse> GetCitiesAsync()
+        {
+            try
+            {
+                var entity = await _services.GetStoresCitiesAsync();
                 return new ApiResponse(entity);
             }
             catch (Exception ex)
