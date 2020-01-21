@@ -62,13 +62,14 @@ namespace customerportalapi
             services.AddScoped(serviceProvider =>
             {
                 var config = serviceProvider.GetRequiredService<IConfiguration>();
-                SmtpClient client = new SmtpClient {ServerCertificateValidationCallback = (s, c, h, e) => true};
-                client.Connect(config.GetValue<string>("Email:Smtp:Host"),
-                            config.GetValue<int>("Email:Smtp:Port"),
-                            config.GetValue<bool>("Email:Smtp:EnableSSL"));
+                SmtpClient client = new SmtpClient();
+                //client.ServerCertificateValidationCallback = (s, c, h, e) => true;
+                //client.Connect(config.GetValue<String>("Email:Smtp:Host"),
+                //            config.GetValue<int>("Email:Smtp:Port"),
+                //            config.GetValue<bool>("Email:Smtp:EnableSSL"));
 
-                // Note: only needed if the SMTP server requires authentication
-                client.Authenticate(config.GetValue<string>("Email:Smtp:Username"), config.GetValue<string>("Email:Smtp:Password"));
+                //// Note: only needed if the SMTP server requires authentication
+                //client.Authenticate(config.GetValue<String>("Email:Smtp:Username"), config.GetValue<String>("Email:Smtp:Password"));
                 return client;
             });
 
@@ -76,7 +77,8 @@ namespace customerportalapi
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IProfileRepository, ProfileRepository>();
             services.AddScoped<IContractRepository, ContractRepository>();
-            services.AddScoped<IMailClient, MailClientWrapper>();
+            //services.AddScoped<IMailClient, MailClientWrapper>();
+            services.AddScoped<IMailClient, TmpMailClientWrapper>();
             services.AddScoped<IMailRepository, MailRepository>();
             services.AddScoped<IEmailTemplateRepository, EmailTemplateRepository>();
 
