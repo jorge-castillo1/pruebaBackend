@@ -67,11 +67,11 @@ namespace customerportalapi.Controllers
         }
 
         [HttpGet("cities")]
-        public async Task<ApiResponse> GetCitiesAsync()
+        public async Task<ApiResponse> GetCitiesAsync(string country)
         {
             try
             {
-                var entity = await _services.GetStoresCitiesAsync();
+                var entity = await _services.GetStoresCitiesAsync(country);
                 return new ApiResponse(entity);
             }
             catch (Exception ex)

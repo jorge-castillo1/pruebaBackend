@@ -74,15 +74,18 @@ namespace customerportalapi.Services
             return groupedOrdered.Select(countryGroup => new Country { Name = countryGroup.Key }).ToList();
         }
 
-        public async Task<List<City>> GetStoresCitiesAsync()
+        public async Task<List<City>> GetStoresCitiesAsync(string country)
         {
             List<Store> entitylist = await GetOrCreateCache();
+
+            if (!string.IsNullOrEmpty(country))
+                entitylist = entitylist.Where(d => d.Country == country).ToList();
 
             var groupedOrdered = entitylist.GroupBy(f => f.City).OrderBy(o => o.Key);
 
             return groupedOrdered.Select(cityGroup => new City { Name = cityGroup.Key }).ToList();
         }
-        
+
 
         private async Task<List<Store>> GetOrCreateCache()
         {

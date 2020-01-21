@@ -9,6 +9,6 @@ namespace customerportalapi.Services.interfaces
         Task<List<Site>> GetContractsAsync(string dni);
         Task<List<Store>> GetStoresAsync(string country, string city);
         Task<List<Country>> GetStoresCountriesAsync();
-        Task<List<City>> GetStoresCitiesAsync();
+        Task<List<City>> GetStoresCitiesAsync(string country);
     }
 }
