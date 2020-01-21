@@ -11,11 +11,11 @@ namespace customerportalapi.Services.Test
     [TestClass]
     public class UserServicesTest
     {
-        Mock<IUserRepository> _userRepository;
-        Mock<IProfileRepository> _profileRepository;
-        Mock<IMailRepository> _mailRepository;
-        Mock<IEmailTemplateRepository> _emailtemplateRepository;
-        Mock<IConfiguration> _config;
+        private Mock<IUserRepository> _userRepository;
+        private Mock<IProfileRepository> _profileRepository;
+        private Mock<IMailRepository> _mailRepository;
+        private Mock<IEmailTemplateRepository> _emailtemplateRepository;
+        private Mock<IConfiguration> _config;
 
         [TestInitialize]
         public void Setup()
@@ -139,7 +139,6 @@ namespace customerportalapi.Services.Test
             //Assert
         }
 
-
         [TestMethod]
         public async Task AlActualizarUnUsuarioExistente_NoSeProducenErrores()
         {
@@ -158,8 +157,8 @@ namespace customerportalapi.Services.Test
             Profile result = await service.UpdateProfileAsync(profile);
 
             //Assert
-            _userRepository.Verify(x => x.getCurrentUser(It.IsAny<string>()));
-            _userRepository.Verify(x => x.update(It.IsAny<User>()));
+            _userRepository.Verify(x => x.GetCurrentUser(It.IsAny<string>()));
+            _userRepository.Verify(x => x.Update(It.IsAny<User>()));
             _profileRepository.Verify(x => x.UpdateProfileAsync(It.IsAny<Profile>()));
 
             Assert.AreEqual("fake Address modified", result.Address);
@@ -222,7 +221,7 @@ namespace customerportalapi.Services.Test
 
             //Assert
             Assert.IsTrue(result);
-            _userRepositoryInvalid.Verify(x => x.create(It.IsAny<User>()));
+            _userRepositoryInvalid.Verify(x => x.Create(It.IsAny<User>()));
             _mailRepository.Verify(x => x.Send(It.IsAny<Email>()));
         }
 
@@ -263,7 +262,7 @@ namespace customerportalapi.Services.Test
 
             //Assert
             Assert.IsTrue(result);
-            _userRepositoryInvalid.Verify(x => x.update(It.IsAny<User>()));
+            _userRepositoryInvalid.Verify(x => x.Update(It.IsAny<User>()));
             _mailRepository.Verify(x => x.Send(It.IsAny<Email>()));
         }
 
@@ -285,9 +284,52 @@ namespace customerportalapi.Services.Test
 
             //Assert
             Assert.IsTrue(result);
-            _userRepositoryInvalid.Verify(x => x.create(It.IsAny<User>()));
+            _userRepositoryInvalid.Verify(x => x.Create(It.IsAny<User>()));
             _mailRepository.Verify(x => x.Send(It.IsAny<Email>()));
         }
 
+        [TestMethod]
+        [ExpectedException(typeof(System.ArgumentException), "No se ha producido la excepción esperada.")]
+        public async Task AlConfirmarUnUsuarioSinToken_DevuelveExcepcion()
+        {
+            //Arrange
+            string invitationToken = string.Empty;
+
+            //Act
+            UserServices service = new UserServices(_userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _config.Object);
+            await service.ConfirmUserAsync(invitationToken);
+        }
+
+        [TestMethod]
+        //[ExpectedException(typeof(AuthenticationException), "No se ha producido la excepción esperada.")]
+        public async Task AlConfirmarUnUsuarioExistente_Activo_DevuelveFalse()
+        {
+            //Arrange
+            string invitationToken = "8e8b9c6c-8943-4482-891d-b92d7414d283";
+
+            //Act
+            Mock<IUserRepository> userRepositoryInvalid = UserRepositoryMock.Invalid_ActiveUserByToken_Repository();
+            UserServices service = new UserServices(userRepositoryInvalid.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _config.Object);
+            bool result = await service.ConfirmUserAsync(invitationToken);
+
+            //Assert
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public async Task AlConfirmarUnUsuarioExistente_NoActivo_ActualizaUsuario()
+        {
+            //Arrange
+            string invitationToken = "8e8b9c6c-8943-4482-891d-b92d7414d283";
+
+            //Act
+            Mock<IUserRepository> userRepositoryInvalid = UserRepositoryMock.Valid_InActiveUserByToken_Repository();
+            UserServices service = new UserServices(userRepositoryInvalid.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _config.Object);
+            bool result = await service.ConfirmUserAsync(invitationToken);
+
+            //Assert
+            Assert.IsTrue(result);
+            userRepositoryInvalid.Verify(x => x.Update(It.IsAny<User>()));
+        }
     }
 }
