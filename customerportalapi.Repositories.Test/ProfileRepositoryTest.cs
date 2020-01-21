@@ -44,7 +44,7 @@ namespace customerportalapi.Repositories.Test
                 .ReturnsAsync(response);
 
             //Act
-            ProfileRepository repository = new ProfileRepository(_configurations, _clientFactory);
+            ProfileRepository repository = new ProfileRepository(_configurations, _clientFactory, null);
             var result = repository.GetProfileAsync("fake dni");
 
             //Assert
@@ -69,7 +69,7 @@ namespace customerportalapi.Repositories.Test
                 .ReturnsAsync(response);
 
             //Act
-            ProfileRepository repository = new ProfileRepository(_configurations, _clientFactory);
+            ProfileRepository repository = new ProfileRepository(_configurations, _clientFactory, null);
             var result = repository.UpdateProfileAsync(new Entities.Profile());
 
             //Assert
