@@ -152,7 +152,7 @@ namespace customerportalapi.Services
             if (invitationTemplate._id == null)
             {
                 invitationTemplate = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.Invitation, LanguageTypes.en.ToString());
-            }
+            } 
 
             if (invitationTemplate._id != null)
             {

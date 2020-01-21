@@ -37,8 +37,9 @@ namespace customerportalapi
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true)
                 .AddEnvironmentVariables();
-            configuration = builder.Build();
-            Configuration = configuration;
+            //configuration = builder.Build();
+            //Configuration = configuration;
+            Configuration = builder.BuildAndReplacePlaceholders();
 
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
@@ -76,7 +77,7 @@ namespace customerportalapi
                 //// Note: only needed if the SMTP server requires authentication
                 //client.Authenticate(config.GetValue<String>("Email:Smtp:Username"), config.GetValue<String>("Email:Smtp:Password"));
                 return client;
-            });
+            });  
 
             //Register Repositories
             services.AddScoped<IUserRepository, UserRepository>();

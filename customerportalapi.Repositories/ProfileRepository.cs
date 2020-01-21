@@ -7,6 +7,7 @@ using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Text;
+using Microsoft.Extensions.Logging;
 
 namespace customerportalapi.Repositories
 {
@@ -15,24 +16,37 @@ namespace customerportalapi.Repositories
         readonly IConfiguration _configuration;
         readonly IHttpClientFactory _clientFactory;
 
-        public ProfileRepository(IConfiguration configuration, IHttpClientFactory clientFactory)
+        private readonly ILogger<ProfileRepository> _logger;
+
+        public ProfileRepository(IConfiguration configuration, IHttpClientFactory clientFactory, ILogger<ProfileRepository> logger)
         {
             _configuration = configuration;
             _clientFactory = clientFactory;
+            _logger = logger;
         }
 
         public async Task<Profile> GetProfileAsync(string dni)
         {
             var httpClient = _clientFactory.CreateClient("httpClientCRM");
             httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["ProfileAPI"]);
+            _logger.LogWarning("Base Address: " + httpClient.BaseAddress.AbsolutePath);
+            try
+            {
+               var response = await httpClient.GetAsync(dni, HttpCompletionOption.ResponseHeadersRead);
+                response.EnsureSuccessStatusCode();
+                if (!response.IsSuccessStatusCode) return new Profile();
+                var content = await response.Content.ReadAsStringAsync();
+                JObject result = JObject.Parse(content);
 
-            var response = await httpClient.GetAsync(dni, HttpCompletionOption.ResponseHeadersRead);
-            response.EnsureSuccessStatusCode();
-            if (!response.IsSuccessStatusCode) return new Profile();
-            var content = await response.Content.ReadAsStringAsync();
-            JObject result = JObject.Parse(content);
+                return JsonConvert.DeserializeObject<Profile>(result.GetValue("result").ToString());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return new Profile();
+            }
+            
 
-            return JsonConvert.DeserializeObject<Profile>(result.GetValue("result").ToString());
         }
 
         public async Task<Profile> UpdateProfileAsync(Profile profile)
