@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Threading.Tasks;
 using AutoWrapper;
 using customerportalapi.Entities;
 using customerportalapi.Repositories;
@@ -16,14 +13,11 @@ using customerportalapi.Services.interfaces;
 using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using MongoDB.Driver;
-using Newtonsoft.Json;
 using Serilog;
 
 namespace customerportalapi
@@ -62,6 +56,11 @@ namespace customerportalapi
                 IMongoDatabase database = GetDatabase();
                 return new MongoCollectionWrapper<EmailTemplate>(database, "emailtemplates");
             });
+            //services.AddScoped<IMongoCollectionWrapper<WebTemplate>>(serviceProvider =>
+            //{
+            //    IMongoDatabase database = GetDatabase();
+            //    return new MongoCollectionWrapper<WebTemplate>(database, "webtemplates");
+            //});
 
             //Mail service
             services.AddScoped<SmtpClient>((serviceProvider) =>
@@ -85,10 +84,13 @@ namespace customerportalapi
             services.AddScoped<IMailClient, TmpMailClientWrapper>();
             services.AddScoped<IMailRepository, MailRepository>();
             services.AddScoped<IEmailTemplateRepository, EmailTemplateRepository>();
+            //services.AddScoped<IWebTemplateRepository, WebTemplateRepository>();
+            services.AddScoped<IStoreRepository, StoreRepository>();
 
             //Register Business Services
             services.AddTransient<IUserServices, UserServices>();
             services.AddTransient<ISiteServices, SiteServices>();
+            //services.AddTransient<IWebTemplateServices, WebTemplateServices>();
 
             services.AddHttpClient("httpClientCRM", c =>
             {
@@ -121,6 +123,8 @@ namespace customerportalapi
                     .AllowAnyMethod();
                 });
             });
+
+            services.AddMemoryCache(options => options.SizeLimit = 1024);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

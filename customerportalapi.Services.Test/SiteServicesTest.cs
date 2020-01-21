@@ -5,34 +5,39 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace customerportalapi.Services.Test
 {
     [TestClass]
     public class SiteServicesTest
     {
-        Mock<IUserRepository> _userRepository;
-        Mock<IContractRepository> _contractRepository;
+        private Mock<IUserRepository> _userRepository;
+        private Mock<IContractRepository> _contractRepository;
+        private Mock<IStoreRepository> _storeRepository;
+        private Mock<IMemoryCache> _memoryCache;
+        
 
         [TestInitialize]
         public void Setup()
         {
             _userRepository = UserRepositoryMock.ValidUserRepository();
             _contractRepository = ContractRepositoryMock.ContractRepository();
+            _storeRepository = StoreRepositoryMock.StoreRepository();
+            _memoryCache = new Mock<IMemoryCache>();
         }
 
         [TestMethod]
-        [ExpectedException(typeof(System.ArgumentException), "No se ha producido la excepción esperada.")]
+        [ExpectedException(typeof(ArgumentException), "No se ha producido la excepción esperada.")]
         public async Task AlSolicitarContratosDeUnUsuarioNoExistente_SeProduceUnaExcepcion()
         {
             //Arrange
             string dni = "12345678A";
-            Mock<IUserRepository> _userRepositoryInvalid = UserRepositoryMock.InvalidUserRepository();
+            Mock<IUserRepository> userRepositoryInvalid = UserRepositoryMock.InvalidUserRepository();
 
             //Act
-            SiteServices service = new SiteServices(_userRepositoryInvalid.Object, _contractRepository.Object);
+            SiteServices service = new SiteServices(userRepositoryInvalid.Object, _contractRepository.Object, _storeRepository.Object, _memoryCache.Object);
             await service.GetContractsAsync(dni);
 
             //Assert
@@ -45,7 +50,7 @@ namespace customerportalapi.Services.Test
             string dni = "12345678A";
 
             //Act
-            SiteServices service = new SiteServices(_userRepository.Object, _contractRepository.Object);
+            SiteServices service = new SiteServices(_userRepository.Object, _contractRepository.Object, _storeRepository.Object, _memoryCache.Object);
             List<Site> sites = await service.GetContractsAsync(dni);
 
             //Assert
