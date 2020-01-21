@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Threading.Tasks;
 using AutoWrapper;
 using customerportalapi.Entities;
 using customerportalapi.Repositories;
@@ -16,15 +13,13 @@ using customerportalapi.Services.interfaces;
 using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using MongoDB.Driver;
-using Newtonsoft.Json;
 using Serilog;
+using Swashbuckle.AspNetCore.Swagger;
 
 namespace customerportalapi
 {
@@ -37,8 +32,9 @@ namespace customerportalapi
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true)
                 .AddEnvironmentVariables();
-            configuration = builder.Build();
-            Configuration = configuration;
+            //configuration = builder.Build();
+            //Configuration = configuration;
+            Configuration = builder.BuildAndReplacePlaceholders();
 
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
@@ -52,7 +48,7 @@ namespace customerportalapi
         public void ConfigureServices(IServiceCollection services)
         {
             //Mongo Database services
-            services.AddScoped<IMongoCollectionWrapper<User>>((serviceProvider) =>
+            services.AddScoped<IMongoCollectionWrapper<User>>(serviceProvider =>
             {
                 IMongoDatabase database = GetDatabase();
                 return new MongoCollectionWrapper<User>(database, "users");
@@ -69,7 +65,7 @@ namespace customerportalapi
             });
 
             //Mail service
-            services.AddScoped<SmtpClient>((serviceProvider) =>
+            services.AddScoped(serviceProvider =>
             {
                 var config = serviceProvider.GetRequiredService<IConfiguration>();
                 SmtpClient client = new SmtpClient();
@@ -81,12 +77,13 @@ namespace customerportalapi
                 //// Note: only needed if the SMTP server requires authentication
                 //client.Authenticate(config.GetValue<String>("Email:Smtp:Username"), config.GetValue<String>("Email:Smtp:Password"));
                 return client;
-            });
+            });  
 
             //Register Repositories
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IProfileRepository, ProfileRepository>();
             services.AddScoped<IContractRepository, ContractRepository>();
+            //services.AddScoped<IMailClient, MailClientWrapper>();
             services.AddScoped<IMailClient, TmpMailClientWrapper>();
             services.AddScoped<IMailRepository, MailRepository>();
             services.AddScoped<IEmailTemplateRepository, EmailTemplateRepository>();
@@ -128,6 +125,11 @@ namespace customerportalapi
                     .AllowAnyMethod();
                 });
             });
+
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new Info { Title = "CustomerPortalAPI", Version = "v1" });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -142,6 +144,7 @@ namespace customerportalapi
             }
             else
             {
+                app.UseExceptionHandler("/Error");
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
@@ -158,14 +161,18 @@ namespace customerportalapi
             });
             app.UseCors("AllowAll");
             app.UseHttpsRedirection();
+            app.UseApiResponseAndExceptionWrapper(new AutoWrapperOptions { IsDebug = env.IsDevelopment(), IsApiOnly = true, ShowStatusCode = true });
             app.UseMvc();
-            app.UseApiResponseAndExceptionWrapper(
-                new AutoWrapperOptions
-                {
-                    ShowStatusCode = true,
-                    IsApiOnly = true,
-                    IsDebug = env.IsDevelopment()
-                });
+
+            // Enable middleware to serve generated Swagger as a JSON endpoint.
+            app.UseSwagger();
+
+            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.), 
+            // specifying the Swagger JSON endpoint.
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "CustomerPortalAPI V1");
+            });
         }
 
         private IMongoDatabase GetDatabase()
