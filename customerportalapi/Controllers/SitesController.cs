@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using AutoWrapper.Wrappers;
-using customerportalapi.Entities;
 using customerportalapi.Services.interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -38,11 +37,11 @@ namespace customerportalapi.Controllers
         }
 
         [HttpGet]
-        public async Task<ApiResponse> GetAsync([FromBody] StoreSearchFilter filter)
+        public async Task<ApiResponse> GetAsync(string country, string city)
         {
             try
             {
-                var entity = await _services.GetStoresAsync(filter);
+                var entity = await _services.GetStoresAsync(country, city);
                 return new ApiResponse(entity);
             }
             catch (Exception ex)

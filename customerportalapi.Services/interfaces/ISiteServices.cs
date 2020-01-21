@@ -7,7 +7,7 @@ namespace customerportalapi.Services.interfaces
     public interface ISiteServices
     {
         Task<List<Site>> GetContractsAsync(string dni);
-        Task<List<Store>> GetStoresAsync(StoreSearchFilter filter);
+        Task<List<Store>> GetStoresAsync(string country, string city);
         Task<List<Country>> GetStoresCountriesAsync();
         Task<List<City>> GetStoresCitiesAsync();
     }

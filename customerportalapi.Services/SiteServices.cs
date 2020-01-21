@@ -5,8 +5,6 @@ using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace customerportalapi.Services
@@ -54,15 +52,15 @@ namespace customerportalapi.Services
             return stores;
         }
 
-        public async Task<List<Store>> GetStoresAsync(StoreSearchFilter filter)
+        public async Task<List<Store>> GetStoresAsync(string country, string city)
         {
             List<Store> entitylist = await GetOrCreateCache();
 
-            if (!string.IsNullOrEmpty(filter.Filters.Country))
-                entitylist = entitylist.Where(d => d.Country == filter.Filters.Country).ToList();
+            if (!string.IsNullOrEmpty(country))
+                entitylist = entitylist.Where(d => d.Country == country).ToList();
 
-            if (!string.IsNullOrEmpty(filter.Filters.City))
-                entitylist = entitylist.Where(d => d.City == filter.Filters.City).ToList();
+            if (!string.IsNullOrEmpty(city))
+                entitylist = entitylist.Where(d => d.City == city).ToList();
 
             return new List<Store>(entitylist.OrderBy(o => o.Country).ThenBy(o => o.City).ThenBy(o => o.StoreName));
         }
