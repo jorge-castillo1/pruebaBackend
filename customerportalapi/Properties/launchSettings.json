@@ -18,7 +18,7 @@
         "MONGO_DATABASE": "customerportal",
         "GATEWAY_URL": "https://localhost:44343/",
         "PROFILE_API":"crmapi/Contacts/",
-        "CONTRACTS_API":"crmapi/Contacts/"
+        "CONTRACTS_API":"crmapi/Contracts/"
       }
     },
     "customerportalapi": {
@@ -31,7 +31,7 @@
         "MONGO_DATABASE": "customerportal",
         "GATEWAY_URL": "https://localhost:44343/",
         "PROFILE_API":"crmapi/Contacts/",
-        "CONTRACTS_API":"crmapi/Contacts/"
+        "CONTRACTS_API":"crmapi/Contracts/"
       },
       "applicationUrl": "https://localhost:5001;http://localhost:5000"
     },
