@@ -1,5 +1,7 @@
 ﻿using customerportalapi.Entities;
+using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace customerportalapi.Services.interfaces
@@ -7,8 +9,5 @@ namespace customerportalapi.Services.interfaces
     public interface ISiteServices
     {
         Task<List<Site>> GetContractsAsync(string dni);
-        Task<List<Store>> GetStoresAsync(StoreSearchFilter filter);
-        Task<List<Country>> GetStoresCountriesAsync();
-        Task<List<City>> GetStoresCitiesAsync();
     }
 }
