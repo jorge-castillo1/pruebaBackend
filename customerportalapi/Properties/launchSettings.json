@@ -22,7 +22,6 @@
         "ASPNETCORE_ENVIRONMENT": "Development",
         "MAIL_FROM": "no-reply@bluespace.eu",
         "SMTP_HOST": "smtp.office365.com",
-        "SMTP_ENABLESSL": "false",
         "SMTP_USERNAME": "no-reply@bluespace.eu",
         "SMTP_PASSWORD": "EoE4RygWaKVvQrvVu7dp"
       }
@@ -41,7 +40,6 @@
         "ASPNETCORE_ENVIRONMENT": "Development",
         "MAIL_FROM": "no-reply@bluespace.eu",
         "SMTP_HOST": "smtp.office365.com",
-        "SMTP_ENABLESSL": "false",
         "SMTP_USERNAME": "no-reply@bluespace.eu",
         "SMTP_PASSWORD": "EoE4RygWaKVvQrvVu7dp"
       },
@@ -61,7 +59,6 @@
         "GATEWAY_URL": "https://localhost:44343/",
         "MAIL_FROM": "no-reply@bluespace.eu",
         "SMTP_HOST": "smtp.office365.com",
-        "SMTP_ENABLESSL": "false",
         "SMTP_USERNAME": "no-reply@bluespace.eu",
         "SMTP_PASSWORD": "EoE4RygWaKVvQrvVu7dp"
       },
