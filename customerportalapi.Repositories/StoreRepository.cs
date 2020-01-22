@@ -23,20 +23,31 @@ namespace customerportalapi.Repositories
 
         public async Task<List<Store>> GetStoresAsync()
         {
-            var entitylist = new List<Store>();
-            
             var httpClient = _clientFactory.CreateClient("httpClientCRM");
             var uri = new Uri(_configuration["GatewayUrl"] + _configuration["StoresAPI"]);
             httpClient.BaseAddress = uri;
 
             var response = await httpClient.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
-            if (!response.IsSuccessStatusCode) return entitylist;
+            if (!response.IsSuccessStatusCode) return new List<Store>();
             var content = await response.Content.ReadAsStringAsync();
             JObject result = JObject.Parse(content);
-            var storeList = JsonConvert.DeserializeObject<List<Store>>(result.GetValue("result").ToString());
 
-            return storeList;
+            return JsonConvert.DeserializeObject<List<Store>>(result.GetValue("result").ToString()); ;
+        }
+
+        public async Task<Store> GetStoreAsync(string storeId)
+        {
+            var httpClient = _clientFactory.CreateClient("httpClientCRM");
+            httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["StoresAPI"]);
+
+            var response = await httpClient.GetAsync(storeId, HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode) return new Store();
+            var content = await response.Content.ReadAsStringAsync();
+            JObject result = JObject.Parse(content);
+
+            return JsonConvert.DeserializeObject<Store>(result.GetValue("result").ToString());
         }
     }
 }

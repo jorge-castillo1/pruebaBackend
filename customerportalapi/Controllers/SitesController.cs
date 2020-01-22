@@ -67,11 +67,26 @@ namespace customerportalapi.Controllers
         }
 
         [HttpGet("cities")]
-        public async Task<ApiResponse> GetCitiesAsync(string country)
+        public async Task<ApiResponse> GetCitiesAsync(string city)
         {
             try
             {
-                var entity = await _services.GetStoresCitiesAsync(country);
+                var entity = await _services.GetStoresCitiesAsync(city);
+                return new ApiResponse(entity);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+
+        [HttpGet("store/{storeId}")]
+        public async Task<ApiResponse> GetStoreAsync(string storeId)
+        {
+            try
+            {
+                var entity = await _services.GetStoreAsync(storeId);
                 return new ApiResponse(entity);
             }
             catch (Exception ex)

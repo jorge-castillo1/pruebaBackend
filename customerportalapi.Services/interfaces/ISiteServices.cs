@@ -10,5 +10,6 @@ namespace customerportalapi.Services.interfaces
         Task<List<Store>> GetStoresAsync(string country, string city);
         Task<List<Country>> GetStoresCountriesAsync();
         Task<List<City>> GetStoresCitiesAsync(string country);
+        Task<Store> GetStoreAsync(string storeId);
     }
 }

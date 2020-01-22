@@ -41,8 +41,7 @@ namespace customerportalapi.Services
             List<Site> stores = new List<Site>();
             foreach (var storegroup in entitylist.GroupBy(x => x.Store))
             {
-                Site store = new Site();
-                store.Name = storegroup.Key;
+                Site store = new Site { Name = storegroup.Key };
                 foreach (var contract in storegroup)
                     store.Contracts.Add(contract);
 
@@ -84,6 +83,11 @@ namespace customerportalapi.Services
             var groupedOrdered = entitylist.GroupBy(f => f.City).OrderBy(o => o.Key);
 
             return groupedOrdered.Select(cityGroup => new City { Name = cityGroup.Key }).ToList();
+        }
+
+        public async Task<Store> GetStoreAsync(string storeId)
+        {
+            return await _storeRepository.GetStoreAsync(storeId);
         }
 
 
