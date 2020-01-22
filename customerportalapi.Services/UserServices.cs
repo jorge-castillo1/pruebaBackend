@@ -50,6 +50,15 @@ namespace customerportalapi.Services
             else if (entity.EmailAddress2 == user.email)
                 entity.EmailAddress2Principal = true;
 
+            //4. Set Phone Principal according to external data. No two principal phones allowed
+            entity.MobilePhone1Principal = false;
+            entity.MobilePhonePrincipal = false;
+
+            if (entity.MobilePhone1 == user.phone && !string.IsNullOrEmpty(user.phone))
+                entity.MobilePhone1Principal = true;
+            else if (entity.MobilePhone == user.phone && !string.IsNullOrEmpty(user.phone))
+                entity.MobilePhonePrincipal = true;
+
             entity.Language = user.language;
             entity.Avatar = user.profilepicture;
 
@@ -63,7 +72,7 @@ namespace customerportalapi.Services
             if (user._id == null)
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
 
-            //3. Set Email Principal according to external data
+            //1. Set Email Principal according to external data
             if (string.IsNullOrEmpty(profile.EmailAddress1) && string.IsNullOrEmpty(profile.EmailAddress2))
                 throw new ServiceException("Email field can not be null.", HttpStatusCode.BadRequest, "Email", "Empty fields");
 
@@ -79,19 +88,28 @@ namespace customerportalapi.Services
             else
                 emailToUpdate = profile.EmailAddress2;
 
-            //1. Compare language, email and image for backend changes
+            //2. Set Phone Principal according to data
+            string phoneToUpdate = string.Empty;
+            if (profile.MobilePhone1Principal && !string.IsNullOrEmpty(profile.MobilePhone1))
+                phoneToUpdate = profile.MobilePhone1;
+            else if (profile.MobilePhonePrincipal && !string.IsNullOrEmpty(profile.MobilePhone))
+                phoneToUpdate = profile.MobilePhone;
+
+            //3. Compare language, email and image for backend changes
             if (user.language != profile.Language ||
                 user.profilepicture != profile.Avatar ||
-                user.email != emailToUpdate)
+                user.email != emailToUpdate ||
+                user.phone != phoneToUpdate)
             {
                 user.language = profile.Language;
                 user.email = emailToUpdate;
+                user.phone = phoneToUpdate;
                 user.profilepicture = profile.Avatar;
 
                 user = _userRepository.Update(user);
             }
 
-            //2. Invoke repository for other changes
+            //4. Invoke repository for other changes
             Profile entity = new Profile();
             entity = await _profileRepository.UpdateProfileAsync(profile);
             entity.Language = user.language;
@@ -100,6 +118,11 @@ namespace customerportalapi.Services
                 entity.EmailAddress1Principal = true;
             else
                 entity.EmailAddress2Principal = true;
+
+            if (entity.MobilePhone1 == user.phone && !string.IsNullOrEmpty(user.phone))
+                entity.MobilePhone1Principal = true;
+            else if (entity.MobilePhone == user.phone && !string.IsNullOrEmpty(user.phone))
+                entity.MobilePhonePrincipal = true;
 
             return entity;
         }
