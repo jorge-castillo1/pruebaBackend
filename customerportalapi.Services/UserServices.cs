@@ -5,6 +5,8 @@ using System;
 using System.Threading.Tasks;
 using customerportalapi.Entities.enums;
 using Microsoft.Extensions.Configuration;
+using customerportalapi.Services.Exceptions;
+using System.Net;
 
 namespace customerportalapi.Services
 {
@@ -31,7 +33,7 @@ namespace customerportalapi.Services
             //Add customer portal Business Logic
             User user = _userRepository.GetCurrentUser(dni);
             if (user._id == null)
-                throw new ArgumentException("User does not exist.");
+                throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
 
 
             //2. If exist complete data from external repository
@@ -59,17 +61,17 @@ namespace customerportalapi.Services
             //Add customer portal Business Logic
             User user = _userRepository.GetCurrentUser(profile.DocumentNumber);
             if (user._id == null)
-                throw new ArgumentException("User does not exist.");
+                throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
 
             //3. Set Email Principal according to external data
             if (string.IsNullOrEmpty(profile.EmailAddress1) && string.IsNullOrEmpty(profile.EmailAddress2))
-                throw new ArgumentException("Email field can not be null.");
+                throw new ServiceException("Email field can not be null.", HttpStatusCode.BadRequest, "Email", "Empty fields");
 
             if (profile.EmailAddress1Principal && string.IsNullOrEmpty(profile.EmailAddress1))
-                throw new ArgumentException("Principal email can not be null.");
-
+                throw new ServiceException("Principal email can not be null.", HttpStatusCode.BadRequest, "Principal email", "Empty field");
+            
             if (profile.EmailAddress2Principal && string.IsNullOrEmpty(profile.EmailAddress2))
-                throw new ArgumentException("Principal email can not be null.");
+                throw new ServiceException("Principal email can not be null.", HttpStatusCode.BadRequest, "Principal email", "Empty field");
 
             string emailToUpdate = string.Empty;
             if (profile.EmailAddress1Principal)
@@ -108,10 +110,11 @@ namespace customerportalapi.Services
 
             //1. Validate email not empty
             if (string.IsNullOrEmpty(value.Email))
-                throw new ArgumentException("User must have a valid email address.");
+                throw new ServiceException("User must have a valid email address.", HttpStatusCode.BadRequest, "Email", "Empty field");
+
             //2. Validate dni not empty
             if (string.IsNullOrEmpty(value.Dni))
-                throw new ArgumentException("User must have a valid document number.");
+                throw new ServiceException("User must have a valid document number.", HttpStatusCode.BadRequest, "Dni", "Empty field");
 
             //3. If no user exists create user
             User user = _userRepository.GetCurrentUser(value.Dni);
@@ -134,7 +137,7 @@ namespace customerportalapi.Services
             {
                 //6. If emailverified is false resend email invitation otherwise throw error
                 if (user.emailverified)
-                    throw new InvalidOperationException("Invitation user fails. User already exist");
+                    throw new ServiceException("Invitation user fails. User was actived before", HttpStatusCode.NotFound, "User", "Already invited");
 
                 //7. Update invitation data
                 user.email = value.Email;
@@ -169,12 +172,11 @@ namespace customerportalapi.Services
         {
             //1. Validate invitationToken not empty
             if (string.IsNullOrEmpty(invitationToken))
-                throw new ArgumentException("User must have a invitationToken.");
+                throw new ServiceException("User must have a invitationToken.", HttpStatusCode.BadRequest, "Invitation Token", "Empty field");
 
             //2. Validate user by invitationToken
             User user = _userRepository.GetUserByInvitationToken(invitationToken);
             if (user._id == null)
-                //throw new AuthenticationException("InvitationToken is obsolete.");
                 return Task.FromResult(false);
 
             //3. Update email verification data
