@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoWrapper.Wrappers;
 using customerportalapi.Entities;
+using customerportalapi.Services.Exceptions;
 using customerportalapi.Services.interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -30,6 +31,10 @@ namespace customerportalapi.Controllers
             {
                 var entity = await _services.GetContractsAsync(dni);
                 return new ApiResponse(entity);
+            }
+            catch (ServiceException se)
+            {
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new ValidationError[] { new ValidationError(se.Field, se.FieldMessage) }));
             }
             catch (Exception ex)
             {

@@ -1,5 +1,6 @@
 using customerportalapi.Entities;
 using customerportalapi.Repositories.interfaces;
+using customerportalapi.Services.Exceptions;
 using customerportalapi.Services.Test.FakeData;
 using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -28,7 +29,7 @@ namespace customerportalapi.Services.Test
         }
 
         [TestMethod]
-        [ExpectedException(typeof(System.ArgumentException), "No se ha producido la excepción esperada.")]
+        [ExpectedException(typeof(ServiceException), "No se ha producido la excepción esperada.")]
         public async Task AlSolicitarUnUsuarioNoExistente_SeProduceUnaExcepcion()
         {
             //Arrange
@@ -61,7 +62,7 @@ namespace customerportalapi.Services.Test
         }
 
         [TestMethod]
-        [ExpectedException(typeof(System.ArgumentException), "No se ha producido la excepción esperada.")]
+        [ExpectedException(typeof(ServiceException), "No se ha producido la excepción esperada.")]
         public async Task AlActualizarUnUsuarioInexistente_SeProduceUnaExcepcion()
         {
             //Arrange
@@ -77,7 +78,7 @@ namespace customerportalapi.Services.Test
         }
 
         [TestMethod]
-        [ExpectedException(typeof(System.ArgumentException), "No se ha producido la excepción esperada.")]
+        [ExpectedException(typeof(ServiceException), "No se ha producido la excepción esperada.")]
         public async Task AlActualizarUnUsuarioExistente_SinEmails_SeProducenErrores()
         {
             //Arrange
@@ -98,7 +99,7 @@ namespace customerportalapi.Services.Test
         }
 
         [TestMethod]
-        [ExpectedException(typeof(System.ArgumentException), "No se ha producido la excepción esperada.")]
+        [ExpectedException(typeof(ServiceException), "No se ha producido la excepción esperada.")]
         public async Task AlActualizarUnUsuarioExistente_ConEmailPrincipal1Invalido_SeProducenErrores()
         {
             //Arrange
@@ -119,7 +120,7 @@ namespace customerportalapi.Services.Test
         }
 
         [TestMethod]
-        [ExpectedException(typeof(System.ArgumentException), "No se ha producido la excepción esperada.")]
+        [ExpectedException(typeof(ServiceException), "No se ha producido la excepción esperada.")]
         public async Task AlActualizarUnUsuarioExistente_ConEmailPrincipal2Invalido_SeProducenErrores()
         {
             //Arrange
@@ -169,7 +170,7 @@ namespace customerportalapi.Services.Test
         }
 
         [TestMethod]
-        [ExpectedException(typeof(System.ArgumentException), "No se ha producido la excepción esperada.")]
+        [ExpectedException(typeof(ServiceException), "No se ha producido la excepción esperada.")]
         public async Task AlInvitarUnUsuarioSinDni_DevuelveExcepcion()
         {
             //Arrange
@@ -187,7 +188,7 @@ namespace customerportalapi.Services.Test
         }
 
         [TestMethod]
-        [ExpectedException(typeof(System.ArgumentException), "No se ha producido la excepción esperada.")]
+        [ExpectedException(typeof(ServiceException), "No se ha producido la excepción esperada.")]
         public async Task AlInvitarUnUsuarioSinEmail_DevuelveExcepcion()
         {
             //Arrange
@@ -226,7 +227,7 @@ namespace customerportalapi.Services.Test
         }
 
         [TestMethod]
-        [ExpectedException(typeof(System.InvalidOperationException), "No se ha producido la excepción esperada.")]
+        [ExpectedException(typeof(ServiceException), "No se ha producido la excepción esperada.")]
         public async Task AlInvitarUnUsuarioExistente_Activo_DevuelveError()
         {
             //Arrange
@@ -289,7 +290,7 @@ namespace customerportalapi.Services.Test
         }
 
         [TestMethod]
-        [ExpectedException(typeof(System.ArgumentException), "No se ha producido la excepción esperada.")]
+        [ExpectedException(typeof(ServiceException), "No se ha producido la excepción esperada.")]
         public async Task AlConfirmarUnUsuarioSinToken_DevuelveExcepcion()
         {
             //Arrange
@@ -301,7 +302,6 @@ namespace customerportalapi.Services.Test
         }
 
         [TestMethod]
-        //[ExpectedException(typeof(AuthenticationException), "No se ha producido la excepción esperada.")]
         public async Task AlConfirmarUnUsuarioExistente_Activo_DevuelveFalse()
         {
             //Arrange
