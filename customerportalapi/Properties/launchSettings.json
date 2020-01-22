@@ -14,12 +14,17 @@
       "launchUrl": "api/values",
       "environmentVariables": {
         "MONGO_URL": "mongodb://localhost:27017",
-        "INVITE_URL": "https://localhost:4200/",
+        "INVITE_URL": "https://localhost:4200/signup/",
         "MONGO_DATABASE": "customerportal",
         "GATEWAY_URL": "https://localhost:44343/",
         "PROFILE_API":"crmapi/Contacts/",
         "CONTRACTS_API":"crmapi/Contracts/",
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "MAIL_FROM": "no-reply@bluespace.eu",
+        "SMTP_HOST": "smtp.office365.com",
+        "SMTP_ENABLESSL": "false",
+        "SMTP_USERNAME": "no-reply@bluespace.eu",
+        "SMTP_PASSWORD": "EoE4RygWaKVvQrvVu7dp"
       }
     },
     "customerportalapi": {
@@ -28,12 +33,17 @@
       "launchUrl": "api/values",
       "environmentVariables": {
         "MONGO_URL": "mongodb://localhost:27017",
-        "INVITE_URL": "https://localhost:4200/",
+        "INVITE_URL": "https://localhost:4200/signup/",
         "MONGO_DATABASE": "customerportal",
         "GATEWAY_URL": "https://localhost:44343/",
         "PROFILE_API":"crmapi/Contacts/",
         "CONTRACTS_API":"crmapi/Contracts/",
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "MAIL_FROM": "no-reply@bluespace.eu",
+        "SMTP_HOST": "smtp.office365.com",
+        "SMTP_ENABLESSL": "false",
+        "SMTP_USERNAME": "no-reply@bluespace.eu",
+        "SMTP_PASSWORD": "EoE4RygWaKVvQrvVu7dp"
       },
       "applicationUrl": "https://localhost:5001;http://localhost:5000"
     },
@@ -44,11 +54,16 @@
         "PROFILE_API": "crmapi/Contacts/",
         "CONTRACTS_API": "crmapi/Contacts/",
         "MONGO_URL": "mongodb://localhost:27017",
-        "INVITE_URL": "http://localhost:4200/",
+        "INVITE_URL": "http://localhost:4200/signup/",
         "ASPNETCORE_URLS": "https://+:443;http://+:80",
         "ASPNETCORE_HTTPS_PORT": "44333",
         "MONGO_DATABASE": "customerportal",
-        "GATEWAY_URL": "https://localhost:44343/"
+        "GATEWAY_URL": "https://localhost:44343/",
+        "MAIL_FROM": "no-reply@bluespace.eu",
+        "SMTP_HOST": "smtp.office365.com",
+        "SMTP_ENABLESSL": "false",
+        "SMTP_USERNAME": "no-reply@bluespace.eu",
+        "SMTP_PASSWORD": "EoE4RygWaKVvQrvVu7dp"
       },
       "httpPort": 53489,
       "useSSL": true,
