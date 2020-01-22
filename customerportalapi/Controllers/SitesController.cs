@@ -81,7 +81,7 @@ namespace customerportalapi.Controllers
             }
         }
 
-        [HttpGet("store/{storeId}")]
+        [HttpGet("stores/{storeId}")]
         public async Task<ApiResponse> GetStoreAsync(string storeId)
         {
             try
