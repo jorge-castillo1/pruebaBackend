@@ -5,6 +5,8 @@ using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using customerportalapi.Services.Exceptions;
 
 namespace customerportalapi.Services
 {
@@ -25,9 +27,8 @@ namespace customerportalapi.Services
             //Add customer portal Business Logic
             User user = _userRepository.GetCurrentUser(dni);
             if (user._id == null)
-                throw new ArgumentException("User does not exist.");
-
-
+                throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
+            
             //2. If exist complete data from external repository
             //Invoke repository
             List<Contract> entitylist = new List<Contract>();
