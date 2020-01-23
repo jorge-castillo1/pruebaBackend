@@ -191,5 +191,10 @@ namespace customerportalapi.Services
         {
             //Establecer email verified a false para que no pueda acceder al portal
         }
+
+        public async Task<FormContact> ContactAsync(FormContact value)
+        {
+            return await Task.FromResult(value);
+        }
     }
 }

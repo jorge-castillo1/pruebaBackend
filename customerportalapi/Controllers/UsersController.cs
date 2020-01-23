@@ -103,6 +103,22 @@ namespace customerportalapi.Controllers
             }
         }
 
+        // POST api/users/contact
+        [HttpPost("contact")]
+        public async Task<ApiResponse> Contact([FromBody] FormContact value)
+        {
+            try
+            {
+                var entity = await _services.ContactAsync(value);
+                return new ApiResponse(entity);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+
         //// PUT api/users/5
         //[HttpPut("{id}")]
         //public void Put(int id, [FromBody] string value)

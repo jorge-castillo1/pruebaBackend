@@ -12,5 +12,7 @@ namespace customerportalapi.Services.interfaces
         Task<bool> InviteUserAsync(Invitation value);
 
         Task<bool> ConfirmUserAsync(string invitationToken);
+
+        Task<FormContact> ContactAsync(FormContact value);
     }
 }
