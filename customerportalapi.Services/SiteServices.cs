@@ -1,11 +1,11 @@
-﻿using customerportalapi.Repositories.interfaces;
-using customerportalapi.Entities;
-using customerportalapi.Services.interfaces;
-using System;
-using System.Threading.Tasks;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Extensions.Caching.Memory;
+using System.Threading.Tasks;
+using customerportalapi.Entities;
+using customerportalapi.Repositories.interfaces;
+using customerportalapi.Services.interfaces;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace customerportalapi.Services
 {
@@ -14,14 +14,15 @@ namespace customerportalapi.Services
         private readonly IUserRepository _userRepository;
         private readonly IContractRepository _contractRepository;
         private readonly IStoreRepository _storeRepository;
-        private readonly IMemoryCache _memoryCache;
+        private readonly IDistributedCache _distributedCache;
 
-        public SiteServices(IUserRepository userRepository, IContractRepository contractRepository, IStoreRepository storeRepository, IMemoryCache memoryCache)
+        public SiteServices(IUserRepository userRepository, IContractRepository contractRepository,
+            IStoreRepository storeRepository, IDistributedCache distributedCache)
         {
             _userRepository = userRepository;
             _contractRepository = contractRepository;
             _storeRepository = storeRepository;
-            _memoryCache = memoryCache;
+            _distributedCache = distributedCache;
         }
 
 
@@ -35,8 +36,7 @@ namespace customerportalapi.Services
 
             //2. If exist complete data from external repository
             //Invoke repository
-            List<Contract> entitylist = new List<Contract>();
-            entitylist = await _contractRepository.GetContractsAsync(dni);
+            List<Contract> entitylist = await _contractRepository.GetContractsAsync(dni);
 
             List<Site> stores = new List<Site>();
             foreach (var storegroup in entitylist.GroupBy(x => x.Store))
@@ -53,7 +53,7 @@ namespace customerportalapi.Services
 
         public async Task<List<Store>> GetStoresAsync(string country, string city)
         {
-            List<Store> entitylist = await GetOrCreateCache();
+            List<Store> entitylist = await GetList();
 
             if (!string.IsNullOrEmpty(country))
                 entitylist = entitylist.Where(d => d.Country == country).ToList();
@@ -66,7 +66,7 @@ namespace customerportalapi.Services
 
         public async Task<List<Country>> GetStoresCountriesAsync()
         {
-            List<Store> entitylist = await GetOrCreateCache();
+            List<Store> entitylist = await GetList();
 
             var groupedOrdered = entitylist.GroupBy(f => f.Country).OrderBy(o => o.Key);
 
@@ -75,7 +75,7 @@ namespace customerportalapi.Services
 
         public async Task<List<City>> GetStoresCitiesAsync(string country)
         {
-            List<Store> entitylist = await GetOrCreateCache();
+            List<Store> entitylist = await GetList();
 
             if (!string.IsNullOrEmpty(country))
                 entitylist = entitylist.Where(d => d.Country == country).ToList();
@@ -90,24 +90,14 @@ namespace customerportalapi.Services
             return await _storeRepository.GetStoreAsync(storeId);
         }
 
-
-        private async Task<List<Store>> GetOrCreateCache()
+        private async Task<List<Store>> GetList()
         {
-            if (!_memoryCache.TryGetValue(CacheKeys.Entry, out List<Store> entitylist))
-            {
-                entitylist = await _storeRepository.GetStoresAsync();
+            DistributedCacheEntryOptions cacheEntryOptions = new DistributedCacheEntryOptions()
+                .SetAbsoluteExpiration(TimeSpan.FromSeconds(30))
+                .SetSlidingExpiration(TimeSpan.FromMinutes(1));
+            DistributedMongoDbCache<List<Store>> distributedCache = new DistributedMongoDbCache<List<Store>>(_distributedCache, cacheEntryOptions);
 
-                // Set cache options.
-                var cacheEntryOptions = new MemoryCacheEntryOptions()
-                    // Set cache entry size by extension method.
-                    .SetSize(1)
-                    // Keep in cache for this time, reset time if accessed.
-                    .SetSlidingExpiration(TimeSpan.FromMinutes(1));
-
-                _memoryCache.Set(CacheKeys.Entry, entitylist, cacheEntryOptions);
-            }
-
-            return entitylist;
+            return await distributedCache.GetOrCreateCache("Store", async () => await _storeRepository.GetStoresAsync());
         }
     }
 }

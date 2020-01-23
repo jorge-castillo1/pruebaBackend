@@ -13,7 +13,7 @@ namespace customerportalapi.Controllers
     {
         private readonly ISiteServices _services;
         private readonly ILogger<SitesController> _logger;
-        
+
 
         public SitesController(ISiteServices services, ILogger<SitesController> logger)
         {

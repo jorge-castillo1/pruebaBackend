@@ -18,6 +18,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
+using MongoDbCache;
 using Serilog;
 
 namespace customerportalapi
@@ -46,7 +47,7 @@ namespace customerportalapi
         public void ConfigureServices(IServiceCollection services)
         {
             //Mongo Database services
-            services.AddScoped<IMongoCollectionWrapper<User>>((serviceProvider) =>
+            services.AddScoped<IMongoCollectionWrapper<User>>(serviceProvider =>
             {
                 IMongoDatabase database = GetDatabase();
                 return new MongoCollectionWrapper<User>(database, "users");
@@ -63,7 +64,7 @@ namespace customerportalapi
             //});
 
             //Mail service
-            services.AddScoped<SmtpClient>((serviceProvider) =>
+            services.AddScoped<SmtpClient>(serviceProvider =>
             {
                 var config = serviceProvider.GetRequiredService<IConfiguration>();
                 SmtpClient client = new SmtpClient();
@@ -124,7 +125,13 @@ namespace customerportalapi
                 });
             });
 
-            services.AddMemoryCache(options => options.SizeLimit = 1024);
+            services.AddMongoDbCache(options =>
+            {
+                options.ConnectionString = Configuration.GetConnectionString("customerportaldb");
+                options.DatabaseName = Configuration["DatabaseName"];
+                options.CollectionName = "appcache";
+                options.ExpiredScanInterval = TimeSpan.FromMinutes(10);
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

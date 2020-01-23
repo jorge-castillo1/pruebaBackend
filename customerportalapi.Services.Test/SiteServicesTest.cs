@@ -6,7 +6,7 @@ using Moq;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace customerportalapi.Services.Test
 {
@@ -16,7 +16,7 @@ namespace customerportalapi.Services.Test
         private Mock<IUserRepository> _userRepository;
         private Mock<IContractRepository> _contractRepository;
         private Mock<IStoreRepository> _storeRepository;
-        private Mock<IMemoryCache> _memoryCache;
+        private Mock<IDistributedCache> _distributedCache;
         
 
         [TestInitialize]
@@ -25,7 +25,7 @@ namespace customerportalapi.Services.Test
             _userRepository = UserRepositoryMock.ValidUserRepository();
             _contractRepository = ContractRepositoryMock.ContractRepository();
             _storeRepository = StoreRepositoryMock.StoreRepository();
-            _memoryCache = new Mock<IMemoryCache>();
+            _distributedCache = new Mock<IDistributedCache>();
         }
 
         [TestMethod]
@@ -37,7 +37,7 @@ namespace customerportalapi.Services.Test
             Mock<IUserRepository> userRepositoryInvalid = UserRepositoryMock.InvalidUserRepository();
 
             //Act
-            SiteServices service = new SiteServices(userRepositoryInvalid.Object, _contractRepository.Object, _storeRepository.Object, _memoryCache.Object);
+            SiteServices service = new SiteServices(userRepositoryInvalid.Object, _contractRepository.Object, _storeRepository.Object, _distributedCache.Object);
             await service.GetContractsAsync(dni);
 
             //Assert
@@ -50,7 +50,7 @@ namespace customerportalapi.Services.Test
             string dni = "12345678A";
 
             //Act
-            SiteServices service = new SiteServices(_userRepository.Object, _contractRepository.Object, _storeRepository.Object, _memoryCache.Object);
+            SiteServices service = new SiteServices(_userRepository.Object, _contractRepository.Object, _storeRepository.Object, _distributedCache.Object);
             List<Site> sites = await service.GetContractsAsync(dni);
 
             //Assert

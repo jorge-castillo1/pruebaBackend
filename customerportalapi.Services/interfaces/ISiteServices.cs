@@ -1,6 +1,6 @@
-﻿using customerportalapi.Entities;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using customerportalapi.Entities;
 
 namespace customerportalapi.Services.interfaces
 {
