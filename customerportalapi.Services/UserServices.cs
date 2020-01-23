@@ -35,6 +35,9 @@ namespace customerportalapi.Services
             if (user._id == null)
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
 
+            //1. If emailverified is false throw error
+            if (!user.emailverified)
+                throw new ServiceException("User is deactivated,", HttpStatusCode.NotFound, "User", "Deactivated");
 
             //2. If exist complete data from external repository
             //Invoke repository
@@ -62,6 +65,10 @@ namespace customerportalapi.Services
             User user = _userRepository.GetCurrentUser(profile.DocumentNumber);
             if (user._id == null)
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
+
+            //1. If emailverified is false throw error
+            if (!user.emailverified)
+                throw new ServiceException("User is deactivated,", HttpStatusCode.NotFound, "User", "Deactivated");
 
             //3. Set Email Principal according to external data
             if (string.IsNullOrEmpty(profile.EmailAddress1) && string.IsNullOrEmpty(profile.EmailAddress2))
@@ -187,9 +194,27 @@ namespace customerportalapi.Services
             return Task.FromResult(true);
         }
 
-        public void DesInvitar()
+        public Task<bool> UnInviteUserAsync(string dni)
         {
-            //Establecer email verified a false para que no pueda acceder al portal
+            //1. Validate dni not empty
+            if (string.IsNullOrEmpty(dni))
+                throw new ServiceException("User must have a valid document number.", HttpStatusCode.BadRequest, "Dni", "Empty field");
+
+            //2. Validate user
+            User user = _userRepository.GetCurrentUser(dni);
+            if (user._id == null)
+                throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
+
+            //3. If emailverified is false
+            if (!user.emailverified)
+                return Task.FromResult(false);
+
+            //4. Update invitation data
+            user.emailverified = false;
+            user.invitationtoken = null;
+            _userRepository.Update(user);
+
+            return Task.FromResult(true);
         }
     }
 }
