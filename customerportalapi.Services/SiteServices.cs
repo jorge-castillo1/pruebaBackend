@@ -51,12 +51,12 @@ namespace customerportalapi.Services
             return stores;
         }
 
-        public async Task<List<Store>> GetStoresAsync(string country, string city)
+        public async Task<List<Store>> GetStoresAsync(string countryCode, string city)
         {
             List<Store> entitylist = await GetList();
 
-            if (!string.IsNullOrEmpty(country))
-                entitylist = entitylist.Where(d => d.Country == country).ToList();
+            if (!string.IsNullOrEmpty(countryCode))
+                entitylist = entitylist.Where(d => d.CountryCode == countryCode).ToList();
 
             if (!string.IsNullOrEmpty(city))
                 entitylist = entitylist.Where(d => d.City == city).ToList();
@@ -68,26 +68,31 @@ namespace customerportalapi.Services
         {
             List<Store> entitylist = await GetList();
 
-            var groupedOrdered = entitylist.GroupBy(f => f.Country).OrderBy(o => o.Key);
+            var groupedOrdered = entitylist.GroupBy(f => new { f.CountryCode, f.Country })
+                .OrderBy(o => o.Key.Country);
 
-            return groupedOrdered.Select(countryGroup => new Country { Name = countryGroup.Key }).ToList();
+            return groupedOrdered.Select(countryGroup => new Country
+            {
+                Code = countryGroup.Key.CountryCode,
+                Name = countryGroup.Key.Country
+            }).ToList();
         }
 
-        public async Task<List<City>> GetStoresCitiesAsync(string country)
+        public async Task<List<City>> GetStoresCitiesAsync(string countryCode)
         {
             List<Store> entitylist = await GetList();
 
-            if (!string.IsNullOrEmpty(country))
-                entitylist = entitylist.Where(d => d.Country == country).ToList();
+            if (!string.IsNullOrEmpty(countryCode))
+                entitylist = entitylist.Where(d => d.CountryCode == countryCode).ToList();
 
             var groupedOrdered = entitylist.GroupBy(f => f.City).OrderBy(o => o.Key);
 
             return groupedOrdered.Select(cityGroup => new City { Name = cityGroup.Key }).ToList();
         }
 
-        public async Task<Store> GetStoreAsync(string storeId)
+        public async Task<Store> GetStoreAsync(string storeCode)
         {
-            return await _storeRepository.GetStoreAsync(storeId);
+            return await _storeRepository.GetStoreAsync(storeCode);
         }
 
         private async Task<List<Store>> GetList()

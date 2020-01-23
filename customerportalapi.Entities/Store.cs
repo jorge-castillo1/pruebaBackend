@@ -28,6 +28,8 @@ namespace customerportalapi.Entities
 
         public string Country { get; set; }
 
+        public string CountryCode { get; set; }
+
         public string EmailAddress1 { get; set; }
 
         public string EmailAddress2 { get; set; }

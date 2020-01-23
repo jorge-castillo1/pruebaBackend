@@ -36,12 +36,12 @@ namespace customerportalapi.Repositories
             return JsonConvert.DeserializeObject<List<Store>>(result.GetValue("result").ToString()); ;
         }
 
-        public async Task<Store> GetStoreAsync(string storeId)
+        public async Task<Store> GetStoreAsync(string storeCode)
         {
             var httpClient = _clientFactory.CreateClient("httpClientCRM");
             httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["StoresAPI"]);
 
-            var response = await httpClient.GetAsync(storeId, HttpCompletionOption.ResponseHeadersRead);
+            var response = await httpClient.GetAsync(storeCode, HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
             if (!response.IsSuccessStatusCode) return new Store();
             var content = await response.Content.ReadAsStringAsync();
