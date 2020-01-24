@@ -14,7 +14,7 @@
       "launchUrl": "api/values",
       "environmentVariables": {
         "MONGO_URL": "mongodb://localhost:27017",
-        "InviteConfirmation": "https://localhost:4200/signup/",
+        "InviteConfirmation": "http://localhost:4200/signup/",
         "DatabaseName": "customerportal",
         "MONGO_DATABASE": "customerportal",
         "ConnectionStrings__customerportaldb":"mongodb://localhost:27017",
