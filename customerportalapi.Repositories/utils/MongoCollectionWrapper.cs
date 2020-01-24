@@ -1,17 +1,15 @@
-﻿using customerportalapi.Entities;
-using customerportalapi.Repositories.interfaces;
+﻿using customerportalapi.Repositories.interfaces;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace customerportalapi.Repositories.utils
 {
     public class MongoCollectionWrapper<T> : IMongoCollectionWrapper<T>
     {
-        IMongoCollection<T> _mongoCollection;
+        readonly IMongoCollection<T> _mongoCollection;
 
         public MongoCollectionWrapper(IMongoDatabase database, string collectionName)
         {
@@ -36,6 +34,11 @@ namespace customerportalapi.Repositories.utils
         public async Task<DeleteResult> DeleteOneAsync(FilterDefinition<T> filter)
         {
             return await _mongoCollection.DeleteOneAsync(filter);
+        }
+
+        public List<T> FindAll(Expression<Func<T, bool>> filter)
+        {
+            return _mongoCollection.Find(filter).ToList();
         }
     }
 }

@@ -13,7 +13,19 @@
       "commandName": "IISExpress",
       "launchUrl": "api/values",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "MONGO_URL": "mongodb://localhost:27017",
+        "InviteConfirmation": "http://localhost:4200/signup/",
+        "DatabaseName": "customerportal",
+        "MONGO_DATABASE": "customerportal",
+        "ConnectionStrings__customerportaldb":"mongodb://localhost:27017",
+        "GatewayUrl": "https://localhost:44343/",
+        "ProfileAPI":"crmapi/Contacts/",
+        "ContractsAPI":"crmapi/Contracts/",
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "MailFrom": "no-reply@bluespace.eu",
+        "Email__Smtp__Host": "smtp.office365.com",
+        "Email__Smtp__Username": "no-reply@bluespace.eu",
+        "Email__Smtp__Password": "EoE4RygWaKVvQrvVu7dp"
       }
     },
     "customerportalapi": {
@@ -21,7 +33,18 @@
       "launchBrowser": true,
       "launchUrl": "api/values",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "MONGO_URL": "mongodb://localhost:27017",
+        "InviteConfirmation": "https://localhost:4200/signup/",
+        "ConnectionStrings__customerportaldb":"mongodb://localhost:27017",
+        "DatabaseName": "customerportal",
+        "GatewayUrl": "https://localhost:44343/",
+        "ProfileAPI":"crmapi/Contacts/",
+        "ContractsAPI":"crmapi/Contracts/",
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "MailFrom": "no-reply@bluespace.eu",
+        "Email__Smtp__Host": "smtp.office365.com",
+        "Email__Smtp__Username": "no-reply@bluespace.eu",
+        "Email__Smtp__Password": "EoE4RygWaKVvQrvVu7dp"
       },
       "applicationUrl": "https://localhost:5001;http://localhost:5000"
     },
@@ -29,8 +52,18 @@
       "commandName": "Docker",
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/api/users",
       "environmentVariables": {
+        "ProfileAPI": "crmapi/Contacts/",
+        "ContractsAPI": "crmapi/Contacts/",
+        "MONGO_URL": "mongodb://localhost:27017",
+        "InviteConfirmation": "http://localhost:4200/signup/",
         "ASPNETCORE_URLS": "https://+:443;http://+:80",
-        "ASPNETCORE_HTTPS_PORT": "44333"
+        "ASPNETCORE_HTTPS_PORT": "44333",
+        "MONGO_DATABASE": "customerportal",
+        "GatewayUrl": "https://localhost:44343/",
+        "MailFrom": "no-reply@bluespace.eu",
+        "Email__Smtp__Host": "smtp.office365.com",
+        "Email__Smtp__Username": "no-reply@bluespace.eu",
+        "Email__Smtp__Password": "EoE4RygWaKVvQrvVu7dp"
       },
       "httpPort": 53489,
       "useSSL": true,

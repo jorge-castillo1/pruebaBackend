@@ -20,6 +20,7 @@ using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using MongoDbCache;
 using Serilog;
+using Swashbuckle.AspNetCore.Swagger;
 
 namespace customerportalapi
 {
@@ -32,8 +33,9 @@ namespace customerportalapi
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true)
                 .AddEnvironmentVariables();
-            configuration = builder.Build();
-            Configuration = configuration;
+            //configuration = builder.Build();
+            //Configuration = configuration;
+            Configuration = builder.BuildAndReplacePlaceholders();
 
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
@@ -57,41 +59,41 @@ namespace customerportalapi
                 IMongoDatabase database = GetDatabase();
                 return new MongoCollectionWrapper<EmailTemplate>(database, "emailtemplates");
             });
-            //services.AddScoped<IMongoCollectionWrapper<WebTemplate>>(serviceProvider =>
-            //{
-            //    IMongoDatabase database = GetDatabase();
-            //    return new MongoCollectionWrapper<WebTemplate>(database, "webtemplates");
-            //});
+            services.AddScoped<IMongoCollectionWrapper<WebTemplate>>(serviceProvider =>
+            {
+                IMongoDatabase database = GetDatabase();
+                return new MongoCollectionWrapper<WebTemplate>(database, "webtemplates");
+            });
 
             //Mail service
-            services.AddScoped<SmtpClient>(serviceProvider =>
+            services.AddScoped(serviceProvider =>
             {
                 var config = serviceProvider.GetRequiredService<IConfiguration>();
                 SmtpClient client = new SmtpClient();
-                //client.ServerCertificateValidationCallback = (s, c, h, e) => true;
-                //client.Connect(config.GetValue<String>("Email:Smtp:Host"),
-                //            config.GetValue<int>("Email:Smtp:Port"),
-                //            config.GetValue<bool>("Email:Smtp:EnableSSL"));
+                client.ServerCertificateValidationCallback = (s, c, h, e) => true;
+                client.Connect(config.GetValue<String>("Email:Smtp:Host"),
+                            config.GetValue<int>("Email:Smtp:Port"),
+                            config.GetValue<bool>("Email:Smtp:EnableSSL"));
 
                 //// Note: only needed if the SMTP server requires authentication
-                //client.Authenticate(config.GetValue<String>("Email:Smtp:Username"), config.GetValue<String>("Email:Smtp:Password"));
+                client.Authenticate(config.GetValue<String>("Email:Smtp:Username"), config.GetValue<String>("Email:Smtp:Password"));
                 return client;
-            });
+            });  
 
             //Register Repositories
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IProfileRepository, ProfileRepository>();
             services.AddScoped<IContractRepository, ContractRepository>();
-            services.AddScoped<IMailClient, TmpMailClientWrapper>();
+            services.AddScoped<IMailClient, MailClientWrapper>();
             services.AddScoped<IMailRepository, MailRepository>();
             services.AddScoped<IEmailTemplateRepository, EmailTemplateRepository>();
-            //services.AddScoped<IWebTemplateRepository, WebTemplateRepository>();
+            services.AddScoped<IWebTemplateRepository, WebTemplateRepository>();
             services.AddScoped<IStoreRepository, StoreRepository>();
 
             //Register Business Services
             services.AddTransient<IUserServices, UserServices>();
             services.AddTransient<ISiteServices, SiteServices>();
-            //services.AddTransient<IWebTemplateServices, WebTemplateServices>();
+            services.AddTransient<IWebTemplateServices, WebTemplateServices>();
 
             services.AddHttpClient("httpClientCRM", c =>
             {
@@ -125,6 +127,11 @@ namespace customerportalapi
                 });
             });
 
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new Info { Title = "CustomerPortalAPI", Version = "v1" });
+            });
+
             services.AddMongoDbCache(options =>
             {
                 options.ConnectionString = Configuration.GetConnectionString("customerportaldb");
@@ -146,6 +153,7 @@ namespace customerportalapi
             }
             else
             {
+                app.UseExceptionHandler("/Error");
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
@@ -162,14 +170,18 @@ namespace customerportalapi
             });
             app.UseCors("AllowAll");
             app.UseHttpsRedirection();
+            app.UseApiResponseAndExceptionWrapper(new AutoWrapperOptions { IsDebug = env.IsDevelopment(), IsApiOnly = true, ShowStatusCode = true });
             app.UseMvc();
-            app.UseApiResponseAndExceptionWrapper(
-                new AutoWrapperOptions
-                {
-                    ShowStatusCode = true,
-                    IsApiOnly = true,
-                    IsDebug = env.IsDevelopment()
-                });
+
+            // Enable middleware to serve generated Swagger as a JSON endpoint.
+            app.UseSwagger();
+
+            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.), 
+            // specifying the Swagger JSON endpoint.
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "CustomerPortalAPI V1");
+            });
         }
 
         private IMongoDatabase GetDatabase()

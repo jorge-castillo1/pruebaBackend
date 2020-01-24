@@ -1,5 +1,6 @@
 ﻿using customerportalapi.Entities;
 using customerportalapi.Repositories.interfaces;
+using customerportalapi.Services.Exceptions;
 using customerportalapi.Services.Test.FakeData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -29,7 +30,7 @@ namespace customerportalapi.Services.Test
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException), "No se ha producido la excepción esperada.")]
+        [ExpectedException(typeof(ServiceException), "No se ha producido la excepción esperada.")]
         public async Task AlSolicitarContratosDeUnUsuarioNoExistente_SeProduceUnaExcepcion()
         {
             //Arrange
