@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace customerportalapi.Entities
+﻿namespace customerportalapi.Entities
 {
     public class Contract
     {
@@ -29,5 +25,7 @@ namespace customerportalapi.Entities
         public string Customer { get; set; }
 
         public Unit Unit { get; set; }
+
+        public Store StoreData { get; set; }
     }
 }

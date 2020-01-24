@@ -33,19 +33,35 @@ namespace customerportalapi.Services
             if (user._id == null)
                 throw new ArgumentException("User does not exist.");
 
-
             //2. If exist complete data from external repository
             //Invoke repository
             List<Contract> entitylist = await _contractRepository.GetContractsAsync(dni);
 
             List<Site> stores = new List<Site>();
-            foreach (var storegroup in entitylist.GroupBy(x => x.Store))
+            foreach (var storegroup in entitylist.GroupBy(x => new
             {
-                Site store = new Site { Name = storegroup.Key };
-                foreach (var contract in storegroup)
-                    store.Contracts.Add(contract);
+                Name = x.StoreData.StoreName,
+                x.StoreData.Telephone,
+                x.StoreData.CoordinatesLatitude,
+                x.StoreData.CoordinatesLongitude
+            }))
+            {
+                Site site = new Site
+                {
+                    Name = storegroup.Key.Name,
+                    Telephone = storegroup.Key.Telephone,
+                    CoordinatesLatitude = storegroup.Key.CoordinatesLatitude,
+                    CoordinatesLongitude = storegroup.Key.CoordinatesLongitude
+                };
 
-                stores.Add(store);
+                foreach (var contract in storegroup)
+                {
+                    //ToDo: remove this and clean contract entity
+                    contract.StoreData = null;
+                    site.Contracts.Add(contract);
+                }
+
+                stores.Add(site);
             }
 
             return stores;
