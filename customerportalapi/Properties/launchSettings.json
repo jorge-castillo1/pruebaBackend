@@ -15,15 +15,17 @@
       "environmentVariables": {
         "MONGO_URL": "mongodb://localhost:27017",
         "InviteConfirmation": "https://localhost:4200/signup/",
+        "DatabaseName": "customerportal",
         "MONGO_DATABASE": "customerportal",
+        "ConnectionStrings__customerportaldb":"mongodb://localhost:27017",
         "GatewayUrl": "https://localhost:44343/",
         "ProfileAPI":"crmapi/Contacts/",
         "ContractsAPI":"crmapi/Contracts/",
         "ASPNETCORE_ENVIRONMENT": "Development",
         "MailFrom": "no-reply@bluespace.eu",
-        "Mail__Smtp__Host": "smtp.office365.com",
-        "Mail__Smtp__Username": "no-reply@bluespace.eu",
-        "Mail__Smtp__Password": "EoE4RygWaKVvQrvVu7dp"
+        "Email__Smtp__Host": "smtp.office365.com",
+        "Email__Smtp__Username": "no-reply@bluespace.eu",
+        "Email__Smtp__Password": "EoE4RygWaKVvQrvVu7dp"
       }
     },
     "customerportalapi": {
@@ -33,15 +35,16 @@
       "environmentVariables": {
         "MONGO_URL": "mongodb://localhost:27017",
         "InviteConfirmation": "https://localhost:4200/signup/",
-        "MONGO_DATABASE": "customerportal",
+        "ConnectionStrings__customerportaldb":"mongodb://localhost:27017",
+        "DatabaseName": "customerportal",
         "GatewayUrl": "https://localhost:44343/",
         "ProfileAPI":"crmapi/Contacts/",
         "ContractsAPI":"crmapi/Contracts/",
         "ASPNETCORE_ENVIRONMENT": "Development",
         "MailFrom": "no-reply@bluespace.eu",
-        "Mail__Smtp__Host": "smtp.office365.com",
-        "Mail__Smtp__Username": "no-reply@bluespace.eu",
-        "Mail__Smtp__Password": "EoE4RygWaKVvQrvVu7dp"
+        "Email__Smtp__Host": "smtp.office365.com",
+        "Email__Smtp__Username": "no-reply@bluespace.eu",
+        "Email__Smtp__Password": "EoE4RygWaKVvQrvVu7dp"
       },
       "applicationUrl": "https://localhost:5001;http://localhost:5000"
     },
@@ -58,9 +61,9 @@
         "MONGO_DATABASE": "customerportal",
         "GatewayUrl": "https://localhost:44343/",
         "MailFrom": "no-reply@bluespace.eu",
-        "Mail__Smtp__Host": "smtp.office365.com",
-        "Mail__Smtp__Username": "no-reply@bluespace.eu",
-        "Mail__Smtp__Password": "EoE4RygWaKVvQrvVu7dp"
+        "Email__Smtp__Host": "smtp.office365.com",
+        "Email__Smtp__Username": "no-reply@bluespace.eu",
+        "Email__Smtp__Password": "EoE4RygWaKVvQrvVu7dp"
       },
       "httpPort": 53489,
       "useSSL": true,
