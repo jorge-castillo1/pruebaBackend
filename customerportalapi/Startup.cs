@@ -18,6 +18,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
+using MongoDbCache;
 using Serilog;
 using Swashbuckle.AspNetCore.Swagger;
 
@@ -87,6 +88,7 @@ namespace customerportalapi
             services.AddScoped<IMailRepository, MailRepository>();
             services.AddScoped<IEmailTemplateRepository, EmailTemplateRepository>();
             services.AddScoped<IWebTemplateRepository, WebTemplateRepository>();
+            services.AddScoped<IStoreRepository, StoreRepository>();
 
             //Register Business Services
             services.AddTransient<IUserServices, UserServices>();
@@ -128,6 +130,14 @@ namespace customerportalapi
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new Info { Title = "CustomerPortalAPI", Version = "v1" });
+            });
+
+            services.AddMongoDbCache(options =>
+            {
+                options.ConnectionString = Configuration.GetConnectionString("customerportaldb");
+                options.DatabaseName = Configuration["DatabaseName"];
+                options.CollectionName = "appcache";
+                options.ExpiredScanInterval = TimeSpan.FromMinutes(10);
             });
         }
 
