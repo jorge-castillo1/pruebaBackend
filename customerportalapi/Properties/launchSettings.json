@@ -13,13 +13,20 @@
       "commandName": "IISExpress",
       "launchUrl": "api/values",
       "environmentVariables": {
-        "PROFILE_API": "crmapi/Contacts/",
-        "CONTRACTS_API": "crmapi/Contacts/",
         "MONGO_URL": "mongodb://localhost:27017",
-        "INVITE_URL": "https://localhost:4200/",
+        "Email__Smtp__Host": "smtp.office365.com",
+        "Email__Smtp__Username": "no-reply@bluespace.eu",
+        "Email__Smtp__Password": "EoE4RygWaKVvQrvVu7dp",
+        "InviteConfirmation": "http://localhost:4200/",
+        "ContractsAPI": "crmapi/Contracts/",
+        "MailFrom": "no-reply@bluespace.eu",
+        "GatewayUrl": "https://localhost:44343/",
+        "ConnectionStrings__customerportaldb": "mongodb://localhost:27017",
         "MONGO_DATABASE": "customerportal",
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "GATEWAY_URL": "https://localhost:44343/"
+        "DatabaseName": "customerportal",
+        "ProfileAPI": "crmapi/Contacts/",
+        "StoresAPI": "crmapi/Sites/",
+        "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
     "customerportalapi": {
@@ -27,28 +34,40 @@
       "launchBrowser": true,
       "launchUrl": "api/values",
       "environmentVariables": {
-        "PROFILE_API": "crmapi/Contacts/",
-        "CONTRACTS_API": "crmapi/Contacts/",
         "MONGO_URL": "mongodb://localhost:27017",
-        "INVITE_URL": "https://localhost:4200/",
+        "Email__Smtp__Host": "smtp.office365.com",
+        "Email__Smtp__Username": "no-reply@bluespace.eu",
+        "Email__Smtp__Password": "EoE4RygWaKVvQrvVu7dp",
+        "InviteConfirmation": "https://localhost:4200/",
+        "ContractsAPI": "crmapi/Contracts/",
+        "MailFrom": "no-reply@bluespace.eu",
+        "GatewayUrl": "https://localhost:44343/",
+        "ConnectionStrings__customerportaldb": "mongodb://localhost:27017",
         "MONGO_DATABASE": "customerportal",
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "GATEWAY_URL": "https://localhost:44343/"
+        "DatabaseName": "customerportal",
+        "ProfileAPI": "crmapi/Contacts/",
+        "StoresAPI": "crmapi/Sites/",
+        "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "applicationUrl": "https://localhost:5001;http://localhost:5000"
+      "applicationUrl": "https://localhost:44332;http://localhost:5000"
     },
     "Docker": {
       "commandName": "Docker",
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/api/users",
       "environmentVariables": {
-        "PROFILE_API": "crmapi/Contacts/",
-        "CONTRACTS_API": "crmapi/Contacts/",
         "MONGO_URL": "mongodb://localhost:27017",
-        "INVITE_URL": "http://localhost:4200/",
+        "Email__Smtp__Host": "smtp.office365.com",
+        "Email__Smtp__Username": "no-reply@bluespace.eu",
+        "Email__Smtp__Password": "EoE4RygWaKVvQrvVu7dp",
+        "InviteConfirmation": "http://localhost:4200/",
+        "ContractsAPI": "crmapi/Contracts/",
+        "MailFrom": "no-reply@bluespace.eu",
+        "GatewayUrl": "https://localhost:44343/",
         "ASPNETCORE_URLS": "https://+:443;http://+:80",
         "ASPNETCORE_HTTPS_PORT": "44333",
         "MONGO_DATABASE": "customerportal",
-        "GATEWAY_URL": "https://localhost:44343/"
+        "ProfileAPI": "crmapi/Contacts/",
+        "StoresAPI": "crmapi/Sites/"
       },
       "httpPort": 53489,
       "useSSL": true,

@@ -18,6 +18,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
+using MongoDbCache;
 using Serilog;
 using Swashbuckle.AspNetCore.Swagger;
 
@@ -69,13 +70,13 @@ namespace customerportalapi
             {
                 var config = serviceProvider.GetRequiredService<IConfiguration>();
                 SmtpClient client = new SmtpClient();
-                //client.ServerCertificateValidationCallback = (s, c, h, e) => true;
-                //client.Connect(config.GetValue<String>("Email:Smtp:Host"),
-                //            config.GetValue<int>("Email:Smtp:Port"),
-                //            config.GetValue<bool>("Email:Smtp:EnableSSL"));
+                client.ServerCertificateValidationCallback = (s, c, h, e) => true;
+                client.Connect(config.GetValue<String>("Email:Smtp:Host"),
+                            config.GetValue<int>("Email:Smtp:Port"),
+                            config.GetValue<bool>("Email:Smtp:EnableSSL"));
 
                 //// Note: only needed if the SMTP server requires authentication
-                //client.Authenticate(config.GetValue<String>("Email:Smtp:Username"), config.GetValue<String>("Email:Smtp:Password"));
+                client.Authenticate(config.GetValue<String>("Email:Smtp:Username"), config.GetValue<String>("Email:Smtp:Password"));
                 return client;
             });  
 
@@ -83,11 +84,11 @@ namespace customerportalapi
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IProfileRepository, ProfileRepository>();
             services.AddScoped<IContractRepository, ContractRepository>();
-            //services.AddScoped<IMailClient, MailClientWrapper>();
-            services.AddScoped<IMailClient, TmpMailClientWrapper>();
+            services.AddScoped<IMailClient, MailClientWrapper>();
             services.AddScoped<IMailRepository, MailRepository>();
             services.AddScoped<IEmailTemplateRepository, EmailTemplateRepository>();
             services.AddScoped<IWebTemplateRepository, WebTemplateRepository>();
+            services.AddScoped<IStoreRepository, StoreRepository>();
 
             //Register Business Services
             services.AddTransient<IUserServices, UserServices>();
@@ -129,6 +130,14 @@ namespace customerportalapi
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new Info { Title = "CustomerPortalAPI", Version = "v1" });
+            });
+
+            services.AddMongoDbCache(options =>
+            {
+                options.ConnectionString = Configuration.GetConnectionString("customerportaldb");
+                options.DatabaseName = Configuration["DatabaseName"];
+                options.CollectionName = "appcache";
+                options.ExpiredScanInterval = TimeSpan.FromMinutes(10);
             });
         }
 
