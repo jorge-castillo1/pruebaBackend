@@ -8,7 +8,7 @@ WORKDIR /src
 COPY ["customerportalapi/customerportalapi.csproj", "customerportalapi/"]
 RUN dotnet restore "customerportalapi/customerportalapi.csproj"
 COPY . .
-WORKDIR "/src/customerportalapi"
+WORKDIR /src/customerportalapi
 RUN dotnet build "customerportalapi.csproj" -c Release -o /app
 
 FROM build AS publish

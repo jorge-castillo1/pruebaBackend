@@ -6,15 +6,14 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
-using System.Text;
 using System.Collections.Generic;
 
 namespace customerportalapi.Repositories
 {
     public class ContractRepository : IContractRepository
     {
-        readonly IConfiguration _configuration;
-        readonly IHttpClientFactory _clientFactory;
+        private readonly IConfiguration _configuration;
+        private readonly IHttpClientFactory _clientFactory;
 
         public ContractRepository(IConfiguration configuration, IHttpClientFactory clientFactory)
         {
