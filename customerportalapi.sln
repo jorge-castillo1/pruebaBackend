@@ -5,8 +5,6 @@ VisualStudioVersion = 16.0.29025.244
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "customerportalapi", "customerportalapi\customerportalapi.csproj", "{A7837635-D5C3-49D7-840B-1E55FE0D90CF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "customerportalapi.Services", "customerportalapi.Services\customerportalapi.Services.csproj", "{61EAAA08-CA86-473E-966F-9E9B517BC567}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "customerportalapi.Entities", "customerportalapi.Entities\customerportalapi.Entities.csproj", "{E15EF4EA-9606-4BC0-8B66-92BC9A115714}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "customerportalapi.Repositories", "customerportalapi.Repositories\customerportalapi.Repositories.csproj", "{0E0CECD3-F259-429C-A0A6-BE37D3C60ED4}"
@@ -22,6 +20,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.gitignore = .gitignore
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "customerportalapi.Services", "customerportalapi.Services\customerportalapi.Services.csproj", "{2BA82D16-B188-41D2-86BD-79112BE901FD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,10 +32,6 @@ Global
 		{A7837635-D5C3-49D7-840B-1E55FE0D90CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A7837635-D5C3-49D7-840B-1E55FE0D90CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A7837635-D5C3-49D7-840B-1E55FE0D90CF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{61EAAA08-CA86-473E-966F-9E9B517BC567}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{61EAAA08-CA86-473E-966F-9E9B517BC567}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{61EAAA08-CA86-473E-966F-9E9B517BC567}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{61EAAA08-CA86-473E-966F-9E9B517BC567}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E15EF4EA-9606-4BC0-8B66-92BC9A115714}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E15EF4EA-9606-4BC0-8B66-92BC9A115714}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E15EF4EA-9606-4BC0-8B66-92BC9A115714}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -52,6 +48,10 @@ Global
 		{D2124A86-8C4D-4938-BD58-5BC729F1BC0D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D2124A86-8C4D-4938-BD58-5BC729F1BC0D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D2124A86-8C4D-4938-BD58-5BC729F1BC0D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2BA82D16-B188-41D2-86BD-79112BE901FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2BA82D16-B188-41D2-86BD-79112BE901FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2BA82D16-B188-41D2-86BD-79112BE901FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2BA82D16-B188-41D2-86BD-79112BE901FD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
