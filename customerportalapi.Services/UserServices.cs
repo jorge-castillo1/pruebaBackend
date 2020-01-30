@@ -36,6 +36,9 @@ namespace customerportalapi.Services
             if (user._id == null)
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
 
+            //1. If emailverified is false throw error
+            if (!user.emailverified)
+                throw new ServiceException("User is deactivated,", HttpStatusCode.NotFound, "User", "Deactivated");
 
             //2. If exist complete data from external repository
             //Invoke repository
@@ -72,7 +75,11 @@ namespace customerportalapi.Services
             if (user._id == null)
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
 
-            //1. Set Email Principal according to external data
+            //1. If emailverified is false throw error
+            if (!user.emailverified)
+                throw new ServiceException("User is deactivated,", HttpStatusCode.NotFound, "User", "Deactivated");
+
+            //2. Set Email Principal according to external data
             if (string.IsNullOrEmpty(profile.EmailAddress1) && string.IsNullOrEmpty(profile.EmailAddress2))
                 throw new ServiceException("Email field can not be null.", HttpStatusCode.BadRequest, "Email", "Empty fields");
 
@@ -84,14 +91,14 @@ namespace customerportalapi.Services
 
             var emailToUpdate = profile.EmailAddress1Principal ? profile.EmailAddress1 : profile.EmailAddress2;
 
-            //2. Set Phone Principal according to data
+            //3. Set Phone Principal according to data
             string phoneToUpdate = string.Empty;
             if (profile.MobilePhone1Principal && !string.IsNullOrEmpty(profile.MobilePhone1))
                 phoneToUpdate = profile.MobilePhone1;
             else if (profile.MobilePhonePrincipal && !string.IsNullOrEmpty(profile.MobilePhone))
                 phoneToUpdate = profile.MobilePhone;
 
-            //3. Compare language, email and image for backend changes
+            //4. Compare language, email and image for backend changes
             if (user.language != profile.Language ||
                 user.profilepicture != profile.Avatar ||
                 user.email != emailToUpdate ||
@@ -105,8 +112,9 @@ namespace customerportalapi.Services
                 user = _userRepository.Update(user);
             }
 
-            //4. Invoke repository for other changes
-            var entity = await _profileRepository.UpdateProfileAsync(profile);
+            //5. Invoke repository for other changes
+            Profile entity = new Profile();
+            entity = await _profileRepository.UpdateProfileAsync(profile);
             entity.Language = user.language;
             entity.Avatar = user.profilepicture;
             if (entity.EmailAddress1 == user.email)
@@ -207,9 +215,27 @@ namespace customerportalapi.Services
             return Task.FromResult(true);
         }
 
-        public void DesInvitar()
+        public Task<bool> UnInviteUserAsync(string dni)
         {
-            //Establecer email verified a false para que no pueda acceder al portal
+            //1. Validate dni not empty
+            if (string.IsNullOrEmpty(dni))
+                throw new ServiceException("User must have a valid document number.", HttpStatusCode.BadRequest, "Dni", "Empty field");
+
+            //2. Validate user
+            User user = _userRepository.GetCurrentUser(dni);
+            if (user._id == null)
+                throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
+
+            //3. If emailverified is false
+            if (!user.emailverified)
+                return Task.FromResult(false);
+
+            //4. Update invitation data
+            user.emailverified = false;
+            user.invitationtoken = null;
+            _userRepository.Update(user);
+
+            return Task.FromResult(true);
         }
 
         public async Task<Account> GetAccountAsync(string dni)

@@ -22,7 +22,7 @@ namespace customerportalapi.Controllers
             _logger = logger;
         }
 
-        [HttpGet("{dni}")]
+        [HttpGet("users/{dni}")]
         public async Task<ApiResponse> GetAsync(string dni)
         {
             try
@@ -41,7 +41,7 @@ namespace customerportalapi.Controllers
             }
         }
 
-        [HttpGet]
+        [HttpGet("stores")]
         public async Task<ApiResponse> GetAsync(string countryCode, string city)
         {
             try
