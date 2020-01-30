@@ -2,6 +2,7 @@
 using customerportalapi.Entities;
 using customerportalapi.Services.interfaces;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using customerportalapi.Entities.enums;
 using Microsoft.Extensions.Configuration;
@@ -38,8 +39,7 @@ namespace customerportalapi.Services
 
             //2. If exist complete data from external repository
             //Invoke repository
-            Profile entity = new Profile();
-            entity = await _profileRepository.GetProfileAsync(dni);
+            var entity = await _profileRepository.GetProfileAsync(dni);
 
             //3. Set Email Principal according to external data. No two principal emails allowed
             entity.EmailAddress1Principal = false;
@@ -78,15 +78,11 @@ namespace customerportalapi.Services
 
             if (profile.EmailAddress1Principal && string.IsNullOrEmpty(profile.EmailAddress1))
                 throw new ServiceException("Principal email can not be null.", HttpStatusCode.BadRequest, "Principal email", "Empty field");
-            
+
             if (profile.EmailAddress2Principal && string.IsNullOrEmpty(profile.EmailAddress2))
                 throw new ServiceException("Principal email can not be null.", HttpStatusCode.BadRequest, "Principal email", "Empty field");
 
-            string emailToUpdate = string.Empty;
-            if (profile.EmailAddress1Principal)
-                emailToUpdate = profile.EmailAddress1;
-            else
-                emailToUpdate = profile.EmailAddress2;
+            var emailToUpdate = profile.EmailAddress1Principal ? profile.EmailAddress1 : profile.EmailAddress2;
 
             //2. Set Phone Principal according to data
             string phoneToUpdate = string.Empty;
@@ -110,8 +106,7 @@ namespace customerportalapi.Services
             }
 
             //4. Invoke repository for other changes
-            Profile entity = new Profile();
-            entity = await _profileRepository.UpdateProfileAsync(profile);
+            var entity = await _profileRepository.UpdateProfileAsync(profile);
             entity.Language = user.language;
             entity.Avatar = user.profilepicture;
             if (entity.EmailAddress1 == user.email)
@@ -146,13 +141,15 @@ namespace customerportalapi.Services
                 //4. TODO Create user in autentication system
 
                 //5. Create user in portal database
-                User newUser = new User();
-                newUser.dni = value.Dni;
-                newUser.email = value.Email;
-                newUser.language = InvitationUtils.GetLanguage(value.Language);
-                newUser.usertype = InvitationUtils.GetUserType(value.CustomerType);
-                newUser.emailverified = false;
-                newUser.invitationtoken = Guid.NewGuid().ToString();
+                User newUser = new User
+                {
+                    dni = value.Dni,
+                    email = value.Email,
+                    language = InvitationUtils.GetLanguage(value.Language),
+                    usertype = InvitationUtils.GetUserType(value.CustomerType),
+                    emailverified = false,
+                    invitationtoken = Guid.NewGuid().ToString()
+                };
 
                 result = await _userRepository.Create(newUser);
             }
@@ -175,7 +172,7 @@ namespace customerportalapi.Services
             if (invitationTemplate._id == null)
             {
                 invitationTemplate = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.Invitation, LanguageTypes.en.ToString());
-            } 
+            }
 
             if (invitationTemplate._id != null)
             {
@@ -213,6 +210,115 @@ namespace customerportalapi.Services
         public void DesInvitar()
         {
             //Establecer email verified a false para que no pueda acceder al portal
+        }
+
+        public async Task<Account> GetAccountAsync(string dni)
+        {
+            //Invoke repository
+            AccountCrm entity = await _profileRepository.GetAccountAsync(dni);
+            if (entity == null)
+                throw new ServiceException("Account is not found.", HttpStatusCode.NotFound, "Account", "Not exist");
+
+            var account = ToAccount(entity);
+
+            return account;
+        }
+
+        public async Task<Account> UpdateAccountAsync(Account value)
+        {
+            //Invoke repository
+            var accountCrm = new AccountCrm
+            {
+                SmCustomerId = value.SmCustomerId, 
+                UseThisAddress = value.UseThisAddress
+            };
+
+            foreach (var address in value.AddressList)
+            {
+                if (address.Type == AddressTypes.Main.ToString())
+                {
+                    accountCrm.Address1Street1 = address.Street1;
+                    accountCrm.Address1Street2 = address.Street2;
+                    accountCrm.Address1Street3 = address.Street3;
+                    accountCrm.Address1City = address.City;
+                    accountCrm.Address1StateOrProvince = address.StateOrProvince;
+                    accountCrm.Address1PostalCode = address.ZipOrPostalCode;
+                    accountCrm.Address1Country = address.Country;
+                }
+                if (address.Type == AddressTypes.Invoice.ToString())
+                {
+                    accountCrm.Address2Street1 = address.Street1;
+                    accountCrm.Address2Street2 = address.Street2;
+                    accountCrm.Address2Street3 = address.Street3;
+                    accountCrm.Address2City = address.City;
+                    accountCrm.Address2StateOrProvince = address.StateOrProvince;
+                    accountCrm.Address2PostalCode = address.ZipOrPostalCode;
+                    accountCrm.Address2Country = address.Country;
+                }
+                if (address.Type == AddressTypes.Alternate.ToString())
+                {
+                    accountCrm.AlternateStreet1 = address.Street1;
+                    accountCrm.AlternateStreet2 = address.Street2;
+                    accountCrm.AlternateStreet3 = address.Street3;
+                    accountCrm.AlternateCity = address.City;
+                    accountCrm.AlternateStateOrProvince = address.StateOrProvince;
+                    accountCrm.AlternatePostalCode = address.ZipOrPostalCode;
+                    accountCrm.AlternateCountry = address.Country;
+                }
+            }
+
+            AccountCrm entity = await _profileRepository.UpdateAccountAsync(accountCrm);
+            if (entity == null)
+                throw new ServiceException("Account is not found.", HttpStatusCode.NotFound, "Account", "Not exist");
+
+            var account = ToAccount(entity);
+
+            return account;
+        }
+
+        private static Account ToAccount(AccountCrm entity)
+        {
+            return new Account
+            {
+                SmCustomerId = entity.SmCustomerId,
+                UseThisAddress = entity.UseThisAddress,
+                AddressList = new List<Address>
+                {
+                    new Address
+                    {
+                        Street1 = entity.Address1Street1,
+                        Street2 = entity.Address1Street2,
+                        Street3 = entity.Address1Street3,
+                        City = entity.Address1City,
+                        StateOrProvince = entity.Address1StateOrProvince,
+                        ZipOrPostalCode = entity.Address1PostalCode,
+                        Country = entity.Address1Country,
+                        Type = AddressTypes.Main.ToString()
+                    },
+                    new Address
+                    {
+                        Street1 = entity.Address2Street1,
+                        Street2 = entity.Address2Street2,
+                        Street3 = entity.Address2Street3,
+                        City = entity.Address2City,
+                        StateOrProvince = entity.Address2StateOrProvince,
+                        ZipOrPostalCode = entity.Address2PostalCode,
+                        Country = entity.Address2Country,
+                        Type = AddressTypes.Invoice.ToString()
+                    },
+                    new Address
+                    {
+                        Street1 = entity.AlternateStreet1,
+                        Street2 = entity.AlternateStreet2,
+                        Street3 = entity.AlternateStreet3,
+                        City = entity.AlternateCity,
+                        StateOrProvince = entity.AlternateStateOrProvince,
+                        ZipOrPostalCode = entity.AlternatePostalCode,
+                        Country = entity.AlternateCountry,
+                        Type = AddressTypes.Alternate.ToString()
+                    }
+                }
+            };
         }
     }
 }

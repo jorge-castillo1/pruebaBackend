@@ -19,14 +19,15 @@
         "Email__Smtp__Password": "EoE4RygWaKVvQrvVu7dp",
         "InviteConfirmation": "http://localhost:4200/",
         "ContractsAPI": "crmapi/Contracts/",
+        "AccountsAPI": "crmapi/Accounts/",
         "MailFrom": "no-reply@bluespace.eu",
         "GatewayUrl": "https://localhost:44343/",
         "ConnectionStrings__customerportaldb": "mongodb://localhost:27017",
         "MONGO_DATABASE": "customerportal",
         "DatabaseName": "customerportal",
         "ProfileAPI": "crmapi/Contacts/",
-        "StoresAPI": "crmapi/Sites/",
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "StoresAPI": "crmapi/Sites/"
       }
     },
     "customerportalapi": {
@@ -46,8 +47,8 @@
         "MONGO_DATABASE": "customerportal",
         "DatabaseName": "customerportal",
         "ProfileAPI": "crmapi/Contacts/",
-        "StoresAPI": "crmapi/Sites/",
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "StoresAPI": "crmapi/Sites/"
       },
       "applicationUrl": "https://localhost:44332;http://localhost:5000"
     },
