@@ -18,15 +18,19 @@ namespace customerportalapi.Entities
 
         public bool EmailAddress2Principal { get; set; }
 
-        public string Phone1 { get; set; }
+        //public string Phone1 { get; set; }
 
-        public string Phone2 { get; set; }
+        //public string Phone2 { get; set; }
 
         public string MobilePhone { get; set; }
 
+        public bool MobilePhonePrincipal { get; set; }
+
         public string MobilePhone1 { get; set; }
 
-        public string MobilePhone2 { get; set; }
+        public bool MobilePhone1Principal { get; set; }
+
+        //public string MobilePhone2 { get; set; }
 
         public string Address { get; set; }
 
