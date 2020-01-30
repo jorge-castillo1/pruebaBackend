@@ -34,7 +34,7 @@ namespace customerportalapi.Controllers
             }
             catch (ServiceException se)
             {
-                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new ValidationError[] { new ValidationError(se.Field, se.FieldMessage) }));
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
             }
             catch (Exception ex)
             {
@@ -54,7 +54,7 @@ namespace customerportalapi.Controllers
             }
             catch (ServiceException se)
             {
-                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new ValidationError[] { new ValidationError(se.Field, se.FieldMessage) }));
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
             }
             catch (Exception ex)
             {
@@ -74,7 +74,7 @@ namespace customerportalapi.Controllers
             }
             catch (ServiceException se)
             {
-                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new ValidationError[] { new ValidationError(se.Field, se.FieldMessage) }));
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
             }
             catch (Exception ex)
             {
@@ -94,7 +94,27 @@ namespace customerportalapi.Controllers
             }
             catch (ServiceException se)
             {
-                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new ValidationError[] { new ValidationError(se.Field, se.FieldMessage) }));
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+
+        // PUT api/users/uninvite/{dni}
+        [HttpPut("uninvite/{dni}")]
+        public async Task<ApiResponse> UnInvite(string dni)
+        {
+            try
+            {
+                var entity = await _services.UnInviteUserAsync(dni);
+                return new ApiResponse(entity);
+            }
+            catch (ServiceException se)
+            {
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
             }
             catch (Exception ex)
             {
