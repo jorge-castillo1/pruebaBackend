@@ -49,7 +49,7 @@
         "StoresAPI": "crmapi/Sites/",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "applicationUrl": "https://localhost:44332;http://localhost:5000"
+      "applicationUrl": "https://localhost:44332;http://localhost:44333"
     },
     "Docker": {
       "commandName": "Docker",
