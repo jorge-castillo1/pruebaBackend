@@ -17,8 +17,9 @@ namespace customerportalapi.Services.Test
         private Mock<IUserRepository> _userRepository;
         private Mock<IContractRepository> _contractRepository;
         private Mock<IStoreRepository> _storeRepository;
+        private Mock<ISitesRepository> _sitesRepository;
         private Mock<IDistributedCache> _distributedCache;
-        
+
 
         [TestInitialize]
         public void Setup()
@@ -26,6 +27,7 @@ namespace customerportalapi.Services.Test
             _userRepository = UserRepositoryMock.ValidUserRepository();
             _contractRepository = ContractRepositoryMock.ContractRepository();
             _storeRepository = StoreRepositoryMock.StoreRepository();
+            _sitesRepository = SitesRepositoryMock.SitesRepository();
             _distributedCache = new Mock<IDistributedCache>();
         }
 
@@ -38,7 +40,7 @@ namespace customerportalapi.Services.Test
             Mock<IUserRepository> userRepositoryInvalid = UserRepositoryMock.InvalidUserRepository();
 
             //Act
-            SiteServices service = new SiteServices(userRepositoryInvalid.Object, _contractRepository.Object, _storeRepository.Object, _distributedCache.Object);
+            SiteServices service = new SiteServices(userRepositoryInvalid.Object, _contractRepository.Object, _storeRepository.Object, _sitesRepository.Object, _distributedCache.Object);
             await service.GetContractsAsync(dni);
 
             //Assert
@@ -51,16 +53,30 @@ namespace customerportalapi.Services.Test
             string dni = "12345678A";
 
             //Act
-            SiteServices service = new SiteServices(_userRepository.Object, _contractRepository.Object, _storeRepository.Object, _distributedCache.Object);
+            SiteServices service = new SiteServices(_userRepository.Object, _contractRepository.Object, _storeRepository.Object, _sitesRepository.Object, _distributedCache.Object);
             List<Site> sites = await service.GetContractsAsync(dni);
 
             //Assert
             Assert.IsNotNull(sites);
             Assert.IsTrue(sites.Count >= 1);
-            foreach(Site s in sites)
+            foreach (Site s in sites)
             {
                 Assert.IsTrue(s.Contracts.Count >= 1);
             }
+        }
+
+        [TestMethod]
+        public async Task AlSolicitarSitiosDeSM_DevuelveLista()
+        {
+            //Arrange
+
+            //Act
+            SiteServices service = new SiteServices(_userRepository.Object, _contractRepository.Object, _storeRepository.Object, _sitesRepository.Object, _distributedCache.Object);
+            List<SmSite> sites = await service.GetSmSitesAsync();
+
+            //Assert
+            Assert.IsNotNull(sites);
+            Assert.IsTrue(sites.Count >= 1);
         }
     }
 }

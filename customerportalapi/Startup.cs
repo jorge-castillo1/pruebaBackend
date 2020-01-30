@@ -69,16 +69,18 @@ namespace customerportalapi
             services.AddScoped(serviceProvider =>
             {
                 var config = serviceProvider.GetRequiredService<IConfiguration>();
-                SmtpClient client = new SmtpClient();
-                client.ServerCertificateValidationCallback = (s, c, h, e) => true;
-                client.Connect(config.GetValue<String>("Email:Smtp:Host"),
+                SmtpClient client = new SmtpClient
+                {
+                    ServerCertificateValidationCallback = (s, c, h, e) => true
+                };
+                client.Connect(config.GetValue<string>("Email:Smtp:Host"),
                             config.GetValue<int>("Email:Smtp:Port"),
                             config.GetValue<bool>("Email:Smtp:EnableSSL"));
 
                 //// Note: only needed if the SMTP server requires authentication
-                client.Authenticate(config.GetValue<String>("Email:Smtp:Username"), config.GetValue<String>("Email:Smtp:Password"));
+                client.Authenticate(config.GetValue<string>("Email:Smtp:Username"), config.GetValue<string>("Email:Smtp:Password"));
                 return client;
-            });  
+            });
 
             //Register Repositories
             services.AddScoped<IUserRepository, UserRepository>();
@@ -89,6 +91,7 @@ namespace customerportalapi
             services.AddScoped<IEmailTemplateRepository, EmailTemplateRepository>();
             services.AddScoped<IWebTemplateRepository, WebTemplateRepository>();
             services.AddScoped<IStoreRepository, StoreRepository>();
+            services.AddScoped<ISitesRepository, SitesRepository>();
 
             //Register Business Services
             services.AddTransient<IUserServices, UserServices>();
@@ -110,8 +113,26 @@ namespace customerportalapi
             }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
             {
                 AllowAutoRedirect = false,
-                AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip,
+                AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip
                 //Credentials = GetCredentials()
+            });
+
+            services.AddHttpClient("httpClientSM", c =>
+            {
+                c.BaseAddress = new Uri(Configuration["SmUrl"]);
+                c.Timeout = new TimeSpan(0, 2, 0);  //2 minutes
+                c.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                c.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue
+                {
+                    NoCache = true,
+                    NoStore = true,
+                    MaxAge = new TimeSpan(0),
+                    MustRevalidate = true
+                };
+            }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            {
+                AllowAutoRedirect = false,
+                AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip
             });
 
             services.AddMvc()

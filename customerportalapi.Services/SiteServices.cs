@@ -16,14 +16,16 @@ namespace customerportalapi.Services
         private readonly IUserRepository _userRepository;
         private readonly IContractRepository _contractRepository;
         private readonly IStoreRepository _storeRepository;
+        private readonly ISitesRepository _sitesRepository;
         private readonly IDistributedCache _distributedCache;
 
         public SiteServices(IUserRepository userRepository, IContractRepository contractRepository,
-            IStoreRepository storeRepository, IDistributedCache distributedCache)
+            IStoreRepository storeRepository, ISitesRepository sitesRepository,  IDistributedCache distributedCache)
         {
             _userRepository = userRepository;
             _contractRepository = contractRepository;
             _storeRepository = storeRepository;
+            _sitesRepository = sitesRepository;
             _distributedCache = distributedCache;
         }
 
@@ -111,6 +113,11 @@ namespace customerportalapi.Services
         public async Task<Store> GetStoreAsync(string storeCode)
         {
             return await _storeRepository.GetStoreAsync(storeCode);
+        }
+
+        public async Task<List<SmSite>> GetSmSitesAsync()
+        {
+            return await _sitesRepository.GetSmSitesAsync();
         }
 
         private async Task<List<Store>> GetList()

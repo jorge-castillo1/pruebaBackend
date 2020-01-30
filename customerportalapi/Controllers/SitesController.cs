@@ -101,5 +101,20 @@ namespace customerportalapi.Controllers
                 throw;
             }
         }
+
+        [HttpGet("smsites")]
+        public async Task<ApiResponse> GetSmSitesAsync()
+        {
+            try
+            {
+                var entity = await _services.GetSmSitesAsync();
+                return new ApiResponse(entity);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
     }
 }
