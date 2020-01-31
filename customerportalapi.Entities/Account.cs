@@ -6,6 +6,14 @@ namespace customerportalapi.Entities
     {
         public string SmCustomerId { get; set; }
 
+        public string Phone1 { get; set; }
+
+        public string Mobile1 { get; set; }
+
+        public string Email1 { get; set; }
+
+        public string Email2 { get; set; }
+
         public string UseThisAddress { get; set; }
 
         public List<Address> AddressList { get; set; }
@@ -14,6 +22,14 @@ namespace customerportalapi.Entities
     public class AccountCrm
     {
         public string SmCustomerId { get; set; }
+
+        public string Phone1 { get; set; }
+
+        public string MobilePhone1 { get; set; }
+
+        public string EmailAddress1 { get; set; }
+
+        public string EmailAddress2 { get; set; }
 
         public string Address1Street1 { get; set; }
 

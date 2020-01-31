@@ -255,7 +255,11 @@ namespace customerportalapi.Services
             //Invoke repository
             var accountCrm = new AccountCrm
             {
-                SmCustomerId = value.SmCustomerId, 
+                SmCustomerId = value.SmCustomerId,
+                Phone1 = value.Phone1,
+                MobilePhone1 = value.Mobile1,
+                EmailAddress1 = value.Email1,
+                EmailAddress2 = value.Email2,
                 UseThisAddress = value.UseThisAddress
             };
 
@@ -307,6 +311,10 @@ namespace customerportalapi.Services
             return new Account
             {
                 SmCustomerId = entity.SmCustomerId,
+                Phone1 = entity.Phone1,
+                Mobile1 = entity.MobilePhone1,
+                Email1 = entity.EmailAddress1,
+                Email2 = entity.EmailAddress2,
                 UseThisAddress = entity.UseThisAddress,
                 AddressList = new List<Address>
                 {
