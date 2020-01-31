@@ -89,11 +89,13 @@ namespace customerportalapi
             services.AddScoped<IEmailTemplateRepository, EmailTemplateRepository>();
             services.AddScoped<IWebTemplateRepository, WebTemplateRepository>();
             services.AddScoped<IStoreRepository, StoreRepository>();
+            services.AddScoped<IIdentityRepository, IdentityRepository>();
 
             //Register Business Services
             services.AddTransient<IUserServices, UserServices>();
             services.AddTransient<ISiteServices, SiteServices>();
             services.AddTransient<IWebTemplateServices, WebTemplateServices>();
+            services.AddTransient<ILoginService, LoginService>();
 
             services.AddHttpClient("httpClientCRM", c =>
             {
@@ -112,6 +114,31 @@ namespace customerportalapi
                 AllowAutoRedirect = false,
                 AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip,
                 //Credentials = GetCredentials()
+            });
+
+            services.AddHttpClient("identityClient", c =>
+            {
+                c.BaseAddress = new Uri(Configuration["Identity:Urls:Authorize"]);
+                c.Timeout = new TimeSpan(0, 2, 0);  //2 minutes
+                c.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/x-www-form-urlencoded"));
+                c.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue
+                {
+                    NoCache = true,
+                    NoStore = true,
+                    MaxAge = new TimeSpan(0),
+                    MustRevalidate = true
+                };
+                c.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                    "Basic",
+                    Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes(
+                        String.Format("{0}:{1}",Configuration["Identity:Credential:ClientId"], Configuration["Identity:Credential:ClientSecret"])))
+                );
+
+
+            }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            {
+                AllowAutoRedirect = false,
+                AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip
             });
 
             services.AddMvc()
