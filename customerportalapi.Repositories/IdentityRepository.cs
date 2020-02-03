@@ -33,23 +33,21 @@ namespace customerportalapi.Repositories
                 var body = new Dictionary<string, string>();
                 body.Add("username", credentials.Username);
                 body.Add("password", credentials.Password);
-                body.Add("grant_type", "passowrd");
+                body.Add("grant_type", "password");
                 body.Add("scope", "openid");
                 var form = new FormUrlEncodedContent(body);
                 var url = httpClient.BaseAddress;
                 var response = await httpClient.PostAsync(url, form);
-                response.EnsureSuccessStatusCode();
+                //response.EnsureSuccessStatusCode();
                 if (!response.IsSuccessStatusCode) 
                     return new Token();
 
                 var content = await response.Content.ReadAsStringAsync();
-                JObject result = JObject.Parse(content);
-
-                return JsonConvert.DeserializeObject<Token>(result.GetValue("result").ToString());
+               return JsonConvert.DeserializeObject<Token>(content);
             }
             catch (Exception ex)
             {
-                return new Token();
+                throw ex;
             }
         }
     }
