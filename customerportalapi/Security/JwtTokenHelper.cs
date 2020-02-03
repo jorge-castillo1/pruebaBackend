@@ -61,16 +61,28 @@ namespace customerportalapi.Security
                 ValidateIssuerSigningKey = false
             };
 
-            SecurityToken securityToken;
+           SecurityToken securityToken;
            var principal = tokenHandler.ValidateToken(token, validationParameters, out securityToken); */
            ClaimsPrincipal principal = new ClaimsPrincipal();
-           ClaimsIdentity identity = new ClaimsIdentity();
+           ClaimsIdentity identity = new ClaimsIdentity("IdentityServer");
 
-            foreach(var claim in jwtToken.Claims){
-                identity.AddClaim(new Claim(claim.Type, claim.Value));
-            }
+
+           //Claim de identidad
+           Claim identidad = jwtToken.Claims.FirstOrDefault(x => x.Type == "sub");
+           if (identidad != null)
+                identity.AddClaim(new Claim(ClaimTypes.Name, identidad.Value));
+
+           //Roles
+           foreach (var claim in jwtToken.Claims.Where(x => x.Type == "groups"))
+                identity.AddClaim(new Claim(ClaimTypes.Role, claim.Value));
+
+           //Email Claim
+           Claim email = jwtToken.Claims.FirstOrDefault(x => x.Type == "email");
+           if (email != null)
+            identity.AddClaim(new Claim(ClaimTypes.Email, email.Value));
+           
            principal.AddIdentity(identity);
-            return principal;
+           return principal;
         }
     }
 }

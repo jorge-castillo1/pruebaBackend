@@ -52,8 +52,12 @@ namespace customerportalapi.Controllers
             _logger.LogInformation("Accessing with authenticated users!!!!");
 
             var claimsPrincipal = HttpContext.User;
-            var claims = claimsPrincipal.FindFirst(x => x.Type == "email");
+            _logger.LogInformation($"username {claimsPrincipal.Identity.Name}");           
+            _logger.LogInformation($"user is in role customerportal_standard {claimsPrincipal.IsInRole("customerportal_standard")}");
+
+            var claims = claimsPrincipal.FindFirst(x => x.Type == ClaimTypes.Email);
             _logger.LogInformation($"email logged {claims.Value}");
+
 
             return new ApiResponse();
         }
