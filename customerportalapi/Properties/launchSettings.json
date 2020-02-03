@@ -27,6 +27,7 @@
         "DatabaseName": "customerportal",
         "ProfileAPI": "crmapi/Contacts/",
         "ASPNETCORE_ENVIRONMENT": "Development",
+        "CountriesAPI": "crmapi/Countries/",
         "StoresAPI": "crmapi/Sites/"
       }
     },

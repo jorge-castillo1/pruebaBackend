@@ -113,8 +113,7 @@ namespace customerportalapi.Services
             }
 
             //5. Invoke repository for other changes
-            Profile entity = new Profile();
-            entity = await _profileRepository.UpdateProfileAsync(profile);
+            var entity = await _profileRepository.UpdateProfileAsync(profile);
             entity.Language = user.language;
             entity.Avatar = user.profilepicture;
             if (entity.EmailAddress1 == user.email)
