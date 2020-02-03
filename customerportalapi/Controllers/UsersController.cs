@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using AutoWrapper.Wrappers;
 using customerportalapi.Entities;
+using customerportalapi.Security;
 using customerportalapi.Services.Exceptions;
 using customerportalapi.Services.interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -41,6 +43,19 @@ namespace customerportalapi.Controllers
                 _logger.LogError(ex.ToString());
                 throw;
             }
+        }
+
+        [HttpGet("sample/{dni}")]
+        [AuthorizeToken]
+        public async Task<ApiResponse> SampleGetAsync(string dni)
+        {
+            _logger.LogInformation("Accessing with authenticated users!!!!");
+
+            var claimsPrincipal = HttpContext.User;
+            var claims = claimsPrincipal.FindFirst(x => x.Type == ClaimTypes.Email.ToString());
+            _logger.LogInformation($"email logged {claims.Value}");
+
+            return new ApiResponse();
         }
 
         // POST api/users
