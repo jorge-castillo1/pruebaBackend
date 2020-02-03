@@ -50,19 +50,26 @@ namespace customerportalapi.Security
             validateLifetime = false;
 #endif
 
-            var symmetricKey = Convert.FromBase64String(config["Identity:Credential:ClientSecret"]);
+/*             var symmetricKey = Convert.FromBase64String(config["Identity:Credential:ClientSecret"]);
             var validationParameters = new TokenValidationParameters()
             {
                 RequireExpirationTime = true,
                 ValidateIssuer = false,
                 ValidateAudience = false,
                 IssuerSigningKey = new SymmetricSecurityKey(symmetricKey),
-                ValidateLifetime = validateLifetime
+                ValidateLifetime = validateLifetime,
+                ValidateIssuerSigningKey = false
             };
 
             SecurityToken securityToken;
-            var principal = tokenHandler.ValidateToken(token, validationParameters, out securityToken);
+           var principal = tokenHandler.ValidateToken(token, validationParameters, out securityToken); */
+           ClaimsPrincipal principal = new ClaimsPrincipal();
+           ClaimsIdentity identity = new ClaimsIdentity();
 
+            foreach(var claim in jwtToken.Claims){
+                identity.AddClaim(new Claim(claim.Type, claim.Value));
+            }
+           principal.AddIdentity(identity);
             return principal;
         }
     }

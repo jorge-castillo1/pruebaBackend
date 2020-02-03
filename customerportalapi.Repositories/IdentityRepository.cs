@@ -36,12 +36,10 @@ namespace customerportalapi.Repositories
                 body.Add("grant_type", "password");
                 body.Add("scope", "openid");
                 var form = new FormUrlEncodedContent(body);
-                var url = httpClient.BaseAddress;
+                var url = httpClient.BaseAddress + _configuration["Identity:Endpoints:Authorize"];
                 var response = await httpClient.PostAsync(url, form);
-                //response.EnsureSuccessStatusCode();
-                if (!response.IsSuccessStatusCode) 
-                    return new Token();
-
+                response.EnsureSuccessStatusCode();
+                
                 var content = await response.Content.ReadAsStringAsync();
                return JsonConvert.DeserializeObject<Token>(content);
             }

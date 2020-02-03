@@ -52,7 +52,7 @@ namespace customerportalapi.Controllers
             _logger.LogInformation("Accessing with authenticated users!!!!");
 
             var claimsPrincipal = HttpContext.User;
-            var claims = claimsPrincipal.FindFirst(x => x.Type == ClaimTypes.Email.ToString());
+            var claims = claimsPrincipal.FindFirst(x => x.Type == "email");
             _logger.LogInformation($"email logged {claims.Value}");
 
             return new ApiResponse();

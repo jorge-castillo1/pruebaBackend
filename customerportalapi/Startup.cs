@@ -118,7 +118,7 @@ namespace customerportalapi
 
             services.AddHttpClient("identityClient", c =>
             {
-                c.BaseAddress = new Uri(Configuration["Identity:Urls:Authorize"]);
+                c.BaseAddress = new Uri(Configuration["Identity:BaseUri"]);
                 c.Timeout = new TimeSpan(0, 2, 0);  //2 minutes
                 c.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                 c.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue
@@ -131,10 +131,8 @@ namespace customerportalapi
                 c.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
                     "Basic",
                     Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes(
-                        String.Format("{0}:{1}",Configuration["Identity:Credential:ClientId"], Configuration["Identity:Credential:ClientSecret"])))
+                        String.Format("{0}:{1}",Configuration["Identity:Credentials:ClientId"], Configuration["Identity:Credentials:ClientSecret"])))
                 );
-
-
             }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
             {
                 AllowAutoRedirect = false,
