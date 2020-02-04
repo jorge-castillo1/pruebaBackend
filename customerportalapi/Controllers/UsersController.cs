@@ -69,6 +69,7 @@ namespace customerportalapi.Controllers
 
         // POST api/users/invite
         [HttpPost("invite")]
+        [AuthorizeApiKey]
         public async Task<ApiResponse> Invite([FromBody] Invitation value)
         {
             try
@@ -109,6 +110,7 @@ namespace customerportalapi.Controllers
 
         // PUT api/users/uninvite/{dni}
         [HttpPut("uninvite/{dni}")]
+        [AuthorizeApiKey]
         public async Task<ApiResponse> UnInvite(string dni)
         {
             try
