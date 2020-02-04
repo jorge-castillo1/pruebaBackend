@@ -26,6 +26,7 @@ namespace customerportalapi.Controllers
 
         // GET api/users/{dni}
         [HttpGet("{dni}")]
+        [AuthorizeToken]
         public async Task<ApiResponse> GetAsync(string dni)
         {
             try
@@ -45,25 +46,9 @@ namespace customerportalapi.Controllers
             }
         }
 
-        [HttpGet("sample/{dni}")]
-        [AuthorizeToken]
-        public async Task<ApiResponse> SampleGetAsync(string dni)
-        {
-            _logger.LogInformation("Accessing with authenticated users!!!!");
-
-            var claimsPrincipal = HttpContext.User;
-            _logger.LogInformation($"username {claimsPrincipal.Identity.Name}");           
-            _logger.LogInformation($"user is in role customerportal_standard {claimsPrincipal.IsInRole("customerportal_standard")}");
-
-            var claims = claimsPrincipal.FindFirst(x => x.Type == ClaimTypes.Email);
-            _logger.LogInformation($"email logged {claims.Value}");
-
-
-            return new ApiResponse();
-        }
-
         // POST api/users
         [HttpPatch]
+        [AuthorizeToken]
         public async Task<ApiResponse> PatchAsync([FromBody] Profile value)
         {
             try
@@ -84,6 +69,7 @@ namespace customerportalapi.Controllers
 
         // POST api/users/invite
         [HttpPost("invite")]
+        [AuthorizeApiKey]
         public async Task<ApiResponse> Invite([FromBody] Invitation value)
         {
             try
@@ -124,6 +110,7 @@ namespace customerportalapi.Controllers
 
         // PUT api/users/uninvite/{dni}
         [HttpPut("uninvite/{dni}")]
+        [AuthorizeApiKey]
         public async Task<ApiResponse> UnInvite(string dni)
         {
             try
@@ -141,17 +128,5 @@ namespace customerportalapi.Controllers
                 throw;
             }
         }
-
-        //// PUT api/users/5
-        //[HttpPut("{id}")]
-        //public void Put(int id, [FromBody] string value)
-        //{
-        //}
-
-        //// DELETE api/users/5
-        //[HttpDelete("{id}")]
-        //public void Delete(int id)
-        //{
-        //}
     }
 }

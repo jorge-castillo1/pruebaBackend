@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using AutoWrapper.Wrappers;
+using customerportalapi.Security;
 using customerportalapi.Services.Exceptions;
 using customerportalapi.Services.interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -10,6 +11,7 @@ namespace customerportalapi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [AuthorizeToken]
     public class SitesController : ControllerBase
     {
         private readonly ISiteServices _services;
