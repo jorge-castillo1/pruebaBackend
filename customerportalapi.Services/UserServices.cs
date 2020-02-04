@@ -206,7 +206,10 @@ namespace customerportalapi.Services
             if (user._id == null)
                 return Task.FromResult(false);
 
-            //3. Update email verification data
+            //3. Confirm access status to external system
+            _profileRepository.ConfirmedWebPortalAccessAsync(user.dni);
+            
+            //4. Update email verification data
             user.emailverified = true;
             user.invitationtoken = null;
             _userRepository.Update(user);
@@ -228,6 +231,9 @@ namespace customerportalapi.Services
             //3. If emailverified is false
             if (!user.emailverified)
                 return Task.FromResult(false);
+
+            //4. Confirm revocation access status to external system
+            _profileRepository.RevokedWebPortalAccessAsync(user.dni);
 
             //4. Update invitation data
             user.emailverified = false;
