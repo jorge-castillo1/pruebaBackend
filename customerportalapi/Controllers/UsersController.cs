@@ -128,5 +128,57 @@ namespace customerportalapi.Controllers
                 throw;
             }
         }
+
+        // GET api/users/accounts/{dni}
+        [HttpGet("accounts/{dni}")]
+        public async Task<ApiResponse> GetAccountAsync(string dni)
+        {
+            try
+            {
+                var entity = await _services.GetAccountAsync(dni);
+                return new ApiResponse(entity);
+            }
+            catch (ServiceException se)
+            {
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+
+        // POST api/users/accounts
+        [HttpPatch("accounts")]
+        public async Task<ApiResponse> PatchAccountAsync([FromBody] Account value)
+        {
+            try
+            {
+                var entity = await _services.UpdateAccountAsync(value);
+                return new ApiResponse(entity);
+            }
+            catch (ServiceException se)
+            {
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+
+        //// PUT api/users/5
+        //[HttpPut("{id}")]
+        //public void Put(int id, [FromBody] string value)
+        //{
+        //}
+
+        //// DELETE api/users/5
+        //[HttpDelete("{id}")]
+        //public void Delete(int id)
+        //{
+        //}
     }
 }

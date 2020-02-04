@@ -19,6 +19,7 @@
         "Email__Smtp__Password": "EoE4RygWaKVvQrvVu7dp",
         "InviteConfirmation": "http://localhost:4200/signup/",
         "ContractsAPI": "crmapi/Contracts/",
+        "AccountsAPI": "crmapi/Accounts/",
         "MailFrom": "no-reply@bluespace.eu",
         "GatewayUrl": "https://localhost:44343/",
         "ConnectionStrings__customerportaldb": "mongodb://localhost:27017",
@@ -27,6 +28,7 @@
         "ProfileAPI": "crmapi/Contacts/",
         "ASPNETCORE_ENVIRONMENT": "Development",
         "CustomerPortal_ApiKey": "F56A2E61-6D3C-4C3F-B1B5-16C335EADA96",
+        "CountriesAPI": "crmapi/Countries/",
         "StoresAPI": "crmapi/Sites/"
       }
     },
@@ -41,6 +43,8 @@
         "Email__Smtp__Password": "EoE4RygWaKVvQrvVu7dp",
         "InviteConfirmation": "https://localhost:4200/signup/",
         "ContractsAPI": "crmapi/Contracts/",
+        "AccountsAPI": "crmapi/Accounts/",
+        "CountriesAPI": "crmapi/Countries/",
         "MailFrom": "no-reply@bluespace.eu",
         "GatewayUrl": "https://localhost:44343/",
         "ConnectionStrings__customerportaldb": "mongodb://localhost:27017",
@@ -50,7 +54,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development",
         "StoresAPI": "crmapi/Sites/"
       },
-      "applicationUrl": "https://localhost:44332;http://localhost:5000"
+      "applicationUrl": "https://localhost:44332;http://localhost:5001"
     },
     "Docker": {
       "commandName": "Docker",
@@ -62,6 +66,8 @@
         "Email__Smtp__Password": "EoE4RygWaKVvQrvVu7dp",
         "InviteConfirmation": "http://localhost:4200/signup/",
         "ContractsAPI": "crmapi/Contracts/",
+        "AccountsAPI": "crmapi/Accounts/",
+        "CountriesAPI": "crmapi/Countries/",
         "MailFrom": "no-reply@bluespace.eu",
         "GatewayUrl": "https://localhost:44343/",
         "ASPNETCORE_URLS": "https://+:443;http://+:80",

@@ -10,6 +10,7 @@ using customerportalapi.Repositories.interfaces;
 using customerportalapi.Repositories.utils;
 using customerportalapi.Services;
 using customerportalapi.Services.interfaces;
+using customerportalapi.Services.Interfaces;
 using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -69,16 +70,15 @@ namespace customerportalapi
             services.AddScoped(serviceProvider =>
             {
                 var config = serviceProvider.GetRequiredService<IConfiguration>();
-                SmtpClient client = new SmtpClient();
-                client.ServerCertificateValidationCallback = (s, c, h, e) => true;
-                client.Connect(config.GetValue<String>("Email:Smtp:Host"),
+                SmtpClient client = new SmtpClient { ServerCertificateValidationCallback = (s, c, h, e) => true };
+                client.Connect(config.GetValue<string>("Email:Smtp:Host"),
                             config.GetValue<int>("Email:Smtp:Port"),
                             config.GetValue<bool>("Email:Smtp:EnableSSL"));
 
                 //// Note: only needed if the SMTP server requires authentication
-                client.Authenticate(config.GetValue<String>("Email:Smtp:Username"), config.GetValue<String>("Email:Smtp:Password"));
+                client.Authenticate(config.GetValue<string>("Email:Smtp:Username"), config.GetValue<string>("Email:Smtp:Password"));
                 return client;
-            });  
+            });
 
             //Register Repositories
             services.AddScoped<IUserRepository, UserRepository>();
@@ -90,12 +90,14 @@ namespace customerportalapi
             services.AddScoped<IWebTemplateRepository, WebTemplateRepository>();
             services.AddScoped<IStoreRepository, StoreRepository>();
             services.AddScoped<IIdentityRepository, IdentityRepository>();
+            services.AddScoped<ICountryRepository, CountryRepository>();
 
             //Register Business Services
             services.AddTransient<IUserServices, UserServices>();
             services.AddTransient<ISiteServices, SiteServices>();
             services.AddTransient<IWebTemplateServices, WebTemplateServices>();
             services.AddTransient<ILoginService, LoginService>();
+            services.AddTransient<ICountryServices, CountryServices>();
 
             services.AddHttpClient("httpClientCRM", c =>
             {
