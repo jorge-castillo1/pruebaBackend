@@ -92,5 +92,33 @@ namespace customerportalapi.Repositories
 
             return JsonConvert.DeserializeObject<AccountCrm>(result.GetValue("result").ToString());
         }
+
+        public async Task<Profile> ConfirmedWebPortalAccessAsync(string dni)
+        {
+            var httpClient = _clientFactory.CreateClient("httpClientCRM");
+            var method = new HttpMethod("PATCH");
+            var request = new HttpRequestMessage(method, new Uri(_configuration["GatewayUrl"] + _configuration["ProfileAPI"] + $"{dni}/invited"));
+
+            var response = await httpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+            var content = await response.Content.ReadAsStringAsync();
+            JObject result = JObject.Parse(content);
+
+            return JsonConvert.DeserializeObject<Profile>(result.GetValue("result").ToString());
+        }
+
+        public async Task<Profile> RevokedWebPortalAccessAsync(string dni)
+        {
+            var httpClient = _clientFactory.CreateClient("httpClientCRM");
+            var method = new HttpMethod("PATCH");
+            var request = new HttpRequestMessage(method, new Uri(_configuration["GatewayUrl"] + _configuration["ProfileAPI"] + $"{dni}/uninvited"));
+            
+            var response = await httpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+            var content = await response.Content.ReadAsStringAsync();
+            JObject result = JObject.Parse(content);
+
+            return JsonConvert.DeserializeObject<Profile>(result.GetValue("result").ToString());
+        }
     }
 }
