@@ -120,35 +120,5 @@ namespace customerportalapi.Repositories
 
             return JsonConvert.DeserializeObject<Profile>(result.GetValue("result").ToString());
         }
-
-        public async Task<AccountCrm> GetAccountAsync(string dni)
-        {
-            var httpClient = _clientFactory.CreateClient("httpClientCRM");
-            httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["AccountsAPI"]);
-
-            var response = await httpClient.GetAsync(dni, HttpCompletionOption.ResponseHeadersRead);
-            response.EnsureSuccessStatusCode();
-            var content = await response.Content.ReadAsStringAsync();
-            JObject result = JObject.Parse(content);
-
-            return JsonConvert.DeserializeObject<AccountCrm>(result.GetValue("result").ToString());
-        }
-
-        public async Task<AccountCrm> UpdateAccountAsync(AccountCrm account)
-        {
-            var httpClient = _clientFactory.CreateClient("httpClientCRM");
-            var method = new HttpMethod("PATCH");
-            var request = new HttpRequestMessage(method, new Uri(_configuration["GatewayUrl"] + _configuration["AccountsAPI"]))
-            {
-                Content = new StringContent(JsonConvert.SerializeObject(account), Encoding.UTF8, "application/json")
-            };
-
-            var response = await httpClient.SendAsync(request);
-            response.EnsureSuccessStatusCode();
-            var content = await response.Content.ReadAsStringAsync();
-            JObject result = JObject.Parse(content);
-
-            return JsonConvert.DeserializeObject<AccountCrm>(result.GetValue("result").ToString());
-        }
     }
 }
