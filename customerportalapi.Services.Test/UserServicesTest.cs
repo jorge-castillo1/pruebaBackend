@@ -334,6 +334,7 @@ namespace customerportalapi.Services.Test
 
             //Assert
             Assert.IsTrue(result);
+            _profileRepository.Verify(x => x.ConfirmedWebPortalAccessAsync(It.IsAny<string>()));
             userRepositoryInvalid.Verify(x => x.Update(It.IsAny<User>()));
         }
 
@@ -391,6 +392,7 @@ namespace customerportalapi.Services.Test
 
             //Assert
             Assert.IsTrue(result);
+            _profileRepository.Verify(x => x.RevokedWebPortalAccessAsync(It.IsAny<string>()));
             userRepository.Verify(x => x.Update(It.IsAny<User>()));
         }
     }
