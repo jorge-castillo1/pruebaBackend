@@ -8,6 +8,7 @@ using customerportalapi.Entities;
 using customerportalapi.Repositories;
 using customerportalapi.Repositories.interfaces;
 using customerportalapi.Repositories.utils;
+using customerportalapi.Security;
 using customerportalapi.Services;
 using customerportalapi.Services.interfaces;
 using customerportalapi.Services.Interfaces;
@@ -132,8 +133,8 @@ namespace customerportalapi
                 };
                 c.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
                     "Basic",
-                    Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes(
-                        String.Format("{0}:{1}",Configuration["Identity:Credentials:ClientId"], Configuration["Identity:Credentials:ClientSecret"])))
+                    Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes(
+                        $"{Configuration["Identity:Credentials:ClientId"]}:{Configuration["Identity:Credentials:ClientSecret"]}"))
                 );
             }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
             {
@@ -165,6 +166,17 @@ namespace customerportalapi
                 options.DatabaseName = Configuration["DatabaseName"];
                 options.CollectionName = "appcache";
                 options.ExpiredScanInterval = TimeSpan.FromMinutes(10);
+            });
+
+            services.AddAuthentication(options =>
+            {
+                options.DefaultChallengeScheme = "scheme name";
+
+                // you can also skip this to make the challenge scheme handle the forbid as well
+                options.DefaultForbidScheme = "scheme name";
+
+                // of course you also need to register that scheme, e.g. using
+                options.AddScheme<SchemeHandler>("scheme name", "scheme display name");
             });
         }
 
