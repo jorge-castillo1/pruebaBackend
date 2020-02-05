@@ -12,5 +12,9 @@ namespace customerportalapi.Repositories.interfaces
         Task<AccountCrm> GetAccountAsync(string dni);
 
         Task<AccountCrm> UpdateAccountAsync(AccountCrm account);
+
+        Task<Profile> ConfirmedWebPortalAccessAsync(string dni);
+
+        Task<Profile> RevokedWebPortalAccessAsync(string dni);
     }
 }
