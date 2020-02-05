@@ -11,6 +11,8 @@ namespace customerportalapi.Entities
         public string dni { get; set; }
         [BsonElement("email")]
         public string email { get; set; }
+        [BsonElement("phone")]
+        public string phone { get; set; }
         [BsonElement("language")]
         public string language { get; set; }
         [BsonElement("profilepicture")]

@@ -13,6 +13,12 @@ namespace customerportalapi.Services.interfaces
 
         Task<bool> ConfirmUserAsync(string invitationToken);
 
+        Task<bool> UnInviteUserAsync(string dni);
+
+        Task<Account> GetAccountAsync(string dni);
+
+        Task<Account> UpdateAccountAsync(Account account);
+
         Task<FormContact> ContactAsync(FormContact value);
     }
 }
