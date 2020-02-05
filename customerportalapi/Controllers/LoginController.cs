@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using AutoWrapper.Wrappers;
 using customerportalapi.Entities;
+using customerportalapi.Security;
 using customerportalapi.Services.Exceptions;
 using customerportalapi.Services.interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -42,5 +43,26 @@ namespace customerportalapi.Controllers
             }
         }
 
+        //POST api/login/passwordReset
+        [HttpPost]
+        [Route("passwordReset")]
+        [AuthorizeToken]
+        public async Task<ApiResponse> PasswordResetAsync([FromBody] Login value)
+        {
+            try
+            {
+                var entity = await _service.ChangePassword(value);
+                return new ApiResponse(entity);
+            }
+            catch (ServiceException se)
+            {
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
     }
 }
