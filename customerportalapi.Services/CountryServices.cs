@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Linq;
 using customerportalapi.Entities;
 using customerportalapi.Repositories.interfaces;
 using Microsoft.Extensions.Caching.Distributed;
@@ -22,7 +23,9 @@ namespace customerportalapi.Services
 
         public async Task<List<Country>> GetCountriesAsync()
         {
-            return await GetList();
+            List<Country> entitylist = await GetList();
+
+            return entitylist.OrderBy(o => o.Name).ToList();
         }
 
         private async Task<List<Country>> GetList()
