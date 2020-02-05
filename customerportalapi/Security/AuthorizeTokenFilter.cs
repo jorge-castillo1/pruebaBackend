@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace customerportalapi.Security
@@ -40,6 +41,7 @@ namespace customerportalapi.Security
                 var token = authorization.Value[0].Split(' ');
                 ClaimsPrincipal claims = JwtTokenHelper.GetPrincipal(token[1], _config);
                 context.HttpContext.User = claims;
+                Thread.CurrentPrincipal = context.HttpContext.User;
 
                 return;
             }

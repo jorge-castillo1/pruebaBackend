@@ -170,6 +170,7 @@ namespace customerportalapi.Controllers
 
         // POST api/users/contact
         [HttpPost("contact")]
+        [AuthorizeToken]
         public async Task<ApiResponse> Contact([FromBody] FormContact value)
         {
             try

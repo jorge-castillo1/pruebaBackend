@@ -8,6 +8,7 @@ using customerportalapi.Entities.enums;
 using Microsoft.Extensions.Configuration;
 using customerportalapi.Services.Exceptions;
 using System.Net;
+using System.Threading;
 
 namespace customerportalapi.Services
 {
@@ -208,7 +209,7 @@ namespace customerportalapi.Services
 
             //3. Confirm access status to external system
             _profileRepository.ConfirmedWebPortalAccessAsync(user.dni);
-            
+
             //4. Update email verification data
             user.emailverified = true;
             user.invitationtoken = null;
@@ -311,6 +312,68 @@ namespace customerportalapi.Services
             return account;
         }
 
+        public async Task<bool> ContactAsync(FormContact value)
+        {
+            bool result = false;
+
+            if (string.IsNullOrEmpty(value.Type))
+                throw new ServiceException("FormContact Type field can not be null.", HttpStatusCode.BadRequest, "Type", "Empty fields");
+
+            //1. Get currentUser
+            var currentUser = Thread.CurrentPrincipal;
+            User user = _userRepository.GetCurrentUser(currentUser.Identity.Name);
+            if (user._id == null)
+                throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
+
+            Profile userProfile = await _profileRepository.GetProfileAsync(user.dni);
+            if (userProfile.DocumentNumber == null)
+                throw new ServiceException("User Profile does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
+
+            Enum.TryParse(typeof(ContactTypes), value.Type, true, out var option);
+            Email emailMessage = null;
+            switch (option)
+            {
+                case ContactTypes.Opinion:
+                    //2. Check required fields
+                    if (value.Message == null)
+                        throw new ServiceException("FormContact Message field can not be null.", HttpStatusCode.BadRequest, "Message", "Empty fields");
+
+                    //3. Send Email
+                    emailMessage = GenerateEmail(EmailTemplateTypes.FormOpinion, user, userProfile, value);
+
+                    break;
+                case ContactTypes.Call:
+                    //2. Check required fields
+                    if (value.Preference == null)
+                        throw new ServiceException("FormContact Preference field can not be null.", HttpStatusCode.BadRequest, "Preference", "Empty fields");
+
+                    if (value.Message == null)
+                        throw new ServiceException("FormContact Message field can not be null.", HttpStatusCode.BadRequest, "Message", "Empty fields");
+
+                    //3. Send Email
+                    emailMessage = GenerateEmail(EmailTemplateTypes.FormCall, user, userProfile, value);
+
+                    break;
+                case ContactTypes.Contact:
+                    //2. Check required fields
+                    if (value.Motive == null)
+                        throw new ServiceException("FormContact Motive field can not be null.", HttpStatusCode.BadRequest, "Motive", "Empty fields");
+
+                    if (value.Message == null)
+                        throw new ServiceException("FormContact Message field can not be null.", HttpStatusCode.BadRequest, "Message", "Empty fields");
+
+                    //3. Send Email
+                    value.EmailTo = _config["FormContactEmail"];
+                    emailMessage = GenerateEmail(EmailTemplateTypes.FormContact, user, userProfile, value);
+                    
+                    break;
+            }
+
+            result = await _mailRepository.Send(emailMessage);
+
+            return result;
+        }
+
         private static Account ToAccount(AccountCrm entity)
         {
             return new Account
@@ -360,9 +423,56 @@ namespace customerportalapi.Services
             };
         }
 
-        public async Task<FormContact> ContactAsync(FormContact value)
+        private Email GenerateEmail(EmailTemplateTypes type, User user, Profile userProfile, FormContact form)
         {
-            return await Task.FromResult(value);
+            //3. Get Email Invitation Template
+            EmailTemplate formContactTemplate = _emailTemplateRepository.getTemplate((int)type, user.language);
+            if (formContactTemplate._id == null)
+            {
+                formContactTemplate = _emailTemplateRepository.getTemplate((int)type, LanguageTypes.en.ToString());
+            }
+
+            if (formContactTemplate._id == null)
+                throw new ServiceException("EmailTemplate not found.", HttpStatusCode.BadRequest, "EmailTemplate", "Not found");
+
+            //5. Send email
+            var message = new Email();
+            message.To.Add(form.EmailTo);
+            message.Subject = formContactTemplate.subject;
+
+            string body;
+            switch (type)
+            {
+                case EmailTemplateTypes.FormContact:
+                    body = string.Format(
+                        formContactTemplate.body,
+                        userProfile.Fullname,
+                        userProfile.MobilePhone,
+                        user.email,
+                        form.Motive,
+                        form.Message);
+                    break;
+                case EmailTemplateTypes.FormOpinion:
+                    body = string.Format(
+                        formContactTemplate.body,
+                        userProfile.Fullname,
+                        userProfile.MobilePhone,
+                        user.email,
+                        form.Message);
+                    break;
+                default:
+                    body = string.Format(
+                        formContactTemplate.body,
+                        userProfile.Fullname,
+                        userProfile.MobilePhone,
+                        user.email,
+                        form.Preference,
+                        form.Message);
+                    break;
+            }
+            message.Body = body;
+
+            return message;
         }
     }
 }
