@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using AutoWrapper.Wrappers;
+using customerportalapi.Security;
 using customerportalapi.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -9,6 +10,7 @@ namespace customerportalapi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [AuthorizeToken]
     public class CountriesController : ControllerBase
     {
         private readonly ICountryServices _services;

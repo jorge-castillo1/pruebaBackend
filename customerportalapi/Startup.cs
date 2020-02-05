@@ -8,6 +8,7 @@ using customerportalapi.Entities;
 using customerportalapi.Repositories;
 using customerportalapi.Repositories.interfaces;
 using customerportalapi.Repositories.utils;
+using customerportalapi.Security;
 using customerportalapi.Services;
 using customerportalapi.Services.interfaces;
 using customerportalapi.Services.Interfaces;
@@ -89,12 +90,14 @@ namespace customerportalapi
             services.AddScoped<IEmailTemplateRepository, EmailTemplateRepository>();
             services.AddScoped<IWebTemplateRepository, WebTemplateRepository>();
             services.AddScoped<IStoreRepository, StoreRepository>();
+            services.AddScoped<IIdentityRepository, IdentityRepository>();
             services.AddScoped<ICountryRepository, CountryRepository>();
 
             //Register Business Services
             services.AddTransient<IUserServices, UserServices>();
             services.AddTransient<ISiteServices, SiteServices>();
             services.AddTransient<IWebTemplateServices, WebTemplateServices>();
+            services.AddTransient<ILoginService, LoginService>();
             services.AddTransient<ICountryServices, CountryServices>();
 
             services.AddHttpClient("httpClientCRM", c =>
@@ -114,6 +117,29 @@ namespace customerportalapi
                 AllowAutoRedirect = false,
                 AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip,
                 //Credentials = GetCredentials()
+            });
+
+            services.AddHttpClient("identityClient", c =>
+            {
+                c.BaseAddress = new Uri(Configuration["Identity:BaseUri"]);
+                c.Timeout = new TimeSpan(0, 2, 0);  //2 minutes
+                c.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                c.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue
+                {
+                    NoCache = true,
+                    NoStore = true,
+                    MaxAge = new TimeSpan(0),
+                    MustRevalidate = true
+                };
+                c.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                    "Basic",
+                    Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes(
+                        $"{Configuration["Identity:Credentials:ClientId"]}:{Configuration["Identity:Credentials:ClientSecret"]}"))
+                );
+            }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            {
+                AllowAutoRedirect = false,
+                AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip
             });
 
             services.AddMvc()
@@ -140,6 +166,17 @@ namespace customerportalapi
                 options.DatabaseName = Configuration["DatabaseName"];
                 options.CollectionName = "appcache";
                 options.ExpiredScanInterval = TimeSpan.FromMinutes(10);
+            });
+
+            services.AddAuthentication(options =>
+            {
+                options.DefaultChallengeScheme = "scheme name";
+
+                // you can also skip this to make the challenge scheme handle the forbid as well
+                options.DefaultForbidScheme = "scheme name";
+
+                // of course you also need to register that scheme, e.g. using
+                options.AddScheme<SchemeHandler>("scheme name", "scheme display name");
             });
         }
 

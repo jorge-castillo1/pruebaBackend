@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
 using AutoWrapper.Wrappers;
+using customerportalapi.Entities;
+using customerportalapi.Security;
 using customerportalapi.Services.Exceptions;
 using customerportalapi.Services.interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -10,6 +13,7 @@ namespace customerportalapi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [AuthorizeToken]
     public class SitesController : ControllerBase
     {
         private readonly ISiteServices _services;
@@ -23,6 +27,7 @@ namespace customerportalapi.Controllers
         }
 
         [HttpGet("users/{dni}")]
+        [Authorize(Roles = Role.Admin)]
         public async Task<ApiResponse> GetAsync(string dni)
         {
             try
