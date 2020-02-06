@@ -314,13 +314,14 @@ namespace customerportalapi.Services
 
         public async Task<bool> ContactAsync(FormContact value)
         {
-            bool result = false;
-
             if (string.IsNullOrEmpty(value.Type))
                 throw new ServiceException("FormContact Type field can not be null.", HttpStatusCode.BadRequest, "Type", "Empty fields");
 
             //1. Get currentUser
             var currentUser = Thread.CurrentPrincipal;
+            if (currentUser == null)
+                throw new ServiceException("Error retrieving the current user.", HttpStatusCode.NotFound, "Current user", "Not logged");
+
             User user = _userRepository.GetCurrentUser(currentUser.Identity.Name);
             if (user._id == null)
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
@@ -369,7 +370,7 @@ namespace customerportalapi.Services
                     break;
             }
 
-            result = await _mailRepository.Send(emailMessage);
+            var result = await _mailRepository.Send(emailMessage);
 
             return result;
         }
