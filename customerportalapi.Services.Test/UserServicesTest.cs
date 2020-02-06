@@ -323,23 +323,26 @@ namespace customerportalapi.Services.Test
             Assert.IsNull(tokenResult.AccesToken);
         }
 
-        //[TestMethod]
-        //public async Task AlConfirmarUnUsuarioExistente_NoActivo_DevuelveToken()
-        //{
-        //    //Arrange
-        //    string invitationToken = "8e8b9c6c-8943-4482-891d-b92d7414d283";
+        [TestMethod]
+        public async Task AlConfirmarUnUsuarioExistente_NoActivo_DevuelveToken()
+        {
+            //Arrange
+            string invitationToken = "8e8b9c6c-8943-4482-891d-b92d7414d283";
 
-        //    //Act
-        //    Mock<IUserRepository> userRepositoryInvalid = UserRepositoryMock.Valid_InActiveUserByToken_Repository();
-        //    UserServices service = new UserServices(userRepositoryInvalid.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object);
-        //    Token tokenResult = await service.ConfirmUserAsync(invitationToken);
+            //Act
+            Mock<IUserRepository> userRepositoryInvalid = UserRepositoryMock.Valid_InActiveUserByToken_Repository();
+            UserServices service = new UserServices(userRepositoryInvalid.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object);
+            Token tokenResult = await service.ConfirmUserAsync(invitationToken);
 
-        //    //Assert
-        //    Assert.AreEqual("Fake AccessToken", tokenResult.AccesToken);
-        //    _profileRepository.Verify(x => x.ConfirmedWebPortalAccessAsync(It.IsAny<string>()));
-        //    userRepositoryInvalid.Verify(x => x.Update(It.IsAny<User>()));
-        //    _identityRepository.Verify(x => x.Authorize(It.IsAny<Login>()));
-        //}
+            //Assert
+            Assert.AreEqual("Fake AccessToken", tokenResult.AccesToken);
+            _identityRepository.Verify(x => x.AddUser(It.IsAny<UserIdentity>()));
+            _identityRepository.Verify(x => x.FindGroup(It.IsAny<string>()));
+            _identityRepository.Verify(x => x.AddUserToGroup(It.IsAny<UserIdentity>(), It.IsAny<Group>()));
+            userRepositoryInvalid.Verify(x => x.Update(It.IsAny<User>()));
+            _profileRepository.Verify(x => x.ConfirmedWebPortalAccessAsync(It.IsAny<string>()));
+            _identityRepository.Verify(x => x.Authorize(It.IsAny<Login>()));
+        }
 
         [TestMethod]
         [ExpectedException(typeof(ServiceException), "No se ha producido la excepción esperada.")]
