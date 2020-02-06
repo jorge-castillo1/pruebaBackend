@@ -19,7 +19,7 @@ namespace customerportalapi.Repositories
         {
             User user = new User();
 
-            var usersInfo = _users.FindOne(t => t.dni == dni);
+            var usersInfo = _users.FindOne(t => t.Dni == dni);
             foreach (var u in usersInfo)
             {
                 user = u;
@@ -30,7 +30,7 @@ namespace customerportalapi.Repositories
         public User Update(User user)
         {
             //update User
-            var filter = Builders<User>.Filter.Eq(s => s.dni, user.dni);
+            var filter = Builders<User>.Filter.Eq(s => s.Dni, user.Dni);
             var result = _users.ReplaceOne(filter, user);
 
             return user;
@@ -47,7 +47,7 @@ namespace customerportalapi.Repositories
         public Task<bool> Delete(User user)
         {
             //update User
-            var filter = Builders<User>.Filter.Eq("dni", user.dni);
+            var filter = Builders<User>.Filter.Eq("dni", user.Dni);
             _users.DeleteOneAsync(filter);
 
             return Task.FromResult(true);
@@ -57,7 +57,7 @@ namespace customerportalapi.Repositories
         {
             User user = new User();
 
-            var usersInfo = _users.FindOne(t => t.invitationtoken == invitationToken);
+            var usersInfo = _users.FindOne(t => t.Invitationtoken == invitationToken);
             foreach (var u in usersInfo)
             {
                 user = u;

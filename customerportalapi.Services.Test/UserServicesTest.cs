@@ -27,7 +27,7 @@ namespace customerportalapi.Services.Test
             _profileRepository = ProfileRepositoryMock.ProfileRepository();
             _mailRepository = MailRepositoryMock.MailRepository();
             _emailtemplateRepository = EmailTemplateRepositoryMock.EmailTemplateRepository();
-            _identityRepository = new Mock<IIdentityRepository>();
+            _identityRepository = IdentityRepositoryMock.IdentityRepository();
             _config = new Mock<IConfiguration>();
         }
 

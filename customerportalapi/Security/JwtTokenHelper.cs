@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using customerportalapi.Entities;
+using customerportalapi.Repositories.interfaces;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
@@ -24,19 +26,6 @@ namespace customerportalapi.Security
             validateLifetime = false;
 #endif
 
-/*             var symmetricKey = Convert.FromBase64String(config["Identity:Credential:ClientSecret"]);
-            var validationParameters = new TokenValidationParameters()
-            {
-                RequireExpirationTime = true,
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                IssuerSigningKey = new SymmetricSecurityKey(symmetricKey),
-                ValidateLifetime = validateLifetime,
-                ValidateIssuerSigningKey = false
-            };
-
-           SecurityToken securityToken;
-           var principal = tokenHandler.ValidateToken(token, validationParameters, out securityToken); */
            ClaimsPrincipal principal = new ClaimsPrincipal();
            ClaimsIdentity identity = new ClaimsIdentity("IdentityServer");
 

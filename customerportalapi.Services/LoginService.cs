@@ -14,10 +14,12 @@ namespace customerportalapi.Services
     public class LoginService : ILoginService
     {
         private readonly IIdentityRepository _identityRepository;
+        private readonly IUserRepository _userRepository;
 
-        public LoginService(IIdentityRepository identityRepository)
+        public LoginService(IIdentityRepository identityRepository, IUserRepository userRepository)
         {
             _identityRepository = identityRepository;
+            _userRepository = userRepository;
         }
 
         public async Task<Token> GetToken(Login credentials){
@@ -25,15 +27,19 @@ namespace customerportalapi.Services
             return await _identityRepository.Authorize(credentials);
         }
 
-        public async Task<UserIdentity> ChangePassword(Login credentials)
+        public async Task<UserIdentity> ChangePassword(ResetPassword credentials)
         {
-            UserIdentity user = new UserIdentity();
+            //1. Get User From backend
+            User currentUser = _userRepository.GetCurrentUser(credentials.Username);
 
-            UserIdentityResults searchUser = await _identityRepository.FindUser(credentials.Username);
-            if (searchUser != null && searchUser.TotalResults == 1)
+            //2. Validate Old Password is valid
+            //¿pedir token?
+
+            //3. Update user
+            UserIdentity user = await _identityRepository.GetUser(currentUser.ExternalId);
+            if (user != null)
             {
-                user = searchUser.Users[0];
-                user.Password = credentials.Password;
+                user.Password = credentials.NewPassword;
                 user = await _identityRepository.UpdateUser(user);
             }
 

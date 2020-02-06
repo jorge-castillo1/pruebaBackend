@@ -8,20 +8,22 @@ namespace customerportalapi.Entities
         [BsonRepresentation(BsonType.ObjectId)]
         public string _id { get; set; }
         [BsonElement("dni")]
-        public string dni { get; set; }
+        public string Dni { get; set; }
         [BsonElement("email")]
-        public string email { get; set; }
+        public string Email { get; set; }
         [BsonElement("phone")]
-        public string phone { get; set; }
+        public string Phone { get; set; }
         [BsonElement("language")]
-        public string language { get; set; }
+        public string Language { get; set; }
         [BsonElement("profilepicture")]
-        public string profilepicture { get; set; }
+        public string Profilepicture { get; set; }
         [BsonElement("usertype")]
-        public int usertype { get; set; }
+        public int Usertype { get; set; }
         [BsonElement("emailverified")]
-        public bool emailverified { get; set; }
+        public bool Emailverified { get; set; }
         [BsonElement("invitationtoken")]
-        public string invitationtoken { get; set; }
+        public string Invitationtoken { get; set; }
+        [BsonElement("externalid")]
+        public string ExternalId { get; set; }
     }
 }
