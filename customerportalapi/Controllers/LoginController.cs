@@ -47,7 +47,7 @@ namespace customerportalapi.Controllers
         [HttpPost]
         [Route("passwordReset")]
         [AuthorizeToken]
-        public async Task<ApiResponse> PasswordResetAsync([FromBody] Login value)
+        public async Task<ApiResponse> PasswordResetAsync([FromBody] ResetPassword value)
         {
             try
             {

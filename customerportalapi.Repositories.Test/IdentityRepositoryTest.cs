@@ -76,18 +76,18 @@ namespace customerportalapi.Repositories.Test
 
             var response = new HttpResponseMessage
             {
-                Content = new StringContent("{ \"id_token\": \"FakeId\", \"access_token\": \"Fake AccessToken\"}")
+                Content = new StringContent("{ \"active\": true, \"userName\": \"Fake user\"}")
             };
             _handler.SetupAnyRequest()
                 .ReturnsAsync(response);
 
             //Act
             IdentityRepository repository = new IdentityRepository(_configurations, _clientFactory);
-            Token result = repository.Validate(token).Result;
+            TokenStatus result = repository.Validate(token).Result;
 
             //Assert
-            Assert.AreEqual("FakeId", result.IdToken);
-            Assert.AreEqual("Fake AccessToken", result.AccesToken);
+            Assert.IsTrue(result.Active);
+            Assert.AreEqual("Fake user", result.UserName);
         }
 
         [TestMethod]
@@ -162,6 +162,35 @@ namespace customerportalapi.Repositories.Test
             //Act
             IdentityRepository repository = new IdentityRepository(_configurations, _clientFactory);
             var result = repository.UpdateUser(newuser).Result;
+
+            //Assert
+            result.UserName = "Fake userName";
+        }
+
+        [TestMethod]
+        public void AlHacerLlamadaExternaDeObtenerUsuario_NoSeProducenErrores()
+        {
+            //Arrange
+            string userId = Guid.NewGuid().ToString();
+
+            Mock.Get(_clientFactory).Setup(x => x.CreateClient("identityClient"))
+                .Returns(() =>
+                {
+                    HttpClient client = _handler.CreateClient();
+                    client.BaseAddress = new Uri("http://fakeUri");
+                    return client;
+                });
+
+            var response = new HttpResponseMessage
+            {
+                Content = new StringContent("{ \"id\": \"FakeId\", \"userName\": \"Fake userName\"}")
+            };
+            _handler.SetupAnyRequest()
+                .ReturnsAsync(response);
+
+            //Act
+            IdentityRepository repository = new IdentityRepository(_configurations, _clientFactory);
+            var result = repository.GetUser(userId).Result;
 
             //Assert
             result.UserName = "Fake userName";

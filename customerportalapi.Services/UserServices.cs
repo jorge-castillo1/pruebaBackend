@@ -39,7 +39,7 @@ namespace customerportalapi.Services
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
 
             //1. If emailverified is false throw error
-            if (!user.emailverified)
+            if (!user.Emailverified)
                 throw new ServiceException("User is deactivated,", HttpStatusCode.NotFound, "User", "Deactivated");
 
             //2. If exist complete data from external repository
@@ -50,22 +50,22 @@ namespace customerportalapi.Services
             entity.EmailAddress1Principal = false;
             entity.EmailAddress2Principal = false;
 
-            if (entity.EmailAddress1 == user.email)
+            if (entity.EmailAddress1 == user.Email)
                 entity.EmailAddress1Principal = true;
-            else if (entity.EmailAddress2 == user.email)
+            else if (entity.EmailAddress2 == user.Email)
                 entity.EmailAddress2Principal = true;
 
             //4. Set Phone Principal according to external data. No two principal phones allowed
             entity.MobilePhone1Principal = false;
             entity.MobilePhonePrincipal = false;
 
-            if (entity.MobilePhone1 == user.phone && !string.IsNullOrEmpty(user.phone))
+            if (entity.MobilePhone1 == user.Phone && !string.IsNullOrEmpty(user.Phone))
                 entity.MobilePhone1Principal = true;
-            else if (entity.MobilePhone == user.phone && !string.IsNullOrEmpty(user.phone))
+            else if (entity.MobilePhone == user.Phone && !string.IsNullOrEmpty(user.Phone))
                 entity.MobilePhonePrincipal = true;
 
-            entity.Language = user.language;
-            entity.Avatar = user.profilepicture;
+            entity.Language = user.Language;
+            entity.Avatar = user.Profilepicture;
 
             return entity;
         }
@@ -78,7 +78,7 @@ namespace customerportalapi.Services
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
 
             //1. If emailverified is false throw error
-            if (!user.emailverified)
+            if (!user.Emailverified)
                 throw new ServiceException("User is deactivated,", HttpStatusCode.NotFound, "User", "Deactivated");
 
             //2. Set Email Principal according to external data
@@ -101,31 +101,31 @@ namespace customerportalapi.Services
                 phoneToUpdate = profile.MobilePhone;
 
             //4. Compare language, email and image for backend changes
-            if (user.language != profile.Language ||
-                user.profilepicture != profile.Avatar ||
-                user.email != emailToUpdate ||
-                user.phone != phoneToUpdate)
+            if (user.Language != profile.Language ||
+                user.Profilepicture != profile.Avatar ||
+                user.Email != emailToUpdate ||
+                user.Phone != phoneToUpdate)
             {
-                user.language = profile.Language;
-                user.email = emailToUpdate;
-                user.phone = phoneToUpdate;
-                user.profilepicture = profile.Avatar;
+                user.Language = profile.Language;
+                user.Email = emailToUpdate;
+                user.Phone = phoneToUpdate;
+                user.Profilepicture = profile.Avatar;
 
                 user = _userRepository.Update(user);
             }
 
             //5. Invoke repository for other changes
             var entity = await _profileRepository.UpdateProfileAsync(profile);
-            entity.Language = user.language;
-            entity.Avatar = user.profilepicture;
-            if (entity.EmailAddress1 == user.email)
+            entity.Language = user.Language;
+            entity.Avatar = user.Profilepicture;
+            if (entity.EmailAddress1 == user.Email)
                 entity.EmailAddress1Principal = true;
             else
                 entity.EmailAddress2Principal = true;
 
-            if (entity.MobilePhone1 == user.phone && !string.IsNullOrEmpty(user.phone))
+            if (entity.MobilePhone1 == user.Phone && !string.IsNullOrEmpty(user.Phone))
                 entity.MobilePhone1Principal = true;
-            else if (entity.MobilePhone == user.phone && !string.IsNullOrEmpty(user.phone))
+            else if (entity.MobilePhone == user.Phone && !string.IsNullOrEmpty(user.Phone))
                 entity.MobilePhonePrincipal = true;
 
             return entity;
@@ -150,12 +150,12 @@ namespace customerportalapi.Services
                 //4. Create user in portal database
                 User newUser = new User
                 {
-                    dni = value.Dni,
-                    email = value.Email,
-                    language = InvitationUtils.GetLanguage(value.Language),
-                    usertype = InvitationUtils.GetUserType(value.CustomerType),
-                    emailverified = false,
-                    invitationtoken = Guid.NewGuid().ToString()
+                    Dni = value.Dni,
+                    Email = value.Email,
+                    Language = InvitationUtils.GetLanguage(value.Language),
+                    Usertype = InvitationUtils.GetUserType(value.CustomerType),
+                    Emailverified = false,
+                    Invitationtoken = Guid.NewGuid().ToString()
                 };
 
                 result = await _userRepository.Create(newUser);
@@ -163,19 +163,19 @@ namespace customerportalapi.Services
             else
             {
                 //5. If emailverified is false resend email invitation otherwise throw error
-                if (user.emailverified)
+                if (user.Emailverified)
                     throw new ServiceException("Invitation user fails. User was actived before", HttpStatusCode.NotFound, "User", "Already invited");
 
                 //6. Update invitation data
-                user.email = value.Email;
-                user.language = InvitationUtils.GetLanguage(value.Language);
-                user.usertype = InvitationUtils.GetUserType(value.CustomerType);
-                user.invitationtoken = Guid.NewGuid().ToString();
+                user.Email = value.Email;
+                user.Language = InvitationUtils.GetLanguage(value.Language);
+                user.Usertype = InvitationUtils.GetUserType(value.CustomerType);
+                user.Invitationtoken = Guid.NewGuid().ToString();
                 _userRepository.Update(user);
             }
 
             //5. Get Email Invitation Template
-            EmailTemplate invitationTemplate = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.Invitation, user.language);
+            EmailTemplate invitationTemplate = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.Invitation, user.Language);
             if (invitationTemplate._id == null)
             {
                 invitationTemplate = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.Invitation, LanguageTypes.en.ToString());
@@ -185,10 +185,10 @@ namespace customerportalapi.Services
             {
                 //6. Sens email invitation
                 Email message = new Email();
-                message.To.Add(user.email);
+                message.To.Add(user.Email);
                 message.Subject = invitationTemplate.subject;
                 message.Body = string.Format(invitationTemplate.body, value.Fullname, value.Dni, value.Dni,
-                    $"{_config["InviteConfirmation"]}{user.invitationtoken}");
+                    $"{_config["InviteConfirmation"]}{user.Invitationtoken}");
                 result = await _mailRepository.Send(message);
             }
 
@@ -206,44 +206,45 @@ namespace customerportalapi.Services
             if (user._id == null)
                 return false;
 
-            //3. Update email verification data
-            user.emailverified = true;
-            user.invitationtoken = null;
-            _userRepository.Update(user);
-
-            //4. Create user in Authentication System
+            //3. Create user in Authentication System
             UserIdentity userIdentity = new UserIdentity();
             string emailType = string.Empty;
-            switch (user.usertype)
+            switch (user.Usertype)
             {
                 case (int)UserTypes.Residential:
                     {
-                        userIdentity.UserName = user.dni;
+                        userIdentity.UserName = user.Dni;
                         emailType = "home";
                         break;
                     }
                 case (int)UserTypes.Business:
                     {
-                        userIdentity.UserName = $"B{user.dni}";
+                        userIdentity.UserName = $"B{user.Dni}";
                         emailType = "work";
                         break;
                     }
                 default:
                     {
-                        userIdentity.UserName = user.dni;
+                        userIdentity.UserName = user.Dni;
                         emailType = "home";
                         break;
                     }
             }
-            userIdentity.Password = user.dni;
+            userIdentity.Password = user.Dni;
             userIdentity.Emails = new List<EmailAccount>()
             {
-                new EmailAccount() {Primary = true, Value = user.email, Type = emailType}
+                new EmailAccount() {Primary = true, Value = user.Email, Type = emailType}
             };
             UserIdentity newUser = await _identityRepository.AddUser(userIdentity);
 
+            //4. Update email verification data
+            user.Emailverified = true;
+            user.Invitationtoken = null;
+            user.ExternalId = newUser.ID;
+            _userRepository.Update(user);
+
             //5. Confirm access status to external system
-            await _profileRepository.ConfirmedWebPortalAccessAsync(user.dni);
+            await _profileRepository.ConfirmedWebPortalAccessAsync(user.Dni);
 
             return true;
         }
@@ -260,15 +261,15 @@ namespace customerportalapi.Services
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
 
             //3. If emailverified is false
-            if (!user.emailverified)
+            if (!user.Emailverified)
                 return Task.FromResult(false);
 
             //4. Confirm revocation access status to external system
-            _profileRepository.RevokedWebPortalAccessAsync(user.dni);
+            _profileRepository.RevokedWebPortalAccessAsync(user.Dni);
 
             //5. Update invitation data
-            user.emailverified = false;
-            user.invitationtoken = null;
+            user.Emailverified = false;
+            user.Invitationtoken = null;
             _userRepository.Update(user);
 
             //6. Delete from IS?

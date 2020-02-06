@@ -48,7 +48,7 @@ namespace customerportalapi.Repositories
             }
         }
 
-        public async Task<Token> Validate(string token)
+        public async Task<TokenStatus> Validate(string token)
         {
             var httpClient = _clientFactory.CreateClient("identityClient");
             try
@@ -67,7 +67,7 @@ namespace customerportalapi.Repositories
                 response.EnsureSuccessStatusCode();
 
                 var content = await response.Content.ReadAsStringAsync();
-               return JsonConvert.DeserializeObject<Token>(content);
+               return JsonConvert.DeserializeObject<TokenStatus>(content);
             }
             catch (Exception ex)
             {
@@ -143,30 +143,6 @@ namespace customerportalapi.Repositories
 
                 var content = await response.Content.ReadAsStringAsync();
                 return JsonConvert.DeserializeObject<UserIdentity>(content);
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-        }
-
-        public async Task<UserIdentityResults> FindUser(string userName)
-        {
-            var httpClient = _clientFactory.CreateClient("identityClient");
-            try
-            {
-                var url = new Uri(httpClient.BaseAddress + _configuration["Identity:Endpoints:Provisioning"] + $"?filter=userName+Eq+%22{userName}%22");
-                
-                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
-                    "Basic",
-                    Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes(
-                        String.Format("{0}:{1}", _configuration["Identity:Credentials:User"], _configuration["Identity:Credentials:Password"])))
-                );
-                var response = await httpClient.GetAsync(url);
-                response.EnsureSuccessStatusCode();
-
-                var content = await response.Content.ReadAsStringAsync();
-                return JsonConvert.DeserializeObject<UserIdentityResults>(content);
             }
             catch (Exception ex)
             {

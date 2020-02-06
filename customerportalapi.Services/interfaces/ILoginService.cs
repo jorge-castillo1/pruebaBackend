@@ -7,6 +7,6 @@ namespace customerportalapi.Services.interfaces
     {
         Task<Token> GetToken(Login credentials);
 
-        Task<UserIdentity> ChangePassword(Login credentials);
+        Task<UserIdentity> ChangePassword(ResetPassword credentials);
     }
 }
