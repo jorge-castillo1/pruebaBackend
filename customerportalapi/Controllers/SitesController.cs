@@ -27,7 +27,7 @@ namespace customerportalapi.Controllers
         }
 
         [HttpGet("users/{dni}")]
-        [Authorize(Roles = Role.Admin)]
+        // [Authorize(Roles = Role.Admin)]
         public async Task<ApiResponse> GetAsync(string dni)
         {
             try
