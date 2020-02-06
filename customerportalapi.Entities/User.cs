@@ -41,5 +41,7 @@ namespace customerportalapi.Entities
 
         [BsonElement("externalid")]
         public string ExternalId { get; set; }
+        [BsonElement("password")]
+        public string Password { get; set; }
     }
 }

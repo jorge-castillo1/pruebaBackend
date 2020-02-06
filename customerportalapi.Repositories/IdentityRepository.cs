@@ -149,5 +149,75 @@ namespace customerportalapi.Repositories
                 throw ex;
             }
         }
+
+        public async Task<GroupResults> FindGroup(string groupName)
+        {
+            var httpClient = _clientFactory.CreateClient("identityClient");
+            try
+            {
+                var url = new Uri(httpClient.BaseAddress + _configuration["Identity:Endpoints:Groups"] + $"?&filter=displayName eq PRIMARY/{groupName}");
+
+                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                    "Basic",
+                    Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes(
+                        String.Format("{0}:{1}", _configuration["Identity:Credentials:User"], _configuration["Identity:Credentials:Password"])))
+                );
+                var response = await httpClient.GetAsync(url);
+                response.EnsureSuccessStatusCode();
+
+                var content = await response.Content.ReadAsStringAsync();
+                return JsonConvert.DeserializeObject<GroupResults>(content);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<UserIdentity> AddUserToGroup(UserIdentity userIdentity, Group group)
+        {
+            var httpClient = _clientFactory.CreateClient("identityClient");
+            var method = new HttpMethod("PATCH");
+            try
+            {
+                var url = new Uri(httpClient.BaseAddress + _configuration["Identity:Endpoints:Groups"] + $"/{group.ID}");
+
+                UserGroupOperations operations = new UserGroupOperations();
+                UserGroupOperation addoperation = new UserGroupOperation();
+                addoperation.Operation = "add";
+                addoperation.Value = new UserGroupOperationValue()
+                {
+                    Members = new List<UserGroupMember>()
+                    {
+                        new UserGroupMember()
+                        {
+                            Display = userIdentity.UserName,
+                            Value = userIdentity.ID
+                        }
+                    }
+                };
+                operations.Operations.Add(addoperation);
+                var request = new HttpRequestMessage(method, url)
+                {
+                    Content = new StringContent(JsonConvert.SerializeObject(operations))
+                };
+                request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                    "Basic",
+                    Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes(
+                        String.Format("{0}:{1}", _configuration["Identity:Credentials:User"], _configuration["Identity:Credentials:Password"])))
+                );
+                //var response = await httpClient.PutAsync(url, postContent);
+                var response = await httpClient.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+
+                var content = await response.Content.ReadAsStringAsync();
+                return JsonConvert.DeserializeObject<UserIdentity>(content);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
     }
 }

@@ -52,11 +52,11 @@ namespace customerportalapi.Services.Test
 
             //Act
             LoginService service = new LoginService(_identityRepository.Object, _userRepository.Object);
-            UserIdentity user = await service.ChangePassword(credentials);
+            Token newToken = await service.ChangePassword(credentials);
 
             //Assert
-            Assert.IsNotNull(user);
-            Assert.AreEqual("Fake Password", user.Password);
+            Assert.IsNotNull(newToken);
+            Assert.AreEqual("Fake AccessToken", newToken.AccesToken);
             _userRepository.Verify(x => x.GetCurrentUser(It.IsAny<string>()));
             _identityRepository.Verify(x => x.UpdateUser(It.IsAny<UserIdentity>()));
         }
