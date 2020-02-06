@@ -37,6 +37,9 @@ namespace customerportalapi.Entities
         public bool emailverified { get; set; }
 
         [BsonElement("invitationtoken")]
-        public string invitationtoken { get; set; }
+        public string Invitationtoken { get; set; }
+
+        [BsonElement("externalid")]
+        public string ExternalId { get; set; }
     }
 }
