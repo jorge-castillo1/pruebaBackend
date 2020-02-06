@@ -36,7 +36,7 @@ namespace customerportalapi.Services
         {
             //Add customer portal Business Logic
             User user = _userRepository.GetCurrentUser(dni);
-            if (user._id == null)
+            if (user.Id == null)
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
 
             //1. If emailverified is false throw error
@@ -75,7 +75,7 @@ namespace customerportalapi.Services
         {
             //Add customer portal Business Logic
             User user = _userRepository.GetCurrentUser(profile.DocumentNumber);
-            if (user._id == null)
+            if (user.Id == null)
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
 
             //1. If emailverified is false throw error
@@ -152,19 +152,19 @@ namespace customerportalapi.Services
             var password = pwd.Next();
 
             User user = _userRepository.GetCurrentUser(userName);
-            if (user._id == null)
+            if (user.Id == null)
             {
                 //4. Create user in portal database
                 User newUser = new User
                 {
-                    dni = userName,
-                    email = value.Email,
-                    name = value.Fullname,
-                    password = password,
-                    language = InvitationUtils.GetLanguage(value.Language),
-                    usertype = InvitationUtils.GetUserType(value.CustomerType),
-                    emailverified = false,
-                    invitationtoken = Guid.NewGuid().ToString()
+                    Dni = userName,
+                    Email = value.Email,
+                    Name = value.Fullname,
+                    Password = password,
+                    Language = InvitationUtils.GetLanguage(value.Language),
+                    Usertype = InvitationUtils.GetUserType(value.CustomerType),
+                    Emailverified = false,
+                    Invitationtoken = Guid.NewGuid().ToString()
                 };
 
                 result = await _userRepository.Create(newUser);
@@ -178,12 +178,12 @@ namespace customerportalapi.Services
                     throw new ServiceException("Invitation user fails. User was actived before", HttpStatusCode.NotFound, "User", "Already invited");
 
                 //7. Update invitation data
-                user.email = value.Email;
-                user.name = value.Fullname;
-                user.password = password;
-                user.language = InvitationUtils.GetLanguage(value.Language);
-                user.usertype = InvitationUtils.GetUserType(value.CustomerType);
-                user.invitationtoken = Guid.NewGuid().ToString();
+                user.Email = value.Email;
+                user.Name = value.Fullname;
+                user.Password = password;
+                user.Language = InvitationUtils.GetLanguage(value.Language);
+                user.Usertype = InvitationUtils.GetUserType(value.CustomerType);
+                user.Invitationtoken = Guid.NewGuid().ToString();
                 _userRepository.Update(user);
             }
 
@@ -200,8 +200,8 @@ namespace customerportalapi.Services
                 Email message = new Email();
                 message.To.Add(user.Email);
                 message.Subject = invitationTemplate.subject;
-                message.Body = string.Format(invitationTemplate.body, user.name, user.dni, user.password,
-                    $"{_config["InviteConfirmation"]}{user.invitationtoken}");
+                message.Body = string.Format(invitationTemplate.body, user.Name, user.Dni, user.Password,
+                    $"{_config["InviteConfirmation"]}{user.Invitationtoken}");
                 result = await _mailRepository.Send(message);
             }
 
@@ -216,7 +216,7 @@ namespace customerportalapi.Services
 
             //2. Validate user by invitationToken
             User user = _userRepository.GetUserByInvitationToken(invitationToken);
-            if (user._id == null)
+            if (user.Id == null)
                 return false;
 
             //3. Create user in Authentication System
@@ -270,7 +270,7 @@ namespace customerportalapi.Services
 
             //2. Validate user
             User user = _userRepository.GetCurrentUser(dni);
-            if (user._id == null)
+            if (user.Id == null)
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
 
             //3. If emailverified is false

@@ -7,34 +7,34 @@ namespace customerportalapi.Entities
     {
         [BsonElement("_id")]
         [BsonRepresentation(BsonType.ObjectId)]
-        public string _id { get; set; }
+        public string Id { get; set; }
 
         [BsonElement("dni")]
-        public string dni { get; set; }
+        public string Dni { get; set; }
 
         [BsonElement("email")]
-        public string email { get; set; }
+        public string Email { get; set; }
 
         [BsonElement("name")]
-        public string name { get; set; }
+        public string Name { get; set; }
 
         [BsonElement("password")]
-        public string password { get; set; }
+        public string Password { get; set; }
 
         [BsonElement("phone")]
-        public string phone { get; set; }
+        public string Phone { get; set; }
 
         [BsonElement("language")]
-        public string language { get; set; }
+        public string Language { get; set; }
 
         [BsonElement("profilepicture")]
-        public string profilepicture { get; set; }
+        public string Profilepicture { get; set; }
 
         [BsonElement("usertype")]
-        public int usertype { get; set; }
+        public int Usertype { get; set; }
 
         [BsonElement("emailverified")]
-        public bool emailverified { get; set; }
+        public bool Emailverified { get; set; }
 
         [BsonElement("invitationtoken")]
         public string Invitationtoken { get; set; }
