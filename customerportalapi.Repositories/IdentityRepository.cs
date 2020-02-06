@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using System.Security.Claims;
+using System.Text;
 
 namespace customerportalapi.Repositories
 {
@@ -66,6 +68,105 @@ namespace customerportalapi.Repositories
 
                 var content = await response.Content.ReadAsStringAsync();
                return JsonConvert.DeserializeObject<Token>(content);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<UserIdentity> AddUser(UserIdentity userIdentity)
+        {
+            var httpClient = _clientFactory.CreateClient("identityClient");
+            var method = new HttpMethod("POST");
+            try
+            {
+                var url = new Uri(httpClient.BaseAddress + _configuration["Identity:Endpoints:Provisioning"]);
+                var postContent = new StringContent(JsonConvert.SerializeObject(userIdentity), Encoding.UTF8, "application/json");
+
+                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                    "Basic",
+                    Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes(
+                        String.Format("{0}:{1}", _configuration["Identity:Credentials:User"], _configuration["Identity:Credentials:Password"])))
+                );
+                var response = await httpClient.PostAsync(url, postContent);
+                response.EnsureSuccessStatusCode();
+
+                var content = await response.Content.ReadAsStringAsync();
+                return JsonConvert.DeserializeObject<UserIdentity>(content);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<UserIdentity> UpdateUser(UserIdentity userIdentity)
+        {
+            var httpClient = _clientFactory.CreateClient("identityClient");
+            try
+            {
+                var url = new Uri(httpClient.BaseAddress + _configuration["Identity:Endpoints:Provisioning"] + $"/{userIdentity.ID}");
+                var postContent = new StringContent(JsonConvert.SerializeObject(userIdentity), Encoding.UTF8, "application/json");
+
+                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                    "Basic",
+                    Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes(
+                        String.Format("{0}:{1}", _configuration["Identity:Credentials:User"], _configuration["Identity:Credentials:Password"])))
+                );
+                var response = await httpClient.PutAsync(url, postContent);
+                response.EnsureSuccessStatusCode();
+
+                var content = await response.Content.ReadAsStringAsync();
+                return JsonConvert.DeserializeObject<UserIdentity>(content);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<UserIdentity> GetUser(string userId)
+        {
+            var httpClient = _clientFactory.CreateClient("identityClient");
+            try
+            {
+                var url = new Uri(httpClient.BaseAddress + _configuration["Identity:Endpoints:Provisioning"] + $"/{userId}");
+
+                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                    "Basic",
+                    Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes(
+                        String.Format("{0}:{1}", _configuration["Identity:Credentials:User"], _configuration["Identity:Credentials:Password"])))
+                );
+                var response = await httpClient.GetAsync(url);
+                response.EnsureSuccessStatusCode();
+
+                var content = await response.Content.ReadAsStringAsync();
+                return JsonConvert.DeserializeObject<UserIdentity>(content);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<UserIdentityResults> FindUser(string userName)
+        {
+            var httpClient = _clientFactory.CreateClient("identityClient");
+            try
+            {
+                var url = new Uri(httpClient.BaseAddress + _configuration["Identity:Endpoints:Provisioning"] + $"?filter=userName+Eq+%22{userName}%22");
+                
+                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                    "Basic",
+                    Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes(
+                        String.Format("{0}:{1}", _configuration["Identity:Credentials:User"], _configuration["Identity:Credentials:Password"])))
+                );
+                var response = await httpClient.GetAsync(url);
+                response.EnsureSuccessStatusCode();
+
+                var content = await response.Content.ReadAsStringAsync();
+                return JsonConvert.DeserializeObject<UserIdentityResults>(content);
             }
             catch (Exception ex)
             {

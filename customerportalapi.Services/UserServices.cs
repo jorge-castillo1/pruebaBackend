@@ -17,14 +17,16 @@ namespace customerportalapi.Services
         private readonly IProfileRepository _profileRepository;
         private readonly IMailRepository _mailRepository;
         private readonly IEmailTemplateRepository _emailTemplateRepository;
+        private readonly IIdentityRepository _identityRepository;
         private readonly IConfiguration _config;
 
-        public UserServices(IUserRepository userRepository, IProfileRepository profileRepository, IMailRepository mailRepository, IEmailTemplateRepository emailTemplateRepository, IConfiguration config)
+        public UserServices(IUserRepository userRepository, IProfileRepository profileRepository, IMailRepository mailRepository, IEmailTemplateRepository emailTemplateRepository, IIdentityRepository identityRepository, IConfiguration config)
         {
             _userRepository = userRepository;
             _profileRepository = profileRepository;
             _mailRepository = mailRepository;
             _emailTemplateRepository = emailTemplateRepository;
+            _identityRepository = identityRepository;
             _config = config;
         }
 
@@ -145,9 +147,7 @@ namespace customerportalapi.Services
             User user = _userRepository.GetCurrentUser(value.Dni);
             if (user._id == null)
             {
-                //4. TODO Create user in autentication system
-
-                //5. Create user in portal database
+                //4. Create user in portal database
                 User newUser = new User
                 {
                     dni = value.Dni,
@@ -162,11 +162,11 @@ namespace customerportalapi.Services
             }
             else
             {
-                //6. If emailverified is false resend email invitation otherwise throw error
+                //5. If emailverified is false resend email invitation otherwise throw error
                 if (user.emailverified)
                     throw new ServiceException("Invitation user fails. User was actived before", HttpStatusCode.NotFound, "User", "Already invited");
 
-                //7. Update invitation data
+                //6. Update invitation data
                 user.email = value.Email;
                 user.language = InvitationUtils.GetLanguage(value.Language);
                 user.usertype = InvitationUtils.GetUserType(value.CustomerType);
@@ -174,7 +174,7 @@ namespace customerportalapi.Services
                 _userRepository.Update(user);
             }
 
-            //4. Get Email Invitation Template
+            //5. Get Email Invitation Template
             EmailTemplate invitationTemplate = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.Invitation, user.language);
             if (invitationTemplate._id == null)
             {
@@ -183,7 +183,7 @@ namespace customerportalapi.Services
 
             if (invitationTemplate._id != null)
             {
-                //5. Sens email invitation
+                //6. Sens email invitation
                 Email message = new Email();
                 message.To.Add(user.email);
                 message.Subject = invitationTemplate.subject;
@@ -195,7 +195,7 @@ namespace customerportalapi.Services
             return result;
         }
 
-        public Task<bool> ConfirmUserAsync(string invitationToken)
+        public async Task<bool> ConfirmUserAsync(string invitationToken)
         {
             //1. Validate invitationToken not empty
             if (string.IsNullOrEmpty(invitationToken))
@@ -204,17 +204,48 @@ namespace customerportalapi.Services
             //2. Validate user by invitationToken
             User user = _userRepository.GetUserByInvitationToken(invitationToken);
             if (user._id == null)
-                return Task.FromResult(false);
+                return false;
 
-            //3. Confirm access status to external system
-            _profileRepository.ConfirmedWebPortalAccessAsync(user.dni);
-            
-            //4. Update email verification data
+            //3. Update email verification data
             user.emailverified = true;
             user.invitationtoken = null;
             _userRepository.Update(user);
 
-            return Task.FromResult(true);
+            //4. Create user in Authentication System
+            UserIdentity userIdentity = new UserIdentity();
+            string emailType = string.Empty;
+            switch (user.usertype)
+            {
+                case (int)UserTypes.Residential:
+                    {
+                        userIdentity.UserName = user.dni;
+                        emailType = "home";
+                        break;
+                    }
+                case (int)UserTypes.Business:
+                    {
+                        userIdentity.UserName = $"B{user.dni}";
+                        emailType = "work";
+                        break;
+                    }
+                default:
+                    {
+                        userIdentity.UserName = user.dni;
+                        emailType = "home";
+                        break;
+                    }
+            }
+            userIdentity.Password = user.dni;
+            userIdentity.Emails = new List<EmailAccount>()
+            {
+                new EmailAccount() {Primary = true, Value = user.email, Type = emailType}
+            };
+            UserIdentity newUser = await _identityRepository.AddUser(userIdentity);
+
+            //5. Confirm access status to external system
+            await _profileRepository.ConfirmedWebPortalAccessAsync(user.dni);
+
+            return true;
         }
 
         public Task<bool> UnInviteUserAsync(string dni)
@@ -235,10 +266,12 @@ namespace customerportalapi.Services
             //4. Confirm revocation access status to external system
             _profileRepository.RevokedWebPortalAccessAsync(user.dni);
 
-            //4. Update invitation data
+            //5. Update invitation data
             user.emailverified = false;
             user.invitationtoken = null;
             _userRepository.Update(user);
+
+            //6. Delete from IS?
 
             return Task.FromResult(true);
         }

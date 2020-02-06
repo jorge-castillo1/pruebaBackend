@@ -6,5 +6,7 @@ namespace customerportalapi.Services.interfaces
     public interface ILoginService
     {
         Task<Token> GetToken(Login credentials);
+
+        Task<UserIdentity> ChangePassword(Login credentials);
     }
 }

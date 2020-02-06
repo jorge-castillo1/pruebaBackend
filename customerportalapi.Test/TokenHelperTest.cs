@@ -21,69 +21,39 @@ namespace customerportalapi.Test
         }
 
         [TestMethod]
-        public void Generar_NuevoToken_NoProduceError()
-        {
-            //Arrange
-            string username = "P37383940Q";
-            string email = "testuser@gmail.com";
-            string role = "Application/bluespace_test";
-            DateTime expirationDate = DateTime.UtcNow.AddMinutes(Convert.ToInt32(20));
-
-            //Act
-            string newToken = Security.JwtTokenHelper.GenerateToken(_configurations, username, role, email, expirationDate);
-
-            //Assert
-            Assert.IsFalse(string.IsNullOrEmpty(newToken));
-        }
-
-        [TestMethod]
         public void Decodificar_TokenValido_NoProduceError()
         {
             //Arrange
-            string username = "P37383940Q";
-            string email = "testuser@gmail.com";
-            string role = "Application/bluespace_test";
-            DateTime expirationdatevalue = DateTime.UtcNow.AddDays(3);
-            string token = Security.JwtTokenHelper.GenerateToken(_configurations, username, role, email, expirationdatevalue);
+            string token = "eyJ4NXQiOiJNV1JtTkRJeE9URTJaREJrWW1SaVptRmhOekkwWlRobU1tRXhZbUUyWW1JMk9UYzFNV1ppWXciLCJraWQiOiJNV1JtTkRJeE9URTJaREJrWW1SaVptRmhOekkwWlRobU1tRXhZbUUyWW1JMk9UYzFNV1ppWXciLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJYODAyODkxNkZAY2FyYm9uLnN1cGVyIiwiYXVkIjoiajRlbjZaT2k2MHVIMjFWbEpEOHZ6cGZwMlJBYSIsIm5iZiI6MTU4MDkwMjcwNywiYXpwIjoiajRlbjZaT2k2MHVIMjFWbEpEOHZ6cGZwMlJBYSIsInNjb3BlIjoib3BlbmlkIiwiaXNzIjoiaHR0cHM6XC9cL2lkZW50aXR5LXByZS5ibHVlc3BhY2UuZXU6OTQ0M1wvb2F1dGgyXC90b2tlbiIsImdyb3VwcyI6WyJjdXN0b21lcnBvcnRhbF9zdGFuZGFyZCIsIkludGVybmFsXC9ldmVyeW9uZSJdLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJYODAyODkxNkYiLCJleHAiOjE1ODA5MDYzMDcsImlhdCI6MTU4MDkwMjcwNywianRpIjoiNDkwMzE5YjMtNTFmYi00M2Y5LWFjYmYtYjY2YmY5MWFlNWMxIiwiZW1haWwiOiJ0ZW8ucXVpcm96QHF1YW50aW9uLmNvbSJ9.Xs4bF4voEBU8-eE3LCTjvqKSS5wk8EKkdmR_Qdz6-q_q6DjtJ-jjReFtQEPJ6kkSxm9jMIXwCGsnz7DSk-mD9EJRsDWMjP-LnKIaGAnaTnDXLxd7j8RXBpO37sWcDVyjFRkpyX59kff7qa_4rBhc48UMk3oPxrqaA346cmYMR3dZOvENuwwF23eBpIRAyrkl85FQsdPgSkc61oMPr_smI34VZGXsJVFX-r4byGXy_40fvdFV4rKa7EIZQh2NvLEYQpPE5BS_dSGDCDamupRu_PGKk5FmMCNv3CwDvY6-OYcZU80Mc63uuBLmFVCATfTj2dus_pfRTmb7KSpR4UErFw";
 
             //Act
             ClaimsPrincipal claims = Security.JwtTokenHelper.GetPrincipal(token, _configurations);
 
             //Asert
-            Claim name = claims.FindFirst(x => x.Type == ClaimTypes.NameIdentifier.ToString());
-            Assert.AreEqual("P37383940Q", name.Value);
+            Claim name = claims.FindFirst(x => x.Type == ClaimTypes.Name.ToString());
+            Assert.AreEqual("X8028916F@carbon.super", name.Value);
 
             Claim mail = claims.FindFirst(x => x.Type == ClaimTypes.Email.ToString());
-            Assert.AreEqual("testuser@gmail.com", mail.Value);
+            Assert.AreEqual("teo.quiroz@quantion.com", mail.Value);
 
             Claim roleclaim = claims.FindFirst(x => x.Type == ClaimTypes.Role.ToString());
-            Assert.AreEqual("Application/bluespace_test", roleclaim.Value);
+            Assert.AreEqual("customerportal_standard", roleclaim.Value);
 
             Claim expirationdate = claims.FindFirst(x => x.Type == ClaimTypes.Expiration.ToString());
-            Assert.AreEqual(expirationdatevalue.ToString(), expirationdate.Value);
+            Assert.IsNotNull(expirationdate.Value);
         }
 
         [TestMethod]
         public void Decodificar_TokenCaducado_ProduceError()
         {
             //Arrange
-            string token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiJQMzczODM5NDBRIiwicm9sZSI6IkFwcGxpY2F0aW9uL2JsdWVzcGFjZV90ZXN0IiwiZW1haWwiOiJ0ZXN0dXNlckBnbWFpbC5jb20iLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL2V4cGlyYXRpb24iOiIwNC8wMi8yMDIwIDE4OjEwOjQ0IiwibmJmIjoxNTgwNTgwNjQ0LCJleHAiOjE1ODA4Mzk4NDQsImlhdCI6MTU4MDU4MDY0NH0.Cpe1BccSmnuaxEQnzctEt-hIFdyJ_auOxLvM9Tlv_Bk";
+            string token = "eyJ4NXQiOiJNV1JtTkRJeE9URTJaREJrWW1SaVptRmhOekkwWlRobU1tRXhZbUUyWW1JMk9UYzFNV1ppWXciLCJraWQiOiJNV1JtTkRJeE9URTJaREJrWW1SaVptRmhOekkwWlRobU1tRXhZbUUyWW1JMk9UYzFNV1ppWXciLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJYODAyODkxNkZAY2FyYm9uLnN1cGVyIiwiYXVkIjoiajRlbjZaT2k2MHVIMjFWbEpEOHZ6cGZwMlJBYSIsIm5iZiI6MTU4MDkwMjcwNywiYXpwIjoiajRlbjZaT2k2MHVIMjFWbEpEOHZ6cGZwMlJBYSIsInNjb3BlIjoib3BlbmlkIiwiaXNzIjoiaHR0cHM6XC9cL2lkZW50aXR5LXByZS5ibHVlc3BhY2UuZXU6OTQ0M1wvb2F1dGgyXC90b2tlbiIsImdyb3VwcyI6WyJjdXN0b21lcnBvcnRhbF9zdGFuZGFyZCIsIkludGVybmFsXC9ldmVyeW9uZSJdLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJYODAyODkxNkYiLCJleHAiOjE1ODA5MDYzMDcsImlhdCI6MTU4MDkwMjcwNywianRpIjoiNDkwMzE5YjMtNTFmYi00M2Y5LWFjYmYtYjY2YmY5MWFlNWMxIiwiZW1haWwiOiJ0ZW8ucXVpcm96QHF1YW50aW9uLmNvbSJ9.Xs4bF4voEBU8-eE3LCTjvqKSS5wk8EKkdmR_Qdz6-q_q6DjtJ-jjReFtQEPJ6kkSxm9jMIXwCGsnz7DSk-mD9EJRsDWMjP-LnKIaGAnaTnDXLxd7j8RXBpO37sWcDVyjFRkpyX59kff7qa_4rBhc48UMk3oPxrqaA346cmYMR3dZOvENuwwF23eBpIRAyrkl85FQsdPgSkc61oMPr_smI34VZGXsJVFX-r4byGXy_40fvdFV4rKa7EIZQh2NvLEYQpPE5BS_dSGDCDamupRu_PGKk5FmMCNv3CwDvY6-OYcZU80Mc63uuBLmFVCATfTj2dus_pfRTmb7KSpR4UErFw";
 
             //Asert
             Assert.ThrowsException<SecurityTokenExpiredException>(
                 new Action(() => {
                     Security.JwtTokenHelper.GetPrincipal(token, _configurations);
                 }));
-        }
-
-        [TestMethod]
-        public void GenerateKey()
-        {
-            var hmac = new System.Security.Cryptography.HMACSHA256();
-            var key = Convert.ToBase64String(hmac.Key);
-
-            //Assert
-            Assert.IsFalse(string.IsNullOrEmpty(key));
         }
     }
 }
