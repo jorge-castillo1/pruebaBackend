@@ -8,6 +8,7 @@ using customerportalapi.Entities.enums;
 using Microsoft.Extensions.Configuration;
 using customerportalapi.Services.Exceptions;
 using System.Net;
+using PasswordGenerator;
 
 namespace customerportalapi.Services
 {
@@ -142,7 +143,13 @@ namespace customerportalapi.Services
                 throw new ServiceException("User must have a valid document number.", HttpStatusCode.BadRequest, "Dni", "Empty field");
 
             //3. If no user exists create user
-            User user = _userRepository.GetCurrentUser(value.Dni);
+            var userType = InvitationUtils.GetUserType(value.CustomerType);
+            var userName = userType == 0 ? value.Dni : "B" + value.Dni;
+
+            var pwd = new Password(true, true, true, false, 6);
+            var password = pwd.Next();
+
+            User user = _userRepository.GetCurrentUser(userName);
             if (user._id == null)
             {
                 //4. TODO Create user in autentication system
@@ -150,8 +157,10 @@ namespace customerportalapi.Services
                 //5. Create user in portal database
                 User newUser = new User
                 {
-                    dni = value.Dni,
+                    dni = userName,
                     email = value.Email,
+                    name = value.Fullname,
+                    password = password,
                     language = InvitationUtils.GetLanguage(value.Language),
                     usertype = InvitationUtils.GetUserType(value.CustomerType),
                     emailverified = false,
@@ -159,6 +168,8 @@ namespace customerportalapi.Services
                 };
 
                 result = await _userRepository.Create(newUser);
+                if (result)
+                    user = _userRepository.GetCurrentUser(userName);
             }
             else
             {
@@ -168,6 +179,8 @@ namespace customerportalapi.Services
 
                 //7. Update invitation data
                 user.email = value.Email;
+                user.name = value.Fullname;
+                user.password = password;
                 user.language = InvitationUtils.GetLanguage(value.Language);
                 user.usertype = InvitationUtils.GetUserType(value.CustomerType);
                 user.invitationtoken = Guid.NewGuid().ToString();
@@ -187,7 +200,7 @@ namespace customerportalapi.Services
                 Email message = new Email();
                 message.To.Add(user.email);
                 message.Subject = invitationTemplate.subject;
-                message.Body = string.Format(invitationTemplate.body, value.Fullname, value.Dni, value.Dni,
+                message.Body = string.Format(invitationTemplate.body, user.name, user.dni, user.password,
                     $"{_config["InviteConfirmation"]}{user.invitationtoken}");
                 result = await _mailRepository.Send(message);
             }
@@ -208,7 +221,7 @@ namespace customerportalapi.Services
 
             //3. Confirm access status to external system
             _profileRepository.ConfirmedWebPortalAccessAsync(user.dni);
-            
+
             //4. Update email verification data
             user.emailverified = true;
             user.invitationtoken = null;
