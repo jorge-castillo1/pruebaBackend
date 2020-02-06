@@ -237,6 +237,11 @@ namespace customerportalapi.Services
             };
             UserIdentity newUser = await _identityRepository.AddUser(userIdentity);
 
+            //3.1 AddUserToGroup
+            GroupResults group = await _identityRepository.FindGroup(Role.User);
+            if (group.TotalResults == 1)
+                await _identityRepository.AddUserToGroup(newUser, group.Groups[0]);
+
             //4. Update email verification data
             user.Emailverified = true;
             user.Invitationtoken = null;

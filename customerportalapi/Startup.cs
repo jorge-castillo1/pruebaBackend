@@ -123,7 +123,7 @@ namespace customerportalapi
             {
                 c.BaseAddress = new Uri(Configuration["Identity:BaseUri"]);
                 c.Timeout = new TimeSpan(0, 2, 0);  //2 minutes
-                c.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                //c.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                 c.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue
                 {
                     NoCache = true,

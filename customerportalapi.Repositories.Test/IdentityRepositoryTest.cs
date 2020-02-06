@@ -195,5 +195,69 @@ namespace customerportalapi.Repositories.Test
             //Assert
             result.UserName = "Fake userName";
         }
+
+        [TestMethod]
+        public void AlHacerLlamadaExternaDeAñadirRoleAUsuario_NoSeProducenErrores()
+        {
+            //Arrange
+            UserIdentity user = new UserIdentity()
+            {
+                ID = "Fake ID",
+                Password = "Fake Passeword",
+                UserName = "Fake Username"
+            };
+            string groupId = Guid.NewGuid().ToString();
+
+            Mock.Get(_clientFactory).Setup(x => x.CreateClient("identityClient"))
+                .Returns(() =>
+                {
+                    HttpClient client = _handler.CreateClient();
+                    client.BaseAddress = new Uri("http://fakeUri");
+                    return client;
+                });
+
+            var response = new HttpResponseMessage
+            {
+                Content = new StringContent("{ \"id\": \"FakeId\", \"userName\": \"Fake userName\"}")
+            };
+            _handler.SetupAnyRequest()
+                .ReturnsAsync(response);
+
+            //Act
+            IdentityRepository repository = new IdentityRepository(_configurations, _clientFactory);
+            var result = repository.AddUserToGroup(user, groupId).Result;
+
+            //Assert
+            result.UserName = "Fake userName";
+        }
+
+        [TestMethod]
+        public void AlHacerLlamadaExternaDeBusquedaDeGroups_NoSeProducenErrores()
+        {
+            //Arrange
+            string groupId = Guid.NewGuid().ToString();
+
+            Mock.Get(_clientFactory).Setup(x => x.CreateClient("identityClient"))
+                .Returns(() =>
+                {
+                    HttpClient client = _handler.CreateClient();
+                    client.BaseAddress = new Uri("http://fakeUri");
+                    return client;
+                });
+
+            var response = new HttpResponseMessage
+            {
+                Content = new StringContent("{ \"totalResults\": 1, \"Resources\": [{\"displayName\":\"PRIMARY/contact\"}]}")
+            };
+            _handler.SetupAnyRequest()
+                .ReturnsAsync(response);
+
+            //Act
+            IdentityRepository repository = new IdentityRepository(_configurations, _clientFactory);
+            var result = repository.FindGroup(groupId).Result;
+
+            //Assert
+            Assert.AreEqual(1, result.Groups.Count);
+        }
     }
 }
