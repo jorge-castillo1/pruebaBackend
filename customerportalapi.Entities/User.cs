@@ -25,5 +25,7 @@ namespace customerportalapi.Entities
         public string Invitationtoken { get; set; }
         [BsonElement("externalid")]
         public string ExternalId { get; set; }
+        [BsonElement("password")]
+        public string Password { get; set; }
     }
 }

@@ -195,7 +195,7 @@ namespace customerportalapi.Services
             return result;
         }
 
-        public async Task<bool> ConfirmUserAsync(string invitationToken)
+        public async Task<Token> ConfirmUserAsync(string invitationToken)
         {
             //1. Validate invitationToken not empty
             if (string.IsNullOrEmpty(invitationToken))
@@ -204,7 +204,7 @@ namespace customerportalapi.Services
             //2. Validate user by invitationToken
             User user = _userRepository.GetUserByInvitationToken(invitationToken);
             if (user._id == null)
-                return false;
+                return new Token();
 
             //3. Create user in Authentication System
             UserIdentity userIdentity = new UserIdentity();
@@ -230,7 +230,7 @@ namespace customerportalapi.Services
                         break;
                     }
             }
-            userIdentity.Password = user.Dni;
+            userIdentity.Password = user.Password;
             userIdentity.Emails = new List<EmailAccount>()
             {
                 new EmailAccount() {Primary = true, Value = user.Email, Type = emailType}
@@ -246,7 +246,14 @@ namespace customerportalapi.Services
             //5. Confirm access status to external system
             await _profileRepository.ConfirmedWebPortalAccessAsync(user.Dni);
 
-            return true;
+            //6. Get Access Token
+            Token accessToken = await _identityRepository.Authorize(new Login()
+            {
+                Username = user.Dni,
+                Password = user.Password
+            });
+
+            return accessToken;
         }
 
         public Task<bool> UnInviteUserAsync(string dni)
