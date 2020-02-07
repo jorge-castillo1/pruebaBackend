@@ -97,12 +97,8 @@ namespace customerportalapi.Repositories.Test
             UserIdentity newuser = new UserIdentity();
             newuser.UserName = "Fake userName";
             newuser.Password = "Fake Password";
-            newuser.Emails = new List<EmailAccount>() {
-                new EmailAccount(){
-                    Primary = true,
-                    Value = "Fake Email",
-                    Type = "Fake type"
-                }
+            newuser.Emails = new List<string>() {
+               "Fake Email"
             };
             
             Mock.Get(_clientFactory).Setup(x => x.CreateClient("identityClient"))
@@ -136,12 +132,8 @@ namespace customerportalapi.Repositories.Test
             newuser.ID = "Fake ID";
             newuser.UserName = "Fake userName";
             newuser.Password = "Fake Password";
-            newuser.Emails = new List<EmailAccount>() {
-                new EmailAccount(){
-                    Primary = true,
-                    Value = "Fake Email",
-                    Type = "Fake type"
-                }
+            newuser.Emails = new List<string>() {
+               "Fake email"
             };
 
             Mock.Get(_clientFactory).Setup(x => x.CreateClient("identityClient"))
