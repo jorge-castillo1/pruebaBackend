@@ -337,6 +337,7 @@ namespace customerportalapi.Services.Test
             //Assert
             Assert.AreEqual("Fake AccessToken", tokenResult.AccesToken);
             _identityRepository.Verify(x => x.AddUser(It.IsAny<UserIdentity>()));
+            _profileRepository.Verify(x => x.GetProfilePermissionsAsync(It.IsAny<string>()));
             _identityRepository.Verify(x => x.FindGroup(It.IsAny<string>()));
             _identityRepository.Verify(x => x.AddUserToGroup(It.IsAny<UserIdentity>(), It.IsAny<Group>()));
             userRepositoryInvalid.Verify(x => x.Update(It.IsAny<User>()));
@@ -354,6 +355,8 @@ namespace customerportalapi.Services.Test
             //Act
             UserServices service = new UserServices(_userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object);
             await service.UnInviteUserAsync(dni);
+
+            //_identityRepository.Verify(x => x.DeleteUser(string userId));
         }
 
 
@@ -398,8 +401,10 @@ namespace customerportalapi.Services.Test
 
             //Assert
             Assert.IsTrue(result);
+            userRepository.Verify(x => x.GetCurrentUser(It.IsAny<string>()));
             _profileRepository.Verify(x => x.RevokedWebPortalAccessAsync(It.IsAny<string>()));
             userRepository.Verify(x => x.Update(It.IsAny<User>()));
+            _identityRepository.Verify(x => x.DeleteUser(It.IsAny<string>()));
         }
     }
 }

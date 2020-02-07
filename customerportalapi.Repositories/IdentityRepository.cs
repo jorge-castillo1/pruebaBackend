@@ -150,6 +150,30 @@ namespace customerportalapi.Repositories
             }
         }
 
+        public async Task DeleteUser(string userId)
+        {
+            var httpClient = _clientFactory.CreateClient("identityClient");
+            try
+            {
+                var url = new Uri(httpClient.BaseAddress + _configuration["Identity:Endpoints:Provisioning"] + $"/{userId}");
+
+                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                    "Basic",
+                    Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes(
+                        String.Format("{0}:{1}", _configuration["Identity:Credentials:User"], _configuration["Identity:Credentials:Password"])))
+                );
+                var response = await httpClient.DeleteAsync(url);
+                response.EnsureSuccessStatusCode();
+
+                var content = await response.Content.ReadAsStringAsync();
+                return;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
         public async Task<GroupResults> FindGroup(string groupName)
         {
             var httpClient = _clientFactory.CreateClient("identityClient");
