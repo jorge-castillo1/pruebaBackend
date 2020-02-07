@@ -196,7 +196,7 @@ namespace customerportalapi.Services
 
             if (invitationTemplate._id != null)
             {
-                //6. Sens email invitation
+                //6. Send email invitation
                 Email message = new Email();
                 message.To.Add(user.Email);
                 message.Subject = invitationTemplate.subject;
@@ -227,7 +227,6 @@ namespace customerportalapi.Services
                 case (int)UserTypes.Residential:
                     {
                         userIdentity.UserName = user.Dni;
-                        emailType = "home";
                         break;
                     }
                 case (int)UserTypes.Business:
@@ -244,10 +243,13 @@ namespace customerportalapi.Services
                     }
             }
             userIdentity.Password = user.Password;
-            userIdentity.Emails = new List<EmailAccount>()
+            userIdentity.Emails = new List<string>()
             {
-                new EmailAccount() {Primary = true, Value = user.Email, Type = emailType}
+                user.Email
             };
+            userIdentity.CardId = user.Dni;
+            userIdentity.Language = user.Language;
+            userIdentity.DisplayName = user.Name;
             UserIdentity newUser = await _identityRepository.AddUser(userIdentity);
 
             //3.1 AddUserToGroup

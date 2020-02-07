@@ -14,6 +14,14 @@ namespace customerportalapi.Entities
         [JsonProperty("password")]
         public string Password { get; set; }
         [JsonProperty("emails")]
-        public List<EmailAccount> Emails { get; set; } = new List<EmailAccount>();      
+        public List<string> Emails { get; set; } = new List<string>();
+        [JsonProperty("preferedLanguage")]
+        public string Language { get; set; }
+        [JsonProperty("userType")]
+        public string UserType { get; set; }
+        [JsonProperty("externalId")]
+        public string CardId { get; set; } 
+         [JsonProperty("displayName")]
+        public string DisplayName { get; set; }  
     }
 }
