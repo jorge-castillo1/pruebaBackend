@@ -9,6 +9,9 @@ namespace customerportalapi.Entities
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; }
 
+        [BsonElement("username")]
+        public string Username { get; set; }
+
         [BsonElement("dni")]
         public string Dni { get; set; }
 

@@ -31,7 +31,7 @@ namespace customerportalapi.Test
 
             //Asert
             Claim name = claims.FindFirst(x => x.Type == ClaimTypes.Name.ToString());
-            Assert.AreEqual("X8028916F@carbon.super", name.Value);
+            Assert.AreEqual("X8028916F", name.Value);
 
             Claim mail = claims.FindFirst(x => x.Type == ClaimTypes.Email.ToString());
             Assert.AreEqual("teo.quiroz@quantion.com", mail.Value);

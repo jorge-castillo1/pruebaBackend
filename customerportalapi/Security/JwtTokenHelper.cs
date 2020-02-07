@@ -32,8 +32,14 @@ namespace customerportalapi.Security
 
             //Claim de identidad
             Claim identidad = jwtToken.Claims.FirstOrDefault(x => x.Type == "sub");
+            var id = identidad.Value;
+
             if (identidad != null)
-                identity.AddClaim(new Claim(ClaimTypes.Name, identidad.Value));
+                if(identidad.Value.IndexOf("@") != -1){
+                    id = identidad.Value.Substring(0,identidad.Value.IndexOf("@"));
+                }
+
+                identity.AddClaim(new Claim(ClaimTypes.Name, id));
 
             //Roles
             foreach (var claim in jwtToken.Claims.Where(x => x.Type == "groups"))
@@ -49,10 +55,6 @@ namespace customerportalapi.Security
             if (expiracion != null)
                 identity.AddClaim(new Claim(ClaimTypes.Expiration, expiracion.Value));
 
-            //PreferedName Claim
-            Claim prefereredName = jwtToken.Claims.FirstOrDefault(x => x.Type == "preferred_username");
-            if (prefereredName != null)
-                identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, prefereredName.Value));
 
             principal.AddIdentity(identity);
             return principal;

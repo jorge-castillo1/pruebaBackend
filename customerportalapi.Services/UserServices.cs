@@ -36,7 +36,7 @@ namespace customerportalapi.Services
         public async Task<Profile> GetProfileAsync(string dni)
         {
             //Add customer portal Business Logic
-            User user = _userRepository.GetCurrentUser(dni);
+            User user = _userRepository.GetCurrentUserByDni(dni);
             if (user.Id == null)
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
 
@@ -75,7 +75,7 @@ namespace customerportalapi.Services
         public async Task<Profile> UpdateProfileAsync(Profile profile)
         {
             //Add customer portal Business Logic
-            User user = _userRepository.GetCurrentUser(profile.DocumentNumber);
+            User user = _userRepository.GetCurrentUserByDni(profile.DocumentNumber);
             if (user.Id == null)
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
 
@@ -156,9 +156,10 @@ namespace customerportalapi.Services
             if (user.Id == null)
             {
                 //4. Create user in portal database
-                User newUser = new User
+                user = new User
                 {
-                    Dni = userName,
+                    Username = userName,
+                    Dni = value.Dni,
                     Email = value.Email,
                     Name = value.Fullname,
                     Password = password,
@@ -168,9 +169,7 @@ namespace customerportalapi.Services
                     Invitationtoken = Guid.NewGuid().ToString()
                 };
 
-                result = await _userRepository.Create(newUser);
-                if (result)
-                    user = _userRepository.GetCurrentUser(userName);
+                result = await _userRepository.Create(user);
             }
             else
             {
@@ -201,7 +200,7 @@ namespace customerportalapi.Services
                 Email message = new Email();
                 message.To.Add(user.Email);
                 message.Subject = invitationTemplate.subject;
-                message.Body = string.Format(invitationTemplate.body, user.Name, user.Dni, user.Password,
+                message.Body = string.Format(invitationTemplate.body, user.Name, user.Username, user.Password,
                     $"{_config["InviteConfirmation"]}{user.Invitationtoken}");
                 result = await _mailRepository.Send(message);
             }
@@ -221,35 +220,14 @@ namespace customerportalapi.Services
                 return new Token();
 
             //3. Get UserProfile from external system
-            var dni = user.Usertype == 0 ? user.Dni : user.Dni.Substring(1);
-            ProfilePermissions profilepermissions = await _profileRepository.GetProfilePermissionsAsync(dni);
+            ProfilePermissions profilepermissions = await _profileRepository.GetProfilePermissionsAsync(user.Dni);
             string role = Role.User;
             if (profilepermissions.CanManageAccounts)
                 role = Role.Admin;
 
             //4. Create user in Authentication System
             UserIdentity userIdentity = new UserIdentity();
-            string emailType = string.Empty;
-            switch (user.Usertype)
-            {
-                case (int)UserTypes.Residential:
-                    {
-                        userIdentity.UserName = user.Dni;
-                        break;
-                    }
-                case (int)UserTypes.Business:
-                    {
-                        userIdentity.UserName = $"B{user.Dni}";
-                        emailType = "work";
-                        break;
-                    }
-                default:
-                    {
-                        userIdentity.UserName = user.Dni;
-                        emailType = "home";
-                        break;
-                    }
-            }
+            userIdentity.UserName = user.Username;
             userIdentity.Password = user.Password;
             userIdentity.Emails = new List<string>()
             {
@@ -272,12 +250,12 @@ namespace customerportalapi.Services
             _userRepository.Update(user);
 
             //7. Confirm access status to external system
-            await _profileRepository.ConfirmedWebPortalAccessAsync(dni);
+            await _profileRepository.ConfirmedWebPortalAccessAsync(user.Dni);
 
             //8. Get Access Token
             Token accessToken = await _identityRepository.Authorize(new Login()
             {
-                Username = user.Dni,
+                Username = user.Username,
                 Password = user.Password
             });
 
@@ -291,7 +269,7 @@ namespace customerportalapi.Services
                 throw new ServiceException("User must have a valid document number.", HttpStatusCode.BadRequest, "Dni", "Empty field");
 
             //2. Validate user
-            User user = _userRepository.GetCurrentUser(dni);
+            User user = _userRepository.GetCurrentUserByDni(dni);
             if (user.Id == null)
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
 

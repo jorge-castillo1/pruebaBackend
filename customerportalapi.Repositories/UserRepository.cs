@@ -15,7 +15,19 @@ namespace customerportalapi.Repositories
             _users = users;
         }
 
-        public User GetCurrentUser(string dni)
+        public User GetCurrentUser(string username)
+        {
+            User user = new User();
+
+            var usersInfo = _users.FindOne(t => t.Username == username);
+            foreach (var u in usersInfo)
+            {
+                user = u;
+            }
+            return user;
+        }
+
+         public User GetCurrentUserByDni(string dni)
         {
             User user = new User();
 
@@ -30,7 +42,7 @@ namespace customerportalapi.Repositories
         public User Update(User user)
         {
             //update User
-            var filter = Builders<User>.Filter.Eq(s => s.Dni, user.Dni);
+            var filter = Builders<User>.Filter.Eq(s => s.Username, user.Username);
             var result = _users.ReplaceOne(filter, user);
 
             return user;
@@ -47,7 +59,7 @@ namespace customerportalapi.Repositories
         public Task<bool> Delete(User user)
         {
             //update User
-            var filter = Builders<User>.Filter.Eq("dni", user.Dni);
+            var filter = Builders<User>.Filter.Eq("username", user.Username);
             _users.DeleteOneAsync(filter);
 
             return Task.FromResult(true);

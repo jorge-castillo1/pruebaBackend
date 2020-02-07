@@ -20,6 +20,16 @@ namespace customerportalapi.Services.Test.FakeData
                 Usertype = 1
             }).Verifiable();
 
+            db.Setup(x => x.GetCurrentUserByDni(It.IsAny<string>())).Returns(new Entities.User()
+            {
+                Dni = "12345678A",
+                Email = "fake email",
+                Language = "fake lang",
+                Profilepicture = "fake profile image",
+                Emailverified = false,
+                Usertype = 1
+            }).Verifiable();
+
             db.Setup(x => x.Create(It.IsAny<User>())).Returns(Task.FromResult(true)).Verifiable();
 
             return db;
@@ -29,6 +39,17 @@ namespace customerportalapi.Services.Test.FakeData
         {
             var db = new Mock<IUserRepository>();
             db.Setup(x => x.GetCurrentUser(It.IsAny<string>())).Returns(new User()
+            {
+                Id = "b02fc244-40e4-e511-80bf-00155d018a4f",
+                Dni = "12345678A",
+                Email = "fake email 1",
+                Language = "fake lang",
+                Profilepicture = "fake profile image",
+                Emailverified = true,
+                Usertype = 1
+            }).Verifiable();
+
+            db.Setup(x => x.GetCurrentUserByDni(It.IsAny<string>())).Returns(new User()
             {
                 Id = "b02fc244-40e4-e511-80bf-00155d018a4f",
                 Dni = "12345678A",
@@ -57,6 +78,17 @@ namespace customerportalapi.Services.Test.FakeData
         {
             var db = new Mock<IUserRepository>();
             db.Setup(x => x.GetCurrentUser(It.IsAny<string>())).Returns(new User()
+            {
+                Id = "b02fc244-40e4-e511-80bf-00155d018a4f",
+                Dni = "12345678A",
+                Email = "fake email 1",
+                Language = "fake lang",
+                Profilepicture = "fake profile image",
+                Emailverified = false,
+                Usertype = 1
+            }).Verifiable();
+
+             db.Setup(x => x.GetCurrentUserByDni(It.IsAny<string>())).Returns(new User()
             {
                 Id = "b02fc244-40e4-e511-80bf-00155d018a4f",
                 Dni = "12345678A",
