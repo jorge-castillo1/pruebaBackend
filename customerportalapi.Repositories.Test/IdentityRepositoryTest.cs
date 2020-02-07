@@ -262,5 +262,33 @@ namespace customerportalapi.Repositories.Test
             //Assert
             Assert.AreEqual(1, result.Groups.Count);
         }
+
+        [TestMethod]
+        public void AlHacerLlamadaExternaDeBorrarUsuario_NoSeProducenErrores()
+        {
+            //Arrange
+            string userId = Guid.NewGuid().ToString();
+
+            Mock.Get(_clientFactory).Setup(x => x.CreateClient("identityClient"))
+                .Returns(() =>
+                {
+                    HttpClient client = _handler.CreateClient();
+                    client.BaseAddress = new Uri("http://fakeUri");
+                    return client;
+                });
+
+            var response = new HttpResponseMessage
+            {
+                Content = new StringContent("{}")
+            };
+            _handler.SetupAnyRequest()
+                .ReturnsAsync(response);
+
+            //Act
+            IdentityRepository repository = new IdentityRepository(_configurations, _clientFactory);
+            repository.DeleteUser(userId).Wait();
+
+            //Assert
+        }
     }
 }

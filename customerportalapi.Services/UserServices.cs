@@ -219,7 +219,14 @@ namespace customerportalapi.Services
             if (user.Id == null)
                 return new Token();
 
-            //3. Create user in Authentication System
+            //3. Get UserProfile from external system
+            var dni = user.Usertype == 0 ? user.Dni : user.Dni.Substring(1);
+            ProfilePermissions profilepermissions = await _profileRepository.GetProfilePermissionsAsync(dni);
+            string role = Role.User;
+            if (profilepermissions.CanManageAccounts)
+                role = Role.Admin;
+
+            //4. Create user in Authentication System
             UserIdentity userIdentity = new UserIdentity();
             string emailType = string.Empty;
             switch (user.Usertype)
@@ -250,21 +257,21 @@ namespace customerportalapi.Services
             };
             UserIdentity newUser = await _identityRepository.AddUser(userIdentity);
 
-            //3.1 AddUserToGroup
-            GroupResults group = await _identityRepository.FindGroup(Role.User);
+            //5 AddUserToGroup
+            GroupResults group = await _identityRepository.FindGroup(role);
             if (group.TotalResults == 1)
                 await _identityRepository.AddUserToGroup(newUser, group.Groups[0]);
 
-            //4. Update email verification data
+            //6. Update email verification data
             user.Emailverified = true;
             user.Invitationtoken = null;
             user.ExternalId = newUser.ID;
             _userRepository.Update(user);
 
-            //5. Confirm access status to external system
-            await _profileRepository.ConfirmedWebPortalAccessAsync(user.Dni);
+            //7. Confirm access status to external system
+            await _profileRepository.ConfirmedWebPortalAccessAsync(dni);
 
-            //6. Get Access Token
+            //8. Get Access Token
             Token accessToken = await _identityRepository.Authorize(new Login()
             {
                 Username = user.Dni,
@@ -297,7 +304,8 @@ namespace customerportalapi.Services
             user.Invitationtoken = null;
             _userRepository.Update(user);
 
-            //6. Delete from IS?
+            //6. Delete from IS
+            _identityRepository.DeleteUser(user.ExternalId);
 
             return Task.FromResult(true);
         }

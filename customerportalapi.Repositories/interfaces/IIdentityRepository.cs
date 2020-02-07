@@ -13,6 +13,7 @@ namespace customerportalapi.Repositories.interfaces
         Task<UserIdentity> AddUser(UserIdentity userIdentity);
         Task<UserIdentity> UpdateUser(UserIdentity userIdentity);
         Task<UserIdentity> GetUser(string userId);
+        Task DeleteUser(string userId);
 
         Task<UserIdentity> AddUserToGroup(UserIdentity userIdentity, Group group);
 
