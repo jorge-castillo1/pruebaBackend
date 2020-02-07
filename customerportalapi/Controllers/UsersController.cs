@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using AutoWrapper.Wrappers;
 using customerportalapi.Entities;
+using customerportalapi.Security;
 using customerportalapi.Services.Exceptions;
 using customerportalapi.Services.interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -24,11 +25,11 @@ namespace customerportalapi.Controllers
 
         // GET api/users/{dni}
         [HttpGet("{dni}")]
+        [AuthorizeToken]
         public async Task<ApiResponse> GetAsync(string dni)
         {
             try
             {
-                _logger.LogInformation("Controller Users Dni!!!!!!!!!!!!!!");
                 var entity = await _services.GetProfileAsync(dni);
                 return new ApiResponse(entity);
             }
@@ -45,6 +46,7 @@ namespace customerportalapi.Controllers
 
         // POST api/users
         [HttpPatch]
+        [AuthorizeToken]
         public async Task<ApiResponse> PatchAsync([FromBody] Profile value)
         {
             try
@@ -65,6 +67,7 @@ namespace customerportalapi.Controllers
 
         // POST api/users/invite
         [HttpPost("invite")]
+        [AuthorizeApiKey]
         public async Task<ApiResponse> Invite([FromBody] Invitation value)
         {
             try
@@ -105,11 +108,52 @@ namespace customerportalapi.Controllers
 
         // PUT api/users/uninvite/{dni}
         [HttpPut("uninvite/{dni}")]
+        [AuthorizeApiKey]
         public async Task<ApiResponse> UnInvite(string dni)
         {
             try
             {
                 var entity = await _services.UnInviteUserAsync(dni);
+                return new ApiResponse(entity);
+            }
+            catch (ServiceException se)
+            {
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+
+        // GET api/users/accounts/{dni}
+        [HttpGet("accounts/{dni}")]
+        public async Task<ApiResponse> GetAccountAsync(string dni)
+        {
+            try
+            {
+                var entity = await _services.GetAccountAsync(dni);
+                return new ApiResponse(entity);
+            }
+            catch (ServiceException se)
+            {
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+
+        // POST api/users/accounts
+        [HttpPatch("accounts")]
+        public async Task<ApiResponse> PatchAccountAsync([FromBody] Account value)
+        {
+            try
+            {
+                var entity = await _services.UpdateAccountAsync(value);
                 return new ApiResponse(entity);
             }
             catch (ServiceException se)

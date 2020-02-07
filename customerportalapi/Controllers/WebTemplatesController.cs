@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using AutoWrapper.Wrappers;
 using customerportalapi.Entities.enums;
+using customerportalapi.Security;
 using customerportalapi.Services.interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -10,6 +11,7 @@ namespace customerportalapi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [AuthorizeToken]
     public class WebTemplatesController : ControllerBase
     {
         private readonly IWebTemplateServices _services;

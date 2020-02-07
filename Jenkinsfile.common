@@ -1,5 +1,5 @@
 container('dotnetcore') {
-  gitlabBuilds(builds: ['build', 'test', 'sonarqube', 'quality_gate', 'docker', 'artifacts']) {
+  gitlabBuilds(builds: ['build', 'test', 'sonarqube', 'quality_gate', 'docker']) {
 
     stage('build') { gitlabCommitStatus(name: 'build') {
       sh """
@@ -47,7 +47,7 @@ container('dotnetcore') {
             docker.withRegistry('https://registry.quantion.com', 'registry_docker_credentials') {
 
               def image = docker.build("${registry}/${service}/backend", "--network container:\$(docker ps | grep \$(hostname) | grep k8s_jnlp | cut -d\" \" -f1) -f Dockerfile .")
-              image.push("v${BUILD_NUMBER}")
+              image.push("b_${env.gitlabSourceBranch}")
               image.push("latest")
             }
           }

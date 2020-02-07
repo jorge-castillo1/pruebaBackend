@@ -33,6 +33,13 @@ namespace customerportalapi.Services.Test.FakeData
                 EmailAddress2 = "fake email 2 modified"
             })).Verifiable();
 
+            db.Setup(x => x.GetProfilePermissionsAsync(It.IsAny<string>())).Returns(Task.FromResult(new ProfilePermissions()
+            {
+                DocumentNumber = "fake Document Number",
+                CanManageAccounts = true,
+                CanManageContacts = false
+            })).Verifiable();
+
             return db;
         }
     }

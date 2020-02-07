@@ -13,9 +13,8 @@ namespace customerportalapi.Repositories
 {
     public class ProfileRepository : IProfileRepository
     {
-        readonly IConfiguration _configuration;
-        readonly IHttpClientFactory _clientFactory;
-
+        private readonly IConfiguration _configuration;
+        private readonly IHttpClientFactory _clientFactory;
         private readonly ILogger<ProfileRepository> _logger;
 
         public ProfileRepository(IConfiguration configuration, IHttpClientFactory clientFactory, ILogger<ProfileRepository> logger)
@@ -30,11 +29,11 @@ namespace customerportalapi.Repositories
             var httpClient = _clientFactory.CreateClient("httpClientCRM");
             httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["ProfileAPI"]);
             _logger.LogWarning("Base Address: " + httpClient.BaseAddress.AbsolutePath);
+
             try
             {
-               var response = await httpClient.GetAsync(dni, HttpCompletionOption.ResponseHeadersRead);
+                var response = await httpClient.GetAsync(dni, HttpCompletionOption.ResponseHeadersRead);
                 response.EnsureSuccessStatusCode();
-                if (!response.IsSuccessStatusCode) return new Profile();
                 var content = await response.Content.ReadAsStringAsync();
                 JObject result = JObject.Parse(content);
 
@@ -45,8 +44,6 @@ namespace customerportalapi.Repositories
                 _logger.LogError(ex.Message);
                 return new Profile();
             }
-            
-
         }
 
         public async Task<Profile> UpdateProfileAsync(Profile profile)
@@ -60,11 +57,89 @@ namespace customerportalapi.Repositories
 
             var response = await httpClient.SendAsync(request);
             response.EnsureSuccessStatusCode();
-            if (!response.IsSuccessStatusCode) return new Profile();
             var content = await response.Content.ReadAsStringAsync();
             JObject result = JObject.Parse(content);
 
             return JsonConvert.DeserializeObject<Profile>(result.GetValue("result").ToString());
+        }
+
+        public async Task<AccountCrm> GetAccountAsync(string dni)
+        {
+            var httpClient = _clientFactory.CreateClient("httpClientCRM");
+            httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["AccountsAPI"]);
+
+            var response = await httpClient.GetAsync(dni, HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
+            var content = await response.Content.ReadAsStringAsync();
+            JObject result = JObject.Parse(content);
+
+            return JsonConvert.DeserializeObject<AccountCrm>(result.GetValue("result").ToString());
+        }
+
+        public async Task<AccountCrm> UpdateAccountAsync(AccountCrm account)
+        {
+            var httpClient = _clientFactory.CreateClient("httpClientCRM");
+            var method = new HttpMethod("PATCH");
+            var request = new HttpRequestMessage(method, new Uri(_configuration["GatewayUrl"] + _configuration["AccountsAPI"]))
+            {
+                Content = new StringContent(JsonConvert.SerializeObject(account), Encoding.UTF8, "application/json")
+            };
+
+            var response = await httpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+            var content = await response.Content.ReadAsStringAsync();
+            JObject result = JObject.Parse(content);
+
+            return JsonConvert.DeserializeObject<AccountCrm>(result.GetValue("result").ToString());
+        }
+
+        public async Task<Profile> ConfirmedWebPortalAccessAsync(string dni)
+        {
+            var httpClient = _clientFactory.CreateClient("httpClientCRM");
+            var method = new HttpMethod("PATCH");
+            var request = new HttpRequestMessage(method, new Uri(_configuration["GatewayUrl"] + _configuration["ProfileAPI"] + $"{dni}/invited"));
+
+            var response = await httpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+            var content = await response.Content.ReadAsStringAsync();
+            JObject result = JObject.Parse(content);
+
+            return JsonConvert.DeserializeObject<Profile>(result.GetValue("result").ToString());
+        }
+
+        public async Task<Profile> RevokedWebPortalAccessAsync(string dni)
+        {
+            var httpClient = _clientFactory.CreateClient("httpClientCRM");
+            var method = new HttpMethod("PATCH");
+            var request = new HttpRequestMessage(method, new Uri(_configuration["GatewayUrl"] + _configuration["ProfileAPI"] + $"{dni}/uninvited"));
+            
+            var response = await httpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+            var content = await response.Content.ReadAsStringAsync();
+            JObject result = JObject.Parse(content);
+
+            return JsonConvert.DeserializeObject<Profile>(result.GetValue("result").ToString());
+        }
+
+        public async Task<ProfilePermissions> GetProfilePermissionsAsync(string dni)
+        {
+            var httpClient = _clientFactory.CreateClient("httpClientCRM");
+            httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["ProfileAPI"]);
+            _logger.LogWarning("Base Address: " + httpClient.BaseAddress.AbsolutePath);
+
+            try
+            {
+                var response = await httpClient.GetAsync(dni, HttpCompletionOption.ResponseHeadersRead);
+                response.EnsureSuccessStatusCode();
+                var content = await response.Content.ReadAsStringAsync();
+                JObject result = JObject.Parse(content);
+                return JsonConvert.DeserializeObject<ProfilePermissions>(result.GetValue("result").ToString());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return new ProfilePermissions();
+            }
         }
     }
 }
