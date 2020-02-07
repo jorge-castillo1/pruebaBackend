@@ -206,7 +206,10 @@ namespace customerportalapi.Repositories.Test
                 Password = "Fake Passeword",
                 UserName = "Fake Username"
             };
-            string groupId = Guid.NewGuid().ToString();
+            Group group = new Group()
+            {
+                ID = "Fake ID"
+            };
 
             Mock.Get(_clientFactory).Setup(x => x.CreateClient("identityClient"))
                 .Returns(() =>
@@ -225,7 +228,7 @@ namespace customerportalapi.Repositories.Test
 
             //Act
             IdentityRepository repository = new IdentityRepository(_configurations, _clientFactory);
-            var result = repository.AddUserToGroup(user, groupId).Result;
+            var result = repository.AddUserToGroup(user, group).Result;
 
             //Assert
             result.UserName = "Fake userName";

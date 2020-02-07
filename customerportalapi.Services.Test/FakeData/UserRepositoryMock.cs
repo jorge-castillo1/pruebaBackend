@@ -30,7 +30,7 @@ namespace customerportalapi.Services.Test.FakeData
             var db = new Mock<IUserRepository>();
             db.Setup(x => x.GetCurrentUser(It.IsAny<string>())).Returns(new User()
             {
-                _id = "b02fc244-40e4-e511-80bf-00155d018a4f",
+                Id = "b02fc244-40e4-e511-80bf-00155d018a4f",
                 Dni = "12345678A",
                 Email = "fake email 1",
                 Language = "fake lang",
@@ -41,7 +41,7 @@ namespace customerportalapi.Services.Test.FakeData
 
             db.Setup(x => x.Update(It.IsAny<User>())).Returns(new User()
             {
-                _id = "b02fc244-40e4-e511-80bf-00155d018a4f",
+                Id = "b02fc244-40e4-e511-80bf-00155d018a4f",
                 Dni = "12345678A",
                 Email = "fake email 1 modified",
                 Language = "fake lang modified",
@@ -58,7 +58,7 @@ namespace customerportalapi.Services.Test.FakeData
             var db = new Mock<IUserRepository>();
             db.Setup(x => x.GetCurrentUser(It.IsAny<string>())).Returns(new User()
             {
-                _id = "b02fc244-40e4-e511-80bf-00155d018a4f",
+                Id = "b02fc244-40e4-e511-80bf-00155d018a4f",
                 Dni = "12345678A",
                 Email = "fake email 1",
                 Language = "fake lang",
@@ -69,7 +69,7 @@ namespace customerportalapi.Services.Test.FakeData
 
             db.Setup(x => x.Update(It.IsAny<User>())).Returns(new User()
             {
-                _id = "b02fc244-40e4-e511-80bf-00155d018a4f",
+                Id = "b02fc244-40e4-e511-80bf-00155d018a4f",
                 Dni = "12345678A",
                 Email = "fake email 1 modified",
                 Language = "fake lang modified",
@@ -86,7 +86,7 @@ namespace customerportalapi.Services.Test.FakeData
             var db = new Mock<IUserRepository>();
             db.Setup(x => x.GetUserByInvitationToken(It.IsAny<string>())).Returns(new User()
             {
-                _id = "b02fc244-40e4-e511-80bf-00155d018a4f",
+                Id = "b02fc244-40e4-e511-80bf-00155d018a4f",
                 Dni = "12345678A",
                 Email = "fake email 1",
                 Language = "fake lang",
@@ -98,7 +98,7 @@ namespace customerportalapi.Services.Test.FakeData
 
             db.Setup(x => x.Update(It.IsAny<User>())).Returns(new User()
             {
-                _id = "b02fc244-40e4-e511-80bf-00155d018a4f",
+                Id = "b02fc244-40e4-e511-80bf-00155d018a4f",
                 Dni = "12345678A",
                 Email = "fake email 1",
                 Language = "fake lang",

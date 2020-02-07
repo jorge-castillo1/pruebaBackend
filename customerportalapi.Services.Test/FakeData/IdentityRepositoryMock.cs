@@ -40,6 +40,27 @@ namespace customerportalapi.Services.Test.FakeData
                 Password = "Fake Password"
             })).Verifiable();
 
+            db.Setup(x => x.FindGroup(It.IsAny<string>())).Returns(Task.FromResult(new GroupResults()
+            {
+                TotalResults = 1,
+                Groups = new List<Group>()
+                {
+                    new Group()
+                    {
+                        ID = "Fake ID",
+                        DisplayName = "Fake group name",
+                         Members = new List<UserGroupMember>()
+                        {
+                            new UserGroupMember()
+                            {
+                                Display = "Fake user name",
+                                Value = "Fake ID User"
+                            }
+                        }
+                    }
+                }
+            })).Verifiable();
+
             return db;
         }
     }

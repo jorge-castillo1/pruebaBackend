@@ -336,8 +336,11 @@ namespace customerportalapi.Services.Test
 
             //Assert
             Assert.AreEqual("Fake AccessToken", tokenResult.AccesToken);
-            _profileRepository.Verify(x => x.ConfirmedWebPortalAccessAsync(It.IsAny<string>()));
+            _identityRepository.Verify(x => x.AddUser(It.IsAny<UserIdentity>()));
+            _identityRepository.Verify(x => x.FindGroup(It.IsAny<string>()));
+            _identityRepository.Verify(x => x.AddUserToGroup(It.IsAny<UserIdentity>(), It.IsAny<Group>()));
             userRepositoryInvalid.Verify(x => x.Update(It.IsAny<User>()));
+            _profileRepository.Verify(x => x.ConfirmedWebPortalAccessAsync(It.IsAny<string>()));
             _identityRepository.Verify(x => x.Authorize(It.IsAny<Login>()));
         }
 
