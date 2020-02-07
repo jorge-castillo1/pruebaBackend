@@ -16,5 +16,7 @@ namespace customerportalapi.Repositories.interfaces
         Task<Profile> ConfirmedWebPortalAccessAsync(string dni);
 
         Task<Profile> RevokedWebPortalAccessAsync(string dni);
+
+        Task<ProfilePermissions> GetProfilePermissionsAsync(string dni);
     }
 }

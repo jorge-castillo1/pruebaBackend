@@ -1,7 +1,4 @@
 ﻿using customerportalapi.Entities.enums;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace customerportalapi.Services
 {
@@ -9,7 +6,7 @@ namespace customerportalapi.Services
     {
         public static string GetLanguage(string invitationLanguage)
         {
-            switch(invitationLanguage.ToLower())
+            switch (invitationLanguage.ToLower())
             {
                 case "spanish":
                     return LanguageTypes.es.ToString();
@@ -33,7 +30,7 @@ namespace customerportalapi.Services
                 case "business":
                     return (int)UserTypes.Business;
                 default:
-                    return (int)UserTypes.Residential; 
+                    return (int)UserTypes.Residential;
             }
         }
     }
