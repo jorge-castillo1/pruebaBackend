@@ -7,6 +7,7 @@ using customerportalapi.Repositories.interfaces;
 using customerportalapi.Services.interfaces;
 using Microsoft.Extensions.Caching.Distributed;
 using System.Net;
+using System.Net.Http;
 using customerportalapi.Services.Exceptions;
 
 namespace customerportalapi.Services
@@ -23,8 +24,13 @@ namespace customerportalapi.Services
         }
 
         public async Task<Token> GetToken(Login credentials){
-
-            return await _identityRepository.Authorize(credentials);
+            try{
+                return await _identityRepository.Authorize(credentials);
+            }
+            catch(HttpRequestException ex){
+                throw new ServiceException("Login Failed", HttpStatusCode.BadRequest);
+            }
+            
         }
 
         public async Task<Token> ChangePassword(ResetPassword credentials)
