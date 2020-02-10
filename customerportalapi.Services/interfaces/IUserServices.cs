@@ -18,5 +18,7 @@ namespace customerportalapi.Services.interfaces
         Task<Account> GetAccountAsync(string dni);
 
         Task<Account> UpdateAccountAsync(Account account);
+
+        Task<bool> ContactAsync(FormContact value);
     }
 }
