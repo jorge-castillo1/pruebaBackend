@@ -72,5 +72,48 @@ namespace customerportalapi.Repositories
                 throw ex;
             }
         }
+
+        public async Task<Token> RefreshToken(string refreshToken)
+        {
+            var httpClient = _clientFactory.CreateClient("identityClient");
+            try
+            {
+                var body = new Dictionary<string, string>();
+                body.Add("refresh_token", refreshToken);
+                body.Add("grant_type", "refresh_token");
+                var form = new FormUrlEncodedContent(body);
+                var url = httpClient.BaseAddress + _configuration["Identity:Endpoints:Authorize"];
+                var response = await httpClient.PostAsync(url, form);
+                response.EnsureSuccessStatusCode();
+
+                var content = await response.Content.ReadAsStringAsync();
+                return JsonConvert.DeserializeObject<Token>(content);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<bool> Logout(string token)
+        {
+            var httpClient = _clientFactory.CreateClient("identityClient");
+            try
+            {
+                var body = new Dictionary<string, string>();
+                body.Add("token", token);
+                body.Add("token_type_hint", "access_token");
+                var form = new FormUrlEncodedContent(body);
+                var url = httpClient.BaseAddress + _configuration["Identity:Endpoints:Revoke"];
+                var response = await httpClient.PostAsync(url, form);
+                response.EnsureSuccessStatusCode();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
     }
 }
