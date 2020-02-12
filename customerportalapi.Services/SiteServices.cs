@@ -31,8 +31,8 @@ namespace customerportalapi.Services
         public async Task<List<Site>> GetContractsAsync(string dni)
         {
             //Add customer portal Business Logic
-            User user = _userRepository.GetCurrentUser(dni);
-            if (user._id == null)
+            User user = _userRepository.GetCurrentUserByDni(dni);
+            if (user.Id == null)
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
             
             //2. If exist complete data from external repository

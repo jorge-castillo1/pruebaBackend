@@ -120,5 +120,26 @@ namespace customerportalapi.Repositories
 
             return JsonConvert.DeserializeObject<Profile>(result.GetValue("result").ToString());
         }
+
+        public async Task<ProfilePermissions> GetProfilePermissionsAsync(string dni)
+        {
+            var httpClient = _clientFactory.CreateClient("httpClientCRM");
+            httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["ProfileAPI"]);
+            _logger.LogWarning("Base Address: " + httpClient.BaseAddress.AbsolutePath);
+
+            try
+            {
+                var response = await httpClient.GetAsync(dni, HttpCompletionOption.ResponseHeadersRead);
+                response.EnsureSuccessStatusCode();
+                var content = await response.Content.ReadAsStringAsync();
+                JObject result = JObject.Parse(content);
+                return JsonConvert.DeserializeObject<ProfilePermissions>(result.GetValue("result").ToString());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return new ProfilePermissions();
+            }
+        }
     }
 }
