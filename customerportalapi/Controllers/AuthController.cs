@@ -6,6 +6,7 @@ using customerportalapi.Services.Exceptions;
 using customerportalapi.Services.interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using System.Net.Http.Headers;
 
 namespace customerportalapi.Controllers
 {
@@ -42,12 +43,14 @@ namespace customerportalapi.Controllers
             }
         }
 
-        [HttpPost("logout")]
-        public async Task<ApiResponse> LogoutAsync([FromBody] RefreshToken value)
+        [HttpGet("logout")]
+        public async Task<ApiResponse> LogoutAsync()
         {
             try
             {
-                var entity = await _service.Logout(value.token);
+                string authorization = AuthenticationHeaderValue.Parse(Request.Headers["Authorization"]).ToString();
+                var token = authorization.Split(' ')[1];
+                var entity = await _service.Logout(token);
                 return new ApiResponse(entity);
             }
             catch (ServiceException se)
