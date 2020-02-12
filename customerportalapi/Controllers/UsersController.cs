@@ -25,12 +25,33 @@ namespace customerportalapi.Controllers
 
         // GET api/users/{dni}
         [HttpGet("{dni}")]
+        [HttpGet("{dni}/Residential")]
         [AuthorizeToken]
         public async Task<ApiResponse> GetAsync(string dni)
         {
             try
             {
-                var entity = await _services.GetProfileAsync(dni);
+                var entity = await _services.GetProfileAsync(dni, AccountType.Residential);
+                return new ApiResponse(entity);
+            }
+            catch (ServiceException se)
+            {
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+
+        [HttpGet("{dni}/Business")]
+        [AuthorizeToken]
+        public async Task<ApiResponse> GetBusinessAsync(string dni)
+        {
+            try
+            {
+                var entity = await _services.GetProfileAsync(dni, AccountType.Business);
                 return new ApiResponse(entity);
             }
             catch (ServiceException se)
@@ -109,11 +130,38 @@ namespace customerportalapi.Controllers
         // PUT api/users/uninvite/{dni}
         [HttpPut("uninvite/{dni}")]
         [AuthorizeApiKey]
-        public async Task<ApiResponse> UnInvite(string dni)
+        [Obsolete]
+        public async Task<ApiResponse> UnInviteDni(string dni)
         {
             try
             {
-                var entity = await _services.UnInviteUserAsync(dni);
+                Invitation value = new Invitation()
+                {
+                    Dni = dni,
+                    CustomerType = AccountType.Residential
+                };
+                var entity = await _services.UnInviteUserAsync(value);
+                return new ApiResponse(entity);
+            }
+            catch (ServiceException se)
+            {
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+
+        // PUT api/users/uninvite/{dni}
+        [HttpPut("uninvite")]
+        [AuthorizeApiKey]
+        public async Task<ApiResponse> UnInvite([FromBody] Invitation value)
+        {
+            try
+            {
+                var entity = await _services.UnInviteUserAsync(value);
                 return new ApiResponse(entity);
             }
             catch (ServiceException se)
@@ -129,11 +177,31 @@ namespace customerportalapi.Controllers
 
         // GET api/users/accounts/{dni}
         [HttpGet("accounts/{dni}")]
+        [HttpGet("accounts/{dni}/Residential")]
         public async Task<ApiResponse> GetAccountAsync(string dni)
         {
             try
             {
-                var entity = await _services.GetAccountAsync(dni);
+                var entity = await _services.GetAccountAsync(dni, AccountType.Residential);
+                return new ApiResponse(entity);
+            }
+            catch (ServiceException se)
+            {
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+
+        [HttpGet("accounts/{dni}/Business")]
+        public async Task<ApiResponse> GetAccountBusinessAsync(string dni)
+        {
+            try
+            {
+                var entity = await _services.GetAccountAsync(dni, AccountType.Business);
                 return new ApiResponse(entity);
             }
             catch (ServiceException se)

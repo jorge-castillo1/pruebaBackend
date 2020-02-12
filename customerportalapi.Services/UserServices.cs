@@ -33,10 +33,11 @@ namespace customerportalapi.Services
         }
 
 
-        public async Task<Profile> GetProfileAsync(string dni)
+        public async Task<Profile> GetProfileAsync(string dni, string accountType)
         {
             //Add customer portal Business Logic
-            User user = _userRepository.GetCurrentUserByDni(dni);
+            int userType = InvitationUtils.GetUserType(accountType);
+            User user = _userRepository.GetCurrentUserByDniAndType(dni, userType);
             if (user.Id == null)
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
 
@@ -46,7 +47,7 @@ namespace customerportalapi.Services
 
             //2. If exist complete data from external repository
             //Invoke repository
-            var entity = await _profileRepository.GetProfileAsync(dni);
+            var entity = await _profileRepository.GetProfileAsync(dni, accountType);
 
             //3. Set Email Principal according to external data. No two principal emails allowed
             entity.EmailAddress1Principal = false;
@@ -68,6 +69,10 @@ namespace customerportalapi.Services
 
             entity.Language = user.Language;
             entity.Avatar = user.Profilepicture;
+            //entity.CustomerTypeInfo = new AccountCustomerType()
+            //{
+            //    CustomerType = accountType
+            //}
 
             return entity;
         }
@@ -75,7 +80,14 @@ namespace customerportalapi.Services
         public async Task<Profile> UpdateProfileAsync(Profile profile)
         {
             //Add customer portal Business Logic
-            User user = _userRepository.GetCurrentUserByDni(profile.DocumentNumber);
+            if (profile.CustomerTypeInfo == null)
+                profile.CustomerTypeInfo = new AccountCustomerType();
+
+            if (string.IsNullOrEmpty(profile.CustomerTypeInfo.CustomerType))
+                profile.CustomerTypeInfo.CustomerType = AccountType.Residential;
+
+            int userType = InvitationUtils.GetUserType(profile.CustomerTypeInfo.CustomerType);
+            User user = _userRepository.GetCurrentUserByDniAndType(profile.DocumentNumber, userType);
             if (user.Id == null)
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
 
@@ -220,7 +232,8 @@ namespace customerportalapi.Services
                 return new Token();
 
             //3. Get UserProfile from external system
-            ProfilePermissions profilepermissions = await _profileRepository.GetProfilePermissionsAsync(user.Dni);
+            string accountType = InvitationUtils.GetAccountType(user.Usertype);
+            ProfilePermissions profilepermissions = await _profileRepository.GetProfilePermissionsAsync(user.Dni, accountType);
             string role = Role.User;
             if (profilepermissions.CanManageAccounts)
                 role = Role.Admin;
@@ -250,7 +263,7 @@ namespace customerportalapi.Services
             _userRepository.Update(user);
 
             //7. Confirm access status to external system
-            await _profileRepository.ConfirmedWebPortalAccessAsync(user.Dni);
+            await _profileRepository.ConfirmedWebPortalAccessAsync(user.Dni, accountType);
 
             //8. Get Access Token
             Token accessToken = await _identityRepository.Authorize(new Login()
@@ -262,14 +275,15 @@ namespace customerportalapi.Services
             return accessToken;
         }
 
-        public Task<bool> UnInviteUserAsync(string dni)
+        public Task<bool> UnInviteUserAsync(Invitation value)
         {
             //1. Validate dni not empty
-            if (string.IsNullOrEmpty(dni))
+            if (string.IsNullOrEmpty(value.Dni))
                 throw new ServiceException("User must have a valid document number.", HttpStatusCode.BadRequest, "Dni", "Empty field");
 
             //2. Validate user
-            User user = _userRepository.GetCurrentUserByDni(dni);
+            int userType = InvitationUtils.GetUserType(value.CustomerType);
+            User user = _userRepository.GetCurrentUserByDniAndType(value.Dni, userType);
             if (user.Id == null)
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
 
@@ -278,7 +292,7 @@ namespace customerportalapi.Services
                 return Task.FromResult(false);
 
             //4. Confirm revocation access status to external system
-            _profileRepository.RevokedWebPortalAccessAsync(user.Dni);
+            _profileRepository.RevokedWebPortalAccessAsync(user.Dni, value.CustomerType);
 
             //5. Update invitation data
             user.Emailverified = false;
@@ -291,10 +305,10 @@ namespace customerportalapi.Services
             return Task.FromResult(true);
         }
 
-        public async Task<Account> GetAccountAsync(string dni)
+        public async Task<Account> GetAccountAsync(string dni, string accountType)
         {
             //Invoke repository
-            AccountCrm entity = await _profileRepository.GetAccountAsync(dni);
+            AccountProfile entity = await _profileRepository.GetAccountAsync(dni, accountType);
             if (entity == null)
                 throw new ServiceException("Account is not found.", HttpStatusCode.NotFound, "Account", "Not exist");
 
@@ -306,7 +320,7 @@ namespace customerportalapi.Services
         public async Task<Account> UpdateAccountAsync(Account value)
         {
             //Invoke repository
-            var accountCrm = new AccountCrm
+            var accountprofile = new AccountProfile
             {
                 SmCustomerId = value.SmCustomerId,
                 Phone1 = value.Phone1,
@@ -320,37 +334,37 @@ namespace customerportalapi.Services
             {
                 if (address.Type == AddressTypes.Main.ToString())
                 {
-                    accountCrm.Address1Street1 = address.Street1;
-                    accountCrm.Address1Street2 = address.Street2;
-                    accountCrm.Address1Street3 = address.Street3;
-                    accountCrm.Address1City = address.City;
-                    accountCrm.Address1StateOrProvince = address.StateOrProvince;
-                    accountCrm.Address1PostalCode = address.ZipOrPostalCode;
-                    accountCrm.Address1Country = address.Country;
+                    accountprofile.Address1Street1 = address.Street1;
+                    accountprofile.Address1Street2 = address.Street2;
+                    accountprofile.Address1Street3 = address.Street3;
+                    accountprofile.Address1City = address.City;
+                    accountprofile.Address1StateOrProvince = address.StateOrProvince;
+                    accountprofile.Address1PostalCode = address.ZipOrPostalCode;
+                    accountprofile.Address1Country = address.Country;
                 }
                 if (address.Type == AddressTypes.Invoice.ToString())
                 {
-                    accountCrm.Address2Street1 = address.Street1;
-                    accountCrm.Address2Street2 = address.Street2;
-                    accountCrm.Address2Street3 = address.Street3;
-                    accountCrm.Address2City = address.City;
-                    accountCrm.Address2StateOrProvince = address.StateOrProvince;
-                    accountCrm.Address2PostalCode = address.ZipOrPostalCode;
-                    accountCrm.Address2Country = address.Country;
+                    accountprofile.Address2Street1 = address.Street1;
+                    accountprofile.Address2Street2 = address.Street2;
+                    accountprofile.Address2Street3 = address.Street3;
+                    accountprofile.Address2City = address.City;
+                    accountprofile.Address2StateOrProvince = address.StateOrProvince;
+                    accountprofile.Address2PostalCode = address.ZipOrPostalCode;
+                    accountprofile.Address2Country = address.Country;
                 }
                 if (address.Type == AddressTypes.Alternate.ToString())
                 {
-                    accountCrm.AlternateStreet1 = address.Street1;
-                    accountCrm.AlternateStreet2 = address.Street2;
-                    accountCrm.AlternateStreet3 = address.Street3;
-                    accountCrm.AlternateCity = address.City;
-                    accountCrm.AlternateStateOrProvince = address.StateOrProvince;
-                    accountCrm.AlternatePostalCode = address.ZipOrPostalCode;
-                    accountCrm.AlternateCountry = address.Country;
+                    accountprofile.AlternateStreet1 = address.Street1;
+                    accountprofile.AlternateStreet2 = address.Street2;
+                    accountprofile.AlternateStreet3 = address.Street3;
+                    accountprofile.AlternateCity = address.City;
+                    accountprofile.AlternateStateOrProvince = address.StateOrProvince;
+                    accountprofile.AlternatePostalCode = address.ZipOrPostalCode;
+                    accountprofile.AlternateCountry = address.Country;
                 }
             }
 
-            AccountCrm entity = await _profileRepository.UpdateAccountAsync(accountCrm);
+            AccountProfile entity = await _profileRepository.UpdateAccountAsync(accountprofile);
             if (entity == null)
                 throw new ServiceException("Account is not found.", HttpStatusCode.NotFound, "Account", "Not exist");
 
@@ -373,7 +387,8 @@ namespace customerportalapi.Services
             if (user.Id == null)
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
 
-            Profile userProfile = await _profileRepository.GetProfileAsync(user.Dni);
+            string accountType = InvitationUtils.GetAccountType(user.Usertype);
+            Profile userProfile = await _profileRepository.GetProfileAsync(user.Dni, accountType);
             if (userProfile.DocumentNumber == null)
                 throw new ServiceException("User Profile does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
 
@@ -422,7 +437,7 @@ namespace customerportalapi.Services
             return result;
         }
 
-        private static Account ToAccount(AccountCrm entity)
+        private static Account ToAccount(AccountProfile entity)
         {
             return new Account
             {

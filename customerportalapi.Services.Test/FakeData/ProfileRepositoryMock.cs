@@ -13,7 +13,7 @@ namespace customerportalapi.Services.Test.FakeData
         public static Mock<IProfileRepository> ProfileRepository()
         {
             var db = new Mock<IProfileRepository>();
-            db.Setup(x => x.GetProfileAsync(It.IsAny<string>())).Returns(Task.FromResult(new Profile()
+            db.Setup(x => x.GetProfileAsync(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(new Profile()
             {
                 Fullname = "fake name",
                 Address = "fake Address",
@@ -33,7 +33,7 @@ namespace customerportalapi.Services.Test.FakeData
                 EmailAddress2 = "fake email 2 modified"
             })).Verifiable();
 
-            db.Setup(x => x.GetProfilePermissionsAsync(It.IsAny<string>())).Returns(Task.FromResult(new ProfilePermissions()
+            db.Setup(x => x.GetProfilePermissionsAsync(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(new ProfilePermissions()
             {
                 DocumentNumber = "fake Document Number",
                 CanManageAccounts = true,

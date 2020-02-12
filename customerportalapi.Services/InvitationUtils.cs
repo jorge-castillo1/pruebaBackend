@@ -1,4 +1,5 @@
-﻿using customerportalapi.Entities.enums;
+﻿using customerportalapi.Entities;
+using customerportalapi.Entities.enums;
 
 namespace customerportalapi.Services
 {
@@ -31,6 +32,19 @@ namespace customerportalapi.Services
                     return (int)UserTypes.Business;
                 default:
                     return (int)UserTypes.Residential;
+            }
+        }
+
+        public static string GetAccountType(int userType)
+        {
+            switch(userType)
+            {
+                case (int)UserTypes.Residential:
+                    return AccountType.Residential;
+                case (int)UserTypes.Business:
+                    return AccountType.Business;
+                default:
+                    return AccountType.Residential;
             }
         }
     }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using AutoWrapper.Wrappers;
+using customerportalapi.Entities;
 using customerportalapi.Security;
 using customerportalapi.Services.Exceptions;
 using customerportalapi.Services.interfaces;
@@ -25,12 +26,33 @@ namespace customerportalapi.Controllers
         }
 
         [HttpGet("users/{dni}")]
+        [HttpGet("users/{dni}/Residential")]
         // [Authorize(Roles = Role.Admin)]
         public async Task<ApiResponse> GetAsync(string dni)
         {
             try
             {
-                var entity = await _services.GetContractsAsync(dni);
+                var entity = await _services.GetContractsAsync(dni, AccountType.Residential);
+                return new ApiResponse(entity);
+            }
+            catch (ServiceException se)
+            {
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+
+        [HttpGet("users/{dni}/Business")]
+        // [Authorize(Roles = Role.Admin)]
+        public async Task<ApiResponse> GetBuinessAsync(string dni)
+        {
+            try
+            {
+                var entity = await _services.GetContractsAsync(dni, AccountType.Business);
                 return new ApiResponse(entity);
             }
             catch (ServiceException se)

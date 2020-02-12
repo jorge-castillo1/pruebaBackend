@@ -20,7 +20,7 @@ namespace customerportalapi.Services.Test.FakeData
                 Usertype = 1
             }).Verifiable();
 
-            db.Setup(x => x.GetCurrentUserByDni(It.IsAny<string>())).Returns(new Entities.User()
+            db.Setup(x => x.GetCurrentUserByDniAndType(It.IsAny<string>(), It.IsAny<int>())).Returns(new Entities.User()
             {
                 Dni = "12345678A",
                 Email = "fake email",
@@ -49,7 +49,7 @@ namespace customerportalapi.Services.Test.FakeData
                 Usertype = 1
             }).Verifiable();
 
-            db.Setup(x => x.GetCurrentUserByDni(It.IsAny<string>())).Returns(new User()
+            db.Setup(x => x.GetCurrentUserByDniAndType(It.IsAny<string>(), It.IsAny<int>())).Returns(new User()
             {
                 Id = "b02fc244-40e4-e511-80bf-00155d018a4f",
                 Dni = "12345678A",
@@ -88,7 +88,7 @@ namespace customerportalapi.Services.Test.FakeData
                 Usertype = 1
             }).Verifiable();
 
-             db.Setup(x => x.GetCurrentUserByDni(It.IsAny<string>())).Returns(new User()
+             db.Setup(x => x.GetCurrentUserByDniAndType(It.IsAny<string>(), It.IsAny<int>())).Returns(new User()
             {
                 Id = "b02fc244-40e4-e511-80bf-00155d018a4f",
                 Dni = "12345678A",

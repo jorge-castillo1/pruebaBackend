@@ -48,7 +48,7 @@ namespace customerportalapi.Repositories.Test
 
             //Act
             ProfileRepository repository = new ProfileRepository(_configurations, _clientFactory, _logger.Object);
-            var result = repository.GetProfileAsync("fake dni").Result;
+            var result = repository.GetProfileAsync("fake dni", "fake customertype").Result;
 
             //Assert
             Assert.IsNotNull(result);
@@ -98,7 +98,7 @@ namespace customerportalapi.Repositories.Test
 
             //Act
             ProfileRepository repository = new ProfileRepository(_configurations, _clientFactory, _logger.Object);
-            var result = repository.GetProfilePermissionsAsync("fake dni").Result;
+            var result = repository.GetProfilePermissionsAsync("fake dni", "fake customertype").Result;
 
             //Assert
             Assert.IsNotNull(result);
