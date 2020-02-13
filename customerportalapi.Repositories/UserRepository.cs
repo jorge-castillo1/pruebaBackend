@@ -27,11 +27,11 @@ namespace customerportalapi.Repositories
             return user;
         }
 
-         public User GetCurrentUserByDni(string dni)
+         public User GetCurrentUserByDniAndType(string dni, int userType)
         {
             User user = new User();
 
-            var usersInfo = _users.FindOne(t => t.Dni == dni);
+            var usersInfo = _users.FindOne(t => t.Dni == dni && t.Usertype == userType);
             foreach (var u in usersInfo)
             {
                 user = u;

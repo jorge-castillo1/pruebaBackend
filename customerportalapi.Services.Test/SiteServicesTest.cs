@@ -39,7 +39,7 @@ namespace customerportalapi.Services.Test
 
             //Act
             SiteServices service = new SiteServices(userRepositoryInvalid.Object, _contractRepository.Object, _storeRepository.Object, _distributedCache.Object);
-            await service.GetContractsAsync(dni);
+            await service.GetContractsAsync(dni, AccountType.Residential);
 
             //Assert
         }
@@ -52,7 +52,7 @@ namespace customerportalapi.Services.Test
 
             //Act
             SiteServices service = new SiteServices(_userRepository.Object, _contractRepository.Object, _storeRepository.Object, _distributedCache.Object);
-            List<Site> sites = await service.GetContractsAsync(dni);
+            List<Site> sites = await service.GetContractsAsync(dni, AccountType.Residential);
 
             //Assert
             Assert.IsNotNull(sites);

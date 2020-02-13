@@ -42,7 +42,7 @@ namespace customerportalapi.Services.Test
 
             //Act
             UserServices service = new UserServices(_userRepositoryInvalid.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object);
-            await service.GetProfileAsync(dni);
+            await service.GetProfileAsync(dni, AccountType.Residential);
 
             //Assert
         }
@@ -55,7 +55,7 @@ namespace customerportalapi.Services.Test
 
             //Act
             UserServices service = new UserServices(_userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object);
-            Profile usuario = await service.GetProfileAsync(dni);
+            Profile usuario = await service.GetProfileAsync(dni, AccountType.Residential);
 
             //Assert
             Assert.IsNotNull(usuario);
@@ -163,7 +163,7 @@ namespace customerportalapi.Services.Test
             Profile result = await service.UpdateProfileAsync(profile);
 
             //Assert
-            _userRepository.Verify(x => x.GetCurrentUserByDni(It.IsAny<string>()));
+            _userRepository.Verify(x => x.GetCurrentUserByDniAndType(It.IsAny<string>(), It.IsAny<int>()));
             _userRepository.Verify(x => x.Update(It.IsAny<User>()));
             _profileRepository.Verify(x => x.UpdateProfileAsync(It.IsAny<Profile>()));
 
@@ -337,11 +337,11 @@ namespace customerportalapi.Services.Test
             //Assert
             Assert.AreEqual("Fake AccessToken", tokenResult.AccesToken);
             _identityRepository.Verify(x => x.AddUser(It.IsAny<UserIdentity>()));
-            _profileRepository.Verify(x => x.GetProfilePermissionsAsync(It.IsAny<string>()));
+            _profileRepository.Verify(x => x.GetProfilePermissionsAsync(It.IsAny<string>(), It.IsAny<string>()));
             _identityRepository.Verify(x => x.FindGroup(It.IsAny<string>()));
             _identityRepository.Verify(x => x.AddUserToGroup(It.IsAny<UserIdentity>(), It.IsAny<Group>()));
             userRepositoryInvalid.Verify(x => x.Update(It.IsAny<User>()));
-            _profileRepository.Verify(x => x.ConfirmedWebPortalAccessAsync(It.IsAny<string>()));
+            _profileRepository.Verify(x => x.ConfirmedWebPortalAccessAsync(It.IsAny<string>(), It.IsAny<string>()));
             _identityRepository.Verify(x => x.Authorize(It.IsAny<Login>()));
         }
 
@@ -350,11 +350,15 @@ namespace customerportalapi.Services.Test
         public async Task AlDesinvitarUnUsuarioSinDni_DevuelveExcepcion()
         {
             //Arrange
-            string dni = string.Empty;
-
+            Invitation value = new Invitation()
+            {
+                Dni = string.Empty,
+                CustomerType = AccountType.Business
+            };
+            
             //Act
             UserServices service = new UserServices(_userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object);
-            await service.UnInviteUserAsync(dni);
+            await service.UnInviteUserAsync(value);
 
             //_identityRepository.Verify(x => x.DeleteUser(string userId));
         }
@@ -365,24 +369,32 @@ namespace customerportalapi.Services.Test
         public async Task AlDesinvitarUnUsuarioInexistente_SeProduceUnaExcepcion()
         {
             //Arrange
-            string dni = "12345678A";
+            Invitation value = new Invitation()
+            {
+                Dni = "12345678A",
+                CustomerType = AccountType.Business
+            };
             Mock<IUserRepository> _userRepositoryInvalid = UserRepositoryMock.InvalidUserRepository();
 
             //Act
             UserServices service = new UserServices(_userRepositoryInvalid.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object);
-            await service.UnInviteUserAsync(dni);
+            await service.UnInviteUserAsync(value);
         }
 
         [TestMethod]
         public async Task AlDesinvitarUnUsuarioExistente_NoActivo_DevuelveFalse()
         {
             //Arrange
-            string dni = "12345678A";
+            Invitation value = new Invitation()
+            {
+                Dni = "12345678A",
+                CustomerType = AccountType.Residential
+            };
 
             //Act
             Mock<IUserRepository> userRepositoryInvalid = UserRepositoryMock.Valid_InActiveUser_Repository();
             UserServices service = new UserServices(userRepositoryInvalid.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object);
-            bool result = await service.UnInviteUserAsync(dni);
+            bool result = await service.UnInviteUserAsync(value);
 
             //Assert
             Assert.IsFalse(result);
@@ -392,17 +404,21 @@ namespace customerportalapi.Services.Test
         public async Task AlDesinvitarUnUsuarioExistente_Activo_ActualizaUsuario()
         {
             //Arrange
-            string dni = "12345678A";
+            Invitation value = new Invitation()
+            {
+                Dni = "12345678A",
+                CustomerType = AccountType.Residential
+            };
 
             //Act
             Mock<IUserRepository> userRepository = UserRepositoryMock.ValidUserRepository();
             UserServices service = new UserServices(userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object);
-            bool result = await service.UnInviteUserAsync(dni);
+            bool result = await service.UnInviteUserAsync(value);
 
             //Assert
             Assert.IsTrue(result);
-            userRepository.Verify(x => x.GetCurrentUserByDni(It.IsAny<string>()));
-            _profileRepository.Verify(x => x.RevokedWebPortalAccessAsync(It.IsAny<string>()));
+            userRepository.Verify(x => x.GetCurrentUserByDniAndType(It.IsAny<string>(), It.IsAny<int>()));
+            _profileRepository.Verify(x => x.RevokedWebPortalAccessAsync(It.IsAny<string>(), It.IsAny<string>()));
             userRepository.Verify(x => x.Update(It.IsAny<User>()));
             _identityRepository.Verify(x => x.DeleteUser(It.IsAny<string>()));
         }
