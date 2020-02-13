@@ -18,5 +18,8 @@ namespace customerportalapi.Repositories.interfaces
         Task<UserIdentity> AddUserToGroup(UserIdentity userIdentity, Group group);
 
         Task<GroupResults> FindGroup(string groupName);
+
+        Task<Token> RefreshToken(string token);
+        Task<bool> Logout(string token);
     }
 }

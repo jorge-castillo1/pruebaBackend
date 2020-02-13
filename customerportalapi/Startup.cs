@@ -99,6 +99,7 @@ namespace customerportalapi
             services.AddTransient<IWebTemplateServices, WebTemplateServices>();
             services.AddTransient<ILoginService, LoginService>();
             services.AddTransient<ICountryServices, CountryServices>();
+            services.AddTransient<IAuthService, AuthService>();
 
             services.AddHttpClient("httpClientCRM", c =>
             {
