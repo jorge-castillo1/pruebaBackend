@@ -220,51 +220,81 @@ namespace customerportalapi.Services
             return result;
         }
 
-        public async Task<Token> ConfirmUserAsync(string invitationToken)
+        public async Task<Token> ConfirmUserAsync(string receivedToken)
         {
-            //1. Validate invitationToken not empty
-            if (string.IsNullOrEmpty(invitationToken))
-                throw new ServiceException("User must have a invitationToken.", HttpStatusCode.BadRequest, "Invitation Token", "Empty field");
+            //1. Validate receivedToken not empty
+            if (string.IsNullOrEmpty(receivedToken))
+                throw new ServiceException("User must have a receivedToken.", HttpStatusCode.BadRequest, "Received Token", "Empty field");
 
-            //2. Validate user by invitationToken
-            User user = _userRepository.GetUserByInvitationToken(invitationToken);
-            if (user.Id == null)
-                return new Token();
+            //2. Validate user by invitationToken or forgotPasswordToken
+            bool invitationToken = false;
+            bool forgotPasswordToken = false;
+            User user = _userRepository.GetUserByInvitationToken(receivedToken);
+            if (user.Id != null)
+                invitationToken = true;
+            else
+            {
+                user = _userRepository.GetUserByForgotPasswordToken(receivedToken);
+                if (user.Id != null)
+                    forgotPasswordToken = true;
+                else
+                    return new Token();
+            }
 
-            //3. Get UserProfile from external system
-            string accountType = InvitationUtils.GetAccountType(user.Usertype);
-            ProfilePermissions profilepermissions = await _profileRepository.GetProfilePermissionsAsync(user.Dni, accountType);
-            string role = Role.User;
-            if (profilepermissions.CanManageAccounts)
-                role = Role.Admin;
+            if (invitationToken)
+            {
+                //3. Get UserProfile from external system
+                string accountType = InvitationUtils.GetAccountType(user.Usertype);
+                ProfilePermissions profilepermissions = await _profileRepository.GetProfilePermissionsAsync(user.Dni, accountType);
+                string role = Role.User;
+                if (profilepermissions.CanManageAccounts)
+                    role = Role.Admin;
 
-            //4. Create user in Authentication System
-            UserIdentity userIdentity = new UserIdentity();
-            userIdentity.UserName = user.Username;
-            userIdentity.Password = user.Password;
-            userIdentity.Emails = new List<string>()
+                //4. Create user in Authentication System
+                UserIdentity userIdentity = new UserIdentity();
+                userIdentity.UserName = user.Username;
+                userIdentity.Password = user.Password;
+                userIdentity.Emails = new List<string>()
             {
                 user.Email
             };
-            userIdentity.CardId = user.Dni;
-            userIdentity.Language = user.Language;
-            userIdentity.DisplayName = user.Name;
-            UserIdentity newUser = await _identityRepository.AddUser(userIdentity);
+                userIdentity.CardId = user.Dni;
+                userIdentity.Language = user.Language;
+                userIdentity.DisplayName = user.Name;
+                UserIdentity newUser = await _identityRepository.AddUser(userIdentity);
 
-            //5 AddUserToGroup
-            GroupResults group = await _identityRepository.FindGroup(role);
-            if (group.TotalResults == 1)
-                await _identityRepository.AddUserToGroup(newUser, group.Groups[0]);
+                //5 AddUserToGroup
+                GroupResults group = await _identityRepository.FindGroup(role);
+                if (group.TotalResults == 1)
+                    await _identityRepository.AddUserToGroup(newUser, group.Groups[0]);
 
-            //6. Update email verification data
-            user.Emailverified = true;
-            user.Invitationtoken = null;
-            user.ExternalId = newUser.ID;
-            _userRepository.Update(user);
+                //6. Update email verification data
+                user.Emailverified = true;
+                user.Invitationtoken = null;
+                user.ExternalId = newUser.ID;
+                _userRepository.Update(user);
 
-            //7. Confirm access status to external system
-            await _profileRepository.ConfirmedWebPortalAccessAsync(user.Dni, accountType);
+                //7. Confirm access status to external system
+                await _profileRepository.ConfirmedWebPortalAccessAsync(user.Dni, accountType);
+            }
+            else if (forgotPasswordToken)
+            {
+                //3. Update user
+                UserIdentity existingUser = await _identityRepository.GetUser(user.ExternalId);
+                if (existingUser != null)
+                {
+                    existingUser.Password = user.Password;
+                    await _identityRepository.UpdateUser(existingUser);
+                }
 
+                //4. Update verification data
+                user.ForgotPasswordtoken = null;
+                _userRepository.Update(user);
+            }
+            else
+            {
+                return new Token();
+            }
             //8. Get Access Token
             Token accessToken = await _identityRepository.Authorize(new Login()
             {
