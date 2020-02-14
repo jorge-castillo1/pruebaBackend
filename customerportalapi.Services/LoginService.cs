@@ -28,39 +28,45 @@ namespace customerportalapi.Services
                 return await _identityRepository.Authorize(credentials);
             }
             catch(HttpRequestException ex){
-                throw new ServiceException("Login Failed", HttpStatusCode.BadRequest);
+                throw new ServiceException("Login Failed", HttpStatusCode.Unauthorized);
             }
-            
+
         }
 
         public async Task<Token> ChangePassword(ResetPassword credentials)
         {
-            //1. Get User From backend
-            User currentUser = _userRepository.GetCurrentUser(credentials.Username);
+            try {
+                //1. Get User From backend
+                User currentUser = _userRepository.GetCurrentUser(credentials.Username);
 
-            //2. Validate Old Password is valid
-            Token validateOld = await _identityRepository.Authorize(new Login()
-            {
-                Username = credentials.Username,
-                Password = credentials.OldPassword
-            });
+                //2. Validate Old Password is valid
+                Token validateOld = await _identityRepository.Authorize(new Login()
+                {
+                    Username = credentials.Username,
+                    Password = credentials.OldPassword
+                });
 
-            //3. Update user
-            UserIdentity user = await _identityRepository.GetUser(currentUser.ExternalId);
-            if (user != null)
-            {
-                user.Password = credentials.NewPassword;
-                user = await _identityRepository.UpdateUser(user);
+                //3. Update user
+                UserIdentity user = await _identityRepository.GetUser(currentUser.ExternalId);
+                if (user != null)
+                {
+                    user.Password = credentials.NewPassword;
+                    user = await _identityRepository.UpdateUser(user);
+                }
+
+                //4. Get new Token
+                Token newToken = await _identityRepository.Authorize(new Login()
+                {
+                    Username = credentials.Username,
+                    Password = credentials.NewPassword
+                });
+
+                return newToken;
+
+            } catch(HttpRequestException ex) {
+                throw new ServiceException("Password not valid", HttpStatusCode.BadRequest);
+
             }
-
-            //4. Get new Token
-            Token newToken = await _identityRepository.Authorize(new Login()
-            {
-                Username = credentials.Username,
-                Password = credentials.NewPassword
-            });
-
-            return newToken;
         }
     }
 }
