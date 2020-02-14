@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using customerportalapi.Services.Exceptions;
 using System.Net;
 using System.Threading;
+using PasswordGenerator;
 
 namespace customerportalapi.Services
 {
@@ -18,53 +19,60 @@ namespace customerportalapi.Services
         private readonly IProfileRepository _profileRepository;
         private readonly IMailRepository _mailRepository;
         private readonly IEmailTemplateRepository _emailTemplateRepository;
+        private readonly IIdentityRepository _identityRepository;
         private readonly IConfiguration _config;
 
-        public UserServices(IUserRepository userRepository, IProfileRepository profileRepository, IMailRepository mailRepository, IEmailTemplateRepository emailTemplateRepository, IConfiguration config)
+        public UserServices(IUserRepository userRepository, IProfileRepository profileRepository, IMailRepository mailRepository, IEmailTemplateRepository emailTemplateRepository, IIdentityRepository identityRepository, IConfiguration config)
         {
             _userRepository = userRepository;
             _profileRepository = profileRepository;
             _mailRepository = mailRepository;
             _emailTemplateRepository = emailTemplateRepository;
+            _identityRepository = identityRepository;
             _config = config;
         }
 
 
-        public async Task<Profile> GetProfileAsync(string dni)
+        public async Task<Profile> GetProfileAsync(string dni, string accountType)
         {
             //Add customer portal Business Logic
-            User user = _userRepository.GetCurrentUser(dni);
-            if (user._id == null)
+            int userType = InvitationUtils.GetUserType(accountType);
+            User user = _userRepository.GetCurrentUserByDniAndType(dni, userType);
+            if (user.Id == null)
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
 
             //1. If emailverified is false throw error
-            if (!user.emailverified)
-                throw new ServiceException("User is deactivated,", HttpStatusCode.NotFound, "User", "Deactivated");
+            if (!user.Emailverified)
+                throw new ServiceException("User is deactivated,", HttpStatusCode.Forbidden, "User", "Deactivated");
 
             //2. If exist complete data from external repository
             //Invoke repository
-            var entity = await _profileRepository.GetProfileAsync(dni);
+            var entity = await _profileRepository.GetProfileAsync(dni, accountType);
 
             //3. Set Email Principal according to external data. No two principal emails allowed
             entity.EmailAddress1Principal = false;
             entity.EmailAddress2Principal = false;
 
-            if (entity.EmailAddress1 == user.email)
+            if (entity.EmailAddress1 == user.Email)
                 entity.EmailAddress1Principal = true;
-            else if (entity.EmailAddress2 == user.email)
+            else if (entity.EmailAddress2 == user.Email)
                 entity.EmailAddress2Principal = true;
 
             //4. Set Phone Principal according to external data. No two principal phones allowed
             entity.MobilePhone1Principal = false;
             entity.MobilePhonePrincipal = false;
 
-            if (entity.MobilePhone1 == user.phone && !string.IsNullOrEmpty(user.phone))
+            if (entity.MobilePhone1 == user.Phone && !string.IsNullOrEmpty(user.Phone))
                 entity.MobilePhone1Principal = true;
-            else if (entity.MobilePhone == user.phone && !string.IsNullOrEmpty(user.phone))
+            else if (entity.MobilePhone == user.Phone && !string.IsNullOrEmpty(user.Phone))
                 entity.MobilePhonePrincipal = true;
 
-            entity.Language = user.language;
-            entity.Avatar = user.profilepicture;
+            entity.Language = user.Language;
+            entity.Avatar = user.Profilepicture;
+            //entity.CustomerTypeInfo = new AccountCustomerType()
+            //{
+            //    CustomerType = accountType
+            //}
 
             return entity;
         }
@@ -72,12 +80,19 @@ namespace customerportalapi.Services
         public async Task<Profile> UpdateProfileAsync(Profile profile)
         {
             //Add customer portal Business Logic
-            User user = _userRepository.GetCurrentUser(profile.DocumentNumber);
-            if (user._id == null)
+            if (profile.CustomerTypeInfo == null)
+                profile.CustomerTypeInfo = new AccountCustomerType();
+
+            if (string.IsNullOrEmpty(profile.CustomerTypeInfo.CustomerType))
+                profile.CustomerTypeInfo.CustomerType = AccountType.Residential;
+
+            int userType = InvitationUtils.GetUserType(profile.CustomerTypeInfo.CustomerType);
+            User user = _userRepository.GetCurrentUserByDniAndType(profile.DocumentNumber, userType);
+            if (user.Id == null)
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
 
             //1. If emailverified is false throw error
-            if (!user.emailverified)
+            if (!user.Emailverified)
                 throw new ServiceException("User is deactivated,", HttpStatusCode.NotFound, "User", "Deactivated");
 
             //2. Set Email Principal according to external data
@@ -100,31 +115,31 @@ namespace customerportalapi.Services
                 phoneToUpdate = profile.MobilePhone;
 
             //4. Compare language, email and image for backend changes
-            if (user.language != profile.Language ||
-                user.profilepicture != profile.Avatar ||
-                user.email != emailToUpdate ||
-                user.phone != phoneToUpdate)
+            if (user.Language != profile.Language ||
+                user.Profilepicture != profile.Avatar ||
+                user.Email != emailToUpdate ||
+                user.Phone != phoneToUpdate)
             {
-                user.language = profile.Language;
-                user.email = emailToUpdate;
-                user.phone = phoneToUpdate;
-                user.profilepicture = profile.Avatar;
+                user.Language = profile.Language;
+                user.Email = emailToUpdate;
+                user.Phone = phoneToUpdate;
+                user.Profilepicture = profile.Avatar;
 
                 user = _userRepository.Update(user);
             }
 
             //5. Invoke repository for other changes
             var entity = await _profileRepository.UpdateProfileAsync(profile);
-            entity.Language = user.language;
-            entity.Avatar = user.profilepicture;
-            if (entity.EmailAddress1 == user.email)
+            entity.Language = user.Language;
+            entity.Avatar = user.Profilepicture;
+            if (entity.EmailAddress1 == user.Email)
                 entity.EmailAddress1Principal = true;
             else
                 entity.EmailAddress2Principal = true;
 
-            if (entity.MobilePhone1 == user.phone && !string.IsNullOrEmpty(user.phone))
+            if (entity.MobilePhone1 == user.Phone && !string.IsNullOrEmpty(user.Phone))
                 entity.MobilePhone1Principal = true;
-            else if (entity.MobilePhone == user.phone && !string.IsNullOrEmpty(user.phone))
+            else if (entity.MobilePhone == user.Phone && !string.IsNullOrEmpty(user.Phone))
                 entity.MobilePhonePrincipal = true;
 
             return entity;
@@ -143,40 +158,49 @@ namespace customerportalapi.Services
                 throw new ServiceException("User must have a valid document number.", HttpStatusCode.BadRequest, "Dni", "Empty field");
 
             //3. If no user exists create user
-            User user = _userRepository.GetCurrentUser(value.Dni);
-            if (user._id == null)
-            {
-                //4. TODO Create user in autentication system
+            var userType = InvitationUtils.GetUserType(value.CustomerType);
+            var userName = userType == 0 ? value.Dni : "B" + value.Dni;
 
-                //5. Create user in portal database
-                User newUser = new User
+            var pwd = new Password(true, true, true, false, 6);
+            var password = pwd.Next();
+
+            User user = _userRepository.GetCurrentUser(userName);
+            if (user.Id == null)
+            {
+                //4. Create user in portal database
+                user = new User
                 {
-                    dni = value.Dni,
-                    email = value.Email,
-                    language = InvitationUtils.GetLanguage(value.Language),
-                    usertype = InvitationUtils.GetUserType(value.CustomerType),
-                    emailverified = false,
-                    invitationtoken = Guid.NewGuid().ToString()
+                    Username = userName,
+                    Dni = value.Dni,
+                    Email = value.Email,
+                    Name = value.Fullname,
+                    Password = password,
+                    Language = InvitationUtils.GetLanguage(value.Language),
+                    Usertype = InvitationUtils.GetUserType(value.CustomerType),
+                    Emailverified = false,
+                    Invitationtoken = Guid.NewGuid().ToString()
                 };
 
-                result = await _userRepository.Create(newUser);
+                result = await _userRepository.Create(user);
             }
             else
             {
-                //6. If emailverified is false resend email invitation otherwise throw error
-                if (user.emailverified)
+                //5. If emailverified is false resend email invitation otherwise throw error
+                if (user.Emailverified)
                     throw new ServiceException("Invitation user fails. User was actived before", HttpStatusCode.NotFound, "User", "Already invited");
 
                 //7. Update invitation data
-                user.email = value.Email;
-                user.language = InvitationUtils.GetLanguage(value.Language);
-                user.usertype = InvitationUtils.GetUserType(value.CustomerType);
-                user.invitationtoken = Guid.NewGuid().ToString();
+                user.Email = value.Email;
+                user.Name = value.Fullname;
+                user.Password = password;
+                user.Language = InvitationUtils.GetLanguage(value.Language);
+                user.Usertype = InvitationUtils.GetUserType(value.CustomerType);
+                user.Invitationtoken = Guid.NewGuid().ToString();
                 _userRepository.Update(user);
             }
 
-            //4. Get Email Invitation Template
-            EmailTemplate invitationTemplate = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.Invitation, user.language);
+            //5. Get Email Invitation Template
+            EmailTemplate invitationTemplate = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.Invitation, user.Language);
             if (invitationTemplate._id == null)
             {
                 invitationTemplate = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.Invitation, LanguageTypes.en.ToString());
@@ -184,19 +208,19 @@ namespace customerportalapi.Services
 
             if (invitationTemplate._id != null)
             {
-                //5. Sens email invitation
+                //6. Send email invitation
                 Email message = new Email();
-                message.To.Add(user.email);
+                message.To.Add(user.Email);
                 message.Subject = invitationTemplate.subject;
-                message.Body = string.Format(invitationTemplate.body, value.Fullname, value.Dni, value.Dni,
-                    $"{_config["InviteConfirmation"]}{user.invitationtoken}");
+                message.Body = string.Format(invitationTemplate.body, user.Name, user.Username, user.Password,
+                    $"{_config["InviteConfirmation"]}{user.Invitationtoken}");
                 result = await _mailRepository.Send(message);
             }
 
             return result;
         }
 
-        public Task<bool> ConfirmUserAsync(string invitationToken)
+        public async Task<Token> ConfirmUserAsync(string invitationToken)
         {
             //1. Validate invitationToken not empty
             if (string.IsNullOrEmpty(invitationToken))
@@ -204,50 +228,87 @@ namespace customerportalapi.Services
 
             //2. Validate user by invitationToken
             User user = _userRepository.GetUserByInvitationToken(invitationToken);
-            if (user._id == null)
-                return Task.FromResult(false);
+            if (user.Id == null)
+                return new Token();
 
-            //3. Confirm access status to external system
-            _profileRepository.ConfirmedWebPortalAccessAsync(user.dni);
+            //3. Get UserProfile from external system
+            string accountType = InvitationUtils.GetAccountType(user.Usertype);
+            ProfilePermissions profilepermissions = await _profileRepository.GetProfilePermissionsAsync(user.Dni, accountType);
+            string role = Role.User;
+            if (profilepermissions.CanManageAccounts)
+                role = Role.Admin;
 
-            //4. Update email verification data
-            user.emailverified = true;
-            user.invitationtoken = null;
+            //4. Create user in Authentication System
+            UserIdentity userIdentity = new UserIdentity();
+            userIdentity.UserName = user.Username;
+            userIdentity.Password = user.Password;
+            userIdentity.Emails = new List<string>()
+            {
+                user.Email
+            };
+            userIdentity.CardId = user.Dni;
+            userIdentity.Language = user.Language;
+            userIdentity.DisplayName = user.Name;
+            UserIdentity newUser = await _identityRepository.AddUser(userIdentity);
+
+            //5 AddUserToGroup
+            GroupResults group = await _identityRepository.FindGroup(role);
+            if (group.TotalResults == 1)
+                await _identityRepository.AddUserToGroup(newUser, group.Groups[0]);
+
+            //6. Update email verification data
+            user.Emailverified = true;
+            user.Invitationtoken = null;
+            user.ExternalId = newUser.ID;
             _userRepository.Update(user);
 
-            return Task.FromResult(true);
+            //7. Confirm access status to external system
+            await _profileRepository.ConfirmedWebPortalAccessAsync(user.Dni, accountType);
+
+            //8. Get Access Token
+            Token accessToken = await _identityRepository.Authorize(new Login()
+            {
+                Username = user.Username,
+                Password = user.Password
+            });
+
+            return accessToken;
         }
 
-        public Task<bool> UnInviteUserAsync(string dni)
+        public Task<bool> UnInviteUserAsync(Invitation value)
         {
             //1. Validate dni not empty
-            if (string.IsNullOrEmpty(dni))
+            if (string.IsNullOrEmpty(value.Dni))
                 throw new ServiceException("User must have a valid document number.", HttpStatusCode.BadRequest, "Dni", "Empty field");
 
             //2. Validate user
-            User user = _userRepository.GetCurrentUser(dni);
-            if (user._id == null)
+            int userType = InvitationUtils.GetUserType(value.CustomerType);
+            User user = _userRepository.GetCurrentUserByDniAndType(value.Dni, userType);
+            if (user.Id == null)
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
 
             //3. If emailverified is false
-            if (!user.emailverified)
+            if (!user.Emailverified)
                 return Task.FromResult(false);
 
             //4. Confirm revocation access status to external system
-            _profileRepository.RevokedWebPortalAccessAsync(user.dni);
+            _profileRepository.RevokedWebPortalAccessAsync(user.Dni, value.CustomerType);
 
-            //4. Update invitation data
-            user.emailverified = false;
-            user.invitationtoken = null;
+            //5. Update invitation data
+            user.Emailverified = false;
+            user.Invitationtoken = null;
             _userRepository.Update(user);
+
+            //6. Delete from IS
+            _identityRepository.DeleteUser(user.ExternalId);
 
             return Task.FromResult(true);
         }
 
-        public async Task<Account> GetAccountAsync(string dni)
+        public async Task<Account> GetAccountAsync(string dni, string accountType)
         {
             //Invoke repository
-            AccountCrm entity = await _profileRepository.GetAccountAsync(dni);
+            AccountProfile entity = await _profileRepository.GetAccountAsync(dni, accountType);
             if (entity == null)
                 throw new ServiceException("Account is not found.", HttpStatusCode.NotFound, "Account", "Not exist");
 
@@ -259,7 +320,7 @@ namespace customerportalapi.Services
         public async Task<Account> UpdateAccountAsync(Account value)
         {
             //Invoke repository
-            var accountCrm = new AccountCrm
+            var accountprofile = new AccountProfile
             {
                 SmCustomerId = value.SmCustomerId,
                 Phone1 = value.Phone1,
@@ -273,37 +334,37 @@ namespace customerportalapi.Services
             {
                 if (address.Type == AddressTypes.Main.ToString())
                 {
-                    accountCrm.Address1Street1 = address.Street1;
-                    accountCrm.Address1Street2 = address.Street2;
-                    accountCrm.Address1Street3 = address.Street3;
-                    accountCrm.Address1City = address.City;
-                    accountCrm.Address1StateOrProvince = address.StateOrProvince;
-                    accountCrm.Address1PostalCode = address.ZipOrPostalCode;
-                    accountCrm.Address1Country = address.Country;
+                    accountprofile.Address1Street1 = address.Street1;
+                    accountprofile.Address1Street2 = address.Street2;
+                    accountprofile.Address1Street3 = address.Street3;
+                    accountprofile.Address1City = address.City;
+                    accountprofile.Address1StateOrProvince = address.StateOrProvince;
+                    accountprofile.Address1PostalCode = address.ZipOrPostalCode;
+                    accountprofile.Address1Country = address.Country;
                 }
                 if (address.Type == AddressTypes.Invoice.ToString())
                 {
-                    accountCrm.Address2Street1 = address.Street1;
-                    accountCrm.Address2Street2 = address.Street2;
-                    accountCrm.Address2Street3 = address.Street3;
-                    accountCrm.Address2City = address.City;
-                    accountCrm.Address2StateOrProvince = address.StateOrProvince;
-                    accountCrm.Address2PostalCode = address.ZipOrPostalCode;
-                    accountCrm.Address2Country = address.Country;
+                    accountprofile.Address2Street1 = address.Street1;
+                    accountprofile.Address2Street2 = address.Street2;
+                    accountprofile.Address2Street3 = address.Street3;
+                    accountprofile.Address2City = address.City;
+                    accountprofile.Address2StateOrProvince = address.StateOrProvince;
+                    accountprofile.Address2PostalCode = address.ZipOrPostalCode;
+                    accountprofile.Address2Country = address.Country;
                 }
                 if (address.Type == AddressTypes.Alternate.ToString())
                 {
-                    accountCrm.AlternateStreet1 = address.Street1;
-                    accountCrm.AlternateStreet2 = address.Street2;
-                    accountCrm.AlternateStreet3 = address.Street3;
-                    accountCrm.AlternateCity = address.City;
-                    accountCrm.AlternateStateOrProvince = address.StateOrProvince;
-                    accountCrm.AlternatePostalCode = address.ZipOrPostalCode;
-                    accountCrm.AlternateCountry = address.Country;
+                    accountprofile.AlternateStreet1 = address.Street1;
+                    accountprofile.AlternateStreet2 = address.Street2;
+                    accountprofile.AlternateStreet3 = address.Street3;
+                    accountprofile.AlternateCity = address.City;
+                    accountprofile.AlternateStateOrProvince = address.StateOrProvince;
+                    accountprofile.AlternatePostalCode = address.ZipOrPostalCode;
+                    accountprofile.AlternateCountry = address.Country;
                 }
             }
 
-            AccountCrm entity = await _profileRepository.UpdateAccountAsync(accountCrm);
+            AccountProfile entity = await _profileRepository.UpdateAccountAsync(accountprofile);
             if (entity == null)
                 throw new ServiceException("Account is not found.", HttpStatusCode.NotFound, "Account", "Not exist");
 
@@ -323,10 +384,11 @@ namespace customerportalapi.Services
                 throw new ServiceException("Error retrieving the current user.", HttpStatusCode.NotFound, "Current user", "Not logged");
 
             User user = _userRepository.GetCurrentUser(currentUser.Identity.Name);
-            if (user._id == null)
+            if (user.Id == null)
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
 
-            Profile userProfile = await _profileRepository.GetProfileAsync(user.dni);
+            string accountType = InvitationUtils.GetAccountType(user.Usertype);
+            Profile userProfile = await _profileRepository.GetProfileAsync(user.Dni, accountType);
             if (userProfile.DocumentNumber == null)
                 throw new ServiceException("User Profile does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
 
@@ -375,7 +437,7 @@ namespace customerportalapi.Services
             return result;
         }
 
-        private static Account ToAccount(AccountCrm entity)
+        private static Account ToAccount(AccountProfile entity)
         {
             return new Account
             {
@@ -427,7 +489,7 @@ namespace customerportalapi.Services
         private Email GenerateEmail(EmailTemplateTypes type, User user, Profile userProfile, FormContact form)
         {
             //3. Get Email Invitation Template
-            EmailTemplate formContactTemplate = _emailTemplateRepository.getTemplate((int)type, user.language);
+            EmailTemplate formContactTemplate = _emailTemplateRepository.getTemplate((int)type, user.Language);
             if (formContactTemplate._id == null)
             {
                 formContactTemplate = _emailTemplateRepository.getTemplate((int)type, LanguageTypes.en.ToString());
@@ -449,7 +511,7 @@ namespace customerportalapi.Services
                         formContactTemplate.body,
                         userProfile.Fullname,
                         userProfile.MobilePhone,
-                        user.email,
+                        user.Email,
                         form.Motive,
                         form.Message);
                     break;
@@ -458,7 +520,7 @@ namespace customerportalapi.Services
                         formContactTemplate.body,
                         userProfile.Fullname,
                         userProfile.MobilePhone,
-                        user.email,
+                        user.Email,
                         form.Message);
                     break;
                 default:
@@ -466,7 +528,7 @@ namespace customerportalapi.Services
                         formContactTemplate.body,
                         userProfile.Fullname,
                         userProfile.MobilePhone,
-                        user.email,
+                        user.Email,
                         form.Preference,
                         form.Message);
                     break;

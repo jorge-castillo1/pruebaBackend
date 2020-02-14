@@ -12,12 +12,22 @@ namespace customerportalapi.Services.Test.FakeData
             var db = new Mock<IUserRepository>();
             db.Setup(x => x.GetCurrentUser(It.IsAny<string>())).Returns(new Entities.User()
             {
-                dni = "12345678A",
-                email = "fake email",
-                language = "fake lang",
-                profilepicture = "fake profile image",
-                emailverified = false,
-                usertype = 1
+                Dni = "12345678A",
+                Email = "fake email",
+                Language = "fake lang",
+                Profilepicture = "fake profile image",
+                Emailverified = false,
+                Usertype = 1
+            }).Verifiable();
+
+            db.Setup(x => x.GetCurrentUserByDniAndType(It.IsAny<string>(), It.IsAny<int>())).Returns(new Entities.User()
+            {
+                Dni = "12345678A",
+                Email = "fake email",
+                Language = "fake lang",
+                Profilepicture = "fake profile image",
+                Emailverified = false,
+                Usertype = 1
             }).Verifiable();
 
             db.Setup(x => x.Create(It.IsAny<User>())).Returns(Task.FromResult(true)).Verifiable();
@@ -30,24 +40,35 @@ namespace customerportalapi.Services.Test.FakeData
             var db = new Mock<IUserRepository>();
             db.Setup(x => x.GetCurrentUser(It.IsAny<string>())).Returns(new User()
             {
-                _id = "b02fc244-40e4-e511-80bf-00155d018a4f",
-                dni = "12345678A",
-                email = "fake email 1",
-                language = "fake lang",
-                profilepicture = "fake profile image",
-                emailverified = true,
-                usertype = 1
+                Id = "b02fc244-40e4-e511-80bf-00155d018a4f",
+                Dni = "12345678A",
+                Email = "fake email 1",
+                Language = "fake lang",
+                Profilepicture = "fake profile image",
+                Emailverified = true,
+                Usertype = 1
+            }).Verifiable();
+
+            db.Setup(x => x.GetCurrentUserByDniAndType(It.IsAny<string>(), It.IsAny<int>())).Returns(new User()
+            {
+                Id = "b02fc244-40e4-e511-80bf-00155d018a4f",
+                Dni = "12345678A",
+                Email = "fake email 1",
+                Language = "fake lang",
+                Profilepicture = "fake profile image",
+                Emailverified = true,
+                Usertype = 1
             }).Verifiable();
 
             db.Setup(x => x.Update(It.IsAny<User>())).Returns(new User()
             {
-                _id = "b02fc244-40e4-e511-80bf-00155d018a4f",
-                dni = "12345678A",
-                email = "fake email 1 modified",
-                language = "fake lang modified",
-                profilepicture = "fake profile image modified",
-                emailverified = true,
-                usertype = 1
+                Id = "b02fc244-40e4-e511-80bf-00155d018a4f",
+                Dni = "12345678A",
+                Email = "fake email 1 modified",
+                Language = "fake lang modified",
+                Profilepicture = "fake profile image modified",
+                Emailverified = true,
+                Usertype = 1
             }).Verifiable();
 
             return db;
@@ -58,24 +79,35 @@ namespace customerportalapi.Services.Test.FakeData
             var db = new Mock<IUserRepository>();
             db.Setup(x => x.GetCurrentUser(It.IsAny<string>())).Returns(new User()
             {
-                _id = "b02fc244-40e4-e511-80bf-00155d018a4f",
-                dni = "12345678A",
-                email = "fake email 1",
-                language = "fake lang",
-                profilepicture = "fake profile image",
-                emailverified = false,
-                usertype = 1
+                Id = "b02fc244-40e4-e511-80bf-00155d018a4f",
+                Dni = "12345678A",
+                Email = "fake email 1",
+                Language = "fake lang",
+                Profilepicture = "fake profile image",
+                Emailverified = false,
+                Usertype = 1
+            }).Verifiable();
+
+             db.Setup(x => x.GetCurrentUserByDniAndType(It.IsAny<string>(), It.IsAny<int>())).Returns(new User()
+            {
+                Id = "b02fc244-40e4-e511-80bf-00155d018a4f",
+                Dni = "12345678A",
+                Email = "fake email 1",
+                Language = "fake lang",
+                Profilepicture = "fake profile image",
+                Emailverified = false,
+                Usertype = 1
             }).Verifiable();
 
             db.Setup(x => x.Update(It.IsAny<User>())).Returns(new User()
             {
-                _id = "b02fc244-40e4-e511-80bf-00155d018a4f",
-                dni = "12345678A",
-                email = "fake email 1 modified",
-                language = "fake lang modified",
-                profilepicture = "fake profile image modified",
-                emailverified = false,
-                usertype = 1
+                Id = "b02fc244-40e4-e511-80bf-00155d018a4f",
+                Dni = "12345678A",
+                Email = "fake email 1 modified",
+                Language = "fake lang modified",
+                Profilepicture = "fake profile image modified",
+                Emailverified = false,
+                Usertype = 1
             }).Verifiable();
 
             return db;
@@ -86,26 +118,26 @@ namespace customerportalapi.Services.Test.FakeData
             var db = new Mock<IUserRepository>();
             db.Setup(x => x.GetUserByInvitationToken(It.IsAny<string>())).Returns(new User()
             {
-                _id = "b02fc244-40e4-e511-80bf-00155d018a4f",
-                dni = "12345678A",
-                email = "fake email 1",
-                language = "fake lang",
-                profilepicture = "fake profile image",
-                emailverified = false,
-                invitationtoken = "8e8b9c6c-8943-4482-891d-b92d7414d283",
-                usertype = 1
+                Id = "b02fc244-40e4-e511-80bf-00155d018a4f",
+                Dni = "12345678A",
+                Email = "fake email 1",
+                Language = "fake lang",
+                Profilepicture = "fake profile image",
+                Emailverified = false,
+                Invitationtoken = "8e8b9c6c-8943-4482-891d-b92d7414d283",
+                Usertype = 1
             }).Verifiable();
 
             db.Setup(x => x.Update(It.IsAny<User>())).Returns(new User()
             {
-                _id = "b02fc244-40e4-e511-80bf-00155d018a4f",
-                dni = "12345678A",
-                email = "fake email 1",
-                language = "fake lang",
-                profilepicture = "fake profile image",
-                emailverified = true,
-                invitationtoken = string.Empty,
-                usertype = 1
+                Id = "b02fc244-40e4-e511-80bf-00155d018a4f",
+                Dni = "12345678A",
+                Email = "fake email 1",
+                Language = "fake lang",
+                Profilepicture = "fake profile image",
+                Emailverified = true,
+                Invitationtoken = string.Empty,
+                Usertype = 1
             }).Verifiable();
 
             return db;

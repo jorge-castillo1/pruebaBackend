@@ -13,7 +13,7 @@ namespace customerportalapi.Services.Test.FakeData
         public static Mock<IContractRepository> ContractRepository()
         {
             var db = new Mock<IContractRepository>();
-            db.Setup(x => x.GetContractsAsync(It.IsAny<string>())).Returns(Task.FromResult(new List<Contract>
+            db.Setup(x => x.GetContractsAsync(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(new List<Contract>
             {
                 new Contract
                 {
