@@ -43,7 +43,7 @@ namespace customerportalapi.Services
 
             //1. If emailverified is false throw error
             if (!user.Emailverified)
-                throw new ServiceException("User is deactivated,", HttpStatusCode.NotFound, "User", "Deactivated");
+                throw new ServiceException("User is deactivated,", HttpStatusCode.Forbidden, "User", "Deactivated");
 
             //2. If exist complete data from external repository
             //Invoke repository
