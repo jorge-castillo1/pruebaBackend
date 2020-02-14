@@ -76,5 +76,17 @@ namespace customerportalapi.Repositories
             }
             return user;
         }
+
+        public User GetUserByForgotPasswordToken(string forgotPasswordToken)
+        {
+            User user = new User();
+
+            var usersInfo = _users.FindOne(t => t.ForgotPasswordtoken == forgotPasswordToken);
+            foreach (var u in usersInfo)
+            {
+                user = u;
+            }
+            return user;
+        }
     }
 }
