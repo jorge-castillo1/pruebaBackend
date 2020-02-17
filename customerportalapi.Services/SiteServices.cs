@@ -8,6 +8,7 @@ using customerportalapi.Services.interfaces;
 using Microsoft.Extensions.Caching.Distributed;
 using System.Net;
 using customerportalapi.Services.Exceptions;
+using customerportalapi.Entities.enums;
 
 namespace customerportalapi.Services
 {
@@ -28,16 +29,17 @@ namespace customerportalapi.Services
         }
 
 
-        public async Task<List<Site>> GetContractsAsync(string dni)
+        public async Task<List<Site>> GetContractsAsync(string dni, string accountType)
         {
             //Add customer portal Business Logic
-            User user = _userRepository.GetCurrentUser(dni);
-            if (user._id == null)
+            int userType = InvitationUtils.GetUserType(accountType);
+            User user = _userRepository.GetCurrentUserByDniAndType(dni, userType);
+            if (user.Id == null)
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
             
             //2. If exist complete data from external repository
             //Invoke repository
-            List<Contract> entitylist = await _contractRepository.GetContractsAsync(dni);
+            List<Contract> entitylist = await _contractRepository.GetContractsAsync(dni, accountType);
 
             List<Site> stores = new List<Site>();
             foreach (var storegroup in entitylist.GroupBy(x => new

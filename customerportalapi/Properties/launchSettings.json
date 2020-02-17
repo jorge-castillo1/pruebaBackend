@@ -27,8 +27,8 @@
         "DatabaseName": "customerportal",
         "ProfileAPI": "crmapi/Contacts/",
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "CustomerPortal_ApiKey": "F56A2E61-6D3C-4C3F-B1B5-16C335EADA96",
         "CountriesAPI": "crmapi/Countries/",
+        "CustomerPortal_ApiKey": "F56A2E61-6D3C-4C3F-B1B5-16C335EADA96",
         "StoresAPI": "crmapi/Sites/"
       }
     },
@@ -44,7 +44,6 @@
         "InviteConfirmation": "https://localhost:4200/signup/",
         "ContractsAPI": "crmapi/Contracts/",
         "AccountsAPI": "crmapi/Accounts/",
-        "CountriesAPI": "crmapi/Countries/",
         "MailFrom": "no-reply@bluespace.eu",
         "GatewayUrl": "https://localhost:44343/",
         "ConnectionStrings__customerportaldb": "mongodb://localhost:27017",
@@ -52,6 +51,7 @@
         "DatabaseName": "customerportal",
         "ProfileAPI": "crmapi/Contacts/",
         "ASPNETCORE_ENVIRONMENT": "Development",
+        "CountriesAPI": "crmapi/Countries/",
         "StoresAPI": "crmapi/Sites/"
       },
       "applicationUrl": "https://localhost:44332;http://localhost:5001"
@@ -67,13 +67,13 @@
         "InviteConfirmation": "http://localhost:4200/signup/",
         "ContractsAPI": "crmapi/Contracts/",
         "AccountsAPI": "crmapi/Accounts/",
-        "CountriesAPI": "crmapi/Countries/",
         "MailFrom": "no-reply@bluespace.eu",
         "GatewayUrl": "https://localhost:44343/",
         "ASPNETCORE_URLS": "https://+:443;http://+:80",
         "ASPNETCORE_HTTPS_PORT": "44333",
         "MONGO_DATABASE": "customerportal",
         "ProfileAPI": "crmapi/Contacts/",
+        "CountriesAPI": "crmapi/Countries/",
         "StoresAPI": "crmapi/Sites/"
       },
       "httpPort": 53489,

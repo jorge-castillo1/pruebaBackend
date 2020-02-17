@@ -19,7 +19,7 @@ namespace customerportalapi.Entities
         public List<Address> AddressList { get; set; }
     }
 
-    public class AccountCrm
+    public class AccountProfile
     {
         public string SmCustomerId { get; set; }
 

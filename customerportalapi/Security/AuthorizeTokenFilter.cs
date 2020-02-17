@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using customerportalapi.Entities;
+using customerportalapi.Repositories.interfaces;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -15,11 +17,13 @@ namespace customerportalapi.Security
 {
     public class AuthorizeTokenFilter : IAuthorizationFilter
     {
+        readonly IIdentityRepository _identityRepository;
         readonly IConfiguration _config;
         readonly ILogger<AuthorizeTokenFilter> _logger;
 
-        public AuthorizeTokenFilter(IConfiguration config, ILogger<AuthorizeTokenFilter> logger)
+        public AuthorizeTokenFilter(IIdentityRepository identityRepository, IConfiguration config, ILogger<AuthorizeTokenFilter> logger)
         {
+            _identityRepository = identityRepository;
             _config = config;
             _logger = logger;
         }
@@ -39,9 +43,17 @@ namespace customerportalapi.Security
                 }
 
                 var token = authorization.Value[0].Split(' ');
+                // Get claims from token
                 ClaimsPrincipal claims = JwtTokenHelper.GetPrincipal(token[1], _config);
-                context.HttpContext.User = claims;
-                Thread.CurrentPrincipal = context.HttpContext.User;
+
+                // Validate against generator system
+                TokenStatus status = _identityRepository.Validate(token[1]).Result;
+                if (status.Active){
+                    context.HttpContext.User = claims;
+                     Thread.CurrentPrincipal = context.HttpContext.User;
+                }
+                else
+                    throw new SecurityTokenExpiredException("Token expired");
 
                 return;
             }

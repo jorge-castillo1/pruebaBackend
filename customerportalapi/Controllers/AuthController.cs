@@ -1,35 +1,35 @@
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using AutoWrapper.Wrappers;
 using customerportalapi.Entities;
-using customerportalapi.Security;
 using customerportalapi.Services.Exceptions;
 using customerportalapi.Services.interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using System.Net.Http.Headers;
 
 namespace customerportalapi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class LoginController : ControllerBase
+    public class AuthController : ControllerBase
     {
-        private readonly ILoginService _service;
+        private readonly IAuthService _service;
         private readonly ILogger<UsersController> _logger;
 
-        public LoginController(ILoginService service, ILogger<UsersController> logger)
+        public AuthController(IAuthService service, ILogger<UsersController> logger)
         {
             _service = service;
             _logger = logger;
         }
 
-        // POST api/login
-        [HttpPost]
-        public async Task<ApiResponse> PostAsync([FromBody] Login value)
+        // POST api/auth/refreshtoken
+        [HttpPost("refreshtoken")]
+        public async Task<ApiResponse> RefreshTokenAsync([FromBody] RefreshToken value)
         {
             try
             {
-                var entity = await _service.GetToken(value);
+                var entity = await _service.RefreshToken(value.token);
                 return new ApiResponse(entity);
             }
             catch (ServiceException se)
@@ -43,35 +43,14 @@ namespace customerportalapi.Controllers
             }
         }
 
-        //POST api/login/passwordReset
-        [HttpPost]
-        [Route("passwordReset")]
-        [AuthorizeToken]
-        public async Task<ApiResponse> PasswordResetAsync([FromBody] ResetPassword value)
+        [HttpGet("logout")]
+        public async Task<ApiResponse> LogoutAsync()
         {
             try
             {
-                var entity = await _service.ChangePassword(value);
-                return new ApiResponse(entity);
-            }
-            catch (ServiceException se)
-            {
-                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex.ToString());
-                throw;
-            }
-        }
-
-        // POST api/login/forgotPassword
-        [HttpPost("forgotPassword/{userName}")]
-        public async Task<ApiResponse> ForgotPassword(string userName)
-        {
-            try
-            {
-                var entity = await _service.SendNewCredentialsAsync(userName);
+                string authorization = AuthenticationHeaderValue.Parse(Request.Headers["Authorization"]).ToString();
+                var token = authorization.Split(' ')[1];
+                var entity = await _service.Logout(token);
                 return new ApiResponse(entity);
             }
             catch (ServiceException se)

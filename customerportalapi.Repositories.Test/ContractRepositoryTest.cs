@@ -45,7 +45,7 @@ namespace customerportalapi.Repositories.Test
 
             //Act
             ContractRepository repository = new ContractRepository(_configurations, _clientFactory);
-            List<Contract> result = repository.GetContractsAsync("fake dni").Result;
+            List<Contract> result = repository.GetContractsAsync("fake dni", "fake customertype").Result;
 
             //Assert
             Assert.IsNotNull(result);
@@ -71,7 +71,7 @@ namespace customerportalapi.Repositories.Test
 
             //Act
             ContractRepository repository = new ContractRepository(_configurations, _clientFactory);
-            List<Contract> result = repository.GetContractsAsync("fake dni").Result;
+            List<Contract> result = repository.GetContractsAsync("fake dni", "fake customertype").Result;
 
             //Assert
             Assert.IsNotNull(result);

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Moq.Contrib.HttpClient;
@@ -14,6 +15,7 @@ namespace customerportalapi.Repositories.Test
         IConfiguration _configurations;
         IHttpClientFactory _clientFactory;
         Mock<HttpMessageHandler> _handler;
+        Mock<ILogger<ProfileRepository>> _logger;
 
         [TestInitialize]
         public void Setup()
@@ -24,6 +26,7 @@ namespace customerportalapi.Repositories.Test
 
             _handler = new Mock<HttpMessageHandler>();
             _clientFactory = _handler.CreateClientFactory();
+            _logger = new Mock<ILogger<ProfileRepository>>();
         }
 
         [TestMethod]
@@ -44,8 +47,8 @@ namespace customerportalapi.Repositories.Test
                 .ReturnsAsync(response);
 
             //Act
-            ProfileRepository repository = new ProfileRepository(_configurations, _clientFactory, null);
-            var result = repository.GetProfileAsync("fake dni");
+            ProfileRepository repository = new ProfileRepository(_configurations, _clientFactory, _logger.Object);
+            var result = repository.GetProfileAsync("fake dni", "fake customertype").Result;
 
             //Assert
             Assert.IsNotNull(result);
@@ -69,8 +72,33 @@ namespace customerportalapi.Repositories.Test
                 .ReturnsAsync(response);
 
             //Act
-            ProfileRepository repository = new ProfileRepository(_configurations, _clientFactory, null);
-            var result = repository.UpdateProfileAsync(new Entities.Profile());
+            ProfileRepository repository = new ProfileRepository(_configurations, _clientFactory, _logger.Object);
+            var result = repository.UpdateProfileAsync(new Entities.Profile()).Result;
+
+            //Assert
+            Assert.IsNotNull(result);
+        }
+
+        [TestMethod]
+        public void AlHacerUnaLlamadaExternaDeDatosDePermisosDeContacto_NoDevuelveErrores()
+        {
+            //Arrange
+            Mock.Get(_clientFactory).Setup(x => x.CreateClient("httpClientCRM"))
+                .Returns(() =>
+                {
+                    return _handler.CreateClient();
+                });
+
+            var response = new HttpResponseMessage
+            {
+                Content = new StringContent("{ \"result\": { \"documentnumber\": \"123456789\", \"admincontact\": \"true\", \"supercontact\": \"false\"}}")
+            };
+            _handler.SetupAnyRequest()
+                .ReturnsAsync(response);
+
+            //Act
+            ProfileRepository repository = new ProfileRepository(_configurations, _clientFactory, _logger.Object);
+            var result = repository.GetProfilePermissionsAsync("fake dni", "fake customertype").Result;
 
             //Assert
             Assert.IsNotNull(result);

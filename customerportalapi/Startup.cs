@@ -99,6 +99,7 @@ namespace customerportalapi
             services.AddTransient<IWebTemplateServices, WebTemplateServices>();
             services.AddTransient<ILoginService, LoginService>();
             services.AddTransient<ICountryServices, CountryServices>();
+            services.AddTransient<IAuthService, AuthService>();
 
             services.AddHttpClient("httpClientCRM", c =>
             {
@@ -123,7 +124,7 @@ namespace customerportalapi
             {
                 c.BaseAddress = new Uri(Configuration["Identity:BaseUri"]);
                 c.Timeout = new TimeSpan(0, 2, 0);  //2 minutes
-                c.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                //c.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                 c.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue
                 {
                     NoCache = true,
