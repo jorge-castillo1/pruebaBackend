@@ -109,7 +109,7 @@ namespace customerportalapi.Repositories.Test
         }
 
         [TestMethod]
-        public void AlOlvidarContraseña_SeVerificaTokenForgotPassword()
+        public void AlOlvidarContraseÃ±a_SeVerificaTokenForgotPassword()
         {
             //Act
 
