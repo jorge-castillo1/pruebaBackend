@@ -147,6 +147,7 @@ namespace customerportalapi.Services.Test.FakeData
         {
             var db = new Mock<IUserRepository>();
             db.Setup(x => x.GetUserByInvitationToken(It.IsAny<string>())).Returns(new User()).Verifiable();
+            db.Setup(x => x.GetUserByForgotPasswordToken(It.IsAny<string>())).Returns(new User()).Verifiable();
 
             return db;
         }
