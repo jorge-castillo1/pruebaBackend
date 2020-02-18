@@ -9,6 +9,7 @@ using Microsoft.Extensions.Caching.Distributed;
 using System.Net;
 using customerportalapi.Services.Exceptions;
 using customerportalapi.Entities.enums;
+using System.Threading;
 
 namespace customerportalapi.Services
 {
@@ -18,14 +19,20 @@ namespace customerportalapi.Services
         private readonly IContractRepository _contractRepository;
         private readonly IStoreRepository _storeRepository;
         private readonly IDistributedCache _distributedCache;
+        private readonly IIdentityRepository _identityRepository;
+        private readonly IContractSMRepository _contractSMRepository;
+
 
         public SiteServices(IUserRepository userRepository, IContractRepository contractRepository,
-            IStoreRepository storeRepository, IDistributedCache distributedCache)
+            IStoreRepository storeRepository, IDistributedCache distributedCache, IIdentityRepository identityRepository,
+            IContractSMRepository contractSMRepository)
         {
             _userRepository = userRepository;
             _contractRepository = contractRepository;
             _storeRepository = storeRepository;
             _distributedCache = distributedCache;
+            _identityRepository = identityRepository;
+            _contractSMRepository = contractSMRepository;
         }
 
 
@@ -36,7 +43,7 @@ namespace customerportalapi.Services
             User user = _userRepository.GetCurrentUserByDniAndType(dni, userType);
             if (user.Id == null)
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
-            
+
             //2. If exist complete data from external repository
             //Invoke repository
             List<Contract> entitylist = await _contractRepository.GetContractsAsync(dni, accountType);
@@ -123,6 +130,34 @@ namespace customerportalapi.Services
             DistributedMongoDbCache<List<Store>> distributedCache = new DistributedMongoDbCache<List<Store>>(_distributedCache, cacheEntryOptions);
 
             return await distributedCache.GetOrCreateCache("Store", async () => await _storeRepository.GetStoresAsync());
+        }
+
+        public async Task<AccessCode> GetAccessCodeAsync(string contractId, string password) {
+            // TODO:
+            var user = Thread.CurrentPrincipal;
+            Token token = await _identityRepository.Authorize(new Login()
+            {
+                Username = user.Identity.Name,
+                Password = password
+            });
+            AccessCode entity = new AccessCode();
+            entity.AccesToken = token.AccesToken;
+            entity.RefreshToken = token.RefreshToken;
+            entity.IdToken = token.IdToken;
+            entity.TokenType = token.TokenType;
+            entity.ExpiresIn = token.ExpiresIn;
+            entity.Scope = token.Scope;
+
+            if (entity.AccesToken == null) {
+                throw new ServiceException("Password not valid", HttpStatusCode.BadRequest);
+            }
+
+            SMContract contract = await _contractSMRepository.GetAccessCodeAsync(contractId);
+
+            entity.Password = contract.Password;
+            entity.ContractId = contractId;
+
+            return entity;
         }
     }
 }
