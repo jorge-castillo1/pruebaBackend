@@ -28,7 +28,7 @@ namespace customerportalapi.Controllers
         {
             try
             {
-                _service.UpdateProcess(value);
+                _service.UpdatePaymentProcess(value);
                 return new OkResult();
             }
             catch (Exception ex)

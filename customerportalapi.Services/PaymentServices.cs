@@ -66,5 +66,27 @@ namespace customerportalapi.Services
 
             return true;
         }
+
+        public bool UpdatePaymentProcess(SignatureStatus value)
+        {
+            ProcessSearchFilter filter = new ProcessSearchFilter
+            {
+                UserName = value.User,
+                DocumentId = value.DocumentId
+            };
+
+            List<Process> processes = _processRepository.Find(filter);
+            if (processes.Count == 0) throw new ServiceException("Process not found.", HttpStatusCode.NotFound);
+            if (processes.Count > 1) throw new ServiceException("More than one process was found", HttpStatusCode.BadRequest);
+
+            Process process = processes[0];
+            if (value.Status == "document_completed") process.ProcessStatus = (int)ProcessStatuses.Accepted;
+            else if (value.Status == "document_canceled") process.ProcessStatus = (int)ProcessStatuses.Canceled;
+            else throw new ServiceException("Document status not valid", HttpStatusCode.BadRequest);
+
+            _processRepository.Update(process);
+
+            return true;
+        }
     }
 }

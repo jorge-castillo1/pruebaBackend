@@ -70,5 +70,62 @@ namespace customerportalapi.Services.Test.FakeData
 
             return db;
         }
+
+        public static Mock<IProcessRepository> NoResultsProcessRepository()
+        {
+            var db = new Mock<IProcessRepository>();
+
+            db.Setup(x => x.Find(It.IsAny<ProcessSearchFilter>())).Returns(new List<Process>()).Verifiable();
+
+            return db;
+        }
+
+        public static Mock<IProcessRepository> MoreThanOneResultProcessRepository()
+        {
+            var db = new Mock<IProcessRepository>();
+
+            db.Setup(x => x.Find(It.IsAny<ProcessSearchFilter>())).Returns(new List<Process>()
+            {
+                new Process()
+                {
+                    Id = new Guid().ToString(),
+                    Username = "fake user",
+                    ContractNumber = "fake contract",
+                },
+                new Process()
+                {
+                    Id = new Guid().ToString(),
+                    Username = "fake user",
+                    ContractNumber = "fake contract2",
+                }
+            }).Verifiable();
+
+            return db;
+        }
+
+        public static Mock<IProcessRepository> OneResultProcessRepository()
+        {
+            var db = new Mock<IProcessRepository>();
+
+            db.Setup(x => x.Find(It.IsAny<ProcessSearchFilter>())).Returns(new List<Process>()
+            {
+                new Process()
+                {
+                    Id = new Guid().ToString(),
+                    Username = "fake user",
+                    ContractNumber = "fake contract",
+                    ProcessStatus = 0
+                }
+            }).Verifiable();
+            db.Setup(x => x.Update(It.IsAny<Process>())).Returns(new Process()
+            {
+                Id = new Guid().ToString(),
+                Username = "fake user",
+                ContractNumber = "fake contract",
+                ProcessStatus = 1
+            }).Verifiable();
+
+            return db;
+        }
     }
 }

@@ -96,5 +96,68 @@ namespace customerportalapi.Services.Test
             PaymentServices service = new PaymentServices(_userRepository.Object, _processRepository.Object);
             bool result = await service.ChangePaymentMethod(bankdata);
         }
+
+        [TestMethod]
+        [ExpectedException(typeof(ServiceException), "No se ha producido la excepción esperada")]
+        public void SiNoExisteRegistro_ConElMismoUsuarioYDocumento_SeDevuelveUnaExcepcion()
+        {
+            //Arrange
+            SignatureStatus value = new SignatureStatus();
+            value.User = "usertest";
+            value.DocumentId = Guid.NewGuid().ToString();
+            value.Status = "document_completed";
+
+            _processRepository = ProcessRepositoryMock.NoResultsProcessRepository();
+            PaymentServices service = new PaymentServices(_userRepository.Object, _processRepository.Object);
+            var result = service.UpdatePaymentProcess(value);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ServiceException), "No se ha producido la excepción esperada")]
+        public void SiExisteMasDeUnRegistro_ConElMismoUsuarioYDocumento_SeDevuelveUnaExcepcion()
+        {
+            //Arrange
+            SignatureStatus value = new SignatureStatus();
+            value.User = "usertest";
+            value.DocumentId = Guid.NewGuid().ToString();
+            value.Status = "document_completed";
+
+            _processRepository = ProcessRepositoryMock.MoreThanOneResultProcessRepository();
+            PaymentServices service = new PaymentServices(_userRepository.Object, _processRepository.Object);
+            var result = service.UpdatePaymentProcess(value);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ServiceException), "No se ha producido la excepción esperada")]
+        public void SiElEstado_NoEsValido_SeDevuelveUnaExcepcion()
+        {
+            //Arrange
+            SignatureStatus value = new SignatureStatus();
+            value.User = "usertest";
+            value.DocumentId = Guid.NewGuid().ToString();
+            value.Status = "fake_document_state";
+
+            _processRepository = ProcessRepositoryMock.OneResultProcessRepository();
+            PaymentServices service = new PaymentServices(_userRepository.Object, _processRepository.Object);
+            var result = service.UpdatePaymentProcess(value);
+        }
+
+        [TestMethod]
+        public void SeModificaUnProceso()
+        {
+            //Arrange
+            SignatureStatus value = new SignatureStatus();
+            value.User = "usertest";
+            value.DocumentId = Guid.NewGuid().ToString();
+            value.Status = "document_canceled";
+
+            _processRepository = ProcessRepositoryMock.OneResultProcessRepository();
+            PaymentServices service = new PaymentServices(_userRepository.Object, _processRepository.Object);
+            var result = service.UpdatePaymentProcess(value);
+
+            Assert.IsNotNull(result);
+            _processRepository.Verify(x => x.Find(It.IsAny<ProcessSearchFilter>()));
+            _processRepository.Verify(x => x.Update(It.IsAny<Process>()));
+        }
     }
 }
