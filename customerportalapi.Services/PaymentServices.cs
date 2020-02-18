@@ -8,6 +8,9 @@ using System.Collections.Generic;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using customerportalapi.Entities;
+using customerportalapi.Entities.enums;
+using customerportalapi.Repositories.interfaces;
 
 namespace customerportalapi.Services
 {

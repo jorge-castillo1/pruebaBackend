@@ -6,8 +6,8 @@ namespace customerportalapi.Entities.enums
 {
     public enum ProcessStatuses
     {
-        Pending,
-        Accepted,
-        Canceled
+        Pending = 0,
+        Accepted = 1,
+        Canceled = 2
     }
 }
