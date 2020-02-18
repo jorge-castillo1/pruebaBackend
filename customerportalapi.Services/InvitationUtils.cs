@@ -3,7 +3,7 @@ using customerportalapi.Entities.enums;
 
 namespace customerportalapi.Services
 {
-    public static class InvitationUtils
+    public static class UserUtils
     {
         public static string GetLanguage(string invitationLanguage)
         {

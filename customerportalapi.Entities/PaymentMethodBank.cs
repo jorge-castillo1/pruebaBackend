@@ -4,10 +4,8 @@ using System.Text;
 
 namespace customerportalapi.Entities
 {
-    public class PaymentMethodBank
+    public class PaymentMethodBank : PaymentMethod
     {
-        public string Dni { get; set; }
-        public string AccountType { get; set; }
         public string ContractNumber { get; set; }
         public string IBAN { get; set; }
         public string FullName { get; set; }
