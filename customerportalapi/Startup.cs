@@ -66,6 +66,11 @@ namespace customerportalapi
                 IMongoDatabase database = GetDatabase();
                 return new MongoCollectionWrapper<WebTemplate>(database, "webtemplates");
             });
+            services.AddScoped<IMongoCollectionWrapper<Process>>(serviceProvider =>
+            {
+                IMongoDatabase database = GetDatabase();
+                return new MongoCollectionWrapper<Process>(database, "processes");
+            });
 
             //Mail service
             services.AddScoped(serviceProvider =>
