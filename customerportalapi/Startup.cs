@@ -106,6 +106,7 @@ namespace customerportalapi
             services.AddTransient<ILoginService, LoginService>();
             services.AddTransient<ICountryServices, CountryServices>();
             services.AddTransient<IAuthService, AuthService>();
+            services.AddTransient<IPaymentService, PaymentServices>();
 
             services.AddHttpClient("httpClientCRM", c =>
             {
