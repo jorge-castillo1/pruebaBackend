@@ -1,6 +1,7 @@
 ﻿using customerportalapi.Entities;
 using customerportalapi.Entities.enums;
 using customerportalapi.Repositories.interfaces;
+using customerportalapi.Services.Exceptions;
 using customerportalapi.Services.Test.FakeData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -24,38 +25,76 @@ namespace customerportalapi.Services.Test
             _processRepository = ProcessRepositoryMock.ProcessRepository();
         }
 
-        //[TestMethod]
-        //public async Task<Process> AlCambiarElMetodoDePagoPorDomiciliacion_SeDevuelveUnProcesoEnEstadoPendiente()
-        //{
-        //    //Arrange
-        //    PaymentMethodBank bankdata = new PaymentMethodBank();
-        //    bankdata.Dni = "fake dni";
-        //    bankdata.AccountType = "fake account type";
-        //    bankdata.ContractNumber = "fake contract number";
-        //    bankdata.IBAN = "fake iban";
-        //    bankdata.FullName = "fake fullname";
-        //    bankdata.Address = "fake address";
-        //    bankdata.PostalCode = "fake postal code";
-        //    bankdata.Location = "fake location";
-        //    bankdata.State = "fake state";
-        //    bankdata.Country = "fake country";
-            
-        //    //Act
-        //    PaymentServices service = new PaymentServices(_userRepository.Object, _processRepository.Object);
-        //    Process entity = await service.ChangePaymentMethod(bankdata);
+        [TestMethod]
+        [ExpectedException(typeof(ServiceException), "No se ha producido la excepción esperada")]
+        public async Task AlCambiarElMetodoDePagoYNoExisteUsuario_SeDevuelveUnaExcepcion()
+        {
+            //Arrange
+            PaymentMethodBank bankdata = new PaymentMethodBank();
+            bankdata.Dni = "fake dni";
+            bankdata.AccountType = "fake account type";
 
-        //    //Assert
-        //    Assert.IsTrue(entity.Id != string.Empty);
-        //    Assert.IsTrue(entity.CreationDate != DateTime.MinValue);
-        //    Assert.IsTrue(entity.ProcessStatus == (int)ProcessStatuses.Pending);
+            //Act
+            _userRepository = UserRepositoryMock.InvalidUserRepository();
+            PaymentServices service = new PaymentServices(_userRepository.Object, _processRepository.Object);
+            bool result = await service.ChangePaymentMethod(bankdata);
+        }
 
-        //    //Más adelante habrá que verificar que se ha enviado el documento a firmar
+        [TestMethod]
+        public async Task AlCambiarElMetodoDePagoPorDomiciliacion_SeCreaUnProceso()
+        {
+            //Arrange
+            PaymentMethodBank bankdata = new PaymentMethodBank();
+            bankdata.Dni = "fake dni";
+            bankdata.AccountType = "fake account type";
+            bankdata.ContractNumber = "fake contract number";
+            bankdata.IBAN = "fake iban";
+            bankdata.FullName = "fake fullname";
+            bankdata.Address = "fake address";
+            bankdata.PostalCode = "fake postal code";
+            bankdata.Location = "fake location";
+            bankdata.State = "fake state";
+            bankdata.Country = "fake country";
 
-        //}
+            //Act
+            _processRepository = ProcessRepositoryMock.NoPendingSameProcessRepository();
+            PaymentServices service = new PaymentServices(_userRepository.Object, _processRepository.Object);
+            bool result = await service.ChangePaymentMethod(bankdata);
 
-        //[TestMethod]
-        //public async Task<Process> AlCambiarElMetodoDePagoDelMismoContrato_ConUnCambioPendiente_SeDevuelveUnaExcepcion()
-        //{
-        //}
+            //Assert
+            Assert.IsTrue(result);
+            _processRepository.Verify(x => x.Find(It.IsAny<ProcessSearchFilter>()));
+            _processRepository.Verify(x => x.Create(It.IsAny<Process>()));
+            //Más adelante habrá que verificar que se ha enviado el documento a firmar
+
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ServiceException), "No se ha producido la excepción esperada")]
+        public async Task AlCambiarElMetodoDePagoPorDomiciliacionSinContrato_SeDevuelveUnaExcepcion()
+        {
+            //Arrange
+            PaymentMethodBank bankdata = new PaymentMethodBank();
+            bankdata.Dni = "fake dni";
+            bankdata.AccountType = "fake account type";
+
+            PaymentServices service = new PaymentServices(_userRepository.Object, _processRepository.Object);
+            bool result = await service.ChangePaymentMethod(bankdata);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ServiceException), "No se ha producido la excepción esperada")]
+        public async Task AlCambiarElMetodoDePagoDelMismoContrato_ConUnCambioPendiente_SeDevuelveUnaExcepcion()
+        {
+            //Arrange
+            PaymentMethodBank bankdata = new PaymentMethodBank();
+            bankdata.Dni = "fake dni";
+            bankdata.AccountType = "fake account type";
+            bankdata.ContractNumber = "fake contract number";
+
+            _processRepository = ProcessRepositoryMock.PendingSameProcessRepository();
+            PaymentServices service = new PaymentServices(_userRepository.Object, _processRepository.Object);
+            bool result = await service.ChangePaymentMethod(bankdata);
+        }
     }
 }

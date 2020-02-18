@@ -54,6 +54,9 @@ namespace customerportalapi.Repositories
             if (!string.IsNullOrEmpty(filter.DocumentId))
                 filters = filters & Builders<Process>.Filter.Eq(x => x.DocumentId, filter.DocumentId);
 
+            if (filter.ProcessStatus.HasValue)
+                filters = filters & Builders<Process>.Filter.Eq(x => x.ProcessStatus, filter.ProcessStatus.Value);
+
             //Without pagination by the moment
             return _processes.Find(filters, 1, 0);
         }
