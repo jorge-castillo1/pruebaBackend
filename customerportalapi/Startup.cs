@@ -92,6 +92,7 @@ namespace customerportalapi
             services.AddScoped<IStoreRepository, StoreRepository>();
             services.AddScoped<IIdentityRepository, IdentityRepository>();
             services.AddScoped<ICountryRepository, CountryRepository>();
+            services.AddScoped<IProcessRepository, ProcessRepository>();
 
             //Register Business Services
             services.AddTransient<IUserServices, UserServices>();
