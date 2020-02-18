@@ -63,5 +63,13 @@ namespace customerportalapi.Services.Test.FakeData
 
             return db;
         }
+
+        public static Mock<IIdentityRepository> IdentityRepository_Invalid()
+        {
+            var db = new Mock<IIdentityRepository>();
+            db.Setup(x => x.Authorize(It.IsAny<Login>())).Returns(Task.FromResult(new Token())).Verifiable();
+
+            return db;
+        }
     }
 }

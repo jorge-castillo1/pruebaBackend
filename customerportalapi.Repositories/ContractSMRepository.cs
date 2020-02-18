@@ -10,30 +10,29 @@ using System.Collections.Generic;
 
 namespace customerportalapi.Repositories
 {
-    public class CountryRepository : ICountryRepository
+    public class ContractSMRepository : IContractSMRepository
     {
         private readonly IConfiguration _configuration;
         private readonly IHttpClientFactory _clientFactory;
 
-        public CountryRepository(IConfiguration configuration, IHttpClientFactory clientFactory)
+        public ContractSMRepository(IConfiguration configuration, IHttpClientFactory clientFactory)
         {
             _configuration = configuration;
             _clientFactory = clientFactory;
         }
-
-        public async Task<List<Country>> GetCountriesAsync()
+        
+        public async Task<SMContract> GetAccessCodeAsync(string contractId)
         {
             var httpClient = _clientFactory.CreateClient("httpClient");
-            var uri = new Uri(_configuration["GatewayUrl"] + _configuration["CountriesAPI"]);
-            httpClient.BaseAddress = uri;
+            httpClient.BaseAddress = new Uri(_configuration["GatewaySmUrl"] + _configuration["ContractSMAPI"]);
 
-            var response = await httpClient.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead);
+            var response = await httpClient.GetAsync(contractId, HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
-            if (!response.IsSuccessStatusCode) return new List<Country>();
+            if (!response.IsSuccessStatusCode) return new SMContract();
             var content = await response.Content.ReadAsStringAsync();
             JObject result = JObject.Parse(content);
 
-            return JsonConvert.DeserializeObject<List<Country>>(result.GetValue("result").ToString());
+            return JsonConvert.DeserializeObject<SMContract>(result.GetValue("result").ToString());
         }
     }
 }

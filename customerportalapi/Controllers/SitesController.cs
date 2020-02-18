@@ -125,5 +125,25 @@ namespace customerportalapi.Controllers
                 throw;
             }
         }
+
+        [HttpPost("access-code")]
+        public async Task<ApiResponse> GetAccessCodeAsync([FromBody] AccessCode value)
+        {
+            try
+            {
+                var entity = await _services.GetAccessCodeAsync(value.ContractId, value.Password);
+                return new ApiResponse(entity);
+            }
+            catch(ServiceException ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
     }
 }

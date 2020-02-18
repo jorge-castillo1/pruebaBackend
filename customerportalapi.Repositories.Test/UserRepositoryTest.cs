@@ -30,6 +30,7 @@ namespace customerportalapi.Repositories.Test
                 {
                 new User
                 {
+                    Id = "fake Id",
                     Dni = "12345678Z",
                     Email = "fakeuser@email.com"
                 }});
@@ -92,6 +93,32 @@ namespace customerportalapi.Repositories.Test
 
             UserRepository _userRepository = new UserRepository(_configurations, _users.Object);
             _userRepository.Delete(testUser);
+        }
+
+        [TestMethod]
+        public void AlConsultarTokenDeInvitacion_NoSeProducenErrores()
+        {
+            //Act
+
+            //Arrange
+            UserRepository _userRepository = new UserRepository(_configurations, _users.Object);
+            User user = _userRepository.GetUserByInvitationToken("fake guid");
+
+            //Assert
+            Assert.IsTrue(user.Id != null);
+        }
+
+        [TestMethod]
+        public void AlOlvidarContraseña_SeVerificaTokenForgotPassword()
+        {
+            //Act
+
+            //Arrange
+            UserRepository _userRepository = new UserRepository(_configurations, _users.Object);
+            User user = _userRepository.GetUserByForgotPasswordToken("fake guid");
+
+            //Assert
+            Assert.IsTrue(user.Id != null);
         }
 
 

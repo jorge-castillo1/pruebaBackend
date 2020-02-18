@@ -107,13 +107,13 @@ namespace customerportalapi.Controllers
             }
         }
 
-        // PUT api/users/confirm/{invitationToken}
-        [HttpPut("confirm/{invitationToken}")]
-        public async Task<ApiResponse> Confirm(string invitationToken)
+        // PUT api/users/confirm/{receivedToken}
+        [HttpPut("confirm/{receivedToken}")]
+        public async Task<ApiResponse> Confirm(string receivedToken)
         {
             try
             {
-                var entity = await _services.ConfirmUserAsync(invitationToken);
+                var entity = await _services.ConfirmUserAsync(receivedToken);
                 return new ApiResponse(entity);
             }
             catch (ServiceException se)
