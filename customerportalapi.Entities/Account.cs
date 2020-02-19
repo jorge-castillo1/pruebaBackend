@@ -17,6 +17,8 @@ namespace customerportalapi.Entities
         public string UseThisAddress { get; set; }
 
         public List<Address> AddressList { get; set; }
+
+        public string CustomerType { get; set; }
     }
 
     public class AccountProfile
@@ -74,5 +76,7 @@ namespace customerportalapi.Entities
         public string AlternateCountry { get; set; }
 
         public string UseThisAddress { get; set; }
+
+        public string CustomerType { get; set; }
     }
 }
