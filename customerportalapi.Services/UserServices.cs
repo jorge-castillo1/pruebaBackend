@@ -477,6 +477,7 @@ namespace customerportalapi.Services
                 Email1 = entity.EmailAddress1,
                 Email2 = entity.EmailAddress2,
                 UseThisAddress = entity.UseThisAddress,
+                CustomerType = entity.CustomerType,
                 AddressList = new List<Address>
                 {
                     new Address
