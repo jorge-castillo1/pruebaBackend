@@ -59,6 +59,7 @@ namespace customerportalapi.Services
                 process.Username = user.Username;
                 process.ProcessType = (int)ProcessTypes.PaymentMethodChangeBank;
                 process.ProcessStatus = (int)ProcessStatuses.Pending;
+                process.ContractNumber = bankmethod.ContractNumber;
                 process.DocumentId = documentid.ToString();
 
                 await _processRepository.Create(process);
