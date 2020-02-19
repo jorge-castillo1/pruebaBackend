@@ -40,5 +40,12 @@ namespace customerportalapi.Repositories.utils
         {
             return _mongoCollection.Find(filter).ToList();
         }
+
+        public List<T> Find(FilterDefinition<T> filter, int pagenum, int pagesize, FindOptions options = null)
+        {
+            var skip = pagenum == 1 ? 0 : (pagenum - 1) * pagesize;
+
+            return _mongoCollection.Find(filter, options).Skip(skip).Limit(pagesize).ToList();
+        }
     }
 }

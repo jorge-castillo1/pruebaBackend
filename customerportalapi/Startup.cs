@@ -66,6 +66,11 @@ namespace customerportalapi
                 IMongoDatabase database = GetDatabase();
                 return new MongoCollectionWrapper<WebTemplate>(database, "webtemplates");
             });
+            services.AddScoped<IMongoCollectionWrapper<Process>>(serviceProvider =>
+            {
+                IMongoDatabase database = GetDatabase();
+                return new MongoCollectionWrapper<Process>(database, "processes");
+            });
 
             //Mail service
             services.AddScoped(serviceProvider =>
@@ -92,6 +97,7 @@ namespace customerportalapi
             services.AddScoped<IStoreRepository, StoreRepository>();
             services.AddScoped<IIdentityRepository, IdentityRepository>();
             services.AddScoped<ICountryRepository, CountryRepository>();
+            services.AddScoped<IProcessRepository, ProcessRepository>();
 
             //Register Business Services
             services.AddTransient<IUserServices, UserServices>();
@@ -100,6 +106,7 @@ namespace customerportalapi
             services.AddTransient<ILoginService, LoginService>();
             services.AddTransient<ICountryServices, CountryServices>();
             services.AddTransient<IAuthService, AuthService>();
+            services.AddTransient<IPaymentService, PaymentServices>();
 
             services.AddHttpClient("httpClientCRM", c =>
             {
