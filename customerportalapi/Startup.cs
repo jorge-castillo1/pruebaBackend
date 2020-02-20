@@ -90,6 +90,7 @@ namespace customerportalapi
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IProfileRepository, ProfileRepository>();
             services.AddScoped<IContractRepository, ContractRepository>();
+            services.AddScoped<IContractSMRepository, ContractSMRepository>();
             services.AddScoped<IMailClient, MailClientWrapper>();
             services.AddScoped<IMailRepository, MailRepository>();
             services.AddScoped<IEmailTemplateRepository, EmailTemplateRepository>();
@@ -108,7 +109,7 @@ namespace customerportalapi
             services.AddTransient<IAuthService, AuthService>();
             services.AddTransient<IPaymentService, PaymentServices>();
 
-            services.AddHttpClient("httpClientCRM", c =>
+            services.AddHttpClient("httpClient", c =>
             {
                 c.BaseAddress = new Uri(Configuration["GatewayUrl"]);
                 c.Timeout = new TimeSpan(0, 2, 0);  //2 minutes
@@ -223,7 +224,7 @@ namespace customerportalapi
             // Enable middleware to serve generated Swagger as a JSON endpoint.
             app.UseSwagger();
 
-            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.), 
+            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.),
             // specifying the Swagger JSON endpoint.
             app.UseSwaggerUI(c =>
             {
