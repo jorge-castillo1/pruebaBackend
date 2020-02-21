@@ -16,6 +16,17 @@ namespace customerportalapi.Services.Test.FakeData
                 new Store()
             })).Verifiable();
 
+            db.Setup(x => x.GetStoreAsync(It.IsAny<string>())).Returns(Task.FromResult(new Store()
+                {
+                    StoreCode = "FAKESTORECODE",
+                    StoreName = "Fake name",
+                    CompanyCif = "FAKE123456",
+                    CompanyName = "Fake Company Name S.L.",
+                    CompanySocialAddress = "Fake Street, 10",
+                    Country = "FAKE"
+                }
+            )).Verifiable();
+
             return db;
         }
     }
