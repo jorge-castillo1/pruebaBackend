@@ -22,6 +22,7 @@ namespace customerportalapi.Repositories
         {
             //create process
             process.CreationDate = System.DateTime.Now;
+            process.ModifiedDate = System.DateTime.Now;
 
             _processes.InsertOne(process);
             return Task.FromResult(true);
