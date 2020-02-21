@@ -13,5 +13,6 @@ namespace customerportalapi.Repositories.interfaces
         void InsertOne(T data);
         Task<DeleteResult> DeleteOneAsync(FilterDefinition<T> filter);
         List<T> FindAll(Expression<Func<T, bool>> filter);
+        List<T> Find(FilterDefinition<T> filter, int pagenum, int pagesize, FindOptions options = null);
     }
 }

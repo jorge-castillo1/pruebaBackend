@@ -66,6 +66,11 @@ namespace customerportalapi
                 IMongoDatabase database = GetDatabase();
                 return new MongoCollectionWrapper<WebTemplate>(database, "webtemplates");
             });
+            services.AddScoped<IMongoCollectionWrapper<Process>>(serviceProvider =>
+            {
+                IMongoDatabase database = GetDatabase();
+                return new MongoCollectionWrapper<Process>(database, "processes");
+            });
 
             //Mail service
             services.AddScoped(serviceProvider =>
@@ -93,7 +98,9 @@ namespace customerportalapi
             services.AddScoped<IStoreRepository, StoreRepository>();
             services.AddScoped<IIdentityRepository, IdentityRepository>();
             services.AddScoped<ICountryRepository, CountryRepository>();
-            
+            services.AddScoped<IProcessRepository, ProcessRepository>();
+            services.AddScoped<ISignatureRepository, SignatureRepository>();
+
             //Register Business Services
             services.AddTransient<IUserServices, UserServices>();
             services.AddTransient<ISiteServices, SiteServices>();
@@ -101,6 +108,8 @@ namespace customerportalapi
             services.AddTransient<ILoginService, LoginService>();
             services.AddTransient<ICountryServices, CountryServices>();
             services.AddTransient<IAuthService, AuthService>();
+            services.AddTransient<IPaymentService, PaymentServices>();
+            services.AddTransient<IProcessService, ProcessService>();
 
             services.AddHttpClient("httpClient", c =>
             {
@@ -142,6 +151,25 @@ namespace customerportalapi
             {
                 AllowAutoRedirect = false,
                 AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip
+            });
+
+            services.AddHttpClient("httpClientSignature", c =>
+            {
+                c.BaseAddress = new Uri(Configuration["GatewaySignatureUrl"]);
+                c.Timeout = new TimeSpan(0, 2, 0);  //2 minutes
+                c.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                c.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue
+                {
+                    NoCache = true,
+                    NoStore = true,
+                    MaxAge = new TimeSpan(0),
+                    MustRevalidate = true
+                };
+            }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            {
+                AllowAutoRedirect = false,
+                AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip,
+                //Credentials = GetCredentials()
             });
 
             services.AddMvc()

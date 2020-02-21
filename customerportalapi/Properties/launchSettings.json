@@ -13,12 +13,14 @@
       "commandName": "IISExpress",
       "launchUrl": "api/values",
       "environmentVariables": {
+        "Key": "Value",
         "MONGO_URL": "mongodb://localhost:27017",
         "Email__Smtp__Host": "smtp.office365.com",
         "Email__Smtp__Username": "no-reply@bluespace.eu",
         "ContractSMAPI": "smapi/Contract/",
         "Email__Smtp__Password": "EoE4RygWaKVvQrvVu7dp",
         "InviteConfirmation": "http://localhost:4200/signup/",
+        "SIGNATUREENDPOINT": "api/signature",
         "ContractsAPI": "crmapi/Contracts/",
         "AccountsAPI": "crmapi/Accounts/",
         "MailFrom": "no-reply@bluespace.eu",
@@ -30,6 +32,7 @@
         "GatewaySmUrl": "https://localhost:44390/",
         "ASPNETCORE_ENVIRONMENT": "Development",
         "CountriesAPI": "crmapi/Countries/",
+        "GATEWAYSIGNATUREURL": "https://localhost:44329/",
         "CustomerPortal_ApiKey": "F56A2E61-6D3C-4C3F-B1B5-16C335EADA96",
         "StoresAPI": "crmapi/Sites/"
       }

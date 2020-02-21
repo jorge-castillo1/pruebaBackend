@@ -39,7 +39,7 @@ namespace customerportalapi.Services
         public async Task<List<Site>> GetContractsAsync(string dni, string accountType)
         {
             //Add customer portal Business Logic
-            int userType = InvitationUtils.GetUserType(accountType);
+            int userType = UserUtils.GetUserType(accountType);
             User user = _userRepository.GetCurrentUserByDniAndType(dni, userType);
             if (user.Id == null)
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
@@ -68,6 +68,7 @@ namespace customerportalapi.Services
                 foreach (var contract in storegroup)
                 {
                     //ToDo: remove this and clean contract entity
+                    contract.StoreCode = contract.StoreData.StoreCode;
                     contract.StoreData = null;
                     site.Contracts.Add(contract);
                 }

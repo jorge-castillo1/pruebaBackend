@@ -36,7 +36,7 @@ namespace customerportalapi.Services
         public async Task<Profile> GetProfileAsync(string dni, string accountType)
         {
             //Add customer portal Business Logic
-            int userType = InvitationUtils.GetUserType(accountType);
+            int userType = UserUtils.GetUserType(accountType);
             User user = _userRepository.GetCurrentUserByDniAndType(dni, userType);
             if (user.Id == null)
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
@@ -86,7 +86,7 @@ namespace customerportalapi.Services
             if (string.IsNullOrEmpty(profile.CustomerTypeInfo.CustomerType))
                 profile.CustomerTypeInfo.CustomerType = AccountType.Residential;
 
-            int userType = InvitationUtils.GetUserType(profile.CustomerTypeInfo.CustomerType);
+            int userType = UserUtils.GetUserType(profile.CustomerTypeInfo.CustomerType);
             User user = _userRepository.GetCurrentUserByDniAndType(profile.DocumentNumber, userType);
             if (user.Id == null)
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
@@ -158,7 +158,7 @@ namespace customerportalapi.Services
                 throw new ServiceException("User must have a valid document number.", HttpStatusCode.BadRequest, "Dni", "Empty field");
 
             //3. If no user exists create user
-            var userType = InvitationUtils.GetUserType(value.CustomerType);
+            var userType = UserUtils.GetUserType(value.CustomerType);
             var userName = userType == 0 ? value.Dni : "B" + value.Dni;
 
             var pwd = new Password(true, true, true, false, 6);
@@ -175,8 +175,8 @@ namespace customerportalapi.Services
                     Email = value.Email,
                     Name = value.Fullname,
                     Password = password,
-                    Language = InvitationUtils.GetLanguage(value.Language),
-                    Usertype = InvitationUtils.GetUserType(value.CustomerType),
+                    Language = UserUtils.GetLanguage(value.Language),
+                    Usertype = UserUtils.GetUserType(value.CustomerType),
                     Emailverified = false,
                     Invitationtoken = Guid.NewGuid().ToString()
                 };
@@ -193,8 +193,8 @@ namespace customerportalapi.Services
                 user.Email = value.Email;
                 user.Name = value.Fullname;
                 user.Password = password;
-                user.Language = InvitationUtils.GetLanguage(value.Language);
-                user.Usertype = InvitationUtils.GetUserType(value.CustomerType);
+                user.Language = UserUtils.GetLanguage(value.Language);
+                user.Usertype = UserUtils.GetUserType(value.CustomerType);
                 user.Invitationtoken = Guid.NewGuid().ToString();
                 _userRepository.Update(user);
             }
@@ -244,7 +244,7 @@ namespace customerportalapi.Services
             if (invitationToken)
             {
                 //3. Get UserProfile from external system
-                string accountType = InvitationUtils.GetAccountType(user.Usertype);
+                string accountType = UserUtils.GetAccountType(user.Usertype);
                 ProfilePermissions profilepermissions = await _profileRepository.GetProfilePermissionsAsync(user.Dni, accountType);
                 string role = Role.User;
                 if (profilepermissions.CanManageAccounts)
@@ -312,7 +312,7 @@ namespace customerportalapi.Services
                 throw new ServiceException("User must have a valid document number.", HttpStatusCode.BadRequest, "Dni", "Empty field");
 
             //2. Validate user
-            int userType = InvitationUtils.GetUserType(value.CustomerType);
+            int userType = UserUtils.GetUserType(value.CustomerType);
             User user = _userRepository.GetCurrentUserByDniAndType(value.Dni, userType);
             if (user.Id == null)
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
@@ -417,7 +417,7 @@ namespace customerportalapi.Services
             if (user.Id == null)
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
 
-            string accountType = InvitationUtils.GetAccountType(user.Usertype);
+            string accountType = UserUtils.GetAccountType(user.Usertype);
             Profile userProfile = await _profileRepository.GetProfileAsync(user.Dni, accountType);
             if (userProfile.DocumentNumber == null)
                 throw new ServiceException("User Profile does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
@@ -477,6 +477,7 @@ namespace customerportalapi.Services
                 Email1 = entity.EmailAddress1,
                 Email2 = entity.EmailAddress2,
                 UseThisAddress = entity.UseThisAddress,
+                CustomerType = entity.CustomerType,
                 AddressList = new List<Address>
                 {
                     new Address
