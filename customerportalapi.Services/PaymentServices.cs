@@ -104,6 +104,7 @@ namespace customerportalapi.Services
             form.Add(new StringContent(((int)DocumentTypes.SEPA).ToString()), "documentinformation[0][documenttype]");
             form.Add(new StringContent(store.StoreName), "storeidentification");
             form.Add(new StringContent(SystemTypes.CustomerPortal.ToString()), "sourcesystem");
+            form.Add(new StringContent(user.Username), "sourceuser");
 
             // data
             form.Add(new StringContent("contractnumber"), "data[0][key]");
