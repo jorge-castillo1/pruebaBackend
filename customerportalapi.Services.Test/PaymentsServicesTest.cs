@@ -9,6 +9,8 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using System.Net.Http;
+
 
 namespace customerportalapi.Services.Test
 {
@@ -17,12 +19,16 @@ namespace customerportalapi.Services.Test
     {
         private Mock<IUserRepository> _userRepository;
         private Mock<IProcessRepository> _processRepository;
+        private Mock<ISignatureRepository> _signatureRepository;
+        private Mock<IStoreRepository> _storeRepository;
 
         [TestInitialize]
         public void Setup()
         {
             _userRepository = UserRepositoryMock.ValidUserRepository();
             _processRepository = ProcessRepositoryMock.ProcessRepository();
+            _signatureRepository = SignatureRepositoryMock.SignatureRepository();
+            _storeRepository = StoreRepositoryMock.StoreRepository();
         }
 
         [TestMethod]
@@ -36,7 +42,7 @@ namespace customerportalapi.Services.Test
 
             //Act
             _userRepository = UserRepositoryMock.InvalidUserRepository();
-            PaymentServices service = new PaymentServices(_userRepository.Object, _processRepository.Object);
+            PaymentServices service = new PaymentServices(_userRepository.Object, _processRepository.Object, _signatureRepository.Object, _storeRepository.Object);
             bool result = await service.ChangePaymentMethod(bankdata);
         }
 
@@ -58,14 +64,14 @@ namespace customerportalapi.Services.Test
 
             //Act
             _processRepository = ProcessRepositoryMock.NoPendingSameProcessRepository();
-            PaymentServices service = new PaymentServices(_userRepository.Object, _processRepository.Object);
+            PaymentServices service = new PaymentServices(_userRepository.Object, _processRepository.Object, _signatureRepository.Object, _storeRepository.Object);
             bool result = await service.ChangePaymentMethod(bankdata);
 
             //Assert
             Assert.IsTrue(result);
             _processRepository.Verify(x => x.Find(It.IsAny<ProcessSearchFilter>()));
             _processRepository.Verify(x => x.Create(It.IsAny<Process>()));
-            //Más adelante habrá que verificar que se ha enviado el documento a firmar
+            _signatureRepository.Verify(x => x.CreateSignature(It.IsAny<MultipartFormDataContent>()));
 
         }
 
@@ -78,7 +84,7 @@ namespace customerportalapi.Services.Test
             bankdata.Dni = "fake dni";
             bankdata.AccountType = "fake account type";
 
-            PaymentServices service = new PaymentServices(_userRepository.Object, _processRepository.Object);
+            PaymentServices service = new PaymentServices(_userRepository.Object, _processRepository.Object, _signatureRepository.Object, _storeRepository.Object);
             bool result = await service.ChangePaymentMethod(bankdata);
         }
 
@@ -93,7 +99,7 @@ namespace customerportalapi.Services.Test
             bankdata.ContractNumber = "fake contract number";
 
             _processRepository = ProcessRepositoryMock.PendingSameProcessRepository();
-            PaymentServices service = new PaymentServices(_userRepository.Object, _processRepository.Object);
+            PaymentServices service = new PaymentServices(_userRepository.Object, _processRepository.Object, _signatureRepository.Object, _storeRepository.Object);
             bool result = await service.ChangePaymentMethod(bankdata);
         }
 
@@ -108,7 +114,7 @@ namespace customerportalapi.Services.Test
             value.Status = "document_completed";
 
             _processRepository = ProcessRepositoryMock.NoResultsProcessRepository();
-            PaymentServices service = new PaymentServices(_userRepository.Object, _processRepository.Object);
+            PaymentServices service = new PaymentServices(_userRepository.Object, _processRepository.Object, _signatureRepository.Object, _storeRepository.Object);
             var result = service.UpdatePaymentProcess(value);
         }
 
@@ -123,7 +129,7 @@ namespace customerportalapi.Services.Test
             value.Status = "document_completed";
 
             _processRepository = ProcessRepositoryMock.MoreThanOneResultProcessRepository();
-            PaymentServices service = new PaymentServices(_userRepository.Object, _processRepository.Object);
+            PaymentServices service = new PaymentServices(_userRepository.Object, _processRepository.Object, _signatureRepository.Object, _storeRepository.Object);
             var result = service.UpdatePaymentProcess(value);
         }
 
@@ -138,7 +144,7 @@ namespace customerportalapi.Services.Test
             value.Status = "fake_document_state";
 
             _processRepository = ProcessRepositoryMock.OneResultProcessRepository();
-            PaymentServices service = new PaymentServices(_userRepository.Object, _processRepository.Object);
+            PaymentServices service = new PaymentServices(_userRepository.Object, _processRepository.Object, _signatureRepository.Object, _storeRepository.Object);
             var result = service.UpdatePaymentProcess(value);
         }
 
@@ -152,7 +158,7 @@ namespace customerportalapi.Services.Test
             value.Status = "document_canceled";
 
             _processRepository = ProcessRepositoryMock.OneResultProcessRepository();
-            PaymentServices service = new PaymentServices(_userRepository.Object, _processRepository.Object);
+            PaymentServices service = new PaymentServices(_userRepository.Object, _processRepository.Object, _signatureRepository.Object, _storeRepository.Object);
             var result = service.UpdatePaymentProcess(value);
 
             Assert.IsNotNull(result);

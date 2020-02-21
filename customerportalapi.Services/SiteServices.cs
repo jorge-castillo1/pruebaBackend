@@ -68,6 +68,7 @@ namespace customerportalapi.Services
                 foreach (var contract in storegroup)
                 {
                     //ToDo: remove this and clean contract entity
+                    contract.StoreCode = contract.StoreData.StoreCode;
                     contract.StoreData = null;
                     site.Contracts.Add(contract);
                 }

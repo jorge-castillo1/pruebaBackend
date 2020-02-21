@@ -4,10 +4,8 @@ using System.Text;
 
 namespace customerportalapi.Entities.enums
 {
-    public enum PaymentMethodTypes
+    public enum DocumentTypes
     {
-        Bank = 0,
-        CreditCard = 1,
-        Cash = 2
+        SEPA = 1
     }
 }
