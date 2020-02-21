@@ -91,12 +91,27 @@ namespace customerportalapi.Services.Test.FakeData
                     Id = new Guid().ToString(),
                     Username = "fake user",
                     ContractNumber = "fake contract",
+                    ProcessType = 1,
+                    ProcessStatus = 0,
+                    ModifiedDate = DateTime.Now
                 },
                 new Process()
                 {
                     Id = new Guid().ToString(),
                     Username = "fake user",
-                    ContractNumber = "fake contract2",
+                    ContractNumber = "fake contract",
+                    ProcessType = 1,
+                    ProcessStatus = 1,
+                    ModifiedDate = DateTime.Now.AddDays(5)
+                },
+                new Process()
+                {
+                    Id = new Guid().ToString(),
+                    Username = "fake user",
+                    ContractNumber = "fake contract",
+                    ProcessType = 1,
+                    ProcessStatus = 2,
+                    ModifiedDate = DateTime.Now.AddDays(2)
                 }
             }).Verifiable();
 
