@@ -23,7 +23,7 @@ namespace customerportalapi.Repositories
 
         public async Task<List<Store>> GetStoresAsync()
         {
-            var httpClient = _clientFactory.CreateClient("httpClientCRM");
+            var httpClient = _clientFactory.CreateClient("httpClient");
             var uri = new Uri(_configuration["GatewayUrl"] + _configuration["StoresAPI"]);
             httpClient.BaseAddress = uri;
 
@@ -38,7 +38,7 @@ namespace customerportalapi.Repositories
 
         public async Task<Store> GetStoreAsync(string storeCode)
         {
-            var httpClient = _clientFactory.CreateClient("httpClientCRM");
+            var httpClient = _clientFactory.CreateClient("httpClient");
             httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["StoresAPI"]);
 
             var response = await httpClient.GetAsync(storeCode, HttpCompletionOption.ResponseHeadersRead);

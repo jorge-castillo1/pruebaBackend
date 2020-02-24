@@ -66,6 +66,11 @@ namespace customerportalapi
                 IMongoDatabase database = GetDatabase();
                 return new MongoCollectionWrapper<WebTemplate>(database, "webtemplates");
             });
+            services.AddScoped<IMongoCollectionWrapper<Process>>(serviceProvider =>
+            {
+                IMongoDatabase database = GetDatabase();
+                return new MongoCollectionWrapper<Process>(database, "processes");
+            });
 
             //Mail service
             services.AddScoped(serviceProvider =>
@@ -85,6 +90,7 @@ namespace customerportalapi
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IProfileRepository, ProfileRepository>();
             services.AddScoped<IContractRepository, ContractRepository>();
+            services.AddScoped<IContractSMRepository, ContractSMRepository>();
             services.AddScoped<IMailClient, MailClientWrapper>();
             services.AddScoped<IMailRepository, MailRepository>();
             services.AddScoped<IEmailTemplateRepository, EmailTemplateRepository>();
@@ -92,6 +98,8 @@ namespace customerportalapi
             services.AddScoped<IStoreRepository, StoreRepository>();
             services.AddScoped<IIdentityRepository, IdentityRepository>();
             services.AddScoped<ICountryRepository, CountryRepository>();
+            services.AddScoped<IProcessRepository, ProcessRepository>();
+            services.AddScoped<ISignatureRepository, SignatureRepository>();
 
             //Register Business Services
             services.AddTransient<IUserServices, UserServices>();
@@ -99,8 +107,11 @@ namespace customerportalapi
             services.AddTransient<IWebTemplateServices, WebTemplateServices>();
             services.AddTransient<ILoginService, LoginService>();
             services.AddTransient<ICountryServices, CountryServices>();
+            services.AddTransient<IAuthService, AuthService>();
+            services.AddTransient<IPaymentService, PaymentServices>();
+            services.AddTransient<IProcessService, ProcessService>();
 
-            services.AddHttpClient("httpClientCRM", c =>
+            services.AddHttpClient("httpClient", c =>
             {
                 c.BaseAddress = new Uri(Configuration["GatewayUrl"]);
                 c.Timeout = new TimeSpan(0, 2, 0);  //2 minutes
@@ -123,7 +134,7 @@ namespace customerportalapi
             {
                 c.BaseAddress = new Uri(Configuration["Identity:BaseUri"]);
                 c.Timeout = new TimeSpan(0, 2, 0);  //2 minutes
-                c.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                //c.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                 c.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue
                 {
                     NoCache = true,
@@ -140,6 +151,25 @@ namespace customerportalapi
             {
                 AllowAutoRedirect = false,
                 AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip
+            });
+
+            services.AddHttpClient("httpClientSignature", c =>
+            {
+                c.BaseAddress = new Uri(Configuration["GatewaySignatureUrl"]);
+                c.Timeout = new TimeSpan(0, 2, 0);  //2 minutes
+                c.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                c.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue
+                {
+                    NoCache = true,
+                    NoStore = true,
+                    MaxAge = new TimeSpan(0),
+                    MustRevalidate = true
+                };
+            }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            {
+                AllowAutoRedirect = false,
+                AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip,
+                //Credentials = GetCredentials()
             });
 
             services.AddMvc()
@@ -215,7 +245,7 @@ namespace customerportalapi
             // Enable middleware to serve generated Swagger as a JSON endpoint.
             app.UseSwagger();
 
-            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.), 
+            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.),
             // specifying the Swagger JSON endpoint.
             app.UseSwaggerUI(c =>
             {

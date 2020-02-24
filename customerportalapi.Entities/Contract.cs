@@ -6,6 +6,8 @@
 
         public string Store { get; set; }
 
+        public string StoreCode { get; set; }
+
         public string Currency { get; set; }
 
         public string Price { get; set; }

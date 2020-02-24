@@ -30,7 +30,7 @@ namespace customerportalapi.Repositories.Test
         public void AlHacerUnaLlamadaGetExternaDeDatosQueDevuelveEntidad_NoDevuelveErrores()
         {
             //Arrange
-            Mock.Get(_clientFactory).Setup(x => x.CreateClient("httpClientCRM"))
+            Mock.Get(_clientFactory).Setup(x => x.CreateClient("httpClient"))
                 .Returns(() =>
                 {
                     return _handler.CreateClient();
@@ -45,7 +45,7 @@ namespace customerportalapi.Repositories.Test
 
             //Act
             ContractRepository repository = new ContractRepository(_configurations, _clientFactory);
-            List<Contract> result = repository.GetContractsAsync("fake dni").Result;
+            List<Contract> result = repository.GetContractsAsync("fake dni", "fake customertype").Result;
 
             //Assert
             Assert.IsNotNull(result);
@@ -56,7 +56,7 @@ namespace customerportalapi.Repositories.Test
         public void AlHacerUnaLlamadaGetExternaDeDatosQueDevuelveLista_NoDevuelveErrores()
         {
             //Arrange
-            Mock.Get(_clientFactory).Setup(x => x.CreateClient("httpClientCRM"))
+            Mock.Get(_clientFactory).Setup(x => x.CreateClient("httpClient"))
                 .Returns(() =>
                 {
                     return _handler.CreateClient();
@@ -71,7 +71,7 @@ namespace customerportalapi.Repositories.Test
 
             //Act
             ContractRepository repository = new ContractRepository(_configurations, _clientFactory);
-            List<Contract> result = repository.GetContractsAsync("fake dni").Result;
+            List<Contract> result = repository.GetContractsAsync("fake dni", "fake customertype").Result;
 
             //Assert
             Assert.IsNotNull(result);

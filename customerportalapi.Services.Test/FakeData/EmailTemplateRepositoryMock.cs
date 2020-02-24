@@ -31,5 +31,15 @@ namespace customerportalapi.Services.Test.FakeData
 
             return db;
         }
+
+        public static Mock<IEmailTemplateRepository> Invalid_EmailTemplateRepository()
+        {
+            var db = new Mock<IEmailTemplateRepository>();
+            db.Setup(x => x.getTemplate(It.IsAny<int>(), It.IsAny<string>())).Returns(new EmailTemplate()).Verifiable();
+
+            db.Setup(x => x.getTemplate(It.IsAny<int>(), "en")).Returns(new EmailTemplate()).Verifiable();
+
+            return db;
+        }
     }
 }

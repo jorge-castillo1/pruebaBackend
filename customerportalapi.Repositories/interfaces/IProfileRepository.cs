@@ -5,16 +5,18 @@ namespace customerportalapi.Repositories.interfaces
 {
     public interface IProfileRepository
     {
-        Task<Profile> GetProfileAsync(string dni);
+        Task<Profile> GetProfileAsync(string dni, string accountType);
 
         Task<Profile> UpdateProfileAsync(Profile profile);
 
-        Task<AccountCrm> GetAccountAsync(string dni);
+        Task<AccountProfile> GetAccountAsync(string dni, string accountType);
 
-        Task<AccountCrm> UpdateAccountAsync(AccountCrm account);
+        Task<AccountProfile> UpdateAccountAsync(AccountProfile account);
 
-        Task<Profile> ConfirmedWebPortalAccessAsync(string dni);
+        Task<Profile> ConfirmedWebPortalAccessAsync(string dni, string accountType);
 
-        Task<Profile> RevokedWebPortalAccessAsync(string dni);
+        Task<Profile> RevokedWebPortalAccessAsync(string dni, string accountType);
+
+        Task<ProfilePermissions> GetProfilePermissionsAsync(string dni, string accountType);
     }
 }
