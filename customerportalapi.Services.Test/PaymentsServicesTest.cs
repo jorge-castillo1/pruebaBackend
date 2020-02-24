@@ -45,7 +45,7 @@ namespace customerportalapi.Services.Test
             PaymentServices service = new PaymentServices(_userRepository.Object, _processRepository.Object, _signatureRepository.Object, _storeRepository.Object);
             bool result = await service.ChangePaymentMethod(bankdata);
         }
-        /*
+       
         [TestMethod]
         public async Task AlCambiarElMetodoDePagoPorDomiciliacion_SeCreaUnProceso()
         {
@@ -71,10 +71,11 @@ namespace customerportalapi.Services.Test
             Assert.IsTrue(result);
             _processRepository.Verify(x => x.Find(It.IsAny<ProcessSearchFilter>()));
             _processRepository.Verify(x => x.Create(It.IsAny<Process>()));
+            _storeRepository.Verify(x => x.GetStoreAsync(It.IsAny<String>()));
             _signatureRepository.Verify(x => x.CreateSignature(It.IsAny<MultipartFormDataContent>()));
 
         }
-        */
+        
         [TestMethod]
         [ExpectedException(typeof(ServiceException), "No se ha producido la excepción esperada")]
         public async Task AlCambiarElMetodoDePagoPorDomiciliacionSinContrato_SeDevuelveUnaExcepcion()

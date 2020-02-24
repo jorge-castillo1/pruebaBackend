@@ -47,7 +47,8 @@ namespace customerportalapi.Services.Test.FakeData
                 Language = "fake lang",
                 Profilepicture = "fake profile image",
                 Emailverified = true,
-                Usertype = 1
+                Usertype = 1,
+                Username = "fake username"
             }).Verifiable();
 
             db.Setup(x => x.GetCurrentUserByDniAndType(It.IsAny<string>(), It.IsAny<int>())).Returns(new User()
@@ -59,7 +60,8 @@ namespace customerportalapi.Services.Test.FakeData
                 Language = "fake lang",
                 Profilepicture = "fake profile image",
                 Emailverified = true,
-                Usertype = 1
+                Usertype = 1,
+                Username = "fake username"
             }).Verifiable();
 
             db.Setup(x => x.Update(It.IsAny<User>())).Returns(new User()
