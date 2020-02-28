@@ -29,5 +29,7 @@
         public Unit Unit { get; set; }
 
         public Store StoreData { get; set; }
+
+        public string AccessType {get; set; }
     }
 }
