@@ -286,5 +286,41 @@ namespace customerportalapi.Repositories
                 throw ex;
             }
         }
+
+        public async Task<UserIdentity> RemoveUserFromGroup(UserIdentity userIdentity, Group group)
+        {
+            var httpClient = _clientFactory.CreateClient("identityClient");
+            var method = new HttpMethod("PATCH");
+            try
+            {
+                var url = new Uri(httpClient.BaseAddress + _configuration["Identity:Endpoints:Groups"] + $"/{group.ID}");
+
+                UserGroupRemoveOperations operations = new UserGroupRemoveOperations();
+                UserGroupRemoveOperation removeoperation = new UserGroupRemoveOperation();
+                removeoperation.Operation = "remove";
+                removeoperation.Path = "members[value eq " + userIdentity.ID +"]";
+                operations.Operations.Add(removeoperation);
+                var request = new HttpRequestMessage(method, url)
+                {
+                    Content = new StringContent(JsonConvert.SerializeObject(operations))
+                };
+                request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                    "Basic",
+                    Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes(
+                        String.Format("{0}:{1}", _configuration["Identity:Credentials:User"], _configuration["Identity:Credentials:Password"])))
+                );
+                //var response = await httpClient.PutAsync(url, postContent);
+                var response = await httpClient.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+
+                var content = await response.Content.ReadAsStringAsync();
+                return JsonConvert.DeserializeObject<UserIdentity>(content);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
     }
 }

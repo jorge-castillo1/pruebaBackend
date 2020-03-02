@@ -252,6 +252,46 @@ namespace customerportalapi.Controllers
             }
         }
 
+        [HttpPatch("role/{username}/{role}")]
+        [AuthorizeApiKey]
+        public async Task<ApiResponse> ChangeRole(string username, string role)
+        {
+            try
+            {
+                var entity = await _services.ChangeRole(username, role);
+                return new ApiResponse(entity);
+            }
+            catch (ServiceException se)
+            {
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+
+        [HttpPatch("role/remove/{username}/{role}")]
+        [AuthorizeApiKey]
+        public async Task<ApiResponse> RemoveRole(string username, string role)
+        {
+            try
+            {
+                var entity = await _services.RemoveRole(username, role);
+                return new ApiResponse(entity);
+            }
+            catch (ServiceException se)
+            {
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+
         //// PUT api/users/5
         //[HttpPut("{id}")]
         //public void Put(int id, [FromBody] string value)
