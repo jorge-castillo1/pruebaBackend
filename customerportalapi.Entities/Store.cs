@@ -45,5 +45,7 @@ namespace customerportalapi.Entities
         public string CompanyCif { get; set; }
 
         public string CompanySocialAddress { get; set; }
+
+        public string AccessType { get; set; }
     }
 }
