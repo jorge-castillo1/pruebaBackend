@@ -6,6 +6,7 @@
         FormContact = 1,
         FormCall = 2,
         FormOpinion = 3,
-        ForgotPassword = 4
+        ForgotPassword = 4,
+        RequestDigitalContract = 5
     }
 }

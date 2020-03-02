@@ -31,7 +31,9 @@
         "ProfileAPI": "crmapi/Contacts/",
         "GatewaySmUrl": "https://localhost:44390/",
         "ASPNETCORE_ENVIRONMENT": "Development",
+        "GATEWAYDOCUMENTURL": "https://localhost:44395/",
         "CountriesAPI": "crmapi/Countries/",
+        "DocumentsAPI": "api/documents/",
         "GATEWAYSIGNATUREURL": "https://localhost:44329/",
         "CustomerPortal_ApiKey": "F56A2E61-6D3C-4C3F-B1B5-16C335EADA96",
         "StoresAPI": "crmapi/Sites/"
