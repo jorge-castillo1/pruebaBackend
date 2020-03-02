@@ -69,6 +69,7 @@ namespace customerportalapi.Services
                 {
                     //ToDo: remove this and clean contract entity
                     contract.StoreCode = contract.StoreData.StoreCode;
+                    contract.AccessType = contract.StoreData.AccessType;
                     contract.StoreData = null;
                     site.Contracts.Add(contract);
                 }
@@ -159,6 +160,16 @@ namespace customerportalapi.Services
             entity.ContractId = contractId;
 
             return entity;
+        }
+
+        public async Task<Unit> GetUnitAsync(Guid id)
+        {
+            return await _storeRepository.GetUnitAsync(id);
+        }
+
+        public async Task<Unit> GetUnitBySMIdAsync(string smid)
+        {
+            return await _storeRepository.GetUnitBySMIdAsync(smid);
         }
     }
 }

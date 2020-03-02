@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using customerportalapi.Entities;
 
@@ -12,5 +13,7 @@ namespace customerportalapi.Services.interfaces
         Task<List<City>> GetStoresCitiesAsync(string countryCode);
         Task<Store> GetStoreAsync(string storeCode);
         Task<AccessCode> GetAccessCodeAsync(string contractId, string password);
+        Task<Unit> GetUnitAsync(Guid id);
+        Task<Unit> GetUnitBySMIdAsync(string smid);
     }
 }

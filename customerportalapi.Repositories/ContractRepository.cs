@@ -37,5 +37,39 @@ namespace customerportalapi.Repositories
 
             return contractList;
         }
+
+        public async Task<Contract> GetContractAsync(string contractNumber)
+        {
+            var entity = new Contract();
+
+            var httpClient = _clientFactory.CreateClient("httpClient");
+            httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["ContractsBySMCodeAPI"]);
+
+            var response = await httpClient.GetAsync(contractNumber, HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode) return entity;
+            var content = await response.Content.ReadAsStringAsync();
+            JObject result = JObject.Parse(content);
+            var contract = JsonConvert.DeserializeObject<Contract>(result.GetValue("result").ToString());
+
+            return contract;
+        }
+
+        public async Task<string> GetDownloadContractAsync(string contractNumber)
+        {
+            var entity = "";
+
+            var httpClient = _clientFactory.CreateClient("httpClient");
+            httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["ContractsAPI"]);
+
+            var response = await httpClient.GetAsync(contractNumber + "/download", HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode) return entity;
+            var content = await response.Content.ReadAsStringAsync();
+            JObject result = JObject.Parse(content);
+            var contractFile = JsonConvert.DeserializeObject<string>(result.GetValue("result").ToString());
+
+            return contractFile;
+        }
     }
 }
