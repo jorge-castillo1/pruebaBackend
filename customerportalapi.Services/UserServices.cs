@@ -583,11 +583,6 @@ namespace customerportalapi.Services
                     userIdentity = await _identityRepository.RemoveUserFromGroup(userIdentity, currentGroup.Groups[0]);
                 }
             }
-            /*if (userIdentity.Groups != null && userIdentity.Groups.Count > 0)
-            {
-                GroupResults currentGroup = await _identityRepository.FindGroup(userIdentity.Groups[0].Display);
-                userIdentity = await _identityRepository.RemoveUserFromGroup(userIdentity, currentGroup.Groups[0]);
-            }*/
             userIdentity = await _identityRepository.AddUserToGroup(userIdentity, group.Groups[0]);
             return userIdentity;
         }
