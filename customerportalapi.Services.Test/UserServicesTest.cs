@@ -16,6 +16,7 @@ namespace customerportalapi.Services.Test
         private Mock<IProfileRepository> _profileRepository;
         private Mock<IMailRepository> _mailRepository;
         private Mock<IEmailTemplateRepository> _emailtemplateRepository;
+        private Mock<IIdentityRepository> _identityRepository;
         private Mock<IConfiguration> _config;
 
 
@@ -26,12 +27,13 @@ namespace customerportalapi.Services.Test
             _profileRepository = ProfileRepositoryMock.ProfileRepository();
             _mailRepository = MailRepositoryMock.MailRepository();
             _emailtemplateRepository = EmailTemplateRepositoryMock.EmailTemplateRepository();
+            _identityRepository = IdentityRepositoryMock.IdentityRepository();
             _config = new Mock<IConfiguration>();
         }
 
 
         [TestMethod]
-        [ExpectedException(typeof(ServiceException), "No se ha producido la excepción esperada.")]
+        [ExpectedException(typeof(ServiceException), "No se ha producido la excepciï¿½n esperada.")]
         public async Task AlSolicitarUnUsuarioNoExistente_SeProduceUnaExcepcion()
         {
             //Arrange
@@ -39,8 +41,8 @@ namespace customerportalapi.Services.Test
             Mock<IUserRepository> _userRepositoryInvalid = UserRepositoryMock.InvalidUserRepository();
 
             //Act
-            UserServices service = new UserServices(_userRepositoryInvalid.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _config.Object);
-            await service.GetProfileAsync(dni);
+            UserServices service = new UserServices(_userRepositoryInvalid.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object);
+            await service.GetProfileAsync(dni, AccountType.Residential);
 
             //Assert
         }
@@ -52,8 +54,8 @@ namespace customerportalapi.Services.Test
             string dni = "12345678A";
 
             //Act
-            UserServices service = new UserServices(_userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _config.Object);
-            Profile usuario = await service.GetProfileAsync(dni);
+            UserServices service = new UserServices(_userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object);
+            Profile usuario = await service.GetProfileAsync(dni, AccountType.Residential);
 
             //Assert
             Assert.IsNotNull(usuario);
@@ -65,7 +67,7 @@ namespace customerportalapi.Services.Test
 
 
         [TestMethod]
-        [ExpectedException(typeof(ServiceException), "No se ha producido la excepción esperada.")]
+        [ExpectedException(typeof(ServiceException), "No se ha producido la excepciï¿½n esperada.")]
         public async Task AlActualizarUnUsuarioInexistente_SeProduceUnaExcepcion()
         {
             //Arrange
@@ -74,14 +76,14 @@ namespace customerportalapi.Services.Test
             Mock<IUserRepository> _userRepositoryInvalid = UserRepositoryMock.InvalidUserRepository();
 
             //Act
-            UserServices service = new UserServices(_userRepositoryInvalid.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _config.Object);
+            UserServices service = new UserServices(_userRepositoryInvalid.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object);
             await service.UpdateProfileAsync(profile);
 
             //Assert
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ServiceException), "No se ha producido la excepción esperada.")]
+        [ExpectedException(typeof(ServiceException), "No se ha producido la excepciï¿½n esperada.")]
         public async Task AlActualizarUnUsuarioExistente_SinEmails_SeProducenErrores()
         {
             //Arrange
@@ -95,14 +97,14 @@ namespace customerportalapi.Services.Test
             profile.Avatar = "new profile image";
 
             //Act
-            UserServices service = new UserServices(_userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _config.Object);
+            UserServices service = new UserServices(_userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object);
             Profile result = await service.UpdateProfileAsync(profile);
 
             //Assert
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ServiceException), "No se ha producido la excepción esperada.")]
+        [ExpectedException(typeof(ServiceException), "No se ha producido la excepciï¿½n esperada.")]
         public async Task AlActualizarUnUsuarioExistente_ConEmailPrincipal1Invalido_SeProducenErrores()
         {
             //Arrange
@@ -116,14 +118,14 @@ namespace customerportalapi.Services.Test
             profile.Avatar = "new profile image";
 
             //Act
-            UserServices service = new UserServices(_userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _config.Object);
+            UserServices service = new UserServices(_userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object);
             Profile result = await service.UpdateProfileAsync(profile);
 
             //Assert
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ServiceException), "No se ha producido la excepción esperada.")]
+        [ExpectedException(typeof(ServiceException), "No se ha producido la excepciï¿½n esperada.")]
         public async Task AlActualizarUnUsuarioExistente_ConEmailPrincipal2Invalido_SeProducenErrores()
         {
             //Arrange
@@ -137,7 +139,7 @@ namespace customerportalapi.Services.Test
             profile.Avatar = "new profile image";
 
             //Act
-            UserServices service = new UserServices(_userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _config.Object);
+            UserServices service = new UserServices(_userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object);
             Profile result = await service.UpdateProfileAsync(profile);
 
             //Assert
@@ -157,11 +159,11 @@ namespace customerportalapi.Services.Test
             profile.Avatar = "new profile image";
 
             //Act
-            UserServices service = new UserServices(_userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _config.Object);
+            UserServices service = new UserServices(_userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object);
             Profile result = await service.UpdateProfileAsync(profile);
 
             //Assert
-            _userRepository.Verify(x => x.GetCurrentUser(It.IsAny<string>()));
+            _userRepository.Verify(x => x.GetCurrentUserByDniAndType(It.IsAny<string>(), It.IsAny<int>()));
             _userRepository.Verify(x => x.Update(It.IsAny<User>()));
             _profileRepository.Verify(x => x.UpdateProfileAsync(It.IsAny<Profile>()));
 
@@ -174,7 +176,7 @@ namespace customerportalapi.Services.Test
 
 
         [TestMethod]
-        [ExpectedException(typeof(ServiceException), "No se ha producido la excepción esperada.")]
+        [ExpectedException(typeof(ServiceException), "No se ha producido la excepciï¿½n esperada.")]
         public async Task AlInvitarUnUsuarioSinDni_DevuelveExcepcion()
         {
             //Arrange
@@ -186,13 +188,13 @@ namespace customerportalapi.Services.Test
             invitation.Language = "French";
 
             //Act
-            UserServices service = new UserServices(_userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _config.Object);
+            UserServices service = new UserServices(_userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object);
             await service.InviteUserAsync(invitation);
 
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ServiceException), "No se ha producido la excepción esperada.")]
+        [ExpectedException(typeof(ServiceException), "No se ha producido la excepciï¿½n esperada.")]
         public async Task AlInvitarUnUsuarioSinEmail_DevuelveExcepcion()
         {
             //Arrange
@@ -204,7 +206,7 @@ namespace customerportalapi.Services.Test
             invitation.Language = "French";
 
             //Act
-            UserServices service = new UserServices(_userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _config.Object);
+            UserServices service = new UserServices(_userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object);
             await service.InviteUserAsync(invitation);
         }
 
@@ -221,7 +223,7 @@ namespace customerportalapi.Services.Test
 
             //Act
             Mock<IUserRepository> _userRepositoryInvalid = UserRepositoryMock.InvalidUserRepository();
-            UserServices service = new UserServices(_userRepositoryInvalid.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _config.Object);
+            UserServices service = new UserServices(_userRepositoryInvalid.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object);
             bool result = await service.InviteUserAsync(invitation);
 
             //Assert
@@ -231,7 +233,7 @@ namespace customerportalapi.Services.Test
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ServiceException), "No se ha producido la excepción esperada.")]
+        [ExpectedException(typeof(ServiceException), "No se ha producido la excepciï¿½n esperada.")]
         public async Task AlInvitarUnUsuarioExistente_Activo_DevuelveError()
         {
             //Arrange
@@ -243,7 +245,7 @@ namespace customerportalapi.Services.Test
             invitation.Language = "French";
 
             //Act
-            UserServices service = new UserServices(_userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _config.Object);
+            UserServices service = new UserServices(_userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object);
             bool result = await service.InviteUserAsync(invitation);
 
             //Assert
@@ -262,7 +264,7 @@ namespace customerportalapi.Services.Test
 
             //Act
             Mock<IUserRepository> _userRepositoryInvalid = UserRepositoryMock.Valid_InActiveUser_Repository();
-            UserServices service = new UserServices(_userRepositoryInvalid.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _config.Object);
+            UserServices service = new UserServices(_userRepositoryInvalid.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object);
             bool result = await service.InviteUserAsync(invitation);
 
             //Assert
@@ -284,7 +286,7 @@ namespace customerportalapi.Services.Test
 
             //Act
             Mock<IUserRepository> _userRepositoryInvalid = UserRepositoryMock.InvalidUserRepository();
-            UserServices service = new UserServices(_userRepositoryInvalid.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _config.Object);
+            UserServices service = new UserServices(_userRepositoryInvalid.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object);
             bool result = await service.InviteUserAsync(invitation);
 
             //Assert
@@ -295,85 +297,104 @@ namespace customerportalapi.Services.Test
 
 
         [TestMethod]
-        [ExpectedException(typeof(ServiceException), "No se ha producido la excepción esperada.")]
+        [ExpectedException(typeof(ServiceException), "No se ha producido la excepciï¿½n esperada.")]
         public async Task AlConfirmarUnUsuarioSinToken_DevuelveExcepcion()
         {
             //Arrange
             string invitationToken = string.Empty;
 
             //Act
-            UserServices service = new UserServices(_userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _config.Object);
+            UserServices service = new UserServices(_userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object);
             await service.ConfirmUserAsync(invitationToken);
         }
 
         [TestMethod]
-        public async Task AlConfirmarUnUsuarioExistente_Activo_DevuelveFalse()
+        public async Task AlConfirmarUnUsuarioExistente_Activo_DevuelveTokenVacio()
         {
             //Arrange
             string invitationToken = "8e8b9c6c-8943-4482-891d-b92d7414d283";
 
             //Act
             Mock<IUserRepository> userRepositoryInvalid = UserRepositoryMock.Invalid_ActiveUserByToken_Repository();
-            UserServices service = new UserServices(userRepositoryInvalid.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _config.Object);
-            bool result = await service.ConfirmUserAsync(invitationToken);
+            UserServices service = new UserServices(userRepositoryInvalid.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object);
+            Token tokenResult = await service.ConfirmUserAsync(invitationToken);
 
             //Assert
-            Assert.IsFalse(result);
+            Assert.IsNull(tokenResult.AccesToken);
         }
 
         [TestMethod]
-        public async Task AlConfirmarUnUsuarioExistente_NoActivo_ActualizaUsuario()
+        public async Task AlConfirmarUnUsuarioExistente_NoActivo_DevuelveToken()
         {
             //Arrange
             string invitationToken = "8e8b9c6c-8943-4482-891d-b92d7414d283";
 
             //Act
             Mock<IUserRepository> userRepositoryInvalid = UserRepositoryMock.Valid_InActiveUserByToken_Repository();
-            UserServices service = new UserServices(userRepositoryInvalid.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _config.Object);
-            bool result = await service.ConfirmUserAsync(invitationToken);
+            UserServices service = new UserServices(userRepositoryInvalid.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object);
+            Token tokenResult = await service.ConfirmUserAsync(invitationToken);
 
             //Assert
-            Assert.IsTrue(result);
-            _profileRepository.Verify(x => x.ConfirmedWebPortalAccessAsync(It.IsAny<string>()));
+            Assert.AreEqual("Fake AccessToken", tokenResult.AccesToken);
+            _identityRepository.Verify(x => x.AddUser(It.IsAny<UserIdentity>()));
+            _profileRepository.Verify(x => x.GetProfilePermissionsAsync(It.IsAny<string>(), It.IsAny<string>()));
+            _identityRepository.Verify(x => x.FindGroup(It.IsAny<string>()));
+            _identityRepository.Verify(x => x.AddUserToGroup(It.IsAny<UserIdentity>(), It.IsAny<Group>()));
             userRepositoryInvalid.Verify(x => x.Update(It.IsAny<User>()));
+            _profileRepository.Verify(x => x.ConfirmedWebPortalAccessAsync(It.IsAny<string>(), It.IsAny<string>()));
+            _identityRepository.Verify(x => x.Authorize(It.IsAny<Login>()));
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ServiceException), "No se ha producido la excepción esperada.")]
+        [ExpectedException(typeof(ServiceException), "No se ha producido la excepciï¿½n esperada.")]
         public async Task AlDesinvitarUnUsuarioSinDni_DevuelveExcepcion()
         {
             //Arrange
-            string dni = string.Empty;
-
+            Invitation value = new Invitation()
+            {
+                Dni = string.Empty,
+                CustomerType = AccountType.Business
+            };
+            
             //Act
-            UserServices service = new UserServices(_userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _config.Object);
-            await service.UnInviteUserAsync(dni);
+            UserServices service = new UserServices(_userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object);
+            await service.UnInviteUserAsync(value);
+
+            //_identityRepository.Verify(x => x.DeleteUser(string userId));
         }
 
 
         [TestMethod]
-        [ExpectedException(typeof(ServiceException), "No se ha producido la excepción esperada.")]
+        [ExpectedException(typeof(ServiceException), "No se ha producido la excepciï¿½n esperada.")]
         public async Task AlDesinvitarUnUsuarioInexistente_SeProduceUnaExcepcion()
         {
             //Arrange
-            string dni = "12345678A";
+            Invitation value = new Invitation()
+            {
+                Dni = "12345678A",
+                CustomerType = AccountType.Business
+            };
             Mock<IUserRepository> _userRepositoryInvalid = UserRepositoryMock.InvalidUserRepository();
 
             //Act
-            UserServices service = new UserServices(_userRepositoryInvalid.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _config.Object);
-            await service.UnInviteUserAsync(dni);
+            UserServices service = new UserServices(_userRepositoryInvalid.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object);
+            await service.UnInviteUserAsync(value);
         }
 
         [TestMethod]
         public async Task AlDesinvitarUnUsuarioExistente_NoActivo_DevuelveFalse()
         {
             //Arrange
-            string dni = "12345678A";
+            Invitation value = new Invitation()
+            {
+                Dni = "12345678A",
+                CustomerType = AccountType.Residential
+            };
 
             //Act
             Mock<IUserRepository> userRepositoryInvalid = UserRepositoryMock.Valid_InActiveUser_Repository();
-            UserServices service = new UserServices(userRepositoryInvalid.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _config.Object);
-            bool result = await service.UnInviteUserAsync(dni);
+            UserServices service = new UserServices(userRepositoryInvalid.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object);
+            bool result = await service.UnInviteUserAsync(value);
 
             //Assert
             Assert.IsFalse(result);
@@ -383,17 +404,23 @@ namespace customerportalapi.Services.Test
         public async Task AlDesinvitarUnUsuarioExistente_Activo_ActualizaUsuario()
         {
             //Arrange
-            string dni = "12345678A";
+            Invitation value = new Invitation()
+            {
+                Dni = "12345678A",
+                CustomerType = AccountType.Residential
+            };
 
             //Act
             Mock<IUserRepository> userRepository = UserRepositoryMock.ValidUserRepository();
-            UserServices service = new UserServices(userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _config.Object);
-            bool result = await service.UnInviteUserAsync(dni);
+            UserServices service = new UserServices(userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object);
+            bool result = await service.UnInviteUserAsync(value);
 
             //Assert
             Assert.IsTrue(result);
-            _profileRepository.Verify(x => x.RevokedWebPortalAccessAsync(It.IsAny<string>()));
+            userRepository.Verify(x => x.GetCurrentUserByDniAndType(It.IsAny<string>(), It.IsAny<int>()));
+            _profileRepository.Verify(x => x.RevokedWebPortalAccessAsync(It.IsAny<string>(), It.IsAny<string>()));
             userRepository.Verify(x => x.Update(It.IsAny<User>()));
+            _identityRepository.Verify(x => x.DeleteUser(It.IsAny<string>()));
         }
     }
 }

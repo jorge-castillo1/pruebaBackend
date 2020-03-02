@@ -5,6 +5,7 @@
         Invitation = 0,
         FormContact = 1,
         FormCall = 2,
-        FormOpinion = 3
+        FormOpinion = 3,
+        ForgotPassword = 4
     }
 }

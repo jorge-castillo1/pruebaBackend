@@ -39,5 +39,13 @@ namespace customerportalapi.Entities
         public string CoordinatesLatitude { get; set; }
 
         public string CoordinatesLongitude { get; set; }
+
+        public string CompanyName { get; set; }
+
+        public string CompanyCif { get; set; }
+
+        public string CompanySocialAddress { get; set; }
+
+        public string AccessType { get; set; }
     }
 }

@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using customerportalapi.Entities;
+using customerportalapi.Services.interfaces;
+
 
 namespace customerportalapi.Controllers
 {
@@ -14,9 +16,11 @@ namespace customerportalapi.Controllers
     public class EventsController : ControllerBase
     {
         private readonly ILogger<EventsController> _logger;
+        private readonly IPaymentService _service;
 
-        public EventsController(ILogger<EventsController> logger)
+        public EventsController(IPaymentService service, ILogger<EventsController> logger)
         {
+            _service = service;
             _logger = logger;
         }
 
@@ -25,6 +29,8 @@ namespace customerportalapi.Controllers
         {
             try
             {
+                _service.UpdatePaymentProcess(value);
+
                 return new OkResult();
             }
             catch (Exception ex)

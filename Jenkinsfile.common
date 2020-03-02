@@ -1,5 +1,5 @@
 container('dotnetcore') {
-  gitlabBuilds(builds: ['build', 'test', 'sonarqube', 'quality_gate', 'docker', 'artifacts']) {
+  gitlabBuilds(builds: ['build', 'test', 'sonarqube', 'quality_gate', 'docker']) {
 
     stage('build') { gitlabCommitStatus(name: 'build') {
       sh """

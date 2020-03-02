@@ -23,7 +23,7 @@ namespace customerportalapi.Repositories
 
         public async Task<List<Store>> GetStoresAsync()
         {
-            var httpClient = _clientFactory.CreateClient("httpClientCRM");
+            var httpClient = _clientFactory.CreateClient("httpClient");
             var uri = new Uri(_configuration["GatewayUrl"] + _configuration["StoresAPI"]);
             httpClient.BaseAddress = uri;
 
@@ -38,7 +38,7 @@ namespace customerportalapi.Repositories
 
         public async Task<Store> GetStoreAsync(string storeCode)
         {
-            var httpClient = _clientFactory.CreateClient("httpClientCRM");
+            var httpClient = _clientFactory.CreateClient("httpClient");
             httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["StoresAPI"]);
 
             var response = await httpClient.GetAsync(storeCode, HttpCompletionOption.ResponseHeadersRead);
@@ -48,6 +48,34 @@ namespace customerportalapi.Repositories
             JObject result = JObject.Parse(content);
 
             return JsonConvert.DeserializeObject<Store>(result.GetValue("result").ToString());
+        }
+
+        public async Task<Unit> GetUnitAsync(Guid id)
+        {
+            var httpClient = _clientFactory.CreateClient("httpClient");
+            httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["UnitsAPI"]);
+
+            var response = await httpClient.GetAsync(id.ToString(), HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode) return new Unit();
+            var content = await response.Content.ReadAsStringAsync();
+            JObject result = JObject.Parse(content);
+
+            return JsonConvert.DeserializeObject<Unit>(result.GetValue("result").ToString());
+        }
+
+        public async Task<Unit> GetUnitBySMIdAsync(string smid)
+        {
+            var httpClient = _clientFactory.CreateClient("httpClient");
+            httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["UnitsAPI"]);
+
+            var response = await httpClient.GetAsync(smid, HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode) return new Unit();
+            var content = await response.Content.ReadAsStringAsync();
+            JObject result = JObject.Parse(content);
+
+            return JsonConvert.DeserializeObject<Unit>(result.GetValue("result").ToString());
         }
     }
 }

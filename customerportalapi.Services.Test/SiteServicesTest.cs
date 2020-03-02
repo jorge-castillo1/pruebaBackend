@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Distributed;
+using System.Security.Principal;
 
 namespace customerportalapi.Services.Test
 {
@@ -18,7 +19,8 @@ namespace customerportalapi.Services.Test
         private Mock<IContractRepository> _contractRepository;
         private Mock<IStoreRepository> _storeRepository;
         private Mock<IDistributedCache> _distributedCache;
-        
+        private Mock<IIdentityRepository> _identityRepository;
+        private Mock<IContractSMRepository> _contractSMRepository;
 
         [TestInitialize]
         public void Setup()
@@ -27,6 +29,8 @@ namespace customerportalapi.Services.Test
             _contractRepository = ContractRepositoryMock.ContractRepository();
             _storeRepository = StoreRepositoryMock.StoreRepository();
             _distributedCache = new Mock<IDistributedCache>();
+            _identityRepository = IdentityRepositoryMock.IdentityRepository();
+            _contractSMRepository = ContractSMRepositoryMock.ContractSMRepository();
         }
 
         [TestMethod]
@@ -38,8 +42,8 @@ namespace customerportalapi.Services.Test
             Mock<IUserRepository> userRepositoryInvalid = UserRepositoryMock.InvalidUserRepository();
 
             //Act
-            SiteServices service = new SiteServices(userRepositoryInvalid.Object, _contractRepository.Object, _storeRepository.Object, _distributedCache.Object);
-            await service.GetContractsAsync(dni);
+            SiteServices service = new SiteServices(userRepositoryInvalid.Object, _contractRepository.Object, _storeRepository.Object, _distributedCache.Object, _identityRepository.Object, _contractSMRepository.Object);
+            await service.GetContractsAsync(dni, AccountType.Residential);
 
             //Assert
         }
@@ -51,8 +55,8 @@ namespace customerportalapi.Services.Test
             string dni = "12345678A";
 
             //Act
-            SiteServices service = new SiteServices(_userRepository.Object, _contractRepository.Object, _storeRepository.Object, _distributedCache.Object);
-            List<Site> sites = await service.GetContractsAsync(dni);
+            SiteServices service = new SiteServices(_userRepository.Object, _contractRepository.Object, _storeRepository.Object, _distributedCache.Object, _identityRepository.Object, _contractSMRepository.Object);
+            List<Site> sites = await service.GetContractsAsync(dni, AccountType.Residential);
 
             //Assert
             Assert.IsNotNull(sites);
@@ -61,6 +65,42 @@ namespace customerportalapi.Services.Test
             {
                 Assert.IsTrue(s.Contracts.Count >= 1);
             }
+        }
+
+        [TestMethod]
+        public async Task AlSolicitarCodigoAcceso_DevuelveCodigoYTokenvalido()
+        {
+            //Arrange
+            GenericIdentity gi = new GenericIdentity("fake name");
+            GenericPrincipal gp = new GenericPrincipal(gi, null);
+            System.Threading.Thread.CurrentPrincipal = gp;
+            
+            //Act
+            SiteServices service = new SiteServices(_userRepository.Object, _contractRepository.Object, _storeRepository.Object, _distributedCache.Object, _identityRepository.Object, _contractSMRepository.Object);
+            AccessCode entity = await service.GetAccessCodeAsync("fake contractid", "fake password");
+
+            //Assert
+            Assert.IsNotNull(entity);
+            Assert.IsTrue(entity.Password == "fake password");
+
+            _identityRepository.Verify(x => x.Authorize(It.IsAny<Login>()));
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ServiceException), "No se ha producido la excepción esperada")]
+        public async Task AlSolicitarCodigoAccesoConUsuarioInvalido_SeProduceUnaExcepcion()
+        {
+            //Arrange
+            GenericIdentity gi = new GenericIdentity("fake name");
+            GenericPrincipal gp = new GenericPrincipal(gi, null);
+            System.Threading.Thread.CurrentPrincipal = gp;
+
+            //Act
+            _identityRepository = IdentityRepositoryMock.IdentityRepository_Invalid();
+            SiteServices service = new SiteServices(_userRepository.Object, _contractRepository.Object, _storeRepository.Object, _distributedCache.Object, _identityRepository.Object, _contractSMRepository.Object);
+            AccessCode entity = await service.GetAccessCodeAsync("fake contractid", "fake password");
+
+            //Assert
         }
     }
 }

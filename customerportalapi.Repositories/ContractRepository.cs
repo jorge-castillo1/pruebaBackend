@@ -21,14 +21,14 @@ namespace customerportalapi.Repositories
             _clientFactory = clientFactory;
         }
 
-        public async Task<List<Contract>> GetContractsAsync(string dni)
+        public async Task<List<Contract>> GetContractsAsync(string dni, string accountType)
         {
             var entitylist = new List<Contract>();
-            
-            var httpClient = _clientFactory.CreateClient("httpClientCRM");
+
+            var httpClient = _clientFactory.CreateClient("httpClient");
             httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["ContractsAPI"]);
 
-            var response = await httpClient.GetAsync(dni, HttpCompletionOption.ResponseHeadersRead);
+            var response = await httpClient.GetAsync(dni + "/" + accountType, HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
             if (!response.IsSuccessStatusCode) return entitylist;
             var content = await response.Content.ReadAsStringAsync();
@@ -36,6 +36,40 @@ namespace customerportalapi.Repositories
             var contractList = JsonConvert.DeserializeObject<List<Contract>>(result.GetValue("result").ToString());
 
             return contractList;
+        }
+
+        public async Task<Contract> GetContractAsync(string contractNumber)
+        {
+            var entity = new Contract();
+
+            var httpClient = _clientFactory.CreateClient("httpClient");
+            httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["ContractsBySMCodeAPI"]);
+
+            var response = await httpClient.GetAsync(contractNumber, HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode) return entity;
+            var content = await response.Content.ReadAsStringAsync();
+            JObject result = JObject.Parse(content);
+            var contract = JsonConvert.DeserializeObject<Contract>(result.GetValue("result").ToString());
+
+            return contract;
+        }
+
+        public async Task<string> GetDownloadContractAsync(string contractNumber)
+        {
+            var entity = "";
+
+            var httpClient = _clientFactory.CreateClient("httpClient");
+            httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["ContractsAPI"]);
+
+            var response = await httpClient.GetAsync(contractNumber + "/download", HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode) return entity;
+            var content = await response.Content.ReadAsStringAsync();
+            JObject result = JObject.Parse(content);
+            var contractFile = JsonConvert.DeserializeObject<string>(result.GetValue("result").ToString());
+
+            return contractFile;
         }
     }
 }
