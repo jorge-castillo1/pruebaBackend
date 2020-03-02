@@ -120,7 +120,13 @@ namespace customerportalapi.Controllers
             {
                 var entity = new UnitTimeZone();
                 entity.Unit = await _services.GetUnitBySMIdAsync(smid);
-                entity.Timezone = await _contractService.GetContractTimeZoneAsync(contractnumber);
+                ContractFull contract = await _contractService.GetFullContractAsync(contractnumber);
+                // entity.TimeZone = await _contractService.GetContractTimeZoneAsync(contractnumber
+                entity.TimeZone = contract.smcontract.Timezone;
+                entity.StoreCoordinatesLatitude = contract.contract.StoreData.CoordinatesLatitude;
+                entity.StoreCoordinatesLongitude = contract.contract.StoreData.CoordinatesLongitude;
+                entity.StoreTelephone = contract.contract.StoreData.Telephone;
+                entity.StoreName = contract.contract.StoreData.StoreName;
                 return new ApiResponse(entity);
             }
             catch (Exception ex)
