@@ -35,6 +35,7 @@ namespace customerportalapi.Services
             ContractFull response = new ContractFull();
             response.contract = await _contractRepository.GetContractAsync(contractNumber);
             if (response.contract.ContractNumber == null) throw new ServiceException("Contract does not exist.", HttpStatusCode.NotFound, "ContractNumber", "Not exist");
+            response.contract.TotalPrice = response.contract.Price + response.contract.Vat;
             response.smcontract = await _contractSMRepository.GetAccessCodeAsync(contractNumber);
             response.contract.StoreCode = response.contract.StoreData.StoreCode;
             return response;
