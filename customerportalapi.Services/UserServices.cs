@@ -443,6 +443,9 @@ namespace customerportalapi.Services
                     if (value.Message == null)
                         throw new ServiceException("FormContact Message field can not be null.", HttpStatusCode.BadRequest, "Message", "Empty fields");
 
+                    if (value.ContactMethod == null)
+                        throw new ServiceException("FormContact Message field can not be null.", HttpStatusCode.BadRequest, "ContactMethod", "Empty fields");
+
                     //3. Send Email
                     emailMessage = GenerateEmail(EmailTemplateTypes.FormCall, user, userProfile, value);
 
@@ -455,10 +458,12 @@ namespace customerportalapi.Services
                     if (value.Message == null)
                         throw new ServiceException("FormContact Message field can not be null.", HttpStatusCode.BadRequest, "Message", "Empty fields");
 
+                    if (value.EmailTo == null)
+                        throw new ServiceException("FormContact Message field can not be null.", HttpStatusCode.BadRequest, "EmailTo", "Empty fields");
+
                     //3. Send Email
-                    value.EmailTo = _config["FormContactEmail"];
                     emailMessage = GenerateEmail(EmailTemplateTypes.FormContact, user, userProfile, value);
-                    
+
                     break;
             }
 
@@ -542,6 +547,7 @@ namespace customerportalapi.Services
                         formContactTemplate.body,
                         userProfile.Fullname,
                         userProfile.MobilePhone,
+                        userProfile.MobilePhone1,
                         user.Email,
                         form.Motive,
                         form.Message);
@@ -551,17 +557,23 @@ namespace customerportalapi.Services
                         formContactTemplate.body,
                         userProfile.Fullname,
                         userProfile.MobilePhone,
+                        userProfile.MobilePhone1,
                         user.Email,
                         form.Message);
                     break;
                 default:
+                    string date = System.DateTime.Now.ToString("dd/MM/yyyy HH:mm");
                     body = string.Format(
                         formContactTemplate.body,
                         userProfile.Fullname,
                         userProfile.MobilePhone,
+                        userProfile.MobilePhone1,
                         user.Email,
+                        user.Dni,
+                        form.ContactMethod,
                         form.Preference,
-                        form.Message);
+                        form.Message,
+                        date);
                     break;
             }
             message.Body = body;
