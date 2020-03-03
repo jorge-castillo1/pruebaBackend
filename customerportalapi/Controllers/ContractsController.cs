@@ -20,6 +20,7 @@ namespace customerportalapi.Controllers
 
 
         public ContractsController(IContractServices services, ILogger<ContractsController> logger)
+
         {
             _services = services;
             _logger = logger;
@@ -63,13 +64,32 @@ namespace customerportalapi.Controllers
             }
         }
 
+        [HttpGet("full/{contractNumber}")]
+        public async Task<ApiResponse> GetFullContractAsync(string contractNumber)
+        {
+            try
+            {
+                var entity = await _services.GetFullContractAsync(contractNumber);
+                return new ApiResponse(entity);
+            }
+            catch (ServiceException se)
+            {
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+
         [HttpPost()]
         public async Task<ApiResponse> UploadContractAsync([FromBody] Document document)
         {
             try
             {
                 var result = await _services.SaveContractAsync(document);
-                return new ApiResponse(null, result);
+                return new ApiResponse(null, result);      
             }
             catch (ServiceException se)
             {

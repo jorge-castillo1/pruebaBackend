@@ -35,6 +35,7 @@ namespace customerportalapi.Services
             return contract;
         }
 
+
         public async Task<string> GetDownloadContractAsync(string dni, string contractNumber)
         {
             string contractFile = await _contractRepository.GetDownloadContractAsync(contractNumber);
@@ -62,9 +63,26 @@ namespace customerportalapi.Services
             return contractFile;
         }
 
+        public async Task<ContractFull> GetFullContractAsync(string contractNumber)
+        {
+            ContractFull response = new ContractFull();
+            response.contract = await _contractRepository.GetContractAsync(contractNumber);
+            if (response.contract.ContractNumber == null) throw new ServiceException("Contract does not exist.", HttpStatusCode.NotFound, "ContractNumber", "Not exist");
+            response.contract.TotalPrice = response.contract.Price + response.contract.Vat;
+            response.smcontract = await _contractSMRepository.GetAccessCodeAsync(contractNumber);
+            response.contract.StoreCode = response.contract.StoreData.StoreCode;
+            return response;
+        }
+
         public async Task<string> SaveContractAsync(Document document)
         {
             return await _contractRepository.SaveContractAsync(document);
+        }
+
+        public async Task<string> GetContractTimeZoneAsync(string contractNumber)
+        {
+            var smcontract = await _contractSMRepository.GetAccessCodeAsync(contractNumber);
+            return smcontract.Timezone;
         }
     }
 }

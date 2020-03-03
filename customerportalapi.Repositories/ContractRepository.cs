@@ -58,7 +58,6 @@ namespace customerportalapi.Repositories
 
         public async Task<string> GetDownloadContractAsync(string contractNumber)
         {
-
             string entity = null;
 
             var httpClient = _clientFactory.CreateClient("httpClientDocument");
@@ -75,6 +74,7 @@ namespace customerportalapi.Repositories
             JObject result = JObject.Parse(content);
             var contractFile = result.GetValue("result").ToString();
             return contractFile;
+
         }
 
         public async Task<string> SaveContractAsync(Document document)

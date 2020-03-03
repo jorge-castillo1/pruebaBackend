@@ -9,5 +9,7 @@ namespace customerportalapi.Services.interfaces
         Task<Contract> GetContractAsync(string contractNumber);
         Task<string> GetDownloadContractAsync(string dni, string contractNumber);
         Task<string> SaveContractAsync(Document document);
+        Task<ContractFull> GetFullContractAsync(string contractNumber);
+        Task<string> GetContractTimeZoneAsync(string contractNumber);
     }
 }

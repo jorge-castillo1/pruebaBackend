@@ -119,7 +119,6 @@ namespace customerportalapi.Services.Test.FakeData
             db.Setup(x => x.GetDownloadContractAsync(It.IsAny<string>())).Returns(Task.FromResult(
             ""
             )).Verifiable();
-            db.Setup(x => x.GetContractAsync(It.IsAny<string>())).Returns(Task.FromResult(new Contract())).Verifiable();
 
             return db;
         }

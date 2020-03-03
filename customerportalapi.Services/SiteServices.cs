@@ -54,7 +54,9 @@ namespace customerportalapi.Services
                 Name = x.StoreData.StoreName,
                 x.StoreData.Telephone,
                 x.StoreData.CoordinatesLatitude,
-                x.StoreData.CoordinatesLongitude
+                x.StoreData.CoordinatesLongitude,
+                x.StoreData.EmailAddress1,
+                x.StoreData.StoreCode
             }))
             {
                 Site site = new Site
@@ -62,13 +64,16 @@ namespace customerportalapi.Services
                     Name = storegroup.Key.Name,
                     Telephone = storegroup.Key.Telephone,
                     CoordinatesLatitude = storegroup.Key.CoordinatesLatitude,
-                    CoordinatesLongitude = storegroup.Key.CoordinatesLongitude
+                    CoordinatesLongitude = storegroup.Key.CoordinatesLongitude,
+                    EmailAddress1 = storegroup.Key.EmailAddress1,
+                    StoreCode = storegroup.Key.StoreCode
                 };
 
                 foreach (var contract in storegroup)
                 {
                     //ToDo: remove this and clean contract entity
                     contract.StoreCode = contract.StoreData.StoreCode;
+                    contract.AccessType = contract.StoreData.AccessType;
                     contract.StoreData = null;
                     site.Contracts.Add(contract);
                 }
@@ -159,6 +164,16 @@ namespace customerportalapi.Services
             entity.ContractId = contractId;
 
             return entity;
+        }
+
+        public async Task<Unit> GetUnitAsync(Guid id)
+        {
+            return await _storeRepository.GetUnitAsync(id);
+        }
+
+        public async Task<Unit> GetUnitBySMIdAsync(string smid)
+        {
+            return await _storeRepository.GetUnitBySMIdAsync(smid);
         }
     }
 }
