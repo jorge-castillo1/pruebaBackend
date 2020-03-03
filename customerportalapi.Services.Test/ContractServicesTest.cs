@@ -71,12 +71,13 @@ namespace customerportalapi.Services.Test
         public async Task WhenDontHaveContractNumberShouldProduceAExceptionWhenCallGetDownloadContractAsync()
         {
             //Arrange
+            string dni= "fake dni";
             string contractNumber = "TRWETR436745732564536";
             Mock<IContractRepository> contractInvalid = ContractRepositoryMock.InvalidDownloadContractRepository();
 
             //Act
             ContractServices service = new ContractServices(contractInvalid.Object, _contractSMRepository.Object, _mailRepository.Object, _emailTemplateRepository.Object);
-            await service.GetDownloadContractAsync(contractNumber);
+            await service.GetDownloadContractAsync(dni, contractNumber);
 
         }
 
@@ -84,11 +85,12 @@ namespace customerportalapi.Services.Test
         public async Task ShouldReturnAStringWhenCallGetDownloadContractAsync()
         {
             //Arrange
+            string dni = "fake dni";
             string contractNumber = "TRWETR436745732564536";
             Mock<IContractRepository> contractRep = ContractRepositoryMock.ValidDownloadContractRepository();
             //Act
             ContractServices service = new ContractServices(contractRep.Object, _contractSMRepository.Object, _mailRepository.Object, _emailTemplateRepository.Object);
-            string contract = await service.GetDownloadContractAsync(contractNumber);
+            string contract = await service.GetDownloadContractAsync(dni, contractNumber);
 
             //Assert
             Assert.IsNotNull(contract);

@@ -35,7 +35,7 @@ namespace customerportalapi.Services
             return contract;
         }
 
-        public async Task<string> GetDownloadContractAsync(string contractNumber)
+        public async Task<string> GetDownloadContractAsync(string dni, string contractNumber)
         {
             string contractFile = await _contractRepository.GetDownloadContractAsync(contractNumber);
             if (contractFile == "")
@@ -47,9 +47,9 @@ namespace customerportalapi.Services
                 {
                     Email message = new Email();
                     //message.To.Add(contract.StoreData.EmailAddress1);
-                    message.To.Add("julia.alsina@quantion.com"); // TODO: canviar mail
-                    message.Subject = requestDigitalContractTemplate.subject;
-                    message.Body = string.Format(requestDigitalContractTemplate.body, contractNumber, contract.Customer); // TODO: faltarà posar les dades que vulguem
+                    message.To.Add("christian.garcia@quantion.com"); // TODO: canviar mail
+                    message.Subject = string.Format(requestDigitalContractTemplate.subject, contract.Customer, dni);
+                    message.Body = string.Format(requestDigitalContractTemplate.body, contract.Customer, dni, contractNumber);
                     await _mailRepository.Send(message);
                 }
                 throw new ServiceException("Contract file does not exist.", HttpStatusCode.NotFound, "ContractNumber", "Not exist");
