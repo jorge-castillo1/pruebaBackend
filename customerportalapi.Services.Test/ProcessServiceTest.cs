@@ -15,14 +15,14 @@ namespace customerportalapi.Services.Test
     [TestClass]
     public class ProcessServiceTest
     {
-        private Mock<IUserRepository> _userRepository;
         private Mock<IProcessRepository> _processRepository;
+        private Mock<ISignatureRepository> _signatureRepository;
 
         [TestInitialize]
         public void Setup()
         {
-            _userRepository = UserRepositoryMock.ValidUserRepository();
             _processRepository = ProcessRepositoryMock.ProcessRepository();
+            _signatureRepository = SignatureRepositoryMock.SignatureRepository();
         }
 
         [TestMethod]
@@ -34,7 +34,7 @@ namespace customerportalapi.Services.Test
             int processtype = 1;
 
             _processRepository = ProcessRepositoryMock.MoreThanOneResultProcessRepository();
-            ProcessService service = new ProcessService(_processRepository.Object);
+            ProcessService service = new ProcessService(_processRepository.Object, _signatureRepository.Object);
             var result = service.GetLastProcesses(user, contractnumber, processtype);
 
             Assert.IsNotNull(result);

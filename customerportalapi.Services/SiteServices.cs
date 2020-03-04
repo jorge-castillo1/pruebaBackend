@@ -54,7 +54,9 @@ namespace customerportalapi.Services
                 Name = x.StoreData.StoreName,
                 x.StoreData.Telephone,
                 x.StoreData.CoordinatesLatitude,
-                x.StoreData.CoordinatesLongitude
+                x.StoreData.CoordinatesLongitude,
+                x.StoreData.EmailAddress1,
+                x.StoreData.StoreCode
             }))
             {
                 Site site = new Site
@@ -62,7 +64,9 @@ namespace customerportalapi.Services
                     Name = storegroup.Key.Name,
                     Telephone = storegroup.Key.Telephone,
                     CoordinatesLatitude = storegroup.Key.CoordinatesLatitude,
-                    CoordinatesLongitude = storegroup.Key.CoordinatesLongitude
+                    CoordinatesLongitude = storegroup.Key.CoordinatesLongitude,
+                    EmailAddress1 = storegroup.Key.EmailAddress1,
+                    StoreCode = storegroup.Key.StoreCode
                 };
 
                 foreach (var contract in storegroup)
@@ -70,6 +74,9 @@ namespace customerportalapi.Services
                     //ToDo: remove this and clean contract entity
                     contract.StoreCode = contract.StoreData.StoreCode;
                     contract.AccessType = contract.StoreData.AccessType;
+                    contract.MapLink = contract.StoreData.MapLink;
+                    SMContract contractSM = await _contractSMRepository.GetAccessCodeAsync(contract.ContractNumber);
+                    contract.TimeZone = contractSM.Timezone;
                     contract.StoreData = null;
                     site.Contracts.Add(contract);
                 }

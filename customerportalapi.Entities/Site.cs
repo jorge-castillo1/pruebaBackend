@@ -12,6 +12,10 @@ namespace customerportalapi.Entities
 
         public string CoordinatesLongitude { get; set; }
 
+        public string EmailAddress1 { get; set; }
+
+        public string StoreCode { get; set; }
+
         public List<Contract> Contracts { get; } = new List<Contract>();
     }
 }
