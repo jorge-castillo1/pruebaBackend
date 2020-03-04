@@ -33,5 +33,8 @@
         public Store StoreData { get; set; }
 
         public string AccessType {get; set; }
+
+        public string TimeZone { get; set; }
+        public string MapLink { get; set; }
     }
 }

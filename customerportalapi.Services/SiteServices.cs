@@ -74,6 +74,9 @@ namespace customerportalapi.Services
                     //ToDo: remove this and clean contract entity
                     contract.StoreCode = contract.StoreData.StoreCode;
                     contract.AccessType = contract.StoreData.AccessType;
+                    contract.MapLink = contract.StoreData.MapLink;
+                    SMContract contractSM = await _contractSMRepository.GetAccessCodeAsync(contract.ContractNumber);
+                    contract.TimeZone = contractSM.Timezone;
                     contract.StoreData = null;
                     site.Contracts.Add(contract);
                 }
