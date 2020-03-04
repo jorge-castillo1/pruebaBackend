@@ -313,9 +313,6 @@ namespace customerportalapi.Repositories
                 //var response = await httpClient.PutAsync(url, postContent);
                 var response = await httpClient.SendAsync(request);
                 response.EnsureSuccessStatusCode();
-
-                var content = await response.Content.ReadAsStringAsync();
-                JsonConvert.DeserializeObject<UserIdentity>(content);
                 return true;
             }
             catch (Exception ex)

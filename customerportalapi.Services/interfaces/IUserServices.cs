@@ -21,7 +21,7 @@ namespace customerportalapi.Services.interfaces
 
         Task<bool> ContactAsync(FormContact value);
 
-        Task<UserIdentity> ChangeRole(string username, string role);
+        Task<bool> ChangeRole(string username, string role);
 
         Task<bool> RemoveRole(string username, string role);
     }
