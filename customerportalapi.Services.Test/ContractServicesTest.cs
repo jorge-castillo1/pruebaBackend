@@ -21,6 +21,8 @@ namespace customerportalapi.Services.Test
         private Mock<IDistributedCache> _distributedCache;
         private Mock<IIdentityRepository> _identityRepository;
         private Mock<IContractSMRepository> _contractSMRepository;
+        private Mock<IMailRepository> _mailRepository;
+        private Mock<IEmailTemplateRepository> _emailTemplateRepository;
 
         [TestInitialize]
         public void Setup()
@@ -31,6 +33,8 @@ namespace customerportalapi.Services.Test
             _distributedCache = new Mock<IDistributedCache>();
             _identityRepository = IdentityRepositoryMock.IdentityRepository();
             _contractSMRepository = ContractSMRepositoryMock.ContractSMRepository();
+            _mailRepository = MailRepositoryMock.MailRepository();
+            _emailTemplateRepository = EmailTemplateRepositoryMock.EmailTemplateRepository();
         }
 
         [TestMethod]
@@ -42,7 +46,7 @@ namespace customerportalapi.Services.Test
             Mock<IContractRepository> contractInvalid = ContractRepositoryMock.InvalidContractRepository();
 
             //Act
-            ContractServices service = new ContractServices(contractInvalid.Object, _contractSMRepository.Object);
+            ContractServices service = new ContractServices(contractInvalid.Object, _contractSMRepository.Object, _mailRepository.Object, _emailTemplateRepository.Object);
             await service.GetContractAsync(contractNumber);
 
         }
@@ -55,7 +59,7 @@ namespace customerportalapi.Services.Test
             Mock<IContractRepository> contractRep = ContractRepositoryMock.ValidContractRepository();
 
             //Act
-            ContractServices service = new ContractServices(contractRep.Object, _contractSMRepository.Object);
+            ContractServices service = new ContractServices(contractRep.Object, _contractSMRepository.Object, _mailRepository.Object, _emailTemplateRepository.Object);
             Contract contract = await service.GetContractAsync(contractNumber);
 
             //Assert
@@ -67,12 +71,13 @@ namespace customerportalapi.Services.Test
         public async Task WhenDontHaveContractNumberShouldProduceAExceptionWhenCallGetDownloadContractAsync()
         {
             //Arrange
+            string dni= "fake dni";
             string contractNumber = "TRWETR436745732564536";
             Mock<IContractRepository> contractInvalid = ContractRepositoryMock.InvalidDownloadContractRepository();
 
             //Act
-            ContractServices service = new ContractServices(contractInvalid.Object, _contractSMRepository.Object);
-            await service.GetDownloadContractAsync(contractNumber);
+            ContractServices service = new ContractServices(contractInvalid.Object, _contractSMRepository.Object, _mailRepository.Object, _emailTemplateRepository.Object);
+            await service.GetDownloadContractAsync(dni, contractNumber);
 
         }
 
@@ -80,11 +85,12 @@ namespace customerportalapi.Services.Test
         public async Task ShouldReturnAStringWhenCallGetDownloadContractAsync()
         {
             //Arrange
+            string dni = "fake dni";
             string contractNumber = "TRWETR436745732564536";
             Mock<IContractRepository> contractRep = ContractRepositoryMock.ValidDownloadContractRepository();
             //Act
-            ContractServices service = new ContractServices(contractRep.Object, _contractSMRepository.Object);
-            string contract = await service.GetDownloadContractAsync(contractNumber);
+            ContractServices service = new ContractServices(contractRep.Object, _contractSMRepository.Object, _mailRepository.Object, _emailTemplateRepository.Object);
+            string contract = await service.GetDownloadContractAsync(dni, contractNumber);
 
             //Assert
             Assert.IsNotNull(contract);
