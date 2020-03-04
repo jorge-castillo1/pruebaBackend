@@ -10,9 +10,11 @@
 
         public string Currency { get; set; }
 
-        public string Price { get; set; }
+        public decimal Price { get; set; }
 
-        public string Vat { get; set; }
+        public decimal Vat { get; set; }
+
+        public decimal TotalPrice { get; set; }
 
         public string ReservationFee { get; set; }
 
@@ -29,5 +31,7 @@
         public Unit Unit { get; set; }
 
         public Store StoreData { get; set; }
+
+        public string AccessType {get; set; }
     }
 }

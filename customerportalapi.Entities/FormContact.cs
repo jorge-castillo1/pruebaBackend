@@ -8,6 +8,8 @@
 
         public string Preference { get; set; }
 
+        public string ContactMethod { get; set; }
+
         public string Motive { get; set; }
 
         public string Message { get; set; }
