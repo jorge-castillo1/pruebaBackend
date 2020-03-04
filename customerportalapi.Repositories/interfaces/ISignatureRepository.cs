@@ -7,5 +7,6 @@ namespace customerportalapi.Repositories.interfaces
     public interface ISignatureRepository
     {
         Task<Guid> CreateSignature(MultipartFormDataContent form);
+        Task<bool> CancelSignature(string id);
     }
 }

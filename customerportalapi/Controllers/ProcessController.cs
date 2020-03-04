@@ -40,5 +40,24 @@ namespace customerportalapi.Controllers
                 throw;
             }
         }
+
+        [HttpPut("cancel/{contractnumber}/{processtype}")]
+        public ApiResponse CancelSignature(string contractnumber, int processtype)
+        {
+            try
+            {
+                var result = _service.CancelProcess(contractnumber, processtype);
+                return new ApiResponse(result);
+            }
+            catch (ServiceException se)
+            {
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
     }
 }
