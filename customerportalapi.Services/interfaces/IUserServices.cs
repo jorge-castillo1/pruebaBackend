@@ -23,6 +23,6 @@ namespace customerportalapi.Services.interfaces
 
         Task<UserIdentity> ChangeRole(string username, string role);
 
-        Task<UserIdentity> RemoveRole(string username, string role);
+        Task<bool> RemoveRole(string username, string role);
     }
 }

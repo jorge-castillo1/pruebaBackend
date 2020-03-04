@@ -287,7 +287,7 @@ namespace customerportalapi.Repositories
             }
         }
 
-        public async Task<UserIdentity> RemoveUserFromGroup(UserIdentity userIdentity, Group group)
+        public async Task<bool> RemoveUserFromGroup(UserIdentity userIdentity, Group group)
         {
             var httpClient = _clientFactory.CreateClient("identityClient");
             var method = new HttpMethod("PATCH");
@@ -315,7 +315,8 @@ namespace customerportalapi.Repositories
                 response.EnsureSuccessStatusCode();
 
                 var content = await response.Content.ReadAsStringAsync();
-                return JsonConvert.DeserializeObject<UserIdentity>(content);
+                JsonConvert.DeserializeObject<UserIdentity>(content);
+                return true;
             }
             catch (Exception ex)
             {
