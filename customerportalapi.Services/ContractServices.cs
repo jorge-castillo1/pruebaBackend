@@ -43,7 +43,7 @@ namespace customerportalapi.Services
             {
                 var contract = await GetContractAsync(contractNumber);
 
-                EmailTemplate requestDigitalContractTemplate = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.RequestDigitalContract, LanguageTypes.es.ToString()); // TODO: canviar d'idioma
+                EmailTemplate requestDigitalContractTemplate = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.RequestDigitalContract, LanguageTypes.en.ToString()); // TODO: canviar d'idioma
                 if (requestDigitalContractTemplate._id != null)
                 {
                     Email message = new Email();
