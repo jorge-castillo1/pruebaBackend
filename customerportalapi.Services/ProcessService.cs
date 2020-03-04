@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using customerportalapi.Services.Interfaces;
 using customerportalapi.Repositories.interfaces;
 using customerportalapi.Entities;
+using customerportalapi.Entities.enums;
 using customerportalapi.Services.Exceptions;
 
 namespace customerportalapi.Services
@@ -12,9 +13,11 @@ namespace customerportalapi.Services
     public class ProcessService : IProcessService
     {
         private readonly IProcessRepository _processRepository;
-        public ProcessService(IProcessRepository processRepository)
+        private readonly ISignatureRepository _signatureRepository;
+        public ProcessService(IProcessRepository processRepository, ISignatureRepository signatureRepository)
         {
             _processRepository = processRepository;
+            _signatureRepository = signatureRepository;
         }
 
         public List<Process> GetLastProcesses(string user, string contractnumber, int? processtype)
@@ -44,6 +47,18 @@ namespace customerportalapi.Services
                 }
             }
             return last;
+        }
+
+        public bool CancelProcess(string contractnumber, int processtype)
+        {
+            List<Process> processes = GetLastProcesses(null, contractnumber, processtype);
+            if (processes.Count == 0) throw new ServiceException("Process not found", HttpStatusCode.NotFound);
+            Process process = processes[0];
+            var documentId = process.DocumentId;
+            process.ProcessStatus = (int)ProcessStatuses.Canceled;
+            _processRepository.Update(process);
+            _signatureRepository.CancelSignature(documentId);    
+            return true;
         }
     }
 }

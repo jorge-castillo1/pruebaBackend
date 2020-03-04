@@ -36,5 +36,17 @@ namespace customerportalapi.Repositories
             var deserializedContent = JsonConvert.DeserializeObject<SignatureResponse>(content);
             return deserializedContent.Result.Documents[0].Id;
         }
+
+        public async Task<bool> CancelSignature(string id)
+        {
+            var httpClient = _clientFactory.CreateClient("httpClientSignature");
+            var url = httpClient.BaseAddress + _configuration["SignatureEndpoint"] + id;
+
+            var response = await httpClient.DeleteAsync(url);
+            response.EnsureSuccessStatusCode();
+
+            await response.Content.ReadAsStringAsync();
+            return true;
+        }
     }
 }
