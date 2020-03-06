@@ -71,5 +71,68 @@ namespace customerportalapi.Services.Test.FakeData
 
             return db;
         }
+
+        public static Mock<IContractRepository> InvalidContractRepository()
+        {
+            var db = new Mock<IContractRepository>();
+            db.Setup(x => x.GetContractAsync(It.IsAny<string>())).Returns(Task.FromResult(new Contract()
+            {
+                ContractDate = "01/01/2020",
+                Store = "Fake Store",
+                StoreData = new Store
+                {
+                    StoreName = "Fake Store",
+                    Telephone = "Fake telephone",
+                    CoordinatesLatitude = "Fake CoordinatesLatitude",
+                    CoordinatesLongitude = "Fake CoordinatesLongitude"
+                }
+
+            })).Verifiable();
+
+            return db;
+        }
+
+        public static Mock<IContractRepository> ValidContractRepository()
+        {
+            var db = new Mock<IContractRepository>();
+            db.Setup(x => x.GetContractAsync(It.IsAny<string>())).Returns(Task.FromResult(new Contract()
+            {
+                ContractNumber = "1234567890",
+                ContractDate = "01/01/2020",
+                Store = "Fake Store",
+                StoreData = new Store
+                {
+                    StoreName = "Fake Store",
+                    Telephone = "Fake telephone",
+                    CoordinatesLatitude = "Fake CoordinatesLatitude",
+                    CoordinatesLongitude = "Fake CoordinatesLongitude"
+                }
+
+            })).Verifiable();
+
+            return db;
+        }
+
+        public static Mock<IContractRepository> InvalidDownloadContractRepository()
+        {
+            var db = new Mock<IContractRepository>();
+            db.Setup(x => x.GetDownloadContractAsync(It.IsAny<string>())).Returns(Task.FromResult(
+            ""
+            )).Verifiable();
+            db.Setup(x => x.GetContractAsync(It.IsAny<string>())).Returns(Task.FromResult(new Contract())).Verifiable();
+
+            return db;
+        }
+
+        public static Mock<IContractRepository> ValidDownloadContractRepository()
+        {
+            var db = new Mock<IContractRepository>();
+            db.Setup(x => x.GetDownloadContractAsync(It.IsAny<string>())).Returns(Task.FromResult(
+            "JVBERi0xLjcNCiW1tbW1DQoxIDAgb2JqDQo8PC9UeXBlL0NhdGFsb2cvUGFnZXMgMiAwIFIvTGFuZyhlcy1FUykgL1N0cn"
+            )).Verifiable();
+
+            return db;
+        }
     }
+
 }

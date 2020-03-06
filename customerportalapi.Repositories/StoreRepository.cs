@@ -49,5 +49,33 @@ namespace customerportalapi.Repositories
 
             return JsonConvert.DeserializeObject<Store>(result.GetValue("result").ToString());
         }
+
+        public async Task<Unit> GetUnitAsync(Guid id)
+        {
+            var httpClient = _clientFactory.CreateClient("httpClient");
+            httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["UnitsAPI"]);
+
+            var response = await httpClient.GetAsync(id.ToString(), HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode) return new Unit();
+            var content = await response.Content.ReadAsStringAsync();
+            JObject result = JObject.Parse(content);
+
+            return JsonConvert.DeserializeObject<Unit>(result.GetValue("result").ToString());
+        }
+
+        public async Task<Unit> GetUnitBySMIdAsync(string smid)
+        {
+            var httpClient = _clientFactory.CreateClient("httpClient");
+            httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["UnitsAPI"]);
+
+            var response = await httpClient.GetAsync(smid, HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode) return new Unit();
+            var content = await response.Content.ReadAsStringAsync();
+            JObject result = JObject.Parse(content);
+
+            return JsonConvert.DeserializeObject<Unit>(result.GetValue("result").ToString());
+        }
     }
 }
