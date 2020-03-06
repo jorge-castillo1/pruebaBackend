@@ -20,8 +20,10 @@ namespace customerportalapi.Entities
         [JsonProperty("userType")]
         public string UserType { get; set; }
         [JsonProperty("externalId")]
-        public string CardId { get; set; } 
-         [JsonProperty("displayName")]
-        public string DisplayName { get; set; }  
+        public string CardId { get; set; }
+        [JsonProperty("displayName")]
+        public string DisplayName { get; set; }
+        [JsonProperty("groups")]
+        public List<UserGroupMember> Groups { get; set; }
     }
 }
