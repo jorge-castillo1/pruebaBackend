@@ -106,7 +106,9 @@ namespace customerportalapi.Services
             Paginate<Store> result = new Paginate<Store>
             {
                 Total = storeList.Count,
-                List = storeList.Skip(skip).Take(limit).ToList()
+                List = storeList.Skip(skip).Take(limit).ToList(),
+                Skip = skip,
+                Limit = limit
             };
             return result;
         }
