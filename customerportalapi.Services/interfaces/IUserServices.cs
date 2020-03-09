@@ -20,5 +20,7 @@ namespace customerportalapi.Services.interfaces
         Task<Account> UpdateAccountAsync(Account account);
 
         Task<bool> ContactAsync(FormContact value);
+
+        Profile GetUserByUsername(string username);
     }
 }

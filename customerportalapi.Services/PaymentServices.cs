@@ -17,12 +17,14 @@ namespace customerportalapi.Services
         private readonly IProcessRepository _processRepository;
         private readonly ISignatureRepository _signatureRepository;
         private readonly IStoreRepository _storeRepository;
-        public PaymentServices(IUserRepository userRepository, IProcessRepository processRepository, ISignatureRepository signatureRepository, IStoreRepository storeRepository)
+        private readonly IProfileRepository _profileRepository;
+        public PaymentServices(IUserRepository userRepository, IProcessRepository processRepository, ISignatureRepository signatureRepository, IStoreRepository storeRepository, IProfileRepository profileRepository)
         {
             _userRepository = userRepository;
             _processRepository = processRepository;
             _signatureRepository = signatureRepository;
             _storeRepository = storeRepository;
+            _profileRepository = profileRepository;
         }
 
         public async Task<bool> ChangePaymentMethod(PaymentMethod paymentMethod)
@@ -32,6 +34,10 @@ namespace customerportalapi.Services
             User user = _userRepository.GetCurrentUserByDniAndType(paymentMethod.Dni, userType);
             if (user.Id == null)
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
+
+            AccountProfile account = await _profileRepository.GetAccountAsync(paymentMethod.Dni, paymentMethod.AccountType);
+            if (account.SmCustomerId == null)
+                throw new ServiceException("Account does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
 
             //2. Process paymentmethod change
             if (paymentMethod.PaymentMethodType == (int)PaymentMethodTypes.Bank)
@@ -56,7 +62,7 @@ namespace customerportalapi.Services
 
                 var store = await _storeRepository.GetStoreAsync(bankmethod.StoreCode);
 
-                var form = FillFormBankMethod(store, bankmethod, user);
+                var form = FillFormBankMethod(store, bankmethod, user, account);
                 Guid documentid = await _signatureRepository.CreateSignature(form);
 
                 //5. Create a change method payment process
@@ -95,12 +101,13 @@ namespace customerportalapi.Services
             return true;
         }
 
-        private MultipartFormDataContent FillFormBankMethod(Store store, PaymentMethodBank bankmethod, User user)
+        private MultipartFormDataContent FillFormBankMethod(Store store, PaymentMethodBank bankmethod, User user, AccountProfile account)
         {
             var form = new MultipartFormDataContent();
+            string email = (account.EmailAddress1 != null) ? account.EmailAddress1 : account.EmailAddress2;
 
             form.Add(new StringContent(user.Name), "recipients[0][name]");
-            form.Add(new StringContent(user.Email), "recipients[0][email]");
+            form.Add(new StringContent(email), "recipients[0][email]");
             form.Add(new StringContent(((int)DocumentTypes.SEPA).ToString()), "documentinformation[0][documenttype]");
             form.Add(new StringContent(store.StoreName), "storeidentification");
             form.Add(new StringContent(SystemTypes.CustomerPortal.ToString()), "sourcesystem");

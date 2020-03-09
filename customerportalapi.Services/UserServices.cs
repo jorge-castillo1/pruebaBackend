@@ -580,5 +580,28 @@ namespace customerportalapi.Services
 
             return message;
         }
+
+        public Profile GetUserByUsername(string username)
+        {
+            //Invoke repository
+
+            User user = _userRepository.GetCurrentUser(username);
+
+            Profile profile = ToProfile(user);
+            if (profile == null)
+                throw new ServiceException("User is not found.", HttpStatusCode.NotFound, "User", "Not exist");
+
+            return profile;
+        }
+
+        private static Profile ToProfile(User entity)
+        {
+
+            return new Profile
+            {
+                Fullname = entity.Name,
+                DocumentNumber = entity.Dni,
+                Username = entity.Username            };
+        }
     }
 }
