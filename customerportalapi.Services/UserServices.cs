@@ -575,6 +575,7 @@ namespace customerportalapi.Services
             UserIdentity userIdentity = await _identityRepository.GetUser(user.ExternalId);
             if (userIdentity.ID == null) throw new ServiceException("User not found", HttpStatusCode.NotFound);
             GroupResults group = await _identityRepository.FindGroup(role);
+            if (group.Groups.Count == 0) throw new ServiceException("Role not found", HttpStatusCode.NotFound);
             if (userIdentity.Groups != null)
             {
                 foreach (var oldGroup in userIdentity.Groups)
