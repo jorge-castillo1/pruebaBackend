@@ -100,6 +100,17 @@ namespace customerportalapi.Services
             return new List<Store>(entitylist.OrderBy(o => o.Country).ThenBy(o => o.City).ThenBy(o => o.StoreName));
         }
 
+        public async Task<Paginate<Store>> GetPaginatedStoresAsync(string countryCode, string city, int skip, int limit)
+        {
+            List<Store> storeList = await GetStoresAsync(countryCode, city);
+            Paginate<Store> result = new Paginate<Store>
+            {
+                Total = storeList.Count,
+                List = storeList.Skip(skip).Take(limit).ToList()
+            };
+            return result;
+        }
+
         public async Task<List<Country>> GetStoresCountriesAsync()
         {
             List<Store> entitylist = await GetList();
