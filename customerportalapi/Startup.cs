@@ -100,6 +100,8 @@ namespace customerportalapi
             services.AddScoped<ICountryRepository, CountryRepository>();
             services.AddScoped<IProcessRepository, ProcessRepository>();
             services.AddScoped<ISignatureRepository, SignatureRepository>();
+            services.AddScoped<IAccountSMRepository, AccountSMRepository>();
+            services.AddScoped<IDocumentRepository, DocumentRepository>();
 
             //Register Business Services
             services.AddTransient<IUserServices, UserServices>();
