@@ -45,6 +45,26 @@ namespace customerportalapi.Controllers
             }
         }
 
+        [HttpGet("username/{username}")]
+        [AuthorizeToken]
+        public ApiResponse GetUserByUsernameAsync(string username)
+        {
+            try
+            {
+                var entity = _services.GetUserByUsername(username);
+                return new ApiResponse(entity);
+            }
+            catch (ServiceException se)
+            {
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+
         [HttpGet("{dni}/Business")]
         [AuthorizeToken]
         public async Task<ApiResponse> GetBusinessAsync(string dni)

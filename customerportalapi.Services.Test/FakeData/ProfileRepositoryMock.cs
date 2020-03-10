@@ -42,5 +42,28 @@ namespace customerportalapi.Services.Test.FakeData
 
             return db;
         }
+
+        public static Mock<IProfileRepository> AccountProfileRepository()
+        {
+            var db = new Mock<IProfileRepository>();
+            db.Setup(x => x.GetAccountAsync(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(new AccountProfile()
+            {
+                SmCustomerId =  "fake SM Customer Id",
+                Phone1 = "fake phone 1",
+                MobilePhone1 = "fake mobile phone 1",
+                EmailAddress1 = "fake email 2 modified",
+                EmailAddress2 = "fake email 2 modified"
+            })).Verifiable();
+
+            return db;
+        }
+
+        public static Mock<IProfileRepository> AccountProfileRepositoryInvalid()
+        {
+            var db = new Mock<IProfileRepository>();
+            db.Setup(x => x.GetAccountAsync(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(new AccountProfile())).Verifiable();
+
+            return db;
+        }
     }
 }
