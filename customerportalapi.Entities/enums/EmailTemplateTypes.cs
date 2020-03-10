@@ -7,6 +7,7 @@
         FormCall = 2,
         FormOpinion = 3,
         ForgotPassword = 4,
-        RequestDigitalContract = 5
+        RequestDigitalContract = 5,
+        UpdateBankAccount = 6
     }
 }
