@@ -69,12 +69,20 @@ namespace customerportalapi.Controllers
         }
 
         [HttpGet("stores")]
-        public async Task<ApiResponse> GetAsync(string countryCode, string city)
+        public async Task<ApiResponse> GetAsync(string countryCode, string city, int skip, int? limit)
         {
             try
             {
-                var entity = await _services.GetStoresAsync(countryCode, city);
-                return new ApiResponse(entity);
+                if (limit == null)
+                {
+                    var entity = await _services.GetStoresAsync(countryCode, city);
+                    return new ApiResponse(entity);
+                }
+                else
+                {
+                    var entity = await _services.GetPaginatedStoresAsync(countryCode, city, skip, (int)limit);
+                    return new ApiResponse(entity);
+                }
             }
             catch (Exception ex)
             {
