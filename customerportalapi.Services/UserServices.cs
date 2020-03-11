@@ -601,7 +601,36 @@ namespace customerportalapi.Services
             {
                 Fullname = entity.Name,
                 DocumentNumber = entity.Dni,
-                Username = entity.Username            };
+                Username = entity.Username            
+            };
+        }        
+        public async Task<bool> ChangeRole(string username, string role)
+        {
+            User user = _userRepository.GetCurrentUser(username);
+            UserIdentity userIdentity = await _identityRepository.GetUser(user.ExternalId);
+            if (userIdentity.ID == null) throw new ServiceException("User not found", HttpStatusCode.NotFound);
+            GroupResults group = await _identityRepository.FindGroup(role);
+            if (group.Groups.Count == 0) throw new ServiceException("Role not found", HttpStatusCode.NotFound);
+            if (userIdentity.Groups != null)
+            {
+                foreach (var oldGroup in userIdentity.Groups)
+                {
+                    GroupResults currentGroup = await _identityRepository.FindGroup(oldGroup.Display);
+                    await _identityRepository.RemoveUserFromGroup(userIdentity, currentGroup.Groups[0]);
+                }
+            }
+            await _identityRepository.AddUserToGroup(userIdentity, group.Groups[0]);
+            return true;
+        }
+
+        public async Task<bool> RemoveRole(string username, string role)
+        {
+            User user = _userRepository.GetCurrentUser(username);
+            UserIdentity userIdentity = await _identityRepository.GetUser(user.ExternalId);
+            if (userIdentity.ID == null) throw new ServiceException("User not found", HttpStatusCode.NotFound);
+            if (userIdentity.Groups == null || !userIdentity.Groups.Exists(x => x.Display == role)) return false;
+            GroupResults group = await _identityRepository.FindGroup(role);
+            return await _identityRepository.RemoveUserFromGroup(userIdentity, group.Groups[0]);   
         }
     }
 }

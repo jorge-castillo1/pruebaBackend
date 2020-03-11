@@ -69,12 +69,20 @@ namespace customerportalapi.Controllers
         }
 
         [HttpGet("stores")]
-        public async Task<ApiResponse> GetAsync(string countryCode, string city)
+        public async Task<ApiResponse> GetAsync(string countryCode, string city, int skip, int? limit)
         {
             try
             {
-                var entity = await _services.GetStoresAsync(countryCode, city);
-                return new ApiResponse(entity);
+                if (limit == null)
+                {
+                    var entity = await _services.GetStoresAsync(countryCode, city);
+                    return new ApiResponse(entity);
+                }
+                else
+                {
+                    var entity = await _services.GetPaginatedStoresAsync(countryCode, city, skip, (int)limit);
+                    return new ApiResponse(entity);
+                }
             }
             catch (Exception ex)
             {
@@ -121,7 +129,7 @@ namespace customerportalapi.Controllers
                 var entity = new UnitTimeZone();
                 entity.Unit = await _services.GetUnitBySMIdAsync(smid);
                 ContractFull contract = await _contractService.GetFullContractAsync(contractnumber);
-                // entity.TimeZone = await _contractService.GetContractTimeZoneAsync(contractnumber
+                // entity.TimeZone = await _contractService.GetContractTimeZoneAsync(contract.contract.SmContractCode)
                 entity.TimeZone = contract.smcontract.Timezone;
                 entity.StoreCoordinatesLatitude = contract.contract.StoreData.CoordinatesLatitude;
                 entity.StoreCoordinatesLongitude = contract.contract.StoreData.CoordinatesLongitude;

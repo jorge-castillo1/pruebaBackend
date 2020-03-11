@@ -74,8 +74,9 @@ namespace customerportalapi.Services.Test
             GenericIdentity gi = new GenericIdentity("fake name");
             GenericPrincipal gp = new GenericPrincipal(gi, null);
             System.Threading.Thread.CurrentPrincipal = gp;
-            
+
             //Act
+            _contractRepository = ContractRepositoryMock.ValidContractRepository();
             SiteServices service = new SiteServices(_userRepository.Object, _contractRepository.Object, _storeRepository.Object, _distributedCache.Object, _identityRepository.Object, _contractSMRepository.Object);
             AccessCode entity = await service.GetAccessCodeAsync("fake contractid", "fake password");
 

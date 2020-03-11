@@ -17,14 +17,23 @@ namespace customerportalapi.Services
         private readonly IProcessRepository _processRepository;
         private readonly ISignatureRepository _signatureRepository;
         private readonly IStoreRepository _storeRepository;
+        private readonly IAccountSMRepository _accountSMRepository;
+        private readonly IEmailTemplateRepository _emailTemplateRepository;
+        private readonly IMailRepository _mailRepository;
         private readonly IProfileRepository _profileRepository;
-        public PaymentServices(IUserRepository userRepository, IProcessRepository processRepository, ISignatureRepository signatureRepository, IStoreRepository storeRepository, IProfileRepository profileRepository)
+        private readonly IContractRepository _contractRepository;
+        public PaymentServices(IUserRepository userRepository, IProcessRepository processRepository, ISignatureRepository signatureRepository, IStoreRepository storeRepository, IAccountSMRepository accountSMRepository, IEmailTemplateRepository emailTemplateRepository, IMailRepository mailRepository, IProfileRepository profileRepository, IContractRepository contractRepository)
         {
             _userRepository = userRepository;
             _processRepository = processRepository;
             _signatureRepository = signatureRepository;
             _storeRepository = storeRepository;
             _profileRepository = profileRepository;
+            _accountSMRepository = accountSMRepository;
+            _emailTemplateRepository = emailTemplateRepository;
+            _mailRepository = mailRepository;
+            _profileRepository = profileRepository;
+            _contractRepository = contractRepository;
         }
 
         public async Task<bool> ChangePaymentMethod(PaymentMethod paymentMethod)
@@ -79,7 +88,7 @@ namespace customerportalapi.Services
             return true;
         }
 
-        public bool UpdatePaymentProcess(SignatureStatus value)
+        public async Task<bool> UpdatePaymentProcess(SignatureStatus value)
         {
             ProcessSearchFilter filter = new ProcessSearchFilter
             {
@@ -98,6 +107,38 @@ namespace customerportalapi.Services
 
             _processRepository.Update(process);
 
+            if (process.ProcessType == (int)ProcessTypes.PaymentMethodChangeBank && value.Status == "document_completed")
+            {
+                // Add Bank account to SM
+                SMBankAccount bankAccount = new SMBankAccount();
+                User user = _userRepository.GetCurrentUser(value.User);
+                string usertype = user.Usertype == (int)UserTypes.Business ? "Business" : "";
+                AccountProfile account = await _profileRepository.GetAccountAsync(user.Dni, usertype);
+
+
+                bankAccount.CustomerId = account.SmCustomerId;
+                bankAccount.PaymentMethodId = "AT5";
+                bankAccount.AccountName = value.BankAccountName;
+                bankAccount.AccountNumber = value.BankAccountOrderNumber;
+                bankAccount.Default = 1;
+                bankAccount.Iban = value.BankAccountOrderNumber;
+                await _accountSMRepository.AddBankAccountAsync(bankAccount);
+
+                // Send email to the store
+                EmailTemplate template = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.UpdateBankAccount, LanguageTypes.en.ToString());
+                string contractNumber = value.ContractNumber;
+                Contract contract = await _contractRepository.GetContractAsync(contractNumber);
+
+                if (template._id != null)
+                {
+                    Email message = new Email();
+                    string storeMail = "julia.alsina@basetis.com"; // contract.StoreData.EmailAddress1;
+                    message.To.Add(storeMail);
+                    message.Subject = string.Format(template.subject, user.Name, user.Dni);
+                    message.Body = string.Format(template.body, user.Name, user.Dni, value.ContractNumber);
+                    await _mailRepository.Send(message);
+                }
+            }
             return true;
         }
 

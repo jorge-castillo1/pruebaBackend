@@ -75,7 +75,8 @@ namespace customerportalapi.Services
                     contract.StoreCode = contract.StoreData.StoreCode;
                     contract.AccessType = contract.StoreData.AccessType;
                     contract.MapLink = contract.StoreData.MapLink;
-                    SMContract contractSM = await _contractSMRepository.GetAccessCodeAsync(contract.ContractNumber);
+
+                    SMContract contractSM = await _contractSMRepository.GetAccessCodeAsync(contract.SmContractCode);
                     contract.TimeZone = contractSM.Timezone;
                     contract.StoreData = null;
                     site.Contracts.Add(contract);
@@ -98,6 +99,17 @@ namespace customerportalapi.Services
                 entitylist = entitylist.Where(d => d.City == city).ToList();
 
             return new List<Store>(entitylist.OrderBy(o => o.Country).ThenBy(o => o.City).ThenBy(o => o.StoreName));
+        }
+
+        public async Task<Paginate<Store>> GetPaginatedStoresAsync(string countryCode, string city, int skip, int limit)
+        {
+            List<Store> storeList = await GetStoresAsync(countryCode, city);
+            Paginate<Store> result = new Paginate<Store>
+            {
+                Total = storeList.Count,
+                List = storeList.Skip(skip).Take(limit).ToList()
+            };
+            return result;
         }
 
         public async Task<List<Country>> GetStoresCountriesAsync()
@@ -160,10 +172,10 @@ namespace customerportalapi.Services
             if (entity.AccesToken == null) {
                 throw new ServiceException("Password not valid", HttpStatusCode.BadRequest);
             }
+            Contract contract = await _contractRepository.GetContractAsync(contractId);
+            SMContract smContract = await _contractSMRepository.GetAccessCodeAsync(contract.SmContractCode);
 
-            SMContract contract = await _contractSMRepository.GetAccessCodeAsync(contractId);
-
-            entity.Password = contract.Password;
+            entity.Password = smContract.Password;
             entity.ContractId = contractId;
 
             return entity;
