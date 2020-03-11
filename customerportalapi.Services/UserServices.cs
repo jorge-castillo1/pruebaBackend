@@ -601,9 +601,10 @@ namespace customerportalapi.Services
             {
                 Fullname = entity.Name,
                 DocumentNumber = entity.Dni,
-                Username = entity.Username
+                Username = entity.Username            
             };
-        }
+        }        
+        
         public async Task<bool> ChangeRole(string username, string role)
         {
             User user = _userRepository.GetCurrentUser(username);

@@ -28,6 +28,7 @@ namespace customerportalapi.Services
             _processRepository = processRepository;
             _signatureRepository = signatureRepository;
             _storeRepository = storeRepository;
+            _profileRepository = profileRepository;
             _accountSMRepository = accountSMRepository;
             _emailTemplateRepository = emailTemplateRepository;
             _mailRepository = mailRepository;
