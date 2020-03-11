@@ -24,11 +24,11 @@ namespace customerportalapi.Controllers
         }
 
         [HttpPost]
-        public ActionResult SignatureStatus([FromBody] SignatureStatus value)
+        public async Task<ActionResult> SignatureStatus([FromBody] SignatureStatus value)
         {
             try
             {
-                _service.UpdatePaymentProcess(value);
+                await _service.UpdatePaymentProcess(value);
                 return new OkResult();
             }
             catch (Exception ex)

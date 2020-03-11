@@ -4,6 +4,8 @@
     {
         public string ContractNumber { get; set; }
 
+        public string SmContractCode { get; set; }
+
         public string Store { get; set; }
 
         public string StoreCode { get; set; }

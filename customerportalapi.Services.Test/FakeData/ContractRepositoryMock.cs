@@ -99,6 +99,7 @@ namespace customerportalapi.Services.Test.FakeData
             {
                 ContractNumber = "1234567890",
                 ContractDate = "01/01/2020",
+                SmContractCode = "R1234567890",
                 Store = "Fake Store",
                 StoreData = new Store
                 {

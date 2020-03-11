@@ -1,0 +1,13 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using customerportalapi.Entities;
+using System.Threading.Tasks;
+
+namespace customerportalapi.Repositories.interfaces
+{
+    public interface IDocumentRepository
+    {
+        Task<List<DocumentMetadata>> Search(DocumentMetadataSearchFilter filter);
+    }
+}
