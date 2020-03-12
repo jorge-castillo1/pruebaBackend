@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using customerportalapi.Entities;
 using customerportalapi.Services.interfaces;
+using customerportalapi.Services.Interfaces;
+using customerportalapi.Entities.enums;
 
 namespace customerportalapi.Controllers
 {
@@ -15,11 +17,13 @@ namespace customerportalapi.Controllers
     public class EventsController : ControllerBase
     {
         private readonly ILogger<EventsController> _logger;
-        private readonly IPaymentService _service;
+        private readonly IProcessService _service;
+        private readonly IPaymentService _paymentService;
 
-        public EventsController(IPaymentService service, ILogger<EventsController> logger)
+        public EventsController(IProcessService service, IPaymentService paymentservice, ILogger<EventsController> logger)
         {
             _service = service;
+            _paymentService = paymentservice;
             _logger = logger;
         }
 
@@ -28,7 +32,16 @@ namespace customerportalapi.Controllers
         {
             try
             {
-                await _service.UpdatePaymentProcess(value);
+                Process process = _service.UpdateSignatureProcess(value);
+
+                if (process != null)
+                {
+                    if (process.ProcessType == (int)ProcessTypes.PaymentMethodChangeBank && process.ProcessStatus == (int)ProcessStatuses.Accepted)
+                    {
+                        await _paymentService.UpdatePaymentProcess(value);
+                    }
+                }
+
                 return new OkResult();
             }
             catch (Exception ex)
