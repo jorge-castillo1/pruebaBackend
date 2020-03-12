@@ -21,10 +21,10 @@ namespace customerportalapi.Services.Test
         private Mock<IProcessRepository> _processRepository;
         private Mock<ISignatureRepository> _signatureRepository;
         private Mock<IStoreRepository> _storeRepository;
+        private Mock<IProfileRepository> _profileRepository;
         private Mock<IAccountSMRepository> _accountSMRepository;
         private Mock<IEmailTemplateRepository> _emailTemplateRepository;
         private Mock<IMailRepository> _mailRepository;
-        private Mock<IProfileRepository> _profileRepository;
         private Mock<IContractRepository> _contractRepository;
 
         [TestInitialize]
@@ -38,10 +38,7 @@ namespace customerportalapi.Services.Test
             _emailTemplateRepository = EmailTemplateRepositoryMock.EmailTemplateRepository();
             _mailRepository = MailRepositoryMock.MailRepository();
             _profileRepository = ProfileRepositoryMock.ProfileRepository();
-            _contractRepository = ContractRepositoryMock.ContractRepository();
-
-
-            
+            _contractRepository = ContractRepositoryMock.ContractRepository();            
         }
 
         [TestMethod]
@@ -55,6 +52,7 @@ namespace customerportalapi.Services.Test
 
             //Act
             _userRepository = UserRepositoryMock.InvalidUserRepository();
+            _profileRepository = ProfileRepositoryMock.AccountProfileRepository();
             PaymentServices service = new PaymentServices(_userRepository.Object, _processRepository.Object, _signatureRepository.Object, _storeRepository.Object, _accountSMRepository.Object, _emailTemplateRepository.Object, _mailRepository.Object, _profileRepository.Object, _contractRepository.Object);
             bool result = await service.ChangePaymentMethod(bankdata);
         }
@@ -77,6 +75,7 @@ namespace customerportalapi.Services.Test
 
             //Act
             _processRepository = ProcessRepositoryMock.NoPendingSameProcessRepository();
+            _profileRepository = ProfileRepositoryMock.AccountProfileRepository();
             PaymentServices service = new PaymentServices(_userRepository.Object, _processRepository.Object, _signatureRepository.Object, _storeRepository.Object, _accountSMRepository.Object, _emailTemplateRepository.Object, _mailRepository.Object, _profileRepository.Object, _contractRepository.Object);
             bool result = await service.ChangePaymentMethod(bankdata);
 
@@ -98,7 +97,23 @@ namespace customerportalapi.Services.Test
             bankdata.Dni = "fake dni";
             bankdata.AccountType = "fake account type";
 
+            _profileRepository = ProfileRepositoryMock.AccountProfileRepository();
             PaymentServices service = new PaymentServices(_userRepository.Object, _processRepository.Object, _signatureRepository.Object, _storeRepository.Object, _accountSMRepository.Object, _emailTemplateRepository.Object, _mailRepository.Object, _profileRepository.Object, _contractRepository.Object);
+            bool result = await service.ChangePaymentMethod(bankdata);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ServiceException), "No se ha producido la excepción esperada")]
+        public async Task AlCambiarElMetodoDePagoPorDomiciliacion_AccountProfileSin_SmContractID_SeDevuelveUnaExcepcion()
+        {
+            //Arrange
+            PaymentMethodBank bankdata = new PaymentMethodBank();
+            bankdata.Dni = "fake dni";
+            bankdata.AccountType = "fake account type";
+
+            _profileRepository = ProfileRepositoryMock.AccountProfileRepositoryInvalid();
+            PaymentServices service = new PaymentServices(_userRepository.Object, _processRepository.Object, _signatureRepository.Object, _storeRepository.Object, _accountSMRepository.Object, _emailTemplateRepository.Object, _mailRepository.Object, _profileRepository.Object, _contractRepository.Object);
+
             bool result = await service.ChangePaymentMethod(bankdata);
         }
 
@@ -113,6 +128,7 @@ namespace customerportalapi.Services.Test
             bankdata.ContractNumber = "fake contract number";
 
             _processRepository = ProcessRepositoryMock.PendingSameProcessRepository();
+            _profileRepository = ProfileRepositoryMock.AccountProfileRepository();
             PaymentServices service = new PaymentServices(_userRepository.Object, _processRepository.Object, _signatureRepository.Object, _storeRepository.Object, _accountSMRepository.Object, _emailTemplateRepository.Object, _mailRepository.Object, _profileRepository.Object, _contractRepository.Object);
             bool result = await service.ChangePaymentMethod(bankdata);
         }
