@@ -177,7 +177,7 @@ namespace customerportalapi
 
             services.AddHttpClient("httpClientDocument", c =>
             {
-                c.BaseAddress = new Uri(Configuration["GatewayDocumentUrl"]);
+                c.BaseAddress = new Uri(Configuration["GatewayDocumentsUrl"]);
                 c.Timeout = new TimeSpan(0, 2, 0);  //2 minutes
                 c.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                 c.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue
