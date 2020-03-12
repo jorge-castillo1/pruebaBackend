@@ -75,7 +75,11 @@ namespace customerportalapi.Services
                 process.ProcessType = (int)ProcessTypes.PaymentMethodChangeBank;
                 process.ProcessStatus = (int)ProcessStatuses.Pending;
                 process.ContractNumber = bankmethod.ContractNumber;
-                process.DocumentId = documentid.ToString();
+                process.Documents.Add(new ProcessDocument()
+                    {
+                        DocumentId = documentid.ToString(),
+                        DocumentStatus = "document_pending",
+                    });
 
                 await _processRepository.Create(process);
             }
@@ -83,58 +87,36 @@ namespace customerportalapi.Services
             return true;
         }
 
-        public async Task<bool> UpdatePaymentProcess(SignatureStatus value)
+        public async Task UpdatePaymentProcess(SignatureStatus value)
         {
-            ProcessSearchFilter filter = new ProcessSearchFilter
+            // Add Bank account to SM
+            SMBankAccount bankAccount = new SMBankAccount();
+            User user = _userRepository.GetCurrentUser(value.User);
+            string usertype = user.Usertype == (int)UserTypes.Business ? "Business" : "";
+            AccountProfile account = await _profileRepository.GetAccountAsync(user.Dni, usertype);
+
+            bankAccount.CustomerId = account.SmCustomerId;
+            bankAccount.PaymentMethodId = "AT5";
+            bankAccount.AccountName = value.Metadata.BankAccountName;
+            bankAccount.AccountNumber = value.Metadata.BankAccountOrderNumber;
+            bankAccount.Default = 1;
+            bankAccount.Iban = value.Metadata.BankAccountOrderNumber;
+            await _accountSMRepository.AddBankAccountAsync(bankAccount);
+
+            // Send email to the store
+            EmailTemplate template = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.UpdateBankAccount, LanguageTypes.en.ToString());
+            string contractNumber = value.Metadata.ContractNumber;
+            Contract contract = await _contractRepository.GetContractAsync(contractNumber);
+
+            if (template._id != null)
             {
-                UserName = value.User,
-                DocumentId = value.DocumentId
-            };
-
-            List<Process> processes = _processRepository.Find(filter);
-            if (processes.Count == 0) throw new ServiceException("Process not found.", HttpStatusCode.NotFound);
-            if (processes.Count > 1) throw new ServiceException("More than one process was found", HttpStatusCode.BadRequest);
-
-            Process process = processes[0];
-            if (value.Status == "document_completed") process.ProcessStatus = (int)ProcessStatuses.Accepted;
-            else if (value.Status == "document_canceled") process.ProcessStatus = (int)ProcessStatuses.Canceled;
-            else throw new ServiceException("Document status not valid", HttpStatusCode.BadRequest);
-
-            _processRepository.Update(process);
-
-            if (process.ProcessType == (int)ProcessTypes.PaymentMethodChangeBank && value.Status == "document_completed")
-            {
-                // Add Bank account to SM
-                SMBankAccount bankAccount = new SMBankAccount();
-                User user = _userRepository.GetCurrentUser(value.User);
-                string usertype = user.Usertype == (int)UserTypes.Business ? "Business" : "";
-                AccountProfile account = await _profileRepository.GetAccountAsync(user.Dni, usertype);
-
-
-                bankAccount.CustomerId = account.SmCustomerId;
-                bankAccount.PaymentMethodId = "AT5";
-                bankAccount.AccountName = value.BankAccountName;
-                bankAccount.AccountNumber = value.BankAccountOrderNumber;
-                bankAccount.Default = 1;
-                bankAccount.Iban = value.BankAccountOrderNumber;
-                await _accountSMRepository.AddBankAccountAsync(bankAccount);
-
-                // Send email to the store
-                EmailTemplate template = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.UpdateBankAccount, LanguageTypes.en.ToString());
-                string contractNumber = value.ContractNumber;
-                Contract contract = await _contractRepository.GetContractAsync(contractNumber);
-
-                if (template._id != null)
-                {
-                    Email message = new Email();
-                    string storeMail = "julia.alsina@basetis.com"; // contract.StoreData.EmailAddress1;
-                    message.To.Add(storeMail);
-                    message.Subject = string.Format(template.subject, user.Name, user.Dni);
-                    message.Body = string.Format(template.body, user.Name, user.Dni, value.ContractNumber);
-                    await _mailRepository.Send(message);
-                }
+                Email message = new Email();
+                string storeMail = "julia.alsina@basetis.com"; // contract.StoreData.EmailAddress1;
+                message.To.Add(storeMail);
+                message.Subject = string.Format(template.subject, user.Name, user.Dni);
+                message.Body = string.Format(template.body, user.Name, user.Dni, value.Metadata.ContractNumber);
+                await _mailRepository.Send(message);
             }
-            return true;
         }
 
         private MultipartFormDataContent FillFormBankMethod(Store store, PaymentMethodBank bankmethod, User user)
