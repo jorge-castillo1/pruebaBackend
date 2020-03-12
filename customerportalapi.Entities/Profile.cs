@@ -55,6 +55,8 @@ namespace customerportalapi.Entities
         public string Avatar { get; set; }
 
         public AccountCustomerType CustomerTypeInfo { get; set; }
+
+        public string Username { get; set; }
     }
 
     public class AccountCustomerType
