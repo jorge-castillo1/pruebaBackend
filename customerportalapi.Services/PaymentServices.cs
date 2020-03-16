@@ -129,6 +129,9 @@ namespace customerportalapi.Services
             form.Add(new StringContent(store.StoreName), "storeidentification");
             form.Add(new StringContent(SystemTypes.CustomerPortal.ToString()), "sourcesystem");
             form.Add(new StringContent(user.Username), "sourceuser");
+            form.Add(new StringContent(user.Usertype.ToString()), "accounttype");
+            form.Add(new StringContent(user.Dni.ToString()), "accountdni");
+
 
             // data
             form.Add(new StringContent("contractnumber"), "data[0][key]");
