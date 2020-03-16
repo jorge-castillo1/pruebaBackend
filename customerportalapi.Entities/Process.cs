@@ -21,9 +21,6 @@ namespace customerportalapi.Entities
         [BsonElement("processstatus")]
         public int ProcessStatus { get; set; }
 
-        [BsonElement("documentid")]
-        public string DocumentId { get; set; }
-
         [BsonElement("contractnumber")]
         public string ContractNumber { get; set; }
 
@@ -32,5 +29,8 @@ namespace customerportalapi.Entities
 
         [BsonElement("modifieddate")]
         public DateTime ModifiedDate { get; set; }
+
+        [BsonElement("documents")]
+        public List<ProcessDocument> Documents { get; set; } = new List<ProcessDocument>();
     }
 }
