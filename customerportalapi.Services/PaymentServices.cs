@@ -104,7 +104,7 @@ namespace customerportalapi.Services
             bankAccount.AccountNumber = value.Metadata.BankAccountOrderNumber;
             bankAccount.Default = 1;
             bankAccount.Iban = value.Metadata.BankAccountOrderNumber;
- //           await _accountSMRepository.AddBankAccountAsync(bankAccount); // TODO: uncomment
+            await _accountSMRepository.AddBankAccountAsync(bankAccount);
 
             // Send email to the store
             EmailTemplate template = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.UpdateBankAccount, LanguageTypes.en.ToString());

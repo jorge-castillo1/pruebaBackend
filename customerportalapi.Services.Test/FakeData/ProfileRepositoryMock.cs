@@ -40,6 +40,12 @@ namespace customerportalapi.Services.Test.FakeData
                 CanManageContacts = false
             })).Verifiable();
 
+            db.Setup(x => x.GetAccountAsync(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(new AccountProfile()
+            {
+                SmCustomerId = "RAAAAAAAAAAAAA0000"
+            })).Verifiable();
+            
+
             return db;
         }
     }

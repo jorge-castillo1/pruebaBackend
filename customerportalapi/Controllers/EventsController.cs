@@ -34,8 +34,6 @@ namespace customerportalapi.Controllers
             {
                 Process process = _service.UpdateSignatureProcess(value);
 
-                await _paymentService.UpdatePaymentProcess(value); // TODO: BORRAR
-
                 if (process != null)
                 {
                     if (process.ProcessType == (int)ProcessTypes.PaymentMethodChangeBank && process.ProcessStatus == (int)ProcessStatuses.Accepted)
