@@ -46,13 +46,13 @@ namespace customerportalapi.Services
             {
                 var contract = await GetContractAsync(contractNumber);
 
-                EmailTemplate requestDigitalContractTemplate = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.RequestDigitalContract, LanguageTypes.en.ToString()); // TODO: canviar d'idioma
+                EmailTemplate requestDigitalContractTemplate = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.RequestDigitalContract, LanguageTypes.en.ToString());
                 if (requestDigitalContractTemplate._id != null)
                 {
                     Email message = new Email();
                     string mailTo = contract.StoreData.EmailAddress1;
                     if (mailTo == null) throw new ServiceException("Store mail not found", HttpStatusCode.NotFound);
-                    if (!(Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == _configuration["EnvProduction"])) mailTo = _configuration["MailStores"];
+                    if (! (_configuration["Environment"] == nameof(EnvironmentTypes.PRO))) mailTo = _configuration["MailStores"];
                     message.To.Add(mailTo);
                     message.Subject = string.Format(requestDigitalContractTemplate.subject, contract.Customer, dni);
                     message.Body = string.Format(requestDigitalContractTemplate.body, contract.Customer, dni, contractNumber);

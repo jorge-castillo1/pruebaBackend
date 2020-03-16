@@ -90,7 +90,7 @@ namespace customerportalapi.Services
             return true;
         }
 
-        public async Task UpdatePaymentProcess(SignatureStatus value)
+        public async Task<bool> UpdatePaymentProcess(SignatureStatus value)
         {
             // Add Bank account to SM
             SMBankAccount bankAccount = new SMBankAccount();
@@ -104,24 +104,23 @@ namespace customerportalapi.Services
             bankAccount.AccountNumber = value.Metadata.BankAccountOrderNumber;
             bankAccount.Default = 1;
             bankAccount.Iban = value.Metadata.BankAccountOrderNumber;
-            await _accountSMRepository.AddBankAccountAsync(bankAccount);
+ //           await _accountSMRepository.AddBankAccountAsync(bankAccount); // TODO: uncomment
 
             // Send email to the store
             EmailTemplate template = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.UpdateBankAccount, LanguageTypes.en.ToString());
             string contractNumber = value.Metadata.ContractNumber;
             Contract contract = await _contractRepository.GetContractAsync(contractNumber);
 
-                if (template._id != null)
-                {
-                    Email message = new Email();
-                    string storeMail = contract.StoreData.EmailAddress1;
-                    if (storeMail == null) throw new ServiceException("Store mail not found", HttpStatusCode.NotFound);
-                    if (!(Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == _configuration["EnvProduction"])) storeMail = _configuration["MailStores"];
-                    message.To.Add(storeMail);
-                    message.Subject = string.Format(template.subject, user.Name, user.Dni);
-                    message.Body = string.Format(template.body, user.Name, user.Dni, value.ContractNumber);
-                    await _mailRepository.Send(message);
-                }
+            if (template._id != null)
+            {
+                Email message = new Email();
+                string storeMail = contract.StoreData.EmailAddress1;
+                if (storeMail == null) throw new ServiceException("Store mail not found", HttpStatusCode.NotFound);
+                if (!(_configuration["Environment"] == nameof(EnvironmentTypes.PRO))) storeMail = _configuration["MailStores"];
+                message.To.Add(storeMail);
+                message.Subject = string.Format(template.subject, user.Name, user.Dni);
+                message.Body = string.Format(template.body, user.Name, user.Dni, value.Metadata.ContractNumber);
+                await _mailRepository.Send(message);
             }
             return true;
         }
