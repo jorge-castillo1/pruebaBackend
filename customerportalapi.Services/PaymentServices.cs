@@ -17,12 +17,23 @@ namespace customerportalapi.Services
         private readonly IProcessRepository _processRepository;
         private readonly ISignatureRepository _signatureRepository;
         private readonly IStoreRepository _storeRepository;
-        public PaymentServices(IUserRepository userRepository, IProcessRepository processRepository, ISignatureRepository signatureRepository, IStoreRepository storeRepository)
+        private readonly IAccountSMRepository _accountSMRepository;
+        private readonly IEmailTemplateRepository _emailTemplateRepository;
+        private readonly IMailRepository _mailRepository;
+        private readonly IProfileRepository _profileRepository;
+        private readonly IContractRepository _contractRepository;
+        public PaymentServices(IUserRepository userRepository, IProcessRepository processRepository, ISignatureRepository signatureRepository, IStoreRepository storeRepository, IAccountSMRepository accountSMRepository, IEmailTemplateRepository emailTemplateRepository, IMailRepository mailRepository, IProfileRepository profileRepository, IContractRepository contractRepository)
         {
             _userRepository = userRepository;
             _processRepository = processRepository;
             _signatureRepository = signatureRepository;
             _storeRepository = storeRepository;
+            _profileRepository = profileRepository;
+            _accountSMRepository = accountSMRepository;
+            _emailTemplateRepository = emailTemplateRepository;
+            _mailRepository = mailRepository;
+            _profileRepository = profileRepository;
+            _contractRepository = contractRepository;
         }
 
         public async Task<bool> ChangePaymentMethod(PaymentMethod paymentMethod)
@@ -32,6 +43,10 @@ namespace customerportalapi.Services
             User user = _userRepository.GetCurrentUserByDniAndType(paymentMethod.Dni, userType);
             if (user.Id == null)
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
+
+            AccountProfile account = await _profileRepository.GetAccountAsync(paymentMethod.Dni, paymentMethod.AccountType);
+            if (account.SmCustomerId == null)
+                throw new ServiceException("Account does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
 
             //2. Process paymentmethod change
             if (paymentMethod.PaymentMethodType == (int)PaymentMethodTypes.Bank)
@@ -56,7 +71,7 @@ namespace customerportalapi.Services
 
                 var store = await _storeRepository.GetStoreAsync(bankmethod.StoreCode);
 
-                var form = FillFormBankMethod(store, bankmethod, user);
+                var form = FillFormBankMethod(store, bankmethod, user, account);
                 Guid documentid = await _signatureRepository.CreateSignature(form);
 
                 //5. Create a change method payment process
@@ -73,7 +88,7 @@ namespace customerportalapi.Services
             return true;
         }
 
-        public bool UpdatePaymentProcess(SignatureStatus value)
+        public async Task<bool> UpdatePaymentProcess(SignatureStatus value)
         {
             ProcessSearchFilter filter = new ProcessSearchFilter
             {
@@ -92,15 +107,48 @@ namespace customerportalapi.Services
 
             _processRepository.Update(process);
 
+            if (process.ProcessType == (int)ProcessTypes.PaymentMethodChangeBank && value.Status == "document_completed")
+            {
+                // Add Bank account to SM
+                SMBankAccount bankAccount = new SMBankAccount();
+                User user = _userRepository.GetCurrentUser(value.User);
+                string usertype = user.Usertype == (int)UserTypes.Business ? "Business" : "";
+                AccountProfile account = await _profileRepository.GetAccountAsync(user.Dni, usertype);
+
+
+                bankAccount.CustomerId = account.SmCustomerId;
+                bankAccount.PaymentMethodId = "AT5";
+                bankAccount.AccountName = value.BankAccountName;
+                bankAccount.AccountNumber = value.BankAccountOrderNumber;
+                bankAccount.Default = 1;
+                bankAccount.Iban = value.BankAccountOrderNumber;
+                await _accountSMRepository.AddBankAccountAsync(bankAccount);
+
+                // Send email to the store
+                EmailTemplate template = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.UpdateBankAccount, LanguageTypes.en.ToString());
+                string contractNumber = value.ContractNumber;
+                Contract contract = await _contractRepository.GetContractAsync(contractNumber);
+
+                if (template._id != null)
+                {
+                    Email message = new Email();
+                    string storeMail = "julia.alsina@basetis.com"; // contract.StoreData.EmailAddress1;
+                    message.To.Add(storeMail);
+                    message.Subject = string.Format(template.subject, user.Name, user.Dni);
+                    message.Body = string.Format(template.body, user.Name, user.Dni, value.ContractNumber);
+                    await _mailRepository.Send(message);
+                }
+            }
             return true;
         }
 
-        private MultipartFormDataContent FillFormBankMethod(Store store, PaymentMethodBank bankmethod, User user)
+        private MultipartFormDataContent FillFormBankMethod(Store store, PaymentMethodBank bankmethod, User user, AccountProfile account)
         {
             var form = new MultipartFormDataContent();
+            string email = (account.EmailAddress1 != null) ? account.EmailAddress1 : account.EmailAddress2;
 
             form.Add(new StringContent(user.Name), "recipients[0][name]");
-            form.Add(new StringContent(user.Email), "recipients[0][email]");
+            form.Add(new StringContent(email), "recipients[0][email]");
             form.Add(new StringContent(((int)DocumentTypes.SEPA).ToString()), "documentinformation[0][documenttype]");
             form.Add(new StringContent(store.StoreName), "storeidentification");
             form.Add(new StringContent(SystemTypes.CustomerPortal.ToString()), "sourcesystem");
