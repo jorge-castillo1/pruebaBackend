@@ -17,13 +17,15 @@ namespace customerportalapi.Services
         private readonly IContractSMRepository _contractSMRepository;
         private readonly IMailRepository _mailRepository;
         private readonly IEmailTemplateRepository _emailTemplateRepository;
+        private readonly IDocumentRepository _documentRepository;
 
-        public ContractServices(IContractRepository contractRepository, IContractSMRepository contractSMRepository, IMailRepository mailRepository, IEmailTemplateRepository emailTemplateRepository)
+        public ContractServices(IContractRepository contractRepository, IContractSMRepository contractSMRepository, IMailRepository mailRepository, IEmailTemplateRepository emailTemplateRepository, IDocumentRepository documentRepository)
         {
             _contractRepository = contractRepository;
             _contractSMRepository = contractSMRepository;
             _mailRepository = mailRepository;
             _emailTemplateRepository = emailTemplateRepository;
+            _documentRepository = documentRepository;
         }
 
         public async Task<Contract> GetContractAsync(string contractNumber)

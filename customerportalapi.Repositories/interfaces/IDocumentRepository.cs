@@ -9,5 +9,9 @@ namespace customerportalapi.Repositories.interfaces
     public interface IDocumentRepository
     {
         Task<List<DocumentMetadata>> Search(DocumentMetadataSearchFilter filter);
+
+        Task<string> SaveDocumentAsync(Document document);
+
+        Task<string> GetDocumentAsync(string documentid);
     }
 }
