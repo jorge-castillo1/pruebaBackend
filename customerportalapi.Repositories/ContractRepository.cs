@@ -61,7 +61,7 @@ namespace customerportalapi.Repositories
             string entity = null;
 
             var httpClient = _clientFactory.CreateClient("httpClientDocument");
-            httpClient.BaseAddress = new Uri(_configuration["GatewayDocumentUrl"] + _configuration["DocumentsAPI"]);
+            httpClient.BaseAddress = new Uri(_configuration["GatewayDocumentsUrl"] + _configuration["DocumentsAPI"]);
 
             var response = await httpClient.GetAsync("contract/" + contractNumber, HttpCompletionOption.ResponseHeadersRead);
             //response.EnsureSuccessStatusCode();
