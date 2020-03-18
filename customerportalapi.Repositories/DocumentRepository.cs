@@ -64,7 +64,7 @@ namespace customerportalapi.Repositories
             httpClient.BaseAddress = new Uri(_configuration["GatewayDocumentsUrl"] + _configuration["DocumentsAPI"]);
 
             var response = await httpClient.GetAsync(documentid, HttpCompletionOption.ResponseHeadersRead);
-            //response.EnsureSuccessStatusCode();
+            response.EnsureSuccessStatusCode();
             if (!response.IsSuccessStatusCode)
             {
                 if (response.StatusCode == System.Net.HttpStatusCode.NotFound) return "";
