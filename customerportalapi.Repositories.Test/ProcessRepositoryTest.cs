@@ -35,10 +35,16 @@ namespace customerportalapi.Repositories.Test
                         Username = "fake username",
                         ProcessType = 0, //Cambio metodo de pago
                         ProcessStatus = 0, //Pendiente
-                        DocumentId = Guid.NewGuid().ToString(), //Optional
                         ContractNumber = "Fake Contract Number", //Optional
                         CreationDate = System.DateTime.Now,
-                        ModifiedDate = System.DateTime.Now
+                        ModifiedDate = System.DateTime.Now,
+                        Documents = new List<ProcessDocument>()
+                        {
+                            new ProcessDocument()
+                            {
+                                DocumentId = Guid.NewGuid().ToString() 
+                            }
+                        }
                     },
                     new Process
                     {
@@ -62,9 +68,15 @@ namespace customerportalapi.Repositories.Test
             process.Username = "fake user";
             process.ProcessType = 0;
             process.ProcessStatus = 0;
-            process.DocumentId = "fake document id";
             process.ContractNumber = "fake contract number";
-            
+            process.Documents = new List<ProcessDocument>()
+                {
+                    new ProcessDocument()
+                    {
+                        DocumentId = "fake document id"
+                    }
+                };
+
             //Act
             ProcessRepository repository = new ProcessRepository(_configurations, _processes.Object);
             bool result = await repository.Create(process);
@@ -82,9 +94,15 @@ namespace customerportalapi.Repositories.Test
             process.Username = "fake user";
             process.ProcessType = 0;
             process.ProcessStatus = 0;
-            process.DocumentId = "fake document id";
             process.ContractNumber = "fake contract number";
-            
+            process.Documents = new List<ProcessDocument>()
+                {
+                    new ProcessDocument()
+                    {
+                        DocumentId = "fake document id"
+                    }
+                };
+
             //Act
             ProcessRepository repository = new ProcessRepository(_configurations, _processes.Object);
             Process updatedEntity = repository.Update(process);
