@@ -9,8 +9,6 @@ namespace customerportalapi.Entities
         public string DocumentId { get; set; }
         public string User { get; set; }
         public string Status { get; set; }
-        public string BankAccountOrderNumber { get; set; }
-        public string BankAccountName { get; set; }
-        public string ContractNumber { get; set; }
+        public SignatureStatusMetadata Metadata { get; set; }
     }
 }
