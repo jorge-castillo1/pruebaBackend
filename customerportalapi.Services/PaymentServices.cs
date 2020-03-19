@@ -8,11 +8,13 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 
 namespace customerportalapi.Services
 {
     public class PaymentServices : IPaymentService
     {
+        private readonly IConfiguration _configuration;
         private readonly IUserRepository _userRepository;
         private readonly IProcessRepository _processRepository;
         private readonly ISignatureRepository _signatureRepository;
@@ -22,8 +24,9 @@ namespace customerportalapi.Services
         private readonly IMailRepository _mailRepository;
         private readonly IProfileRepository _profileRepository;
         private readonly IContractRepository _contractRepository;
-        public PaymentServices(IUserRepository userRepository, IProcessRepository processRepository, ISignatureRepository signatureRepository, IStoreRepository storeRepository, IAccountSMRepository accountSMRepository, IEmailTemplateRepository emailTemplateRepository, IMailRepository mailRepository, IProfileRepository profileRepository, IContractRepository contractRepository)
+        public PaymentServices(IConfiguration configuration, IUserRepository userRepository, IProcessRepository processRepository, ISignatureRepository signatureRepository, IStoreRepository storeRepository, IAccountSMRepository accountSMRepository, IEmailTemplateRepository emailTemplateRepository, IMailRepository mailRepository, IProfileRepository profileRepository, IContractRepository contractRepository)
         {
+            _configuration = configuration;
             _userRepository = userRepository;
             _processRepository = processRepository;
             _signatureRepository = signatureRepository;
@@ -92,7 +95,7 @@ namespace customerportalapi.Services
             return true;
         }
 
-        public async Task UpdatePaymentProcess(SignatureStatus value)
+        public async Task<bool> UpdatePaymentProcess(SignatureStatus value)
         {
             // Add Bank account to SM
             SMBankAccount bankAccount = new SMBankAccount();
@@ -116,12 +119,15 @@ namespace customerportalapi.Services
             if (template._id != null)
             {
                 Email message = new Email();
-                string storeMail = "julia.alsina@basetis.com"; // contract.StoreData.EmailAddress1;
+                string storeMail = contract.StoreData.EmailAddress1;
+                if (storeMail == null) throw new ServiceException("Store mail not found", HttpStatusCode.NotFound);
+                if (!(_configuration["Environment"] == nameof(EnvironmentTypes.PRO))) storeMail = _configuration["MailStores"];
                 message.To.Add(storeMail);
                 message.Subject = string.Format(template.subject, user.Name, user.Dni);
                 message.Body = string.Format(template.body, user.Name, user.Dni, value.Metadata.ContractNumber);
                 await _mailRepository.Send(message);
             }
+            return true;
         }
 
         private MultipartFormDataContent FillFormBankMethod(Store store, PaymentMethodBank bankmethod, User user, AccountProfile account)
