@@ -61,7 +61,7 @@ namespace customerportalapi.Services
                     Email message = new Email();
                     string mailTo = contract.StoreData.EmailAddress1;
                     if (mailTo == null) throw new ServiceException("Store mail not found", HttpStatusCode.NotFound);
-                    if (!(_configuration["Environment"] == nameof(EnvironmentTypes.PRO))) mailTo = _configuration["MailStores"];
+                    if (! (_configuration["Environment"] == nameof(EnvironmentTypes.PRO))) mailTo = _configuration["MailStores"];
                     message.To.Add(mailTo);
                     message.Subject = string.Format(requestDigitalContractTemplate.subject, contract.Customer, dni);
                     message.Body = string.Format(requestDigitalContractTemplate.body, contract.Customer, dni, contractNumber);
