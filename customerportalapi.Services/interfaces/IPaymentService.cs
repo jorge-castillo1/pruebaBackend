@@ -9,6 +9,6 @@ namespace customerportalapi.Services.interfaces
     public interface IPaymentService
     {
         Task<bool> ChangePaymentMethod(PaymentMethod paymentMethod);
-        Task UpdatePaymentProcess(SignatureStatus value);
+        Task<bool> UpdatePaymentProcess(SignatureStatus value);
     }
 }

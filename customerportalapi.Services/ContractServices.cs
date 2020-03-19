@@ -8,18 +8,21 @@ using customerportalapi.Repositories.interfaces;
 using customerportalapi.Services.interfaces;
 using System.Net;
 using customerportalapi.Services.Exceptions;
+using Microsoft.Extensions.Configuration;
 
 namespace customerportalapi.Services
 {
     public class ContractServices : IContractServices
     {
+        private readonly IConfiguration _configuration;
         private readonly IContractRepository _contractRepository;
         private readonly IContractSMRepository _contractSMRepository;
         private readonly IMailRepository _mailRepository;
         private readonly IEmailTemplateRepository _emailTemplateRepository;
 
-        public ContractServices(IContractRepository contractRepository, IContractSMRepository contractSMRepository, IMailRepository mailRepository, IEmailTemplateRepository emailTemplateRepository)
+        public ContractServices(IConfiguration configuration, IContractRepository contractRepository, IContractSMRepository contractSMRepository, IMailRepository mailRepository, IEmailTemplateRepository emailTemplateRepository)
         {
+            _configuration = configuration;
             _contractRepository = contractRepository;
             _contractSMRepository = contractSMRepository;
             _mailRepository = mailRepository;
@@ -43,12 +46,14 @@ namespace customerportalapi.Services
             {
                 var contract = await GetContractAsync(contractNumber);
 
-                EmailTemplate requestDigitalContractTemplate = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.RequestDigitalContract, LanguageTypes.en.ToString()); // TODO: canviar d'idioma
+                EmailTemplate requestDigitalContractTemplate = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.RequestDigitalContract, LanguageTypes.en.ToString());
                 if (requestDigitalContractTemplate._id != null)
                 {
                     Email message = new Email();
-                    //message.To.Add(contract.StoreData.EmailAddress1);
-                    message.To.Add("christian.garcia@quantion.com"); // TODO: canviar mail
+                    string mailTo = contract.StoreData.EmailAddress1;
+                    if (mailTo == null) throw new ServiceException("Store mail not found", HttpStatusCode.NotFound);
+                    if (! (_configuration["Environment"] == nameof(EnvironmentTypes.PRO))) mailTo = _configuration["MailStores"];
+                    message.To.Add(mailTo);
                     message.Subject = string.Format(requestDigitalContractTemplate.subject, contract.Customer, dni);
                     message.Body = string.Format(requestDigitalContractTemplate.body, contract.Customer, dni, contractNumber);
                     await _mailRepository.Send(message);
