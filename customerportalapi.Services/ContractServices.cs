@@ -43,6 +43,7 @@ namespace customerportalapi.Services
 
         public async Task<string> GetDownloadContractAsync(string dni, string contractNumber)
         {
+
             DocumentMetadataSearchFilter filter = new DocumentMetadataSearchFilter()
             {
                 ContractNumber = contractNumber,
@@ -51,6 +52,7 @@ namespace customerportalapi.Services
             List<DocumentMetadata> list = await _documentRepository.Search(filter);
 
             if (list.Count > 1) throw new ServiceException("More than one document was found", HttpStatusCode.BadRequest);
+
             else if (list.Count == 0)
             {
                 var contract = await GetContractAsync(contractNumber);
@@ -60,17 +62,21 @@ namespace customerportalapi.Services
                 {
                     Email message = new Email();
                     string mailTo = contract.StoreData.EmailAddress1;
+
                     if (mailTo == null) throw new ServiceException("Store mail not found", HttpStatusCode.NotFound);
                     if (!(_configuration["Environment"] == nameof(EnvironmentTypes.PRO))) mailTo = _configuration["MailStores"];
+
                     message.To.Add(mailTo);
                     message.Subject = string.Format(requestDigitalContractTemplate.subject, contract.Customer, dni);
                     message.Body = string.Format(requestDigitalContractTemplate.body, contract.Customer, dni, contractNumber);
                     await _mailRepository.Send(message);
                 }
+
                 throw new ServiceException("Contract file does not exist.", HttpStatusCode.NotFound, "ContractNumber", "Not exist");
             }
 
             string documentId = list[0].DocumentId;
+
 
             return await _documentRepository.GetDocumentAsync(documentId);
         }
