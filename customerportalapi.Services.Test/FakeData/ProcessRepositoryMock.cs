@@ -21,20 +21,32 @@ namespace customerportalapi.Services.Test.FakeData
                     Id = Guid.NewGuid().ToString(),
                     Username = "fake user",
                     ContractNumber = "fake contract",
-                    DocumentId = "fake document id",
                     ProcessType = (int)ProcessTypes.PaymentMethodChangeBank,
                     ProcessStatus = (int)ProcessStatuses.Accepted,
-                    CreationDate = System.DateTime.Now
+                    CreationDate = System.DateTime.Now,
+                    Documents = new List<ProcessDocument>()
+                    {
+                        new ProcessDocument()
+                        {
+                            DocumentId = "fake document id"
+                        }
+                    }
                 },
                 new Process(){
                     Id = Guid.NewGuid().ToString(),
                     Username = "fake user",
                     ContractNumber = "fake contract",
-                    DocumentId = "fake document id",
                     ProcessType = (int)ProcessTypes.PaymentMethodChangeBank,
                     ProcessStatus = (int)ProcessStatuses.Canceled,
                     CreationDate = System.DateTime.Now,
-                    ModifiedDate = System.DateTime.Now
+                    ModifiedDate = System.DateTime.Now,
+                    Documents = new List<ProcessDocument>()
+                    {
+                        new ProcessDocument()
+                        {
+                            DocumentId = "fake document id"
+                        }
+                    }
                 }
             }).Verifiable();
 
@@ -51,10 +63,16 @@ namespace customerportalapi.Services.Test.FakeData
                     Id = Guid.NewGuid().ToString(),
                     Username = "fake user",
                     ContractNumber = "fake contract",
-                    DocumentId = "fake document id",
                     ProcessType = (int)ProcessTypes.PaymentMethodChangeBank,
                     ProcessStatus = (int)ProcessStatuses.Pending,
-                    CreationDate = System.DateTime.Now
+                    CreationDate = System.DateTime.Now,
+                    Documents = new List<ProcessDocument>()
+                    {
+                        new ProcessDocument()
+                        {
+                            DocumentId = "fake document id"
+                        }
+                    }
                 }
             }).Verifiable();
 
@@ -129,7 +147,14 @@ namespace customerportalapi.Services.Test.FakeData
                     Id = new Guid().ToString(),
                     Username = "fake user",
                     ContractNumber = "fake contract",
-                    ProcessStatus = 0
+                    ProcessStatus = 0,
+                    Documents = new List<ProcessDocument>()
+                    {
+                        new ProcessDocument()
+                        {
+                            DocumentId = "fake document id"
+                        }
+                    }
                 }
             }).Verifiable();
             db.Setup(x => x.Update(It.IsAny<Process>())).Returns(new Process()
