@@ -41,5 +41,68 @@ namespace customerportalapi.Services.Test
             Assert.AreEqual(1, result[0].ProcessStatus);
             _processRepository.Verify(x => x.Find(It.IsAny<ProcessSearchFilter>()));
         }
+
+        [TestMethod]
+        public void SeModificaUnProceso()
+        {
+            //Arrange
+            SignatureStatus value = new SignatureStatus();
+            value.User = "usertest";
+            value.DocumentId = Guid.NewGuid().ToString();
+            value.Status = "document_canceled";
+
+            _processRepository = ProcessRepositoryMock.OneResultProcessRepository();
+            ProcessService service = new ProcessService(_processRepository.Object, _signatureRepository.Object);
+            var result = service.UpdateSignatureProcess(value);
+
+            Assert.IsNotNull(result);
+            _processRepository.Verify(x => x.Find(It.IsAny<ProcessSearchFilter>()));
+            _processRepository.Verify(x => x.Update(It.IsAny<Process>()));
+        }
+
+        [TestMethod]
+        public void SiNoExisteRegistro_ConElMismoUsuarioYDocumento_SeDevuelveNull()
+        {
+            //Arrange
+            SignatureStatus value = new SignatureStatus();
+            value.User = "usertest";
+            value.DocumentId = Guid.NewGuid().ToString();
+            value.Status = "document_completed";
+
+            _processRepository = ProcessRepositoryMock.NoResultsProcessRepository();
+            ProcessService service = new ProcessService(_processRepository.Object, _signatureRepository.Object);
+            Process process = service.UpdateSignatureProcess(value);
+            Assert.IsNull(process);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ServiceException), "No se ha producido la excepción esperada")]
+        public void SiExisteMasDeUnRegistro_ConElMismoUsuarioYDocumento_SeDevuelveUnaExcepcion()
+        {
+            //Arrange
+            SignatureStatus value = new SignatureStatus();
+            value.User = "usertest";
+            value.DocumentId = Guid.NewGuid().ToString();
+            value.Status = "document_completed";
+
+            _processRepository = ProcessRepositoryMock.MoreThanOneResultProcessRepository();
+            ProcessService service = new ProcessService(_processRepository.Object, _signatureRepository.Object);
+            service.UpdateSignatureProcess(value);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ServiceException), "No se ha producido la excepción esperada")]
+        public void SiElEstado_NoEsValido_SeDevuelveUnaExcepcion()
+        {
+            //Arrange
+            SignatureStatus value = new SignatureStatus();
+            value.User = "usertest";
+            value.DocumentId = Guid.NewGuid().ToString();
+            value.Status = "fake_document_state";
+
+            _processRepository = ProcessRepositoryMock.OneResultProcessRepository();
+            ProcessService service = new ProcessService(_processRepository.Object, _signatureRepository.Object);
+            service.UpdateSignatureProcess(value);
+        }
     }
 }

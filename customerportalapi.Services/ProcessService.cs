@@ -7,6 +7,7 @@ using customerportalapi.Repositories.interfaces;
 using customerportalapi.Entities;
 using customerportalapi.Entities.enums;
 using customerportalapi.Services.Exceptions;
+using System.Threading.Tasks;
 
 namespace customerportalapi.Services
 {
@@ -54,11 +55,53 @@ namespace customerportalapi.Services
             List<Process> processes = GetLastProcesses(null, contractnumber, processtype);
             if (processes.Count == 0) throw new ServiceException("Process not found", HttpStatusCode.NotFound);
             Process process = processes[0];
-            var documentId = process.DocumentId;
             process.ProcessStatus = (int)ProcessStatuses.Canceled;
             _processRepository.Update(process);
-            _signatureRepository.CancelSignature(documentId);    
+
+            if (process.ProcessType == (int)ProcessTypes.PaymentMethodChangeBank)
+            {
+                foreach(ProcessDocument processdocument in process.Documents)
+                    _signatureRepository.CancelSignature(processdocument.DocumentId);
+            }
             return true;
+        }
+
+        public Process UpdateSignatureProcess(SignatureStatus value)
+        {
+            if (value.Status != "document_completed" && value.Status != "document_canceled")
+                throw new ServiceException("Document status not valid", HttpStatusCode.BadRequest);
+
+            ProcessSearchFilter filter = new ProcessSearchFilter
+            {
+                UserName = value.User,
+                DocumentId = value.DocumentId
+            };
+
+            List<Process> processes = _processRepository.Find(filter);
+            //if (processes.Count == 0) throw new ServiceException("Process not found.", HttpStatusCode.NotFound);
+            if (processes.Count == 0) return null;
+            if (processes.Count > 1) throw new ServiceException("More than one process was found", HttpStatusCode.BadRequest);
+
+            Process process = processes[0];
+            bool processCompleted = true;
+            bool processCanceled = false;
+            foreach (ProcessDocument processDocument in process.Documents)
+            {
+                if (processDocument.DocumentId == value.DocumentId)
+                    processDocument.DocumentStatus = value.Status;
+
+                processCompleted = processCompleted & processDocument.DocumentStatus == "document_completed";
+                processCanceled = processCanceled || processDocument.DocumentStatus == "document_canceled";
+            }
+
+            //When all documents are completed, process will be completed.
+            //When one document are cancelled, all process will be cancelled
+            if (processCompleted) process.ProcessStatus = (int)ProcessStatuses.Accepted;
+            else if (processCanceled) process.ProcessStatus = (int)ProcessStatuses.Canceled;
+              
+            _processRepository.Update(process);
+
+            return process;
         }
     }
 }
