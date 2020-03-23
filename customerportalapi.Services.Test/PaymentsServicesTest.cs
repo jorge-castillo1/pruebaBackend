@@ -27,6 +27,7 @@ namespace customerportalapi.Services.Test
         private Mock<IEmailTemplateRepository> _emailTemplateRepository;
         private Mock<IMailRepository> _mailRepository;
         private Mock<IContractRepository> _contractRepository;
+        private Mock<IDocumentRepository> _documentRepository;
 
         [TestInitialize]
         public void Setup()
@@ -40,6 +41,7 @@ namespace customerportalapi.Services.Test
             _mailRepository = MailRepositoryMock.MailRepository();
             _profileRepository = ProfileRepositoryMock.ProfileRepository();
             _contractRepository = ContractRepositoryMock.ContractRepository();
+            _documentRepository = DocumentRepositoryMock.DocumentRepository();
 
             var builder = new ConfigurationBuilder();
             builder.AddJsonFile("appsettings.json");
@@ -137,51 +139,6 @@ namespace customerportalapi.Services.Test
             _profileRepository = ProfileRepositoryMock.AccountProfileRepository();
             PaymentServices service = new PaymentServices(_configuration, _userRepository.Object, _processRepository.Object, _signatureRepository.Object, _storeRepository.Object, _accountSMRepository.Object, _emailTemplateRepository.Object, _mailRepository.Object, _profileRepository.Object, _contractRepository.Object);
             bool result = await service.ChangePaymentMethod(bankdata);
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(ServiceException), "No se ha producido la excepción esperada")]
-        public async void SiNoExisteRegistro_ConElMismoUsuarioYDocumento_SeDevuelveUnaExcepcion()
-        {
-            //Arrange
-            SignatureStatus value = new SignatureStatus();
-            value.User = "usertest";
-            value.DocumentId = Guid.NewGuid().ToString();
-            value.Status = "document_completed";
-
-            _processRepository = ProcessRepositoryMock.NoResultsProcessRepository();
-            PaymentServices service = new PaymentServices(_configuration, _userRepository.Object, _processRepository.Object, _signatureRepository.Object, _storeRepository.Object, _accountSMRepository.Object, _emailTemplateRepository.Object, _mailRepository.Object, _profileRepository.Object, _contractRepository.Object);
-            var result = await service.UpdatePaymentProcess(value);
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(ServiceException), "No se ha producido la excepción esperada")]
-        public async void SiExisteMasDeUnRegistro_ConElMismoUsuarioYDocumento_SeDevuelveUnaExcepcion()
-        {
-            //Arrange
-            SignatureStatus value = new SignatureStatus();
-            value.User = "usertest";
-            value.DocumentId = Guid.NewGuid().ToString();
-            value.Status = "document_completed";
-
-            _processRepository = ProcessRepositoryMock.MoreThanOneResultProcessRepository();
-            PaymentServices service = new PaymentServices(_configuration, _userRepository.Object, _processRepository.Object, _signatureRepository.Object, _storeRepository.Object, _accountSMRepository.Object, _emailTemplateRepository.Object, _mailRepository.Object, _profileRepository.Object, _contractRepository.Object);
-            var result = await service.UpdatePaymentProcess(value);
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(ServiceException), "No se ha producido la excepción esperada")]
-        public async void SiElEstado_NoEsValido_SeDevuelveUnaExcepcion()
-        {
-            //Arrange
-            SignatureStatus value = new SignatureStatus();
-            value.User = "usertest";
-            value.DocumentId = Guid.NewGuid().ToString();
-            value.Status = "fake_document_state";
-
-            _processRepository = ProcessRepositoryMock.OneResultProcessRepository();
-            PaymentServices service = new PaymentServices(_configuration, _userRepository.Object, _processRepository.Object, _signatureRepository.Object, _storeRepository.Object, _accountSMRepository.Object, _emailTemplateRepository.Object, _mailRepository.Object, _profileRepository.Object, _contractRepository.Object);
-            var result = await service.UpdatePaymentProcess(value);
         }
 
         [TestMethod]

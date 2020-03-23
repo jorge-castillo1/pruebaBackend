@@ -5,7 +5,7 @@ namespace customerportalapi.Services.interfaces
 {
     public interface IUserServices
     {
-        Task<Profile> GetProfileAsync(string dni, string accountType);
+        Task<Profile> GetProfileAsync(string username);
 
         Task<Profile> UpdateProfileAsync(Profile profile);
 
@@ -13,9 +13,11 @@ namespace customerportalapi.Services.interfaces
 
         Task<Token> ConfirmUserAsync(string invitationToken);
 
+        Task<Token> ConfirmAndChangeCredentialsAsync(string invitationToken, ResetPassword value);
+
         Task<bool> UnInviteUserAsync(Invitation value);
 
-        Task<Account> GetAccountAsync(string dni, string accountType);
+        Task<Account> GetAccountAsync(string username);
 
         Task<Account> UpdateAccountAsync(Account account);
 
@@ -26,5 +28,7 @@ namespace customerportalapi.Services.interfaces
         Task<bool> ChangeRole(string username, string role);
 
         Task<bool> RemoveRole(string username, string role);
+
+        bool ValidateUsername(string username);
     }
 }
