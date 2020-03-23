@@ -38,12 +38,12 @@ namespace customerportalapi.Services.Test
         public async Task AlSolicitarContratosDeUnUsuarioNoExistente_SeProduceUnaExcepcion()
         {
             //Arrange
-            string dni = "12345678A";
+            string username = "12345678A";
             Mock<IUserRepository> userRepositoryInvalid = UserRepositoryMock.InvalidUserRepository();
 
             //Act
             SiteServices service = new SiteServices(userRepositoryInvalid.Object, _contractRepository.Object, _storeRepository.Object, _distributedCache.Object, _identityRepository.Object, _contractSMRepository.Object);
-            await service.GetContractsAsync(dni, AccountType.Residential);
+            await service.GetContractsAsync(username);
 
             //Assert
         }
@@ -52,11 +52,11 @@ namespace customerportalapi.Services.Test
         public async Task AlSolicitarContratosDeUsuarioExistente_DevuelveListaPorEdificio()
         {
             //Arrange
-            string dni = "12345678A";
+            string username = "12345678A";
 
             //Act
             SiteServices service = new SiteServices(_userRepository.Object, _contractRepository.Object, _storeRepository.Object, _distributedCache.Object, _identityRepository.Object, _contractSMRepository.Object);
-            List<Site> sites = await service.GetContractsAsync(dni, AccountType.Residential);
+            List<Site> sites = await service.GetContractsAsync(username);
 
             //Assert
             Assert.IsNotNull(sites);

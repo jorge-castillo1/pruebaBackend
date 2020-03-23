@@ -24,54 +24,14 @@ namespace customerportalapi.Controllers
         }
 
         // GET api/users/{dni}
-        [HttpGet("{dni}")]
-        [HttpGet("{dni}/Residential")]
-        [AuthorizeToken]
-        public async Task<ApiResponse> GetAsync(string dni)
-        {
-            try
-            {
-                var entity = await _services.GetProfileAsync(dni, AccountType.Residential);
-                return new ApiResponse(entity);
-            }
-            catch (ServiceException se)
-            {
-                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex.ToString());
-                throw;
-            }
-        }
+        [HttpGet("{username}")]
 
-        [HttpGet("username/{username}")]
         [AuthorizeToken]
-        public ApiResponse GetUserByUsernameAsync(string username)
+        public async Task<ApiResponse> GetAsync(string username)
         {
             try
             {
-                var entity = _services.GetUserByUsername(username);
-                return new ApiResponse(entity);
-            }
-            catch (ServiceException se)
-            {
-                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex.ToString());
-                throw;
-            }
-        }
-
-        [HttpGet("{dni}/Business")]
-        [AuthorizeToken]
-        public async Task<ApiResponse> GetBusinessAsync(string dni)
-        {
-            try
-            {
-                var entity = await _services.GetProfileAsync(dni, AccountType.Business);
+                var entity = await _services.GetProfileAsync(username);
                 return new ApiResponse(entity);
             }
             catch (ServiceException se)
@@ -127,6 +87,25 @@ namespace customerportalapi.Controllers
             }
         }
 
+        [HttpPut("confirm/user/{receivedToken}")]
+        public async Task<ApiResponse> ConfirmAndChangeCredentials(string receivedToken, [FromBody] ResetPassword value)
+        {
+            try
+            {
+                var entity = await _services.ConfirmAndChangeCredentialsAsync(receivedToken, value);
+                return new ApiResponse(entity);
+            }
+            catch (ServiceException se)
+            {
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+
         // PUT api/users/confirm/{receivedToken}
         [HttpPut("confirm/{receivedToken}")]
         public async Task<ApiResponse> Confirm(string receivedToken)
@@ -139,6 +118,21 @@ namespace customerportalapi.Controllers
             catch (ServiceException se)
             {
                 return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+
+        [HttpGet("{username}/validation")]
+        public ApiResponse UniqueUsername(string username)
+        {
+            try
+            {
+                bool entity = _services.ValidateUsername(username);
+                return new ApiResponse(entity);
             }
             catch (Exception ex)
             {
@@ -195,14 +189,13 @@ namespace customerportalapi.Controllers
             }
         }
 
-        // GET api/users/accounts/{dni}
-        [HttpGet("accounts/{dni}")]
-        [HttpGet("accounts/{dni}/Residential")]
-        public async Task<ApiResponse> GetAccountAsync(string dni)
+        // GET api/users/accounts/{username}
+        [HttpGet("accounts/{username}")]
+        public async Task<ApiResponse> GetAccountAsync(string username)
         {
             try
             {
-                var entity = await _services.GetAccountAsync(dni, AccountType.Residential);
+                var entity = await _services.GetAccountAsync(username);
                 return new ApiResponse(entity);
             }
             catch (ServiceException se)
@@ -216,24 +209,7 @@ namespace customerportalapi.Controllers
             }
         }
 
-        [HttpGet("accounts/{dni}/Business")]
-        public async Task<ApiResponse> GetAccountBusinessAsync(string dni)
-        {
-            try
-            {
-                var entity = await _services.GetAccountAsync(dni, AccountType.Business);
-                return new ApiResponse(entity);
-            }
-            catch (ServiceException se)
-            {
-                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex.ToString());
-                throw;
-            }
-        }
+
 
         // POST api/users/accounts
         [HttpPatch("accounts")]

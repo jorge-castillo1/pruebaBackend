@@ -27,7 +27,7 @@ namespace customerportalapi.Repositories
             return user;
         }
 
-         public User GetCurrentUserByDniAndType(string dni, int userType)
+        public User GetCurrentUserByDniAndType(string dni, int userType)
         {
             User user = new User();
 
@@ -38,11 +38,18 @@ namespace customerportalapi.Repositories
             }
             return user;
         }
-
         public User Update(User user)
         {
             //update User
             var filter = Builders<User>.Filter.Eq(s => s.Username, user.Username);
+            var result = _users.ReplaceOne(filter, user);
+
+            return user;
+        }
+
+        public User UpdateById(User user)
+        {
+            var filter = Builders<User>.Filter.Eq(s => s.Id, user.Id);
             var result = _users.ReplaceOne(filter, user);
 
             return user;

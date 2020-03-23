@@ -46,7 +46,8 @@ namespace customerportalapi.Services
             DocumentMetadataSearchFilter filter = new DocumentMetadataSearchFilter()
             {
                 ContractNumber = contractNumber,
-                AccountDni = dni
+                AccountDni = dni,
+                DocumentType = (int) DocumentTypes.Contract
             };
             List<DocumentMetadata> list = await _documentRepository.Search(filter);
 
