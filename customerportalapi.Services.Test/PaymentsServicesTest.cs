@@ -27,6 +27,7 @@ namespace customerportalapi.Services.Test
         private Mock<IEmailTemplateRepository> _emailTemplateRepository;
         private Mock<IMailRepository> _mailRepository;
         private Mock<IContractRepository> _contractRepository;
+        private Mock<IDocumentRepository> _documentRepository;
 
         [TestInitialize]
         public void Setup()
@@ -40,6 +41,7 @@ namespace customerportalapi.Services.Test
             _mailRepository = MailRepositoryMock.MailRepository();
             _profileRepository = ProfileRepositoryMock.ProfileRepository();
             _contractRepository = ContractRepositoryMock.ContractRepository();
+            _documentRepository = DocumentRepositoryMock.DocumentRepository();
 
             var builder = new ConfigurationBuilder();
             builder.AddJsonFile("appsettings.json");

@@ -19,14 +19,16 @@ namespace customerportalapi.Services
         private readonly IContractSMRepository _contractSMRepository;
         private readonly IMailRepository _mailRepository;
         private readonly IEmailTemplateRepository _emailTemplateRepository;
+        private readonly IDocumentRepository _documentRepository;
 
-        public ContractServices(IConfiguration configuration, IContractRepository contractRepository, IContractSMRepository contractSMRepository, IMailRepository mailRepository, IEmailTemplateRepository emailTemplateRepository)
+        public ContractServices(IConfiguration configuration, IContractRepository contractRepository, IContractSMRepository contractSMRepository, IMailRepository mailRepository, IEmailTemplateRepository emailTemplateRepository, IDocumentRepository documentRepository)
         {
             _configuration = configuration;
             _contractRepository = contractRepository;
             _contractSMRepository = contractSMRepository;
             _mailRepository = mailRepository;
             _emailTemplateRepository = emailTemplateRepository;
+            _documentRepository = documentRepository;
         }
 
         public async Task<Contract> GetContractAsync(string contractNumber)
@@ -41,8 +43,15 @@ namespace customerportalapi.Services
 
         public async Task<string> GetDownloadContractAsync(string dni, string contractNumber)
         {
-            string contractFile = await _contractRepository.GetDownloadContractAsync(contractNumber);
-            if (contractFile == "")
+            DocumentMetadataSearchFilter filter = new DocumentMetadataSearchFilter()
+            {
+                ContractNumber = contractNumber,
+                AccountDni = dni
+            };
+            List<DocumentMetadata> list = await _documentRepository.Search(filter);
+
+            if (list.Count > 1) throw new ServiceException("More than one document was found", HttpStatusCode.BadRequest);
+            else if (list.Count == 0)
             {
                 var contract = await GetContractAsync(contractNumber);
 
@@ -60,12 +69,10 @@ namespace customerportalapi.Services
                 }
                 throw new ServiceException("Contract file does not exist.", HttpStatusCode.NotFound, "ContractNumber", "Not exist");
             }
-            if (contractFile == null)
-            {
-                throw new ServiceException("Something went wrong", HttpStatusCode.BadRequest);
-            }
 
-            return contractFile;
+            string documentId = list[0].DocumentId;
+
+            return await _documentRepository.GetDocumentAsync(documentId);
         }
 
         public async Task<ContractFull> GetFullContractAsync(string contractNumber)
@@ -82,7 +89,7 @@ namespace customerportalapi.Services
 
         public async Task<string> SaveContractAsync(Document document)
         {
-            return await _contractRepository.SaveContractAsync(document);
+            return await _documentRepository.SaveDocumentAsync(document);
         }
 
         public async Task<string> GetContractTimeZoneAsync(string contractNumber)
