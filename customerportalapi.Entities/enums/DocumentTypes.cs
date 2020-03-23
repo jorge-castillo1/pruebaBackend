@@ -6,6 +6,7 @@ namespace customerportalapi.Entities.enums
 {
     public enum DocumentTypes
     {
-        SEPA = 1
+        SEPA = 1,
+        Contract = 0,
     }
 }

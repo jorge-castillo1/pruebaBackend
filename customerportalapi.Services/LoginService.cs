@@ -113,7 +113,7 @@ namespace customerportalapi.Services
                 message.To.Add(user.Email);
                 message.Subject = forgotPasswordTemplate.subject;
                 message.Body = string.Format(forgotPasswordTemplate.body, user.Name, user.Password,
-                    $"{_config["InviteConfirmation"]}{user.ForgotPasswordtoken}");
+                    $"{_config["ResetPassword"]}{user.ForgotPasswordtoken}");
                 result = await _mailRepository.Send(message);
             }
 

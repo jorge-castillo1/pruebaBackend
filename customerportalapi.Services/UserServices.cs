@@ -21,8 +21,9 @@ namespace customerportalapi.Services
         private readonly IEmailTemplateRepository _emailTemplateRepository;
         private readonly IIdentityRepository _identityRepository;
         private readonly IConfiguration _config;
+        private readonly ILoginService _loginService;
 
-        public UserServices(IUserRepository userRepository, IProfileRepository profileRepository, IMailRepository mailRepository, IEmailTemplateRepository emailTemplateRepository, IIdentityRepository identityRepository, IConfiguration config)
+        public UserServices(IUserRepository userRepository, IProfileRepository profileRepository, IMailRepository mailRepository, IEmailTemplateRepository emailTemplateRepository, IIdentityRepository identityRepository, IConfiguration config, ILoginService loginService)
         {
             _userRepository = userRepository;
             _profileRepository = profileRepository;
@@ -30,14 +31,15 @@ namespace customerportalapi.Services
             _emailTemplateRepository = emailTemplateRepository;
             _identityRepository = identityRepository;
             _config = config;
+            _loginService = loginService;
         }
 
 
-        public async Task<Profile> GetProfileAsync(string dni, string accountType)
+        public async Task<Profile> GetProfileAsync(string username)
         {
             //Add customer portal Business Logic
-            int userType = UserUtils.GetUserType(accountType);
-            User user = _userRepository.GetCurrentUserByDniAndType(dni, userType);
+            
+            User user = _userRepository.GetCurrentUser(username);
             if (user.Id == null)
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
 
@@ -47,7 +49,8 @@ namespace customerportalapi.Services
 
             //2. If exist complete data from external repository
             //Invoke repository
-            var entity = await _profileRepository.GetProfileAsync(dni, accountType);
+            string accountType = (user.Usertype == (int)UserTypes.Business) ? AccountType.Business : AccountType.Residential;
+            var entity = await _profileRepository.GetProfileAsync(user.Dni, accountType);
 
             //3. Set Email Principal according to external data. No two principal emails allowed
             entity.EmailAddress1Principal = false;
@@ -220,6 +223,71 @@ namespace customerportalapi.Services
             return result;
         }
 
+        public async Task<Token> ConfirmAndChangeCredentialsAsync(string receivedToken, ResetPassword value)
+        {
+            // 1. Validate user
+            if (string.IsNullOrEmpty(receivedToken)) throw new ServiceException("User must have a received Token.", HttpStatusCode.BadRequest, "Received Token", "Empty field");
+
+            User user = _userRepository.GetUserByInvitationToken(receivedToken);
+            if (user.Id == null) return new Token();
+
+            if (user.Password != value.OldPassword) throw new ServiceException("Wrong password.", HttpStatusCode.BadRequest);
+            user.Password = value.NewPassword;
+
+            // Get UserProfile from external system
+            string accountType = UserUtils.GetAccountType(user.Usertype);
+            ProfilePermissions profilepermissions = await _profileRepository.GetProfilePermissionsAsync(user.Dni, accountType);
+            string role = Role.User;
+            if (profilepermissions.CanManageAccounts) role = Role.Admin;
+
+            // 2. Change useranme
+            if (value.Username != null && value.Username != "")
+            {
+                if (ValidateUsername(value.Username)) user.Username = value.Username;
+                else throw new ServiceException("Username must be unique", HttpStatusCode.BadRequest, "Username", "Must be unique");
+            }
+
+            // 3. Afegir-lo a l'IS
+            UserIdentity newUser = await AddUserToIdentityServer(user);
+
+            GroupResults group = await _identityRepository.FindGroup(role);
+            if (group.TotalResults == 1)
+                await _identityRepository.AddUserToGroup(newUser, group.Groups[0]);
+
+            user.Password = null;
+            user.Emailverified = true;
+            user.Invitationtoken = null;
+            user.ExternalId = newUser.ID;
+            _userRepository.UpdateById(user);
+
+            // Confirm access status to external system
+            await _profileRepository.ConfirmedWebPortalAccessAsync(user.Dni, accountType);
+
+            //8. Get Access Token
+            Token accessToken = await _identityRepository.Authorize(new Login()
+            {
+                Username = user.Username,
+                Password = value.NewPassword
+            });
+
+            return accessToken;
+        }
+
+        private async Task<UserIdentity> AddUserToIdentityServer(User user)
+        {
+            UserIdentity userIdentity = new UserIdentity();
+            userIdentity.UserName = user.Username;
+            userIdentity.Password = user.Password;
+            userIdentity.Emails = new List<string>()
+            {
+                user.Email
+            };
+            userIdentity.CardId = user.Dni;
+            userIdentity.Language = user.Language;
+            userIdentity.DisplayName = user.Name;
+            return await _identityRepository.AddUser(userIdentity);
+        }
+
         public async Task<Token> ConfirmUserAsync(string receivedToken)
         {
             //1. Validate receivedToken not empty
@@ -251,17 +319,7 @@ namespace customerportalapi.Services
                     role = Role.Admin;
 
                 //4. Create user in Authentication System
-                UserIdentity userIdentity = new UserIdentity();
-                userIdentity.UserName = user.Username;
-                userIdentity.Password = user.Password;
-                userIdentity.Emails = new List<string>()
-            {
-                user.Email
-            };
-                userIdentity.CardId = user.Dni;
-                userIdentity.Language = user.Language;
-                userIdentity.DisplayName = user.Name;
-                UserIdentity newUser = await _identityRepository.AddUser(userIdentity);
+                UserIdentity newUser = await AddUserToIdentityServer(user);
 
                 //5 AddUserToGroup
                 GroupResults group = await _identityRepository.FindGroup(role);
@@ -335,10 +393,15 @@ namespace customerportalapi.Services
             return Task.FromResult(true);
         }
 
-        public async Task<Account> GetAccountAsync(string dni, string accountType)
+        public async Task<Account> GetAccountAsync(string username)
         {
+            User user = _userRepository.GetCurrentUser(username);
+            if (user.Id == null)
+                throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
+
             //Invoke repository
-            AccountProfile entity = await _profileRepository.GetAccountAsync(dni, accountType);
+            string accountType = UserUtils.GetAccountType(user.Usertype);            
+            AccountProfile entity = await _profileRepository.GetAccountAsync(user.Dni, accountType);
             if (entity == null)
                 throw new ServiceException("Account is not found.", HttpStatusCode.NotFound, "Account", "Not exist");
 
@@ -632,6 +695,12 @@ namespace customerportalapi.Services
             if (userIdentity.Groups == null || !userIdentity.Groups.Exists(x => x.Display == role)) return false;
             GroupResults group = await _identityRepository.FindGroup(role);
             return await _identityRepository.RemoveUserFromGroup(userIdentity, group.Groups[0]);   
+        }
+
+        public bool ValidateUsername(string username)
+        {
+            User user = _userRepository.GetCurrentUser(username);
+            return (user.Id == null);
         }
     }
 }
