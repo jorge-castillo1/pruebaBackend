@@ -36,17 +36,17 @@ namespace customerportalapi.Services
         }
 
 
-        public async Task<List<Site>> GetContractsAsync(string dni, string accountType)
+        public async Task<List<Site>> GetContractsAsync(string username)
         {
             //Add customer portal Business Logic
-            int userType = UserUtils.GetUserType(accountType);
-            User user = _userRepository.GetCurrentUserByDniAndType(dni, userType);
+            User user = _userRepository.GetCurrentUser(username);
             if (user.Id == null)
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
 
             //2. If exist complete data from external repository
             //Invoke repository
-            List<Contract> entitylist = await _contractRepository.GetContractsAsync(dni, accountType);
+            string accountType = (user.Usertype == (int)UserTypes.Business) ? AccountType.Business : AccountType.Residential;
+            List<Contract> entitylist = await _contractRepository.GetContractsAsync(user.Dni, accountType);
 
             List<Site> stores = new List<Site>();
             foreach (var storegroup in entitylist.GroupBy(x => new

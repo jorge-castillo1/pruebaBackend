@@ -27,34 +27,13 @@ namespace customerportalapi.Controllers
             _logger = logger;
         }
 
-        [HttpGet("users/{dni}")]
-        [HttpGet("users/{dni}/Residential")]
+        [HttpGet("users/{username}")]
         // [Authorize(Roles = Role.Admin)]
-        public async Task<ApiResponse> GetAsync(string dni)
+        public async Task<ApiResponse> GetAsync(string username)
         {
             try
             {
-                var entity = await _services.GetContractsAsync(dni, AccountType.Residential);
-                return new ApiResponse(entity);
-            }
-            catch (ServiceException se)
-            {
-                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex.ToString());
-                throw;
-            }
-        }
-
-        [HttpGet("users/{dni}/Business")]
-        // [Authorize(Roles = Role.Admin)]
-        public async Task<ApiResponse> GetBuinessAsync(string dni)
-        {
-            try
-            {
-                var entity = await _services.GetContractsAsync(dni, AccountType.Business);
+                var entity = await _services.GetContractsAsync(username);
                 return new ApiResponse(entity);
             }
             catch (ServiceException se)
