@@ -23,11 +23,11 @@ namespace customerportalapi.Controllers
         }
 
         [HttpGet]
-        public ApiResponse GetLastProcess(string user, string contractnumber = null, int? processtype = null)
+        public ApiResponse GetLastProcess(string user, string smContractCode = null, int? processtype = null)
         {
             try
             {
-                var result = _service.GetLastProcesses(user, contractnumber, processtype);
+                var result = _service.GetLastProcesses(user, smContractCode, processtype);
                 return new ApiResponse(result);
             }
             catch (ServiceException se)
@@ -42,11 +42,11 @@ namespace customerportalapi.Controllers
         }
 
         [HttpPut("cancel/{contractnumber}/{processtype}")]
-        public ApiResponse CancelSignature(string contractnumber, int processtype)
+        public ApiResponse CancelSignature(string smContractCode, int processtype)
         {
             try
             {
-                var result = _service.CancelProcess(contractnumber, processtype);
+                var result = _service.CancelProcess(smContractCode, processtype);
                 return new ApiResponse(result);
             }
             catch (ServiceException se)

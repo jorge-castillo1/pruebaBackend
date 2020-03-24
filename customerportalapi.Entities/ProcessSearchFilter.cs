@@ -8,7 +8,7 @@ namespace customerportalapi.Entities
     {
         public string UserName { get; set; }
         public int? ProcessType { get; set; }
-        public string ContractNumber { get; set; }
+        public string SmContractCode { get; set; }
         public string DocumentId { get; set; }
 
         public int? ProcessStatus { get; set; }

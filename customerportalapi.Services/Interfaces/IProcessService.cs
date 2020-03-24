@@ -8,7 +8,7 @@ namespace customerportalapi.Services.Interfaces
 {
     public interface IProcessService
     {
-        List<Process> GetLastProcesses(string user, string contractnumber, int? processtype);
+        List<Process> GetLastProcesses(string user, string smContractCode, int? processtype);
         bool CancelProcess(string contractnumber, int processtype);
         Process UpdateSignatureProcess(SignatureStatus value);
     }

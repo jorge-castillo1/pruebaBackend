@@ -73,6 +73,7 @@ namespace customerportalapi.Services.Test
             bankdata.Dni = "fake dni";
             bankdata.AccountType = "fake account type";
             bankdata.ContractNumber = "fake contract number";
+            bankdata.SmContractCode = "fake sm contract code";
             bankdata.IBAN = "fake iban";
             bankdata.FullName = "fake fullname";
             bankdata.Address = "fake address";
