@@ -21,38 +21,38 @@ namespace customerportalapi.Services
             _signatureRepository = signatureRepository;
         }
 
-        public List<Process> GetLastProcesses(string user, string contractnumber, int? processtype)
+        public List<Process> GetLastProcesses(string user, string smContractCode, int? processtype)
         {
             ProcessSearchFilter filter = new ProcessSearchFilter()
             {
                 UserName = user,
-                ContractNumber = contractnumber,
+                SmContractCode = smContractCode,
                 ProcessType = processtype
             };
             List<Process> processes = _processRepository.Find(filter);
 
-            List<Process> ordered = processes.OrderBy(item => item.ContractNumber).ThenBy(item => item.ProcessType).ThenByDescending(item => item.ModifiedDate).ToList();
+            List<Process> ordered = processes.OrderBy(item => item.SmContractCode).ThenBy(item => item.ProcessType).ThenByDescending(item => item.ModifiedDate).ToList();
             List<Process> last = new List<Process>();
 
             if (processes.Count == 0) return last;
             last.Add(ordered[0]);
-            string lastContractnumber = ordered[0].ContractNumber;
+            string lastSmContractCode = ordered[0].SmContractCode;
             int lastProcesstype = ordered[0].ProcessType;
             foreach(var process in ordered)
             {
-                if (process.ContractNumber != lastContractnumber || process.ProcessType != lastProcesstype)
+                if (process.SmContractCode != lastSmContractCode || process.ProcessType != lastProcesstype)
                 {
                     last.Add(process);
-                    lastContractnumber = process.ContractNumber;
+                    lastSmContractCode = process.SmContractCode;
                     lastProcesstype = process.ProcessType;
                 }
             }
             return last;
         }
 
-        public bool CancelProcess(string contractnumber, int processtype)
+        public bool CancelProcess(string smContractCode, int processtype)
         {
-            List<Process> processes = GetLastProcesses(null, contractnumber, processtype);
+            List<Process> processes = GetLastProcesses(null, smContractCode, processtype);
             if (processes.Count == 0) throw new ServiceException("Process not found", HttpStatusCode.NotFound);
             Process process = processes[0];
             process.ProcessStatus = (int)ProcessStatuses.Canceled;

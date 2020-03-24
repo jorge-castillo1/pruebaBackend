@@ -12,6 +12,8 @@ namespace customerportalapi.Entities
         public string AccountDni { get; set; }
         public int? AccountType { get; set; }
         public string ContractNumber { get; set; }
+
+        public string SmContractCode { get; set; }
         public int PageNumber { get; set; }
         public int PageSize { get; set; }
     }

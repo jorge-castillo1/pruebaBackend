@@ -49,8 +49,8 @@ namespace customerportalapi.Repositories
             if (filter.ProcessType.HasValue)
                 filters = filters & Builders<Process>.Filter.Eq(x => x.ProcessType, filter.ProcessType.Value);
 
-            if (!string.IsNullOrEmpty(filter.ContractNumber))
-                filters = filters & Builders<Process>.Filter.Eq(x => x.ContractNumber, filter.ContractNumber);
+            if (!string.IsNullOrEmpty(filter.SmContractCode))
+                filters = filters & Builders<Process>.Filter.Eq(x => x.SmContractCode, filter.SmContractCode);
 
             if (!string.IsNullOrEmpty(filter.DocumentId))
                 filters = filters & Builders<Process>.Filter.ElemMatch(x => x.Documents, a => a.DocumentId == filter.DocumentId);
