@@ -56,14 +56,14 @@ namespace customerportalapi.Repositories
             return contract;
         }
 
-        public async Task<string> GetDownloadContractAsync(string contractNumber)
+        public async Task<string> GetDownloadContractAsync(string smContractCode)
         {
             string entity = null;
 
             var httpClient = _clientFactory.CreateClient("httpClientDocument");
             httpClient.BaseAddress = new Uri(_configuration["GatewayDocumentsUrl"] + _configuration["DocumentsAPI"]);
 
-            var response = await httpClient.GetAsync("contract/" + contractNumber, HttpCompletionOption.ResponseHeadersRead);
+            var response = await httpClient.GetAsync("contract/" + smContractCode, HttpCompletionOption.ResponseHeadersRead);
             //response.EnsureSuccessStatusCode();
             if (!response.IsSuccessStatusCode)
             {

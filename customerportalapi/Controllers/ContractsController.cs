@@ -45,12 +45,12 @@ namespace customerportalapi.Controllers
             }
         }
 
-        [HttpGet("{dni}/{contractNumber}/download")]
-        public async Task<ApiResponse> GetDownloadContractAsync(string dni, string contractNumber)
+        [HttpGet("{dni}/{smContractCode}/download")]
+        public async Task<ApiResponse> GetDownloadContractAsync(string dni, string smContractCode)
         {
             try
             {
-                var entity = await _services.GetDownloadContractAsync(dni, contractNumber);
+                var entity = await _services.GetDownloadContractAsync(dni, smContractCode);
                 return new ApiResponse(null, entity);
             }
             catch (ServiceException se)

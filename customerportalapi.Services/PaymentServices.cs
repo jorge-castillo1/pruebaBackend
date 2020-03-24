@@ -53,14 +53,14 @@ namespace customerportalapi.Services
                 PaymentMethodBank bankmethod = (PaymentMethodBank)paymentMethod;
 
                 //3. Validate contract number
-                if (string.IsNullOrEmpty(bankmethod.ContractNumber))
+                if (string.IsNullOrEmpty(bankmethod.SmContractCode))
                     throw new ServiceException("Contract number field can not be null.", HttpStatusCode.BadRequest, "ContractNumber", "Empty fields");
 
-                //4. Validate that don't exist any pending process for same user, process type and contract number
+                //4. Validate that don't exist any pending process for same user, process type and SM contract code
                 ProcessSearchFilter searchProcess = new ProcessSearchFilter();
                 searchProcess.UserName = user.Username;
                 searchProcess.ProcessType = (int)ProcessTypes.PaymentMethodChangeBank;
-                searchProcess.ContractNumber = bankmethod.ContractNumber;
+                searchProcess.SmContractCode = bankmethod.SmContractCode;
                 searchProcess.ProcessStatus = (int)ProcessStatuses.Pending;
                 List<Process> processes = _processRepository.Find(searchProcess);
                 if (processes.Count > 0)
@@ -79,6 +79,7 @@ namespace customerportalapi.Services
                 process.ProcessType = (int)ProcessTypes.PaymentMethodChangeBank;
                 process.ProcessStatus = (int)ProcessStatuses.Pending;
                 process.ContractNumber = bankmethod.ContractNumber;
+                process.SmContractCode = bankmethod.SmContractCode;
                 process.Documents.Add(new ProcessDocument()
                     {
                         DocumentId = documentid.ToString(),
@@ -133,6 +134,7 @@ namespace customerportalapi.Services
             form.Add(new StringContent(user.Name), "recipients[0][name]");
             form.Add(new StringContent(user.Email), "recipients[0][email]");
             form.Add(new StringContent(((int)DocumentTypes.SEPA).ToString()), "documentinformation[0][documenttype]");
+            form.Add(new StringContent(bankmethod.SmContractCode), "documentinformation[0][SmContractCode]");
             form.Add(new StringContent(store.StoreName), "storeidentification");
             form.Add(new StringContent(SystemTypes.CustomerPortal.ToString()), "sourcesystem");
             form.Add(new StringContent(user.Username), "sourceuser");

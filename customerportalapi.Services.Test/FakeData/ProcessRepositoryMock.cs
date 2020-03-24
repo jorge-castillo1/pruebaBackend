@@ -21,6 +21,7 @@ namespace customerportalapi.Services.Test.FakeData
                     Id = Guid.NewGuid().ToString(),
                     Username = "fake user",
                     ContractNumber = "fake contract",
+                    SmContractCode = "fake Sm Contract Code",
                     ProcessType = (int)ProcessTypes.PaymentMethodChangeBank,
                     ProcessStatus = (int)ProcessStatuses.Accepted,
                     CreationDate = System.DateTime.Now,
@@ -36,6 +37,7 @@ namespace customerportalapi.Services.Test.FakeData
                     Id = Guid.NewGuid().ToString(),
                     Username = "fake user",
                     ContractNumber = "fake contract",
+                    SmContractCode = "fake Sm Contract Code",
                     ProcessType = (int)ProcessTypes.PaymentMethodChangeBank,
                     ProcessStatus = (int)ProcessStatuses.Canceled,
                     CreationDate = System.DateTime.Now,
@@ -63,6 +65,7 @@ namespace customerportalapi.Services.Test.FakeData
                     Id = Guid.NewGuid().ToString(),
                     Username = "fake user",
                     ContractNumber = "fake contract",
+                    SmContractCode = "fake Sm Contract Code",
                     ProcessType = (int)ProcessTypes.PaymentMethodChangeBank,
                     ProcessStatus = (int)ProcessStatuses.Pending,
                     CreationDate = System.DateTime.Now,
@@ -109,6 +112,7 @@ namespace customerportalapi.Services.Test.FakeData
                     Id = new Guid().ToString(),
                     Username = "fake user",
                     ContractNumber = "fake contract",
+                    SmContractCode = "fake Sm Contract Code",
                     ProcessType = 1,
                     ProcessStatus = 0,
                     ModifiedDate = DateTime.Now
@@ -118,6 +122,7 @@ namespace customerportalapi.Services.Test.FakeData
                     Id = new Guid().ToString(),
                     Username = "fake user",
                     ContractNumber = "fake contract",
+                    SmContractCode = "fake Sm Contract Code",
                     ProcessType = 1,
                     ProcessStatus = 1,
                     ModifiedDate = DateTime.Now.AddDays(5)
@@ -127,6 +132,7 @@ namespace customerportalapi.Services.Test.FakeData
                     Id = new Guid().ToString(),
                     Username = "fake user",
                     ContractNumber = "fake contract",
+                    SmContractCode = "fake Sm Contract Code",
                     ProcessType = 1,
                     ProcessStatus = 2,
                     ModifiedDate = DateTime.Now.AddDays(2)
@@ -147,6 +153,7 @@ namespace customerportalapi.Services.Test.FakeData
                     Id = new Guid().ToString(),
                     Username = "fake user",
                     ContractNumber = "fake contract",
+                    SmContractCode = "fake Sm Contract Code",
                     ProcessStatus = 0,
                     Documents = new List<ProcessDocument>()
                     {
@@ -162,6 +169,7 @@ namespace customerportalapi.Services.Test.FakeData
                 Id = new Guid().ToString(),
                 Username = "fake user",
                 ContractNumber = "fake contract",
+                SmContractCode = "fake Sm Contract Code",
                 ProcessStatus = 1
             }).Verifiable();
 

@@ -24,6 +24,9 @@ namespace customerportalapi.Entities
         [BsonElement("contractnumber")]
         public string ContractNumber { get; set; }
 
+        [BsonElement("smcontractcode")]
+        public string SmContractCode { get; set; }
+
         [BsonElement("creationdate")]
         public DateTime CreationDate { get; set; }
 

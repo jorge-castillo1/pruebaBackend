@@ -12,6 +12,7 @@ namespace customerportalapi.Entities
         public string AccountDni { get; set; }
         public int AccountType { get; set; }
         public string ContractNumber { get; set; }
+        public string SmContractCode { get; set; }
         public string CreatedBy { get; set; }
         public DateTime CreationDate { get; set; }
         public string RelativeUrl { get; set; }
