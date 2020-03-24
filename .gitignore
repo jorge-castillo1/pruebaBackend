@@ -342,4 +342,5 @@ healthchecksdb
 
 .vscode/
 .sonarqube/
+coverage/
 global.json

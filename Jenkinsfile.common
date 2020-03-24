@@ -13,13 +13,16 @@ container('dotnetcore') {
       dotnet test "./customerportalapi.Services.Test/customerportalapi.Services.Test.csproj"
       """
     }}
-
     stage('sonarqube') {
       gitlabCommitStatus(name: 'sonarqube')  {
-        container('java') {
-          def scannerHome = tool 'QuantionSonarqube';
+        container('sonar') {
+          def sqScannerMsBuildHome = tool 'QuantionNetSonarqube'
           withSonarQubeEnv('QuantionSonarqubeScanner') {
-            sh "${scannerHome}/bin/sonar-scanner"
+            sh """
+            dotnet "${sqScannerMsBuildHome}/SonarScanner.MSBuild.dll" begin /k:"bluespace-customerportal-backend" 
+            dotnet build "./customerportalapi.sln"
+            dotnet "${sqScannerMsBuildHome}/SonarScanner.MSBuild.dll" end
+            """
           }
         }
       }
