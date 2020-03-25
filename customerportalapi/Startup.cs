@@ -71,6 +71,11 @@ namespace customerportalapi
                 IMongoDatabase database = GetDatabase();
                 return new MongoCollectionWrapper<Process>(database, "processes");
             });
+            services.AddScoped<IMongoCollectionWrapper<UserAccount>>(serviceProvider =>
+            {
+                IMongoDatabase database = GetDatabase();
+                return new MongoCollectionWrapper<UserAccount>(database, "useraccounts");
+            });
 
             //Mail service
             services.AddScoped(serviceProvider =>
@@ -102,6 +107,7 @@ namespace customerportalapi
             services.AddScoped<ISignatureRepository, SignatureRepository>();
             services.AddScoped<IAccountSMRepository, AccountSMRepository>();
             services.AddScoped<IDocumentRepository, DocumentRepository>();
+            services.AddScoped<IUserAccountRepository, UserAccountRepository>();
 
             //Register Business Services
             services.AddTransient<IUserServices, UserServices>();
