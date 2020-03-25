@@ -212,12 +212,12 @@ namespace customerportalapi.Controllers
 
 
         // POST api/users/accounts
-        [HttpPatch("accounts")]
-        public async Task<ApiResponse> PatchAccountAsync([FromBody] Account value)
+        [HttpPatch("accounts/{username}")]
+        public async Task<ApiResponse> PatchAccountAsync([FromBody] Account value, string username)
         {
             try
             {
-                var entity = await _services.UpdateAccountAsync(value);
+                var entity = await _services.UpdateAccountAsync(value, username);
                 return new ApiResponse(entity);
             }
             catch (ServiceException se)

@@ -22,8 +22,18 @@ namespace customerportalapi.Services
         private readonly IIdentityRepository _identityRepository;
         private readonly IConfiguration _config;
         private readonly ILoginService _loginService;
+        private readonly IUserAccountRepository _userAccountRepository;
 
-        public UserServices(IUserRepository userRepository, IProfileRepository profileRepository, IMailRepository mailRepository, IEmailTemplateRepository emailTemplateRepository, IIdentityRepository identityRepository, IConfiguration config, ILoginService loginService)
+        public UserServices(
+            IUserRepository userRepository, 
+            IProfileRepository profileRepository, 
+            IMailRepository mailRepository, 
+            IEmailTemplateRepository emailTemplateRepository, 
+            IIdentityRepository identityRepository, 
+            IConfiguration config, 
+            ILoginService loginService,
+            IUserAccountRepository userAccountRepository
+        )
         {
             _userRepository = userRepository;
             _profileRepository = profileRepository;
@@ -32,6 +42,7 @@ namespace customerportalapi.Services
             _identityRepository = identityRepository;
             _config = config;
             _loginService = loginService;
+            _userAccountRepository = userAccountRepository;
         }
 
 
@@ -402,6 +413,10 @@ namespace customerportalapi.Services
             //Invoke repository
             string accountType = UserUtils.GetAccountType(user.Usertype);            
             AccountProfile entity = await _profileRepository.GetAccountAsync(user.Dni, accountType);
+            UserAccount userAccount = _userAccountRepository.GetAccount(username);
+            if (userAccount.Profilepicture != null)
+                entity.Profilepicture = userAccount.Profilepicture;
+            
             if (entity == null)
                 throw new ServiceException("Account is not found.", HttpStatusCode.NotFound, "Account", "Not exist");
 
@@ -410,12 +425,13 @@ namespace customerportalapi.Services
             return account;
         }
 
-        public async Task<Account> UpdateAccountAsync(Account value)
+        public async Task<Account> UpdateAccountAsync(Account value, string username)
         {
             //Invoke repository
             var accountprofile = new AccountProfile
             {
                 SmCustomerId = value.SmCustomerId,
+                CompanyName = value.CompanyName,
                 Phone1 = value.Phone1,
                 MobilePhone1 = value.Mobile1,
                 EmailAddress1 = value.Email1,
@@ -460,6 +476,37 @@ namespace customerportalapi.Services
             AccountProfile entity = await _profileRepository.UpdateAccountAsync(accountprofile);
             if (entity == null)
                 throw new ServiceException("Account is not found.", HttpStatusCode.NotFound, "Account", "Not exist");
+
+            
+            UserAccount userAccount = _userAccountRepository.GetAccount(username);
+            
+
+            if (userAccount.Id == null) 
+            {
+                UserAccount newUserAccount = new UserAccount() 
+                {
+                    Username = username,
+                    Profilepicture = value.Profilepicture
+
+                };
+                bool create = await _userAccountRepository.Create(newUserAccount);
+                if (create == true)
+                    entity.Profilepicture = value.Profilepicture;
+                
+            } 
+            else 
+            {
+                UserAccount userAccountToUpdate = new UserAccount() 
+                {
+                    Id = userAccount.Id,
+                    Username = username,
+                    Profilepicture = value.Profilepicture
+
+                };
+                UserAccount create = _userAccountRepository.Update(userAccountToUpdate);
+                if (create.Profilepicture != null)
+                    entity.Profilepicture = value.Profilepicture;
+            }
 
             var account = ToAccount(entity);
 
@@ -540,12 +587,15 @@ namespace customerportalapi.Services
             return new Account
             {
                 SmCustomerId = entity.SmCustomerId,
+                CompanyName = entity.CompanyName,
+                DocumentNumber = entity.DocumentNumber,
                 Phone1 = entity.Phone1,
                 Mobile1 = entity.MobilePhone1,
                 Email1 = entity.EmailAddress1,
                 Email2 = entity.EmailAddress2,
                 UseThisAddress = entity.UseThisAddress,
                 CustomerType = entity.CustomerType,
+                Profilepicture = entity.Profilepicture,
                 AddressList = new List<Address>
                 {
                     new Address

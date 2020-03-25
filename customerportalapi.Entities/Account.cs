@@ -6,6 +6,10 @@ namespace customerportalapi.Entities
     {
         public string SmCustomerId { get; set; }
 
+        public string CompanyName { get; set; }
+
+        public string DocumentNumber { get; set; }
+
         public string Phone1 { get; set; }
 
         public string Mobile1 { get; set; }
@@ -19,11 +23,17 @@ namespace customerportalapi.Entities
         public List<Address> AddressList { get; set; }
 
         public string CustomerType { get; set; }
+
+        public string Profilepicture { get; set; }
     }
 
     public class AccountProfile
     {
         public string SmCustomerId { get; set; }
+
+        public string DocumentNumber { get; set; }
+
+        public string CompanyName { get; set; }
 
         public string Phone1 { get; set; }
 
@@ -78,5 +88,6 @@ namespace customerportalapi.Entities
         public string UseThisAddress { get; set; }
 
         public string CustomerType { get; set; }
+        public string Profilepicture { get; set; }
     }
 }
