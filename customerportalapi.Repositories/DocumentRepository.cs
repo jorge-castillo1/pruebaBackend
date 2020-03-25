@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using customerportalapi.Repositories.interfaces;
 using customerportalapi.Entities;
+using Microsoft.Extensions.Logging;
 
 namespace customerportalapi.Repositories
 {
@@ -17,10 +18,13 @@ namespace customerportalapi.Repositories
         private readonly IConfiguration _configuration;
         private readonly IHttpClientFactory _clientFactory;
 
-        public DocumentRepository(IConfiguration configuration, IHttpClientFactory clientFactory)
+        private readonly ILogger<ProfileRepository> _logger;
+
+        public DocumentRepository(IConfiguration configuration, IHttpClientFactory clientFactory, ILogger<ProfileRepository> logger)
         {
             _configuration = configuration;
             _clientFactory = clientFactory;
+            _logger = logger;
         }
 
         public async Task<List<DocumentMetadata>> Search(DocumentMetadataSearchFilter filter)
@@ -47,7 +51,13 @@ namespace customerportalapi.Repositories
             var httpClient = _clientFactory.CreateClient("httpClientDocument");
 
             var url = new Uri(httpClient.BaseAddress + _configuration["DocumentsAPI"]);
+            _logger.LogWarning("LOG!!!::Save Document Url" + url.ToString());
+            
             var postContent = new StringContent(JsonConvert.SerializeObject(document), Encoding.UTF8, "application/json");
+
+            _logger.LogWarning("LOG!!!:: Document Filename " + document.FileName);
+            _logger.LogWarning("LOG!!!:: Document Store name " + document.Metadata.StoreName);
+
             var response = await httpClient.PostAsync(url, postContent);
             response.EnsureSuccessStatusCode();
             var content = await response.Content.ReadAsStringAsync();
