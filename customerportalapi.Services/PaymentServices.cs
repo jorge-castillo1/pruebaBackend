@@ -110,8 +110,8 @@ namespace customerportalapi.Services
 
             // Send email to the store
             EmailTemplate template = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.UpdateBankAccount, LanguageTypes.en.ToString());
-            string contractNumber = value.Metadata.ContractNumber;
-            Contract contract = await _contractRepository.GetContractAsync(contractNumber);
+            string smContractCode = value.Metadata.SmContractCode;
+            Contract contract = await _contractRepository.GetContractAsync(smContractCode);
 
             if (template._id != null)
             {

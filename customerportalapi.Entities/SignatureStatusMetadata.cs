@@ -11,6 +11,9 @@ namespace customerportalapi.Entities
         public string BankAccountOrderNumber { get; set; }
 
         public string BankAccountName { get; set; }
+
         public int DocumentType { get; set; }
+
+        public string SmContractCode { get; set; }
     }
 }
