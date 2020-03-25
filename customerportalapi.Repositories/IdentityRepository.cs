@@ -244,13 +244,13 @@ namespace customerportalapi.Repositories
             }
         }
 
-        public async Task<Token> RefreshToken(string refreshToken)
+        public async Task<Token> RefreshToken(string token)
         {
             var httpClient = _clientFactory.CreateClient("identityClient");
             try
             {
                 var body = new Dictionary<string, string>();
-                body.Add("refresh_token", refreshToken);
+                body.Add("refresh_token", token);
                 body.Add("grant_type", "refresh_token");
                 var form = new FormUrlEncodedContent(body);
                 var url = httpClient.BaseAddress + _configuration["Identity:Endpoints:Authorize"];
