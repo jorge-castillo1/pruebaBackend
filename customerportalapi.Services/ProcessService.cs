@@ -90,7 +90,7 @@ namespace customerportalapi.Services
                 if (processDocument.DocumentId == value.DocumentId)
                     processDocument.DocumentStatus = value.Status;
 
-                processCompleted = processCompleted & processDocument.DocumentStatus == "document_completed";
+                processCompleted = processCompleted && processDocument.DocumentStatus == "document_completed";
                 processCanceled = processCanceled || processDocument.DocumentStatus == "document_canceled";
             }
 
