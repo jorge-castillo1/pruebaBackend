@@ -97,20 +97,35 @@ namespace customerportalapi.Services
             // Add Bank account to SM
             SMBankAccount bankAccount = new SMBankAccount();
             User user = _userRepository.GetCurrentUser(value.User);
-            string usertype = user.Usertype == (int)UserTypes.Business ? "Business" : "";
+            string usertype = user.Usertype == (int)UserTypes.Business ? AccountType.Business : string.Empty;
             AccountProfile account = await _profileRepository.GetAccountAsync(user.Dni, usertype);
+
+            //Get signature data
+            SignatureSearchFilter filter = new SignatureSearchFilter();
+            filter.Filters.SignatureId = value.SignatureId;
+            List<SignatureProcess> signatures = await _signatureRepository.SearchSignaturesAsync(filter);
+            if (signatures.Count != 1)
+                throw new ServiceException("Error searching signature for this process", HttpStatusCode.BadRequest, "SignatureId", "Not exist");
+
+            ProcessedDocument processedpaymentdocument = null;
+            var docIndex = 0;
+            foreach(SignatureDocumentResult dr in signatures[0].SignatureResult.Documents)
+            {
+                if (dr.Id.ToString() == value.DocumentId)
+                    processedpaymentdocument = signatures[0].Documents[docIndex];
+            }
 
             bankAccount.CustomerId = account.SmCustomerId;
             bankAccount.PaymentMethodId = "AT5";
-            bankAccount.AccountName = value.Metadata.BankAccountName;
-            bankAccount.AccountNumber = value.Metadata.BankAccountOrderNumber;
+            bankAccount.AccountName = processedpaymentdocument.BankAccountName;
+            bankAccount.AccountNumber = processedpaymentdocument.BankAccountOrderNumber;
             bankAccount.Default = 1;
-            bankAccount.Iban = value.Metadata.BankAccountOrderNumber;
+            bankAccount.Iban = processedpaymentdocument.BankAccountOrderNumber;
             await _accountSMRepository.AddBankAccountAsync(bankAccount);
 
             // Send email to the store
             EmailTemplate template = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.UpdateBankAccount, LanguageTypes.en.ToString());
-            string smContractCode = value.Metadata.SmContractCode;
+            string smContractCode = processedpaymentdocument.SmContractCode;
             Contract contract = await _contractRepository.GetContractAsync(smContractCode);
 
             if (template._id != null)
@@ -121,7 +136,7 @@ namespace customerportalapi.Services
                 if (!(_configuration["Environment"] == nameof(EnvironmentTypes.PRO))) storeMail = _configuration["MailStores"];
                 message.To.Add(storeMail);
                 message.Subject = string.Format(template.subject, user.Name, user.Dni);
-                message.Body = string.Format(template.body, user.Name, user.Dni, value.Metadata.ContractNumber);
+                message.Body = string.Format(template.body, user.Name, user.Dni, processedpaymentdocument.DocumentNumber);
                 await _mailRepository.Send(message);
             }
             return true;
@@ -134,13 +149,17 @@ namespace customerportalapi.Services
             form.Add(new StringContent(user.Name), "recipients[0][name]");
             form.Add(new StringContent(user.Email), "recipients[0][email]");
             form.Add(new StringContent(((int)DocumentTypes.SEPA).ToString()), "documentinformation[0][documenttype]");
-            form.Add(new StringContent(bankmethod.SmContractCode), "documentinformation[0][SmContractCode]");
+            form.Add(new StringContent(bankmethod.ContractNumber), "documentinformation[0][documentidentificationnumber]");
+            form.Add(new StringContent(bankmethod.IBAN), "documentinformation[0][bankaccountordernumber]");
+            form.Add(new StringContent(store.CompanyName), "documentinformation[0][bankaccountname]");
+            form.Add(new StringContent(bankmethod.SmContractCode), "documentinformation[0][smcontractcode]");
+
             form.Add(new StringContent(store.StoreName), "storeidentification");
             form.Add(new StringContent(SystemTypes.CustomerPortal.ToString()), "sourcesystem");
             form.Add(new StringContent(user.Username), "sourceuser");
             form.Add(new StringContent(user.Usertype.ToString()), "accounttype");
             form.Add(new StringContent(user.Dni.ToString()), "accountdni");
-
+            form.Add(new StringContent(_configuration["GatewaySignatureEventsUrl"]), "signatureendprocess_url");
 
             // data
             form.Add(new StringContent("contractnumber"), "data[0][key]");
