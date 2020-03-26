@@ -28,7 +28,6 @@ namespace customerportalapi.Repositories
         {
             var httpClient = _clientFactory.CreateClient("httpClient");
             httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["ProfileAPI"]);
-            _logger.LogWarning("Base Address: " + httpClient.BaseAddress.AbsolutePath);
 
             try
             {
@@ -125,7 +124,6 @@ namespace customerportalapi.Repositories
         {
             var httpClient = _clientFactory.CreateClient("httpClient");
             httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["ProfileAPI"]);
-            _logger.LogWarning("Base Address: " + httpClient.BaseAddress.AbsolutePath);
 
             try
             {
