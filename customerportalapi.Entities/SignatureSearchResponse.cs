@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -8,17 +9,12 @@ namespace customerportalapi.Entities
     {
         public int StatusCode { get; set; }
         public string Message { get; set; }
-        public SignatureSearchResultResponse Result { get; set; } = new SignatureSearchResultResponse();
-        
-    }
-
-    public class SignatureSearchResultResponse
-    {
-        public List<SignatureProcess> SignatureProcess { get; set; } = new List<SignatureProcess>();
+        public List<SignatureProcess> Result { get; set; } = new List<SignatureProcess>();    
     }
 
     public class SignatureProcess
     {
+
         public SignatureResult SignatureResult { get; set; } = new SignatureResult();
         public string Store { get; set; }
         public List<ProcessedDocument> Documents { get; set; } = new List<ProcessedDocument>();

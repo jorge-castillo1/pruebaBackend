@@ -68,7 +68,7 @@ namespace customerportalapi.Repositories
             var contentresult = await response.Content.ReadAsStringAsync();
             
             var deserializedContent = JsonConvert.DeserializeObject<SignatureSearchResponse>(contentresult);
-            return deserializedContent.Result.SignatureProcess;
+            return deserializedContent.Result;
         }
     }
 }
