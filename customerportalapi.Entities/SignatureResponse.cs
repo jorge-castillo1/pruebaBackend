@@ -8,18 +8,38 @@ namespace customerportalapi.Entities
     {
         public int StatusCode { get; set; }
         public string Message { get; set; }
-        public SignatureResultResponse Result { get; set; } = new SignatureResultResponse();
+        public SignatureResult Result { get; set; } = new SignatureResult();
         
     }
 
-    public class SignatureResultResponse
+    public class SignatureResult
     {
         public Guid Id { get; set; }
-        public List<SignatureResultDocumentResponse> Documents { get; set; } = new List<SignatureResultDocumentResponse>();
+        public string Created_at { get; set; }
+        public List<SignatureDocumentResult> Documents { get; set; } = new List<SignatureDocumentResult>();
     }
 
-    public class SignatureResultDocumentResponse
+    public class SignatureDocumentResult
     {
         public Guid Id { get; set; }
+        public string Created_at { get; set; }
+        public string Email { get; set; }
+        public List<EventResult> Events { get; set; }
+        public string Name { get; set; }
+        public string Status { get; set; }
+        public FileResult File { get; set; }
+    }
+
+    public class EventResult
+    {
+        public string Type { get; set; }
+        public string Created_at { get; set; }
+    }
+
+    public class FileResult
+    {
+        public string Name { get; set; }
+        public int Pages { get; set; }
+        public int Size { get; set; }
     }
 }
