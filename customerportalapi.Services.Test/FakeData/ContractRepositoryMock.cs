@@ -25,7 +25,8 @@ namespace customerportalapi.Services.Test.FakeData
                        StoreName = "Fake Store",
                        Telephone = "Fake telephone",
                        CoordinatesLatitude = "Fake CoordinatesLatitude",
-                       CoordinatesLongitude = "Fake CoordinatesLongitude"
+                       CoordinatesLongitude = "Fake CoordinatesLongitude",
+                       StoreCode="RI1BBFRI120920060001"
                    }
                 },
                 new Contract
@@ -38,7 +39,8 @@ namespace customerportalapi.Services.Test.FakeData
                        StoreName = "Fake Store",
                        Telephone = "Fake telephone",
                        CoordinatesLatitude = "Fake CoordinatesLatitude",
-                       CoordinatesLongitude = "Fake CoordinatesLongitude"
+                       CoordinatesLongitude = "Fake CoordinatesLongitude",
+                       StoreCode="RI1BBFRI120920060001"
                    }
                 },
                 new Contract
@@ -51,7 +53,8 @@ namespace customerportalapi.Services.Test.FakeData
                        StoreName = "Fake Store",
                        Telephone = "Fake telephone",
                        CoordinatesLatitude = "Fake CoordinatesLatitude",
-                       CoordinatesLongitude = "Fake CoordinatesLongitude"
+                       CoordinatesLongitude = "Fake CoordinatesLongitude",
+                       StoreCode="RI1BBFRI120920060000"
                    }
                 },
                 new Contract
@@ -64,7 +67,8 @@ namespace customerportalapi.Services.Test.FakeData
                        StoreName = "Fake Store",
                        Telephone = "Fake telephone",
                        CoordinatesLatitude = "Fake CoordinatesLatitude",
-                       CoordinatesLongitude = "Fake CoordinatesLongitude"
+                       CoordinatesLongitude = "Fake CoordinatesLongitude",
+                       StoreCode="RI1BBFRI120920060000"
                    }
                 },
             })).Verifiable();

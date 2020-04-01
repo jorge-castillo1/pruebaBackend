@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Distributed;
 using System.Security.Principal;
+using System.Linq;
 
 namespace customerportalapi.Services.Test
 {
@@ -102,6 +103,37 @@ namespace customerportalapi.Services.Test
             AccessCode entity = await service.GetAccessCodeAsync("fake contractid", "fake password");
 
             //Assert
+        }
+
+        [TestMethod]
+        public async Task AlSolicitarInformacionDeUltimasFacturas_DevuelveLas3Ultimas()
+        {
+            //Arrange
+            string username = "fake user";
+            SiteServices service = new SiteServices(_userRepository.Object, _contractRepository.Object, _storeRepository.Object, _distributedCache.Object, _identityRepository.Object, _contractSMRepository.Object);
+
+            //Act
+            List<SiteInvoices> siteInvoices = await service.GetLastInvoices(username);
+
+            //Assert
+            Assert.IsTrue(siteInvoices.Count == 2);
+            Assert.IsTrue(siteInvoices[0].Invoices.Count(x => x.SiteID == "RI1BBFRI120920060001") == 3);
+        }
+
+        [TestMethod]
+        public async Task AlSolicitarInformacionDeUltimasFacturasDeUnClienteSinFacturas_NoDevuelveNinguna()
+        {
+            //Arrange
+            string username = "fake user";
+            _contractSMRepository = ContractSMRepositoryMock.ContractSMNoInvoiceRepository();
+            SiteServices service = new SiteServices(_userRepository.Object, _contractRepository.Object, _storeRepository.Object, _distributedCache.Object, _identityRepository.Object, _contractSMRepository.Object);
+
+            //Act
+            List<SiteInvoices> siteInvoices = await service.GetLastInvoices(username);
+
+            //Assert
+            Assert.IsTrue(siteInvoices.Count == 2);
+            Assert.IsTrue(siteInvoices[0].Invoices.Count(x => x.SiteID == "RI1BBFRI120920060001") == 0);
         }
     }
 }
