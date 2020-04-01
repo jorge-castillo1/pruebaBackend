@@ -192,5 +192,63 @@ namespace customerportalapi.Services
         {
             return await _storeRepository.GetUnitBySMIdAsync(smid);
         }
+
+        public async Task<List<SiteInvoices>> GetLastInvoices(string username)
+        {
+            List<SiteInvoices> siteInvoices = new List<SiteInvoices>();
+            //Add customer portal Business Logic
+            User user = _userRepository.GetCurrentUser(username);
+            if (user.Id == null)
+                throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
+
+            //2. If exist complete data from external repository
+            //Invoke repository
+            string accountType = (user.Usertype == (int)UserTypes.Business) ? AccountType.Business : AccountType.Residential;
+            List<Contract> entitylist = await _contractRepository.GetContractsAsync(user.Dni, accountType);
+
+            //3. From one contract get customer invoces
+            if (entitylist.Count == 0)
+                return siteInvoices;
+
+            string contractNumber = entitylist[0].SmContractCode;
+            List<Invoice> invoices = new List<Invoice>();
+            invoices = await _contractSMRepository.GetInvoicesAsync(contractNumber);
+
+            //4. Only returns 3 invoices for every Site 
+            List<Invoice> filteredInvoices = new List<Invoice>();
+            var sites = invoices.GroupBy(x => x.SiteID);
+            foreach (var sitegroup in sites)
+            {
+                var orderGroup = sitegroup.OrderByDescending(x => x.DocumentDate);
+                var num = 0;
+                foreach (var orderedinvoice in orderGroup)
+                {
+                    if (num < 3)
+                        filteredInvoices.Add(orderedinvoice);
+
+                    num++;
+                }
+            }
+
+            //5. Complete siteContracts with filteredInvoices
+            //List<Site> stores = new List<Site>();
+            foreach (var storegroup in entitylist.GroupBy(x => new
+            {
+                Name = x.StoreData.StoreName,
+                x.StoreData.StoreCode
+            }))
+            {
+                  SiteInvoices site = new SiteInvoices
+                {
+                    Name = storegroup.Key.Name,
+                    StoreCode = storegroup.Key.StoreCode
+                };
+
+                site.Invoices.AddRange(filteredInvoices.FindAll(x => x.SiteID == site.StoreCode));
+                siteInvoices.Add(site);
+            }
+
+            return siteInvoices;
+        }
     }
 }

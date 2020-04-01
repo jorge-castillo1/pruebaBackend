@@ -53,5 +53,33 @@ namespace customerportalapi.Repositories.Test
             Assert.IsNotNull(result);
             Assert.IsTrue(result.Password == "fake password");
         }
+
+        [TestMethod]
+        public async Task AlHacerUnaLlamadaGetExternaDeDatosQueDevuelveLista_NoDevuelveErrores()
+        {
+            //Arrange
+            Mock.Get(_clientFactory).Setup(x => x.CreateClient("httpClient"))
+                .Returns(() =>
+                {
+                    return _handler.CreateClient();
+                });
+
+            var response = new HttpResponseMessage
+            {
+                Content = new StringContent("{ \"result\": [{ \"DocumentDate\": \"2020-01-16\"," +
+                "\"Amount\": \"197.34\"}, { \"DocumentDater\": \"2020-01-16\"," +
+                "\"Amount\": \"34.75\" }]}")
+            };
+            _handler.SetupAnyRequest()
+                .ReturnsAsync(response);
+
+            //Act
+            ContractSMRepository repository = new ContractSMRepository(_configurations, _clientFactory);
+            List<Invoice> result = await repository.GetInvoicesAsync("fake contract number");
+
+            //Assert
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result.Count == 2);
+        }
     }
 }

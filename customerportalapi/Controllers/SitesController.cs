@@ -187,5 +187,25 @@ namespace customerportalapi.Controllers
                 throw;
             }
         }
+
+        [HttpGet("invoices/{username}")]
+        public async Task<ApiResponse> GetInvoicesAsync(string username)
+        {
+            try
+            {
+                var entity = await _services.GetLastInvoices(username);
+                return new ApiResponse(entity);
+            }
+            catch (ServiceException ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
     }
 }
