@@ -34,5 +34,19 @@ namespace customerportalapi.Repositories
 
             return JsonConvert.DeserializeObject<SMContract>(result.GetValue("result").ToString());
         }
+
+        public async Task<List<Invoice>> GetInvoicesAsync(string contractId)
+        {
+            var httpClient = _clientFactory.CreateClient("httpClient");
+            httpClient.BaseAddress = new Uri(_configuration["GatewaySmUrl"] + _configuration["InvoiceSMAPI"]);
+
+            var response = await httpClient.GetAsync(contractId, HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode) return new List<Invoice>();
+            var content = await response.Content.ReadAsStringAsync();
+            JObject result = JObject.Parse(content);
+
+            return JsonConvert.DeserializeObject<List<Invoice>>(result.GetValue("result").ToString());
+        }
     }
 }
