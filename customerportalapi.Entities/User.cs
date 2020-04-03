@@ -1,20 +1,51 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace customerportalapi.Entities
 {
     public class User
     {
+        [BsonElement("_id")]
         [BsonRepresentation(BsonType.ObjectId)]
-        public string _id { get; set; }
+        public string Id { get; set; }
+
+        [BsonElement("username")]
+        public string Username { get; set; }
+
         [BsonElement("dni")]
-        public string dni { get; set; }
+        public string Dni { get; set; }
+
         [BsonElement("email")]
-        public string email { get; set; }
+        public string Email { get; set; }
+
+        [BsonElement("name")]
+        public string Name { get; set; }
+
+        [BsonElement("password")]
+        public string Password { get; set; }
+
+        [BsonElement("phone")]
+        public string Phone { get; set; }
+
         [BsonElement("language")]
-        public int language { get; set; }
+        public string Language { get; set; }
+
+        [BsonElement("profilepicture")]
+        public string Profilepicture { get; set; }
+
+        [BsonElement("usertype")]
+        public int Usertype { get; set; }
+
+        [BsonElement("emailverified")]
+        public bool Emailverified { get; set; }
+
+        [BsonElement("invitationtoken")]
+        public string Invitationtoken { get; set; }
+
+        [BsonElement("externalid")]
+        public string ExternalId { get; set; }
+
+        [BsonElement("forgotpasswordtoken")]
+        public string ForgotPasswordtoken { get; set; }
     }
 }
