@@ -4,10 +4,11 @@ using System.Text;
 
 namespace customerportalapi.Entities.enums
 {
-    public enum DocumentTypes
+    public enum ProcessCardStatuses
     {
-        SEPA = 1,
-        Contract = 0,
-        Card = 2,
+        Card = 0,
+
+        Signature = 1
+
     }
 }

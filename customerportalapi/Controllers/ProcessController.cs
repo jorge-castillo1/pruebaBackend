@@ -41,7 +41,7 @@ namespace customerportalapi.Controllers
             }
         }
 
-        [HttpPut("cancel/{contractnumber}/{processtype}")]
+        [HttpPut("cancel/{smContractCode}/{processtype}")]
         public ApiResponse CancelSignature(string smContractCode, int processtype)
         {
             try
