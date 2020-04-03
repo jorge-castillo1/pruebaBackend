@@ -17,12 +17,14 @@ namespace customerportalapi.Services.Test
     {
         private Mock<IProcessRepository> _processRepository;
         private Mock<ISignatureRepository> _signatureRepository;
+        private Mock<IPaymentRepository> _paymentRepository;
 
         [TestInitialize]
         public void Setup()
         {
             _processRepository = ProcessRepositoryMock.ProcessRepository();
             _signatureRepository = SignatureRepositoryMock.SignatureRepository();
+            _paymentRepository = PaymentRepositoryMock.PaymentRepository();
         }
 
         [TestMethod]
@@ -34,7 +36,7 @@ namespace customerportalapi.Services.Test
             int processtype = 1;
 
             _processRepository = ProcessRepositoryMock.MoreThanOneResultProcessRepository();
-            ProcessService service = new ProcessService(_processRepository.Object, _signatureRepository.Object);
+            ProcessService service = new ProcessService(_processRepository.Object, _signatureRepository.Object, _paymentRepository.Object);
             var result = service.GetLastProcesses(user, contractnumber, processtype);
 
             Assert.IsNotNull(result);
@@ -52,7 +54,7 @@ namespace customerportalapi.Services.Test
             value.Status = "document_canceled";
 
             _processRepository = ProcessRepositoryMock.OneResultProcessRepository();
-            ProcessService service = new ProcessService(_processRepository.Object, _signatureRepository.Object);
+            ProcessService service = new ProcessService(_processRepository.Object, _signatureRepository.Object, _paymentRepository.Object);
             var result = service.UpdateSignatureProcess(value);
 
             Assert.IsNotNull(result);
@@ -70,7 +72,7 @@ namespace customerportalapi.Services.Test
             value.Status = "document_completed";
 
             _processRepository = ProcessRepositoryMock.NoResultsProcessRepository();
-            ProcessService service = new ProcessService(_processRepository.Object, _signatureRepository.Object);
+            ProcessService service = new ProcessService(_processRepository.Object, _signatureRepository.Object, _paymentRepository.Object);
             Process process = service.UpdateSignatureProcess(value);
             Assert.IsNull(process);
         }
@@ -86,7 +88,7 @@ namespace customerportalapi.Services.Test
             value.Status = "document_completed";
 
             _processRepository = ProcessRepositoryMock.MoreThanOneResultProcessRepository();
-            ProcessService service = new ProcessService(_processRepository.Object, _signatureRepository.Object);
+            ProcessService service = new ProcessService(_processRepository.Object, _signatureRepository.Object, _paymentRepository.Object);
             service.UpdateSignatureProcess(value);
         }
 
@@ -101,7 +103,7 @@ namespace customerportalapi.Services.Test
             value.Status = "fake_document_state";
 
             _processRepository = ProcessRepositoryMock.OneResultProcessRepository();
-            ProcessService service = new ProcessService(_processRepository.Object, _signatureRepository.Object);
+            ProcessService service = new ProcessService(_processRepository.Object, _signatureRepository.Object, _paymentRepository.Object);
             service.UpdateSignatureProcess(value);
         }
     }

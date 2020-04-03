@@ -76,6 +76,11 @@ namespace customerportalapi
                 IMongoDatabase database = GetDatabase();
                 return new MongoCollectionWrapper<UserAccount>(database, "useraccounts");
             });
+            services.AddScoped<IMongoCollectionWrapper<Card>>(serviceProvider =>
+            {
+                IMongoDatabase database = GetDatabase();
+                return new MongoCollectionWrapper<Card>(database, "cards");
+            });
 
             //Mail service
             services.AddScoped(serviceProvider =>
@@ -107,6 +112,8 @@ namespace customerportalapi
             services.AddScoped<ISignatureRepository, SignatureRepository>();
             services.AddScoped<IAccountSMRepository, AccountSMRepository>();
             services.AddScoped<IDocumentRepository, DocumentRepository>();
+            services.AddScoped<IPaymentRepository, PaymentRepository>();
+            services.AddScoped<ICardRepository, CardRepository>();
             services.AddScoped<IUserAccountRepository, UserAccountRepository>();
 
             //Register Business Services
@@ -198,6 +205,31 @@ namespace customerportalapi
                 AllowAutoRedirect = false,
                 AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip,
                 //Credentials = GetCredentials()
+            });
+            services.AddHttpClient("httpClientPayment", c =>
+            {
+                c.BaseAddress = new Uri(Configuration["GatewayPaymentUrl"]);
+                c.Timeout = new TimeSpan(0, 2, 0);  //2 minutes
+                c.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/x-www-form-urlencoded"));
+                c.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue
+                {
+                    NoCache = true,
+                    NoStore = true,
+                    MaxAge = new TimeSpan(0),
+                    MustRevalidate = true
+                };
+                var a = Configuration["PaymentCredentials:User"];
+                var b = Configuration["PaymentCredentials:Password"];
+
+                c.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                    "Basic",
+                    Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes(
+                        $"{Configuration["PaymentCredentials:User"]}:{Configuration["PaymentCredentials:Password"]}"))
+                );
+            }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            {
+                AllowAutoRedirect = false,
+                AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip,
             });
 
             services.AddMvc()
