@@ -45,6 +45,28 @@ namespace customerportalapi.Controllers
             }
         }
 
+        // GET api/users/{dni}
+        [HttpGet("{dni}/{accountType}")]
+
+        [AuthorizeToken]
+        public async Task<ApiResponse> GetUserByDniAndTypeAsync(string username)
+        {
+            try
+            {
+                var entity = await _services.GetProfileAsync(username);
+                return new ApiResponse(entity);
+            }
+            catch (ServiceException se)
+            {
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+
         // POST api/users
         [HttpPatch]
         [AuthorizeToken]
