@@ -35,5 +35,8 @@ namespace customerportalapi.Entities
 
         [BsonElement("documents")]
         public List<ProcessDocument> Documents { get; set; } = new List<ProcessDocument>();
+
+        [BsonElement("card")]
+        public ProcessCard Card { get; set; }
     }
 }

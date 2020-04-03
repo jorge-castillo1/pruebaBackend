@@ -48,5 +48,70 @@ namespace customerportalapi.Controllers
                 throw;
             }
         }
+
+        //POST api/payment/changepaymentmethod/card
+        [HttpPost]
+        [Route("changepaymentmethod/card")]
+        public async Task<ApiResponse> ChangePaymentMethodCardAsync([FromBody] PaymentMethodCardSignature value)
+        {
+            try
+            {
+                value.PaymentMethodType = (int)PaymentMethodTypes.CreditCard;
+                var result = await _services.ChangePaymentMethodCard(value);
+                return new ApiResponse(result);
+            }
+            catch (ServiceException se)
+            {
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+
+        //POST api/payment/changepaymentmethod/card/load
+        [HttpPost]
+        [Route("changepaymentmethod/card/load")]
+        public async Task<ApiResponse> ChangePaymentMethodCardLoadAsync([FromBody] PaymentMethodCard value)
+        {
+            try
+            {
+                value.PaymentMethodType = (int)PaymentMethodTypes.CreditCard;
+                var result = await _services.ChangePaymentMethodCardLoad(value);
+                return new ApiResponse(result);
+            }
+            catch (ServiceException se)
+            {
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+
+        //POST api/payment/changepaymentmethod/card/response
+        [HttpPost]
+        [Route("changepaymentmethod/card/response")]
+        public async Task<ApiResponse> ChangePaymentMethodCardResponseAsync([FromBody] PaymentMethodCardData value)
+        {
+            try
+            {
+                var result = await _services.ChangePaymentMethodCardResponseAsync(value);
+                return new ApiResponse(result);
+            }
+            catch (ServiceException se)
+            {
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
     }
 }

@@ -40,6 +40,11 @@ namespace customerportalapi.Controllers
                     {
                         await _paymentService.UpdatePaymentProcess(value);
                     }
+                
+                    if (process.ProcessType == (int)ProcessTypes.PaymentMethodChangeCardSignature && process.ProcessStatus == (int)ProcessStatuses.Accepted)
+                    {
+                        await _paymentService.UpdatePaymentCardProcess(value, process);
+                    }
                 }
 
                 return new OkResult();

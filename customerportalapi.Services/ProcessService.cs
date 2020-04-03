@@ -15,10 +15,12 @@ namespace customerportalapi.Services
     {
         private readonly IProcessRepository _processRepository;
         private readonly ISignatureRepository _signatureRepository;
-        public ProcessService(IProcessRepository processRepository, ISignatureRepository signatureRepository)
+        private readonly IPaymentRepository _paymentRepository;
+        public ProcessService(IProcessRepository processRepository, ISignatureRepository signatureRepository, IPaymentRepository paymentRepository)
         {
             _processRepository = processRepository;
             _signatureRepository = signatureRepository;
+            _paymentRepository = paymentRepository;
         }
 
         public List<Process> GetLastProcesses(string user, string smContractCode, int? processtype)
@@ -31,7 +33,7 @@ namespace customerportalapi.Services
             };
             List<Process> processes = _processRepository.Find(filter);
 
-            List<Process> ordered = processes.OrderBy(item => item.SmContractCode).ThenBy(item => item.ProcessType).ThenByDescending(item => item.ModifiedDate).ToList();
+            List<Process> ordered = processes.OrderBy(item => item.SmContractCode).ThenByDescending(item => item.ModifiedDate).ThenBy(item => item.ProcessType).ToList();
             List<Process> last = new List<Process>();
 
             if (processes.Count == 0) return last;
@@ -40,7 +42,7 @@ namespace customerportalapi.Services
             int lastProcesstype = ordered[0].ProcessType;
             foreach(var process in ordered)
             {
-                if (process.SmContractCode != lastSmContractCode || process.ProcessType != lastProcesstype)
+                if (process.SmContractCode != lastSmContractCode)
                 {
                     last.Add(process);
                     lastSmContractCode = process.SmContractCode;
@@ -60,6 +62,30 @@ namespace customerportalapi.Services
 
             if (process.ProcessType == (int)ProcessTypes.PaymentMethodChangeBank)
             {
+                foreach(ProcessDocument processdocument in process.Documents)
+                    _signatureRepository.CancelSignature(processdocument.DocumentId);
+            } 
+            else if (process.ProcessType == (int)ProcessTypes.PaymentMethodChangeCard)
+            {
+                ProcessCard card = process.Card;
+                PaymentMethodCardConfirmationToken confirmation = new PaymentMethodCardConfirmationToken()
+                {
+                    ExternalId = card.ExternalId,
+                    Channel = "WEBPORTAL",
+                    Confirmed = false
+                };
+               _paymentRepository.ConfirmChangePaymentMethodCard(confirmation);
+            }
+            else if (process.ProcessType == (int)ProcessTypes.PaymentMethodChangeCardSignature)
+            {
+                ProcessCard card = process.Card;
+                PaymentMethodCardConfirmationToken confirmation = new PaymentMethodCardConfirmationToken()
+                {
+                    ExternalId = card.ExternalId,
+                    Channel = "WEBPORTAL",
+                    Confirmed = false
+                };
+               _paymentRepository.ConfirmChangePaymentMethodCard(confirmation);
                 foreach(ProcessDocument processdocument in process.Documents)
                     _signatureRepository.CancelSignature(processdocument.DocumentId);
             }
@@ -103,5 +129,6 @@ namespace customerportalapi.Services
 
             return process;
         }
+
     }
 }
