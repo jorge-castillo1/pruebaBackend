@@ -49,11 +49,11 @@ namespace customerportalapi.Controllers
         [HttpGet("{dni}/{accountType}")]
 
         [AuthorizeToken]
-        public async Task<ApiResponse> GetUserByDniAndTypeAsync(string dni, string accountType)
+        public async Task<ApiResponse> GetUserByDniAndTypeAsync(string username)
         {
             try
             {
-                var entity = await _services.GetProfileByDniAndTypeAsync(dni, accountType);
+                var entity = await _services.GetProfileAsync(username);
                 return new ApiResponse(entity);
             }
             catch (ServiceException se)

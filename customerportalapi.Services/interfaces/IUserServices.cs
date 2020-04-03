@@ -7,8 +7,6 @@ namespace customerportalapi.Services.interfaces
     {
         Task<Profile> GetProfileAsync(string username);
 
-        Task<Profile> GetProfileByDniAndTypeAsync(string dni, string accountType);
-
         Task<Profile> UpdateProfileAsync(Profile profile);
 
         Task<bool> InviteUserAsync(Invitation value);

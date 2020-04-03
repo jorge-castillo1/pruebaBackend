@@ -107,7 +107,6 @@ namespace customerportalapi.Services
             //2. If exist complete data from external repository
             //Invoke repository
             var entity = await _profileRepository.GetProfileAsync(user.Dni, accountType);
-            entity.Username = user.Username;
 
             //3. Set Email Principal according to external data. No two principal emails allowed
             entity.EmailAddress1Principal = false;
