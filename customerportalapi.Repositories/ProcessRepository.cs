@@ -58,6 +58,10 @@ namespace customerportalapi.Repositories
             if (filter.ProcessStatus.HasValue)
                 filters = filters & Builders<Process>.Filter.Eq(x => x.ProcessStatus, filter.ProcessStatus.Value);
 
+            if (!string.IsNullOrEmpty(filter.ExternalId))
+                filters = filters & Builders<Process>.Filter.Eq(x => x.Card.ExternalId, filter.ExternalId);
+
+          
             //Without pagination by the moment
             return _processes.Find(filters, 1, 0);
         }
