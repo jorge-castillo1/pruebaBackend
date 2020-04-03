@@ -91,6 +91,51 @@ namespace customerportalapi.Services
             return entity;
         }
 
+        public async Task<Profile> GetProfileByDniAndTypeAsync(string dni, string accountType)
+        {
+            //Add customer portal Business Logic
+            int userType = UserUtils.GetUserType(accountType);
+
+            User user = _userRepository.GetCurrentUserByDniAndType(dni, userType);
+            if (user.Id == null)
+                throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
+
+            //1. If emailverified is false throw error
+            if (!user.Emailverified)
+                throw new ServiceException("User is deactivated,", HttpStatusCode.Forbidden, "User", "Deactivated");
+
+            //2. If exist complete data from external repository
+            //Invoke repository
+            var entity = await _profileRepository.GetProfileAsync(user.Dni, accountType);
+
+            //3. Set Email Principal according to external data. No two principal emails allowed
+            entity.EmailAddress1Principal = false;
+            entity.EmailAddress2Principal = false;
+
+            if (entity.EmailAddress1 == user.Email)
+                entity.EmailAddress1Principal = true;
+            else if (entity.EmailAddress2 == user.Email)
+                entity.EmailAddress2Principal = true;
+
+            //4. Set Phone Principal according to external data. No two principal phones allowed
+            entity.MobilePhone1Principal = false;
+            entity.MobilePhonePrincipal = false;
+
+            if (entity.MobilePhone1 == user.Phone && !string.IsNullOrEmpty(user.Phone))
+                entity.MobilePhone1Principal = true;
+            else if (entity.MobilePhone == user.Phone && !string.IsNullOrEmpty(user.Phone))
+                entity.MobilePhonePrincipal = true;
+
+            entity.Language = user.Language;
+            entity.Avatar = user.Profilepicture;
+            //entity.CustomerTypeInfo = new AccountCustomerType()
+            //{
+            //    CustomerType = accountType
+            //}
+
+            return entity;
+        }
+
         public async Task<Profile> UpdateProfileAsync(Profile profile)
         {
             //Add customer portal Business Logic
