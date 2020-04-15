@@ -20,8 +20,20 @@ namespace customerportalapi.Services
         private readonly IMailRepository _mailRepository;
         private readonly IEmailTemplateRepository _emailTemplateRepository;
         private readonly IDocumentRepository _documentRepository;
+        private readonly IUserRepository _userRepository;
+        private readonly IStoreRepository _storeRepository;
 
-        public ContractServices(IConfiguration configuration, IContractRepository contractRepository, IContractSMRepository contractSMRepository, IMailRepository mailRepository, IEmailTemplateRepository emailTemplateRepository, IDocumentRepository documentRepository)
+
+        public ContractServices(
+            IConfiguration configuration, 
+            IContractRepository contractRepository, 
+            IContractSMRepository contractSMRepository, 
+            IMailRepository mailRepository, 
+            IEmailTemplateRepository emailTemplateRepository, 
+            IDocumentRepository documentRepository,
+            IUserRepository userRepository,
+            IStoreRepository storeRepository
+         )
         {
             _configuration = configuration;
             _contractRepository = contractRepository;
@@ -29,6 +41,8 @@ namespace customerportalapi.Services
             _mailRepository = mailRepository;
             _emailTemplateRepository = emailTemplateRepository;
             _documentRepository = documentRepository;
+            _userRepository = userRepository;
+            _storeRepository = storeRepository;
         }
 
         public async Task<Contract> GetContractAsync(string contractNumber)
@@ -66,6 +80,41 @@ namespace customerportalapi.Services
                     message.To.Add(mailTo);
                     message.Subject = string.Format(requestDigitalContractTemplate.subject, contract.Customer, dni);
                     message.Body = string.Format(requestDigitalContractTemplate.body, contract.Customer, dni, contract.ContractNumber);
+                    await _mailRepository.Send(message);
+                }
+                throw new ServiceException("Contract file does not exist.", HttpStatusCode.NotFound, "ContractNumber", "Not exist");
+            }
+
+            string documentId = list[0].DocumentId;
+
+            return await _documentRepository.GetDocumentAsync(documentId);
+        }
+        public async Task<string> GetDownloadInvoiceAsync(InvoiceDownload invoiceDownload)
+        {
+            DocumentMetadataSearchFilter filter = new DocumentMetadataSearchFilter()
+            {
+                InvoiceNumber = invoiceDownload.InvoiceNumber,
+                DocumentType = (int) DocumentTypes.Invoice
+            };
+            List<DocumentMetadata> list = await _documentRepository.Search(filter);
+
+            if (list.Count > 1) throw new ServiceException("More than one document was found", HttpStatusCode.BadRequest);
+            else if (list.Count == 0)
+            {
+
+                User user = _userRepository.GetCurrentUser(invoiceDownload.Username);
+                Store store = await _storeRepository.GetStoreAsync(invoiceDownload.StoreCode);
+
+                EmailTemplate requestDigitalInvoiceTemplate = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.RequestDigitalInvoice, LanguageTypes.en.ToString());
+                if (requestDigitalInvoiceTemplate._id != null)
+                {
+                    Email message = new Email();
+                    string mailTo = store.EmailAddress1;
+                    if (mailTo == null) throw new ServiceException("Store mail not found", HttpStatusCode.NotFound);
+                    if (! (_configuration["Environment"] == nameof(EnvironmentTypes.PRO))) mailTo = _configuration["MailStores"];
+                    message.To.Add(mailTo);
+                    message.Subject = string.Format(requestDigitalInvoiceTemplate.subject, user.Name, user.Dni, invoiceDownload.InvoiceNumber);
+                    message.Body = string.Format(requestDigitalInvoiceTemplate.body, user.Name, user.Dni, invoiceDownload.InvoiceNumber);
                     await _mailRepository.Send(message);
                 }
                 throw new ServiceException("Contract file does not exist.", HttpStatusCode.NotFound, "ContractNumber", "Not exist");

@@ -64,6 +64,25 @@ namespace customerportalapi.Controllers
             }
         }
 
+        [HttpPost("invoices/download")]
+        public async Task<ApiResponse> GetDownloadInvoiceAsync([FromBody] InvoiceDownload invoiceDownload)
+        {
+            try
+            {
+                var entity = await _services.GetDownloadInvoiceAsync(invoiceDownload);
+                return new ApiResponse(null, entity);
+            }
+            catch (ServiceException se)
+            {
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+
         [HttpGet("full/{contractNumber}")]
         public async Task<ApiResponse> GetFullContractAsync(string contractNumber)
         {

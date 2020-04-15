@@ -8,6 +8,8 @@
         FormOpinion = 3,
         ForgotPassword = 4,
         RequestDigitalContract = 5,
-        UpdateBankAccount = 6
+        UpdateBankAccount = 6,
+        RequestDigitalInvoice = 7
+
     }
 }
