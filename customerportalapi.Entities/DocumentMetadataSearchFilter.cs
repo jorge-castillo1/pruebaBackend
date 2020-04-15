@@ -16,5 +16,6 @@ namespace customerportalapi.Entities
         public string SmContractCode { get; set; }
         public int PageNumber { get; set; }
         public int PageSize { get; set; }
+        public string InvoiceNumber { get; set; }
     }
 }

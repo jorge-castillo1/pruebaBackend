@@ -15,7 +15,6 @@ namespace customerportalapi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [AuthorizeToken]
     public class PaymentController : ControllerBase
     {
         private readonly IPaymentService _services;
@@ -30,6 +29,7 @@ namespace customerportalapi.Controllers
         //POST api/payment/changepaymentmethod/bank
         [HttpPost]
         [Route("changepaymentmethod/bank")]
+        [AuthorizeToken]
         public async Task<ApiResponse> ChangePaymentMethodBankAsync([FromBody] PaymentMethodBank value)
         {
             try
@@ -52,6 +52,7 @@ namespace customerportalapi.Controllers
         //POST api/payment/changepaymentmethod/card
         [HttpPost]
         [Route("changepaymentmethod/card")]
+        [AuthorizeToken]
         public async Task<ApiResponse> ChangePaymentMethodCardAsync([FromBody] PaymentMethodCardSignature value)
         {
             try
@@ -74,6 +75,7 @@ namespace customerportalapi.Controllers
         //POST api/payment/changepaymentmethod/card/load
         [HttpPost]
         [Route("changepaymentmethod/card/load")]
+        [AuthorizeToken]
         public async Task<ApiResponse> ChangePaymentMethodCardLoadAsync([FromBody] PaymentMethodCard value)
         {
             try

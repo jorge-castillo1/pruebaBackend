@@ -26,13 +26,13 @@ namespace customerportalapi.Services
             {
                 cacheEntry = await createItem();
                 string json = JsonConvert.SerializeObject(cacheEntry);
-                byte[] value = Encoding.ASCII.GetBytes(json);
+                byte[] value = Encoding.UTF8.GetBytes(json);
 
                 _distributedCache.Set(cacheKey, value, _cacheEntryOptions);
             }
             else
             {
-                string content = Encoding.ASCII.GetString(result);
+                string content = Encoding.UTF8.GetString(result);
                 cacheEntry = JsonConvert.DeserializeObject<TItem>(content);
             }
 
