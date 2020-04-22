@@ -10,6 +10,5 @@ namespace customerportalapi.Repositories.interfaces
     {
         Task<List<Contract>> GetContractsAsync(string dni, string accountType);
         Task<Contract> GetContractAsync(string contractNumber);
-        Task<string> GetDownloadContractAsync(string contractNumber);
     }
 }

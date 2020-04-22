@@ -117,27 +117,6 @@ namespace customerportalapi.Services.Test.FakeData
 
             return db;
         }
-
-        public static Mock<IContractRepository> InvalidDownloadContractRepository()
-        {
-            var db = new Mock<IContractRepository>();
-            db.Setup(x => x.GetDownloadContractAsync(It.IsAny<string>())).Returns(Task.FromResult(
-            ""
-            )).Verifiable();
-            db.Setup(x => x.GetContractAsync(It.IsAny<string>())).Returns(Task.FromResult(new Contract())).Verifiable();
-
-            return db;
-        }
-
-        public static Mock<IContractRepository> ValidDownloadContractRepository()
-        {
-            var db = new Mock<IContractRepository>();
-            db.Setup(x => x.GetDownloadContractAsync(It.IsAny<string>())).Returns(Task.FromResult(
-            "JVBERi0xLjcNCiW1tbW1DQoxIDAgb2JqDQo8PC9UeXBlL0NhdGFsb2cvUGFnZXMgMiAwIFIvTGFuZyhlcy1FUykgL1N0cn"
-            )).Verifiable();
-
-            return db;
-        }
     }
 
 }
