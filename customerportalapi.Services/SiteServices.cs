@@ -223,8 +223,10 @@ namespace customerportalapi.Services
                 var num = 0;
                 foreach (var orderedinvoice in orderGroup)
                 {
-                    if (num < 3)
+                    if (num < 3 || orderedinvoice.OutStanding > 0 || orderedinvoice.OutStanding < 0)
+                    {
                         filteredInvoices.Add(orderedinvoice);
+                    }
 
                     num++;
                 }
