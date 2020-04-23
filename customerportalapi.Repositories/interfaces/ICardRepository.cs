@@ -7,6 +7,7 @@ namespace customerportalapi.Repositories.interfaces
     public interface ICardRepository
     {
         Card Get(string username, string smContractCode);
+        Card GetCurrent(string username, string smContractCode);
         Card GetByExternalId(string externalId);
         Card Update(Card card);
         Task<bool> Create(Card card);

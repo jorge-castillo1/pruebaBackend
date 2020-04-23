@@ -162,8 +162,22 @@ namespace customerportalapi.Services.Test
             var result = service.UpdatePaymentProcess(value);
 
             Assert.IsNotNull(result);
-            //_processRepository.Verify(x => x.Find(It.IsAny<ProcessSearchFilter>()));
-            //_processRepository.Verify(x => x.Update(It.IsAny<Process>()));
+        }
+
+        [TestMethod]
+        public void getCardCorrect()
+        {
+            //Arrange
+            SignatureStatus value = new SignatureStatus();
+            value.User = "usertest";
+            value.DocumentId = Guid.NewGuid().ToString();
+            value.Status = "document_canceled";
+
+            _cardRepository = CardRepositoryMock.CardRepository();
+            PaymentServices service = new PaymentServices(_configuration, _userRepository.Object, _processRepository.Object, _signatureRepository.Object, _storeRepository.Object, _accountSMRepository.Object, _emailTemplateRepository.Object, _mailRepository.Object, _profileRepository.Object, _contractRepository.Object, _paymentRepository.Object, _smContractRepository.Object, _cardRepository.Object);
+            var result = service.GetCard("username", "smContractCode");
+
+            Assert.IsNotNull(result);
         }
     }
 }

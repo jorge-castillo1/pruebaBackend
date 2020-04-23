@@ -11,7 +11,8 @@ namespace customerportalapi.Repositories.interfaces
     {
         Task<string> ChangePaymentMethodCard(HttpContent content);
         Task<PaymentMethodCardConfirmationResponse> ConfirmChangePaymentMethodCard(PaymentMethodCardConfirmationToken confirmation);
-
+        Task<PaymentMethodGetCardResponse> GetCard(string token);
+        Task<PaymentMethodPayInvoiceResponse> PayInvoice(PaymentMethodPayInvoice payInvoice);
 
     }
 }

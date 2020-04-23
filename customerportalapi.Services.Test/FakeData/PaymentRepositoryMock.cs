@@ -25,6 +25,18 @@ namespace customerportalapi.Services.Test.FakeData
                 }
             )).Verifiable();
 
+            db.Setup(x => x.GetCard(It.IsAny<string>())).Returns(Task.FromResult(
+                new PaymentMethodGetCardResponse()
+                {
+                    status = "success",
+                    message = "message",
+                    type = "MasterCard",
+                    expirydate = "10/33",
+                    cardnumber = "5458XXXXXXXXXXXX2585",
+                    card_holder = "cardholder"
+                }
+            )).Verifiable();
+
             return db;
         }
     }

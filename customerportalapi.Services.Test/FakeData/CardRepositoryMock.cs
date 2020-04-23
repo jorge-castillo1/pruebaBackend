@@ -51,6 +51,25 @@ namespace customerportalapi.Services.Test.FakeData
                 DocumentId = "fake documentId"
             }).Verifiable();
 
+            db.Setup(x => x.GetCurrent(It.IsAny<string>(), It.IsAny<string>())).Returns(new Card()
+            {
+                Id = "b02fc244-40e4-e511-80bf-00155d018a4g",
+                ExternalId = "12345678A",
+                Idcustomer = "fakeIdCustomer",
+                Siteid = "fake siteId",
+                Token = "fake token",
+                Status = 00,
+                Message = "fake message",
+                Cardholder = "fakecardholder",
+                Expirydate = "fake expiryDate",
+                Typecard = "fake typeCard",
+                Cardnumber = "fake cardNumber",
+                ContractNumber = "fake cntractNumber",
+                Username = "fake username",
+                Current = true,
+                DocumentId = "fake documentId"
+            }).Verifiable();
+
             db.Setup(x => x.Update(It.IsAny<Card>())).Returns(new Card()
             {   
                 Id = "b02fc244-40e4-e511-80bf-00155d018a4g",
