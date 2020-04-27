@@ -89,14 +89,14 @@ namespace customerportalapi.Repositories
             httpClient.BaseAddress = new Uri(_configuration["GatewayPaymentUrl"] + _configuration["PayInvoice"]);
 
             var keyValues = new List<KeyValuePair<string, string>>();
-            keyValues.Add(new KeyValuePair<string, string>("externalid", payInvoice.ExternalId));
+            keyValues.Add(new KeyValuePair<string, string>("externalid", Guid.NewGuid().ToString()));
             keyValues.Add(new KeyValuePair<string, string>("channel", "WEBPORTAL"));
             keyValues.Add(new KeyValuePair<string, string>("siteid", payInvoice.SiteId));
             keyValues.Add(new KeyValuePair<string, string>("idcustomer", payInvoice.IdCustomer));
             keyValues.Add(new KeyValuePair<string, string>("token", payInvoice.Token));
-            keyValues.Add(new KeyValuePair<string, string>("amount", payInvoice.Amount));
+            keyValues.Add(new KeyValuePair<string, string>("amount", payInvoice.Amount.ToString().Replace(",", ".")));
             keyValues.Add(new KeyValuePair<string, string>("ourref", payInvoice.Ourref));
-            keyValues.Add(new KeyValuePair<string, string>("documentid", payInvoice.Documentid));
+            keyValues.Add(new KeyValuePair<string, string>("documentid", payInvoice.Ourref));
             HttpContent content = new FormUrlEncodedContent(keyValues);
 
             var response = await httpClient.PostAsync(httpClient.BaseAddress, content);
@@ -118,8 +118,8 @@ namespace customerportalapi.Repositories
             httpClient.BaseAddress = new Uri(_configuration["GatewayPaymentUrl"] + _configuration["PayInvoiceNewCard"]);
             
             var keyValues = new List<KeyValuePair<string, string>>();
-            keyValues.Add(new KeyValuePair<string, string>("recurrent", payInvoiceNewCard.Recurrent.ToString()));
-            keyValues.Add(new KeyValuePair<string, string>("externalId", payInvoiceNewCard.ExternalId));
+            keyValues.Add(new KeyValuePair<string, string>("recurrent", payInvoiceNewCard.Recurrent == true ?  "true" : "false"));
+            keyValues.Add(new KeyValuePair<string, string>("externalid", payInvoiceNewCard.ExternalId));
             keyValues.Add(new KeyValuePair<string, string>("channel", "WEBPORTAL"));
             keyValues.Add(new KeyValuePair<string, string>("siteid", payInvoiceNewCard.SiteId));
             keyValues.Add(new KeyValuePair<string, string>("idcustomer", payInvoiceNewCard.IdCustomer));
@@ -127,7 +127,7 @@ namespace customerportalapi.Repositories
             keyValues.Add(new KeyValuePair<string, string>("name", payInvoiceNewCard.Name));
             keyValues.Add(new KeyValuePair<string, string>("surnames", payInvoiceNewCard.Surnames));
             keyValues.Add(new KeyValuePair<string, string>("url", payInvoiceNewCard.Url));
-            keyValues.Add(new KeyValuePair<string, string>("amount", payInvoiceNewCard.Amount));
+            keyValues.Add(new KeyValuePair<string, string>("amount", payInvoiceNewCard.Amount.ToString().Replace(",", ".")));
             keyValues.Add(new KeyValuePair<string, string>("ourref", payInvoiceNewCard.Ourref));
             keyValues.Add(new KeyValuePair<string, string>("documentid", payInvoiceNewCard.DocumentId));
             HttpContent content = new FormUrlEncodedContent(keyValues);

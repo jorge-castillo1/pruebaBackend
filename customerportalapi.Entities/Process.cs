@@ -38,5 +38,7 @@ namespace customerportalapi.Entities
 
         [BsonElement("card")]
         public ProcessCard Card { get; set; }
+        [BsonElement("pay")]
+        public ProcessPay Pay { get; set; }
     }
 }

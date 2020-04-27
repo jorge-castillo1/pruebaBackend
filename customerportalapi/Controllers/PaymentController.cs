@@ -137,5 +137,69 @@ namespace customerportalapi.Controllers
             }
         }
 
+        [HttpPost]
+        [Route("invoice")]
+        [AuthorizeToken]
+        public async Task<ApiResponse> PayInvoice(PaymentMethodPayInvoice payInvoice)
+        {
+            try
+            {
+                PaymentMethodPayInvoiceResponse entity = await _services.PayInvoice(payInvoice);
+                return new ApiResponse(entity);
+            }
+            catch (ServiceException se)
+            {
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+
+        //POST api/payment/invoice/load
+        [HttpPost]
+        [Route("invoice/load")]
+        [AuthorizeToken]
+        public async Task<ApiResponse> PayInvoiceByNewCardLoad([FromBody] PaymentMethodPayInvoiceNewCard value)
+        {
+            try
+            {
+                var result = await _services.PayInvoiceByNewCardLoad(value);
+                return new ApiResponse(result);
+            }
+            catch (ServiceException se)
+            {
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+
+        //POST api/payment/invoice/response
+        [HttpPost]
+        [Route("invoice/response")]
+        public async Task<ApiResponse> PayInvoiceByNewCardResponse([FromBody] PaymentMethodPayInvoiceNewCardResponse value)
+        {
+            try
+            {
+                var result = await _services.PayInvoiceByNewCardResponse(value);
+                return new ApiResponse(result);
+            }
+            catch (ServiceException se)
+            {
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+
     }
 }

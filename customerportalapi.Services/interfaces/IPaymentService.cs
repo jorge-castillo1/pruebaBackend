@@ -19,8 +19,13 @@ namespace customerportalapi.Services.interfaces
         Task<bool> ChangePaymentMethodCardResponseAsync(PaymentMethodCardData cardData);
 
         Task<bool> ChangePaymentMethodCard(PaymentMethodCardSignature paymentMethodCardSignature);
+        
         Task<Card> GetCard(string username, string smContractCode);
 
+        Task<PaymentMethodPayInvoiceResponse> PayInvoice(PaymentMethodPayInvoice payInvoice);
 
+        Task<string> PayInvoiceByNewCardLoad(PaymentMethodPayInvoiceNewCard paymentMethod);
+        
+        Task<bool> PayInvoiceByNewCardResponse(PaymentMethodPayInvoiceNewCardResponse payRes);
     }
 }
