@@ -73,38 +73,5 @@ namespace customerportalapi.Services.Test
             //Assert
             Assert.IsNotNull(contract);
         }
-
-        [TestMethod]
-        [ExpectedException(typeof(ServiceException), "No se ha producido la excepción esperada.")]
-        public async Task WhenDontHaveContractNumberShouldProduceAExceptionWhenCallGetDownloadContractAsync()
-        {
-            //Arrange
-            string dni= "fake dni";
-            string contractNumber = "TRWETR436745732564536";
-            Mock<IContractRepository> contractInvalid = ContractRepositoryMock.InvalidDownloadContractRepository();
-
-            //Act
-            _documentRepository = DocumentRepositoryMock.NoContractnumberDocumentRepository();
-            ContractServices service = new ContractServices(_configuration, contractInvalid.Object, _contractSMRepository.Object, _mailRepository.Object, _emailTemplateRepository.Object, _documentRepository.Object, _userRepository.Object, _storeRepository.Object);
-            await service.GetDownloadContractAsync(dni, contractNumber);
-
-        }
-
-        [TestMethod]
-        public async Task ShouldReturnAStringWhenCallGetDownloadContractAsync()
-        {
-            //Arrange
-            string dni = "fake dni";
-            string contractNumber = "TRWETR436745732564536";
-            Mock<IContractRepository> contractRep = ContractRepositoryMock.ValidDownloadContractRepository();
-            //Act
-            ContractServices service = new ContractServices(_configuration, contractRep.Object, _contractSMRepository.Object, _mailRepository.Object, _emailTemplateRepository.Object, _documentRepository.Object, _userRepository.Object, _storeRepository.Object);
-            string contract = await service.GetDownloadContractAsync(dni, contractNumber);
-
-            //Assert
-            Assert.IsNotNull(contract);
-        }
-
-
     }
 }

@@ -56,25 +56,6 @@ namespace customerportalapi.Repositories
             return contract;
         }
 
-        public async Task<string> GetDownloadContractAsync(string smContractCode)
-        {
-            string entity = null;
-
-            var httpClient = _clientFactory.CreateClient("httpClientDocument");
-            httpClient.BaseAddress = new Uri(_configuration["GatewayDocumentsUrl"] + _configuration["DocumentsAPI"]);
-
-            var response = await httpClient.GetAsync("contract/" + smContractCode, HttpCompletionOption.ResponseHeadersRead);
-            //response.EnsureSuccessStatusCode();
-            if (!response.IsSuccessStatusCode)
-            {
-                if (response.StatusCode == System.Net.HttpStatusCode.NotFound) return "";
-                return entity;
-            }
-            var content = await response.Content.ReadAsStringAsync();
-            JObject result = JObject.Parse(content);
-            var contractFile = result.GetValue("result").ToString();
-            return contractFile;
-
-        }
+        
     }
 }
