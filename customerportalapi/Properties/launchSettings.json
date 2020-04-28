@@ -16,6 +16,8 @@
         "Key": "Value",
         "MONGO_URL": "mongodb://localhost:27017",
         "InvoiceSMAPI": "smapi/Invoice/",
+        "InvoicePaymentSMAPI": "smapi/Invoice/payment/",
+        "PaymentMethodsCRM": "crmapi/Payments/",
         "Email__Smtp__Host": "smtp.office365.com",
         "Email__Smtp__Username": "no-reply@bluespace.eu",
         "ContractSMAPI": "smapi/Contract/",

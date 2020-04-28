@@ -1,4 +1,5 @@
-﻿using customerportalapi.Entities;
+﻿using System.Linq;
+using customerportalapi.Entities;
 using customerportalapi.Entities.enums;
 using customerportalapi.Repositories.interfaces;
 using customerportalapi.Services.Exceptions;
@@ -26,8 +27,9 @@ namespace customerportalapi.Services
         private readonly IContractRepository _contractRepository;
         private readonly IPaymentRepository _paymentRepository;
         private readonly IContractSMRepository _contractSMRepository;
-
         private readonly ICardRepository _cardRepository;
+        private readonly IPaymentMethodRepository _paymentMethodRepository;
+        private readonly IPayRepository _payRepository;
 
         public PaymentServices(
             IConfiguration configuration, 
@@ -42,7 +44,9 @@ namespace customerportalapi.Services
             IContractRepository contractRepository,
             IPaymentRepository paymentRepository,
             IContractSMRepository contractSMRepository,
-            ICardRepository cardRepository
+            ICardRepository cardRepository,
+            IPaymentMethodRepository paymentMethodRepository,
+            IPayRepository payRepository
         )
         {
             _configuration = configuration;
@@ -59,6 +63,8 @@ namespace customerportalapi.Services
             _paymentRepository = paymentRepository;
             _contractSMRepository = contractSMRepository;
             _cardRepository = cardRepository;
+            _paymentMethodRepository = paymentMethodRepository;
+            _payRepository = payRepository;
         }
 
         public async Task<bool> ChangePaymentMethod(PaymentMethod paymentMethod)
@@ -316,7 +322,7 @@ namespace customerportalapi.Services
 
 
             // Card verification failed
-            if (cardData.Status != 00) {
+            if (cardData.Status != "00") {
                 Process cancelProcess = new Process();;
                 cancelProcess.Username = updateCard.Username;
                 cancelProcess.ProcessType = (int)ProcessTypes.PaymentMethodChangeCard;
@@ -533,6 +539,265 @@ namespace customerportalapi.Services
            
             return true;
         }
-    }
-    
+        public async Task<Card> GetCard(string username, string smContractCode)
+        {
+            // 1. Get token of data card
+            Card card = _cardRepository.GetCurrent(username, smContractCode);
+            if (card.Id == null)
+                throw new ServiceException("Current Card doesn´t exits", HttpStatusCode.BadRequest, "Username, smContractCode");
+            
+            // 2. Get Card from precognis
+            PaymentMethodGetCardResponse cardData = await _paymentRepository.GetCard(card.Token);
+
+            if (cardData.status == "error")
+                throw new ServiceException("Card data error", HttpStatusCode.BadRequest, "token");
+            
+            // 3. Update own card data to prevent discrepancies
+             Card cardToUpdate = new Card() 
+            {
+                Id = card.Id,
+                ExternalId = card.ExternalId,
+                Idcustomer = card.Idcustomer,
+                Siteid = card.Siteid,
+                Token = card.Token,
+                Status = card.Status,
+                Message = card.Message,
+                Cardholder = cardData.card_holder,
+                Expirydate = cardData.expirydate,
+                Typecard = cardData.type,
+                Cardnumber = cardData.cardnumber,
+                ContractNumber = card.ContractNumber,
+                SmContractCode = card.SmContractCode,
+                Username = card.Username,
+                Current = card.Current
+
+            };
+            Card updatedCard = _cardRepository.Update(cardToUpdate);
+
+            // 4. 
+            return updatedCard;
+
+        }
+
+        public async Task<PaymentMethodPayInvoiceResponse> PayInvoice(PaymentMethodPayInvoice payInvoice)
+        {
+            // 1. Check payInvoice required values
+            if (payInvoice.SiteId == null || payInvoice.SiteId == "")
+                throw new ServiceException("SiteId is required", HttpStatusCode.BadRequest, "SiteId");
+
+            if (payInvoice.SmContractCode == null || payInvoice.SmContractCode == "")
+                throw new ServiceException("SmContractCode is required", HttpStatusCode.BadRequest, "SmContractCode");
+
+            if (payInvoice.Ourref == null || payInvoice.Ourref == "")
+                throw new ServiceException("Ourref is required", HttpStatusCode.BadRequest, "Ourref");
+
+            if (payInvoice.Token == null || payInvoice.Token == "")
+                throw new ServiceException("Token is required", HttpStatusCode.BadRequest, "Token");
+            
+            if (payInvoice.Username == null || payInvoice.Username == "")
+                throw new ServiceException("Username is required", HttpStatusCode.BadRequest, "Username");
+            
+            // 2. Get Invoice
+            List<Invoice> invoices = await _contractSMRepository.GetInvoicesAsync(payInvoice.SmContractCode);
+            if (invoices.Count <= 0)
+                throw new ServiceException("Invoices not found", HttpStatusCode.BadRequest, "smContractCode");
+
+               Invoice inv = invoices.Find(x => x.OurReference.Contains(payInvoice.Ourref));
+
+            if (inv.OurReference == null)
+                throw new ServiceException("Invoice not found", HttpStatusCode.BadRequest, "Ourreference");
+
+            // 3. Get SmContract 
+            SMContract smContract = await _contractSMRepository.GetAccessCodeAsync(payInvoice.SmContractCode);
+
+            if (smContract.Customerid == null)
+                throw new ServiceException("Contract sm found", HttpStatusCode.BadRequest, "SmContractCode");
+
+            // 4. Set data
+            payInvoice.Amount = inv.Amount;
+            payInvoice.IdCustomer = smContract.Customerid;
+
+            // 5. Pay
+            PaymentMethodPayInvoiceResponse payResponse = await _paymentRepository.PayInvoice(payInvoice);
+            if (payResponse.result != "00")
+                throw new ServiceException("Error payment", HttpStatusCode.BadRequest, "result");
+
+            // 6. Get CRM PayMethods
+            List<Store> stores = await _storeRepository.GetStoresAsync();
+            Store store = stores.Find(x => x.StoreCode.Contains(payInvoice.SiteId));
+            if (store.StoreId == null)
+                throw new ServiceException("Store not found", HttpStatusCode.BadRequest, "StoreId");
+
+            PaymentMethodCRM payMetCRM = await _paymentMethodRepository.GetPaymentMethod(store.StoreId.ToString());
+            if (payMetCRM.SMId == null)
+                throw new ServiceException("Error payment method crm", HttpStatusCode.BadRequest, "SMId");
+        
+            // 7. MakePayment SM
+            MakePayment mPayment = new MakePayment()
+            {
+                CustomerId = payInvoice.IdCustomer,
+                SiteId = payInvoice.SiteId,
+                DocumentId = payInvoice.Ourref,
+                PayMethod = payMetCRM.SMId,
+                PayAmount = payInvoice.Amount,
+                PayRef = payInvoice.Ourref
+            };
+            bool makePayment = await _contractSMRepository.MakePayment(mPayment);
+
+            return payResponse;
+        }
+
+        public async Task<string> PayInvoiceByNewCardLoad(PaymentMethodPayInvoiceNewCard paymentMethod)
+        {
+             //1. User must exists
+            User user = _userRepository.GetCurrentUser (paymentMethod.Username);
+
+            if (user.Id == null)
+                throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
+
+            // 2. Validate data
+
+            if (string.IsNullOrEmpty(paymentMethod.SmContractCode))
+                throw new ServiceException("Contract number field can not be null.", HttpStatusCode.BadRequest, "SMContractCode", "Empty fields");
+            
+            var store = await _storeRepository.GetStoreAsync(paymentMethod.SiteId);
+            
+            // 4. Get data to load card form string 
+            string usertype = UserUtils.GetAccountType(user.Usertype);
+            Profile userProfile = await _profileRepository.GetProfileAsync(user.Dni, usertype);
+            SMContract smContract = await _contractSMRepository.GetAccessCodeAsync(paymentMethod.SmContractCode);
+
+            List<Invoice> invoices = await _contractSMRepository.GetInvoicesAsync(paymentMethod.SmContractCode);
+            if (invoices.Count <= 0)
+                throw new ServiceException("Invoices not found", HttpStatusCode.BadRequest, "smContractCode");
+
+               Invoice inv = invoices.Find(x => x.OurReference.Contains(paymentMethod.Ourref));
+
+            if (inv.OurReference == null)
+                throw new ServiceException("Invoice not found", HttpStatusCode.BadRequest, "Ourreference");
+            string externalId = Guid.NewGuid().ToString();
+
+            paymentMethod.ExternalId = externalId;
+            paymentMethod.Recurrent = false;
+            paymentMethod.Nif = userProfile.DocumentNumber;
+            paymentMethod.Name = userProfile.Name;
+            paymentMethod.Surnames = userProfile.Surname;
+            paymentMethod.DocumentId = paymentMethod.Ourref;
+            paymentMethod.Amount = inv.Amount;
+            paymentMethod.IdCustomer = smContract.Customerid;
+            paymentMethod.Url =  _configuration["PayInvoiceByNewCardMethodCardResponse"];
+
+            string stringHtml = await _paymentRepository.PayInvoiceNewCard(paymentMethod);
+
+            Pay pay = new Pay()
+            {
+                ExternalId = externalId,
+                Idcustomer = paymentMethod.IdCustomer,
+                Siteid = paymentMethod.SiteId,
+                Token = null,
+                Status = null,
+                Message = null,
+                SmContractCode = paymentMethod.SmContractCode,
+                Username = paymentMethod.Username,
+                DocumentId = paymentMethod.DocumentId,
+                InvoiceNumber = paymentMethod.Ourref
+            };
+            bool createPay = await _payRepository.Create(pay);
+
+            return stringHtml;
+        }
+
+        public async Task<bool> PayInvoiceByNewCardResponse(PaymentMethodPayInvoiceNewCardResponse payRes) 
+        {
+            // 1. Save pay response in Pay collection
+            Pay findPay = _payRepository.GetByExternalId(payRes.ExternalId);
+           
+            if (findPay.Id == null)
+                throw new ServiceException("Pay doesn´t exist", HttpStatusCode.BadRequest);
+
+            Pay pay = new Pay() 
+            {
+                Id = findPay.Id,
+                ExternalId = payRes.ExternalId,
+                Idcustomer = findPay.Idcustomer,
+                Siteid = payRes.SiteId,
+                Token = payRes.Token,
+                Status = payRes.Status,
+                Message = payRes.Message,
+                SmContractCode = findPay.SmContractCode,
+                Username = findPay.Username,
+                DocumentId = findPay.DocumentId,
+                InvoiceNumber = findPay.InvoiceNumber,
+
+            };
+            Pay updatePay = _payRepository.Update(pay);
+
+           
+            // 2. Pay verification failed
+            if (payRes.Status != "00") {
+                Process cancelProcess = new Process();;
+                cancelProcess.Username = updatePay.Username;
+                cancelProcess.ProcessType = (int)ProcessTypes.Payment;
+                cancelProcess.ProcessStatus = (int)ProcessStatuses.Canceled;
+                cancelProcess.ContractNumber = null;
+                cancelProcess.SmContractCode = updatePay.SmContractCode;
+                cancelProcess.Pay = new ProcessPay()
+                {
+                    ExternalId = findPay.ExternalId,
+                    InvoiceNumber = findPay.InvoiceNumber
+                };
+                cancelProcess.Documents = null;
+
+                await _processRepository.Create(cancelProcess);
+                throw new ServiceException("Payment error", HttpStatusCode.BadRequest);
+            }
+
+             // 3. Get CRM PayMethods
+            List<Store> stores = await _storeRepository.GetStoresAsync();
+            Store store = stores.Find(x => x.StoreCode.Contains(payRes.SiteId));
+            if (store.StoreId == null)
+                throw new ServiceException("Store not found", HttpStatusCode.BadRequest, "StoreId");
+
+            // 4. Get Payment Method from CRM
+            PaymentMethodCRM payMetCRM = await _paymentMethodRepository.GetPaymentMethod(store.StoreId.ToString());
+            if (payMetCRM.SMId == null)
+                throw new ServiceException("Error payment method crm", HttpStatusCode.BadRequest, "SMId");
+
+             // 4. Get Invoice
+            List<Invoice> invoices = await _contractSMRepository.GetInvoicesAsync(pay.SmContractCode);
+            if (invoices.Count <= 0)
+                throw new ServiceException("Invoices not found", HttpStatusCode.BadRequest, "smContractCode");
+
+            Invoice inv = invoices.Find(x => x.OurReference.Contains(pay.InvoiceNumber));
+
+            // 4. MakePayment SM
+            MakePayment mPayment = new MakePayment()
+            {
+                CustomerId = pay.Idcustomer,
+                SiteId = payRes.SiteId,
+                DocumentId = pay.InvoiceNumber,
+                PayMethod = payMetCRM.SMId,
+                PayAmount = inv.Amount,
+                PayRef = pay.InvoiceNumber
+            };
+            bool makePayment = await _contractSMRepository.MakePayment(mPayment);
+            
+            Process process = new Process();
+            process.Username = updatePay.Username;
+            process.ProcessType = (int)ProcessTypes.Payment;
+            process.ProcessStatus = (int)ProcessStatuses.Accepted;
+            process.ContractNumber = null;
+            process.SmContractCode = updatePay.SmContractCode;
+            process.Pay = new ProcessPay()
+            {
+                ExternalId = updatePay.ExternalId,
+                InvoiceNumber = updatePay.InvoiceNumber
+            };
+            process.Documents = null;
+
+            await _processRepository.Create(process);
+            
+            return true;
+        }
+    }    
 }

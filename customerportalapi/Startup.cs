@@ -81,6 +81,11 @@ namespace customerportalapi
                 IMongoDatabase database = GetDatabase();
                 return new MongoCollectionWrapper<Card>(database, "cards");
             });
+            services.AddScoped<IMongoCollectionWrapper<Pay>>(serviceProvider =>
+            {
+                IMongoDatabase database = GetDatabase();
+                return new MongoCollectionWrapper<Pay>(database, "pays");
+            });
 
             //Mail service
             services.AddScoped(serviceProvider =>
@@ -115,6 +120,8 @@ namespace customerportalapi
             services.AddScoped<IPaymentRepository, PaymentRepository>();
             services.AddScoped<ICardRepository, CardRepository>();
             services.AddScoped<IUserAccountRepository, UserAccountRepository>();
+            services.AddScoped<IPaymentMethodRepository, PaymentMethodsRepository>();
+            services.AddScoped<IPayRepository, PayRepository>();
 
             //Register Business Services
             services.AddTransient<IUserServices, UserServices>();
