@@ -7,6 +7,7 @@ using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Text;
 
 namespace customerportalapi.Repositories
 {
@@ -47,6 +48,18 @@ namespace customerportalapi.Repositories
             JObject result = JObject.Parse(content);
 
             return JsonConvert.DeserializeObject<List<Invoice>>(result.GetValue("result").ToString());
+        }
+
+        public async Task<bool> MakePayment(MakePayment makePayment)
+        {
+            var httpClient = _clientFactory.CreateClient("httpClient");
+            var url = new Uri(_configuration["GatewaySmUrl"] + _configuration["InvoicePaymentSMAPI"]);
+
+            var postContent = new StringContent(JsonConvert.SerializeObject(makePayment), Encoding.UTF8, "application/json");
+
+            var response = await httpClient.PostAsync(url, postContent);
+            response.EnsureSuccessStatusCode();
+            return response.IsSuccessStatusCode;
         }
     }
 }

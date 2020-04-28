@@ -8,6 +8,7 @@ namespace customerportalapi.Entities.enums
     {
         PaymentMethodChangeBank = 0,
         PaymentMethodChangeCard = 1,
-        PaymentMethodChangeCardSignature = 2
+        PaymentMethodChangeCardSignature = 2,
+        Payment = 3
     }
 }

@@ -62,5 +62,84 @@ namespace customerportalapi.Repositories
 
         }
 
+        public async Task<PaymentMethodGetCardResponse> GetCard(string token)
+        {
+            PaymentMethodGetCardResponse entity = new PaymentMethodGetCardResponse();
+
+            var httpClient = _clientFactory.CreateClient("httpClientPayment");
+            httpClient.BaseAddress = new Uri(_configuration["GatewayPaymentUrl"] + _configuration["GetCardEndpoint"]);
+
+           
+            var response = await httpClient.GetAsync("?token="+ token + "&channel=WEBPORTAL", HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode) return entity;
+
+            var value = await response.Content.ReadAsStringAsync();
+            JObject result = JObject.Parse(value);
+
+            return JsonConvert.DeserializeObject<PaymentMethodGetCardResponse>(result.ToString());
+
+        }
+
+        public async Task<PaymentMethodPayInvoiceResponse> PayInvoice(PaymentMethodPayInvoice payInvoice)
+        {
+            PaymentMethodPayInvoiceResponse entity = new PaymentMethodPayInvoiceResponse();
+
+            var httpClient = _clientFactory.CreateClient("httpClientPayment");
+            httpClient.BaseAddress = new Uri(_configuration["GatewayPaymentUrl"] + _configuration["PayInvoice"]);
+
+            var keyValues = new List<KeyValuePair<string, string>>();
+            keyValues.Add(new KeyValuePair<string, string>("externalid", Guid.NewGuid().ToString()));
+            keyValues.Add(new KeyValuePair<string, string>("channel", "WEBPORTAL"));
+            keyValues.Add(new KeyValuePair<string, string>("siteid", payInvoice.SiteId));
+            keyValues.Add(new KeyValuePair<string, string>("idcustomer", payInvoice.IdCustomer));
+            keyValues.Add(new KeyValuePair<string, string>("token", payInvoice.Token));
+            keyValues.Add(new KeyValuePair<string, string>("amount", payInvoice.Amount.ToString().Replace(",", ".")));
+            keyValues.Add(new KeyValuePair<string, string>("ourref", payInvoice.Ourref));
+            keyValues.Add(new KeyValuePair<string, string>("documentid", payInvoice.Ourref));
+            HttpContent content = new FormUrlEncodedContent(keyValues);
+
+            var response = await httpClient.PostAsync(httpClient.BaseAddress, content);
+            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode) return entity;
+
+            var value = await response.Content.ReadAsStringAsync();
+            JObject result = JObject.Parse(value);
+
+            return JsonConvert.DeserializeObject<PaymentMethodPayInvoiceResponse>(result.ToString());
+
+        }
+
+        public async Task<string> PayInvoiceNewCard(PaymentMethodPayInvoiceNewCard payInvoiceNewCard)
+        {
+            string entity = "";
+
+            var httpClient = _clientFactory.CreateClient("httpClientPayment");
+            httpClient.BaseAddress = new Uri(_configuration["GatewayPaymentUrl"] + _configuration["PayInvoiceNewCard"]);
+            
+            var keyValues = new List<KeyValuePair<string, string>>();
+            keyValues.Add(new KeyValuePair<string, string>("recurrent", payInvoiceNewCard.Recurrent == true ?  "true" : "false"));
+            keyValues.Add(new KeyValuePair<string, string>("externalid", payInvoiceNewCard.ExternalId));
+            keyValues.Add(new KeyValuePair<string, string>("channel", "WEBPORTAL"));
+            keyValues.Add(new KeyValuePair<string, string>("siteid", payInvoiceNewCard.SiteId));
+            keyValues.Add(new KeyValuePair<string, string>("idcustomer", payInvoiceNewCard.IdCustomer));
+            keyValues.Add(new KeyValuePair<string, string>("nif", payInvoiceNewCard.Nif));
+            keyValues.Add(new KeyValuePair<string, string>("name", payInvoiceNewCard.Name));
+            keyValues.Add(new KeyValuePair<string, string>("surnames", payInvoiceNewCard.Surnames));
+            keyValues.Add(new KeyValuePair<string, string>("url", payInvoiceNewCard.Url));
+            keyValues.Add(new KeyValuePair<string, string>("amount", payInvoiceNewCard.Amount.ToString().Replace(",", ".")));
+            keyValues.Add(new KeyValuePair<string, string>("ourref", payInvoiceNewCard.Ourref));
+            keyValues.Add(new KeyValuePair<string, string>("documentid", payInvoiceNewCard.DocumentId));
+            HttpContent content = new FormUrlEncodedContent(keyValues);
+
+            var response = await httpClient.PostAsync(httpClient.BaseAddress, content);
+            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode) return entity;
+
+            var value = await response.Content.ReadAsStringAsync();
+            
+            return value;
+        }
+
     }
 }

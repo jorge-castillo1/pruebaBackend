@@ -27,6 +27,17 @@ namespace customerportalapi.Repositories
             }
             return card;
         }
+        public Card GetCurrent(string username, string smContractCode)
+        {
+            Card card = new Card();
+
+            var cardsInfo = _cards.FindOne(t => t.Username == username && t.SmContractCode == smContractCode && t.Current == true);
+            foreach (var c in cardsInfo)
+            {
+                card = c;
+            }
+            return card;
+        }
         public Card GetByExternalId(string externalId)
         {
             Card card = new Card();
