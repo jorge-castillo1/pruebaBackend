@@ -775,11 +775,7 @@ namespace customerportalapi.Services
             {
                 CustomerId = pay.Idcustomer,
                 SiteId = payRes.SiteId,
-<<<<<<< HEAD
                 DocumentId = inv.DocumentId,
-=======
-                DocumentId = pay.InvoiceNumber,
->>>>>>> 11403204d94b71997760d48a1febac17bd7cbaa5
                 PayMethod = payMetCRM.SMId,
                 PayAmount = inv.Amount,
                 PayRef = pay.InvoiceNumber
