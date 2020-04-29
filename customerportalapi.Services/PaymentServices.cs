@@ -637,10 +637,10 @@ namespace customerportalapi.Services
             {
                 CustomerId = payInvoice.IdCustomer,
                 SiteId = payInvoice.SiteId,
-                DocumentId = payInvoice.Ourref,
                 PayMethod = payMetCRM.SMId,
                 PayAmount = payInvoice.Amount,
-                PayRef = payInvoice.Ourref
+                PayRef = payInvoice.Ourref,
+                DocumentId = inv.DocumentId
             };
             bool makePayment = await _contractSMRepository.MakePayment(mPayment);
 
@@ -775,7 +775,7 @@ namespace customerportalapi.Services
             {
                 CustomerId = pay.Idcustomer,
                 SiteId = payRes.SiteId,
-                DocumentId = pay.InvoiceNumber,
+                DocumentId = inv.DocumentId,
                 PayMethod = payMetCRM.SMId,
                 PayAmount = inv.Amount,
                 PayRef = pay.InvoiceNumber
