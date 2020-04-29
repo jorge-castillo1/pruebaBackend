@@ -9,5 +9,6 @@ namespace customerportalapi.Entities
         public string Name { get; set; }
         public string StoreId { get; set; }
         public string SMId { get; set; }
+        public string DocumentId { get; set; }
     }
 }
