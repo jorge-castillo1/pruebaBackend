@@ -695,7 +695,10 @@ namespace customerportalapi.Services
 
             //5. Send email
             var message = new Email();
-            message.To.Add(form.EmailTo);
+            string email = form.EmailTo;
+            if (!(_config["Environment"] == nameof(EnvironmentTypes.PRO))) email = _config["MailStores"];
+
+            message.To.Add(email);
             message.Cc.Add(user.Email);
             message.Subject = formContactTemplate.subject;
 
