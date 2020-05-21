@@ -696,6 +696,7 @@ namespace customerportalapi.Services
             //5. Send email
             var message = new Email();
             message.To.Add(form.EmailTo);
+            message.Cc.Add(user.Email);
             message.Subject = formContactTemplate.subject;
 
             string body;
