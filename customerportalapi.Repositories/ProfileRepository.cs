@@ -75,6 +75,19 @@ namespace customerportalapi.Repositories
 
             return JsonConvert.DeserializeObject<AccountProfile>(result.GetValue("result").ToString());
         }
+        
+        public async Task<AccountProfile> GetAccountByDocumentNumberAsync(string documentNumber)
+        {
+            var httpClient = _clientFactory.CreateClient("httpClient");
+            httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["AccountsAPI"]);
+
+            var response = await httpClient.GetAsync(documentNumber + "/Base", HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
+            var content = await response.Content.ReadAsStringAsync();
+            JObject result = JObject.Parse(content);
+
+            return JsonConvert.DeserializeObject<AccountProfile>(result.GetValue("result").ToString());
+        }
 
         public async Task<AccountProfile> UpdateAccountAsync(AccountProfile account)
         {
