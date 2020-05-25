@@ -778,7 +778,7 @@ namespace customerportalapi.Services
                 DocumentId = inv.DocumentId,
                 PayMethod = payMetCRM.SMId,
                 PayAmount = inv.Amount,
-                PayRef = pay.InvoiceNumber
+                PayRef = pay.InvoiceNumber.Replace("/", "")
             };
             bool makePayment = await _contractSMRepository.MakePayment(mPayment);
             

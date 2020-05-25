@@ -471,6 +471,17 @@ namespace customerportalapi.Services
             return account;
         }
 
+        public async Task<Account> GetAccountByDocumentNumberAsync(string documentNumber)
+        {
+            AccountProfile accountProfile = await _profileRepository.GetAccountByDocumentNumberAsync(documentNumber);
+            if (accountProfile.DocumentNumber == null)
+                throw new ServiceException("Account does not exist.", HttpStatusCode.NotFound, "DocumentNumber", "Not exist");
+
+            var account = ToAccount(accountProfile);
+
+            return account;
+        }
+
         public async Task<Account> UpdateAccountAsync(Account value, string username)
         {
             //Invoke repository
@@ -642,6 +653,7 @@ namespace customerportalapi.Services
                 UseThisAddress = entity.UseThisAddress,
                 CustomerType = entity.CustomerType,
                 Profilepicture = entity.Profilepicture,
+                PaymentMethodId = entity.PaymentMethodId,
                 AddressList = new List<Address>
                 {
                     new Address

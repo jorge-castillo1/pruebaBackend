@@ -25,6 +25,8 @@ namespace customerportalapi.Entities
         public string CustomerType { get; set; }
 
         public string Profilepicture { get; set; }
+
+        public string PaymentMethodId { get; set; }
     }
 
     public class AccountProfile
@@ -88,6 +90,9 @@ namespace customerportalapi.Entities
         public string UseThisAddress { get; set; }
 
         public string CustomerType { get; set; }
+
         public string Profilepicture { get; set; }
+        
+        public string PaymentMethodId { get; set; }
     }
 }

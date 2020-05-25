@@ -11,6 +11,8 @@ namespace customerportalapi.Repositories.interfaces
 
         Task<AccountProfile> GetAccountAsync(string dni, string accountType);
 
+        Task<AccountProfile> GetAccountByDocumentNumberAsync(string documentNumber);
+
         Task<AccountProfile> UpdateAccountAsync(AccountProfile account);
 
         Task<Profile> ConfirmedWebPortalAccessAsync(string dni, string accountType);

@@ -231,6 +231,26 @@ namespace customerportalapi.Controllers
             }
         }
 
+        // GET api/users/accounts/{documentNumber}/base
+        [HttpGet("accounts/{documentNumber}/base")]
+        public async Task<ApiResponse> GetAccountBydocumentNumberAsync(string documentNumber)
+        {
+            try
+            {
+                var entity = await _services.GetAccountByDocumentNumberAsync(documentNumber);
+                return new ApiResponse(entity);
+            }
+            catch (ServiceException se)
+            {
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+
 
 
         // POST api/users/accounts
