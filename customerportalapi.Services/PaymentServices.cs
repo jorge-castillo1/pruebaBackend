@@ -155,6 +155,25 @@ namespace customerportalapi.Services
             EmailTemplate template = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.UpdateBankAccount, LanguageTypes.en.ToString());
             string smContractCode = processedpaymentdocument.SmContractCode;
             Contract contract = await _contractRepository.GetContractAsync(smContractCode);
+        
+            List<Store> stores = await _storeRepository.GetStoresAsync();
+            Store store = stores.Find(x => x.StoreCode.Contains(contract.StoreCode));
+            if (store.StoreId == null)
+                throw new ServiceException("Store not found", HttpStatusCode.BadRequest, "StoreId");
+
+            PaymentMethodCRM payMetCRM = await _paymentMethodRepository.GetPaymentMethodByBankAccount(store.StoreId.ToString());
+            if (payMetCRM.SMId == null)
+                throw new ServiceException("Error payment method crm", HttpStatusCode.BadRequest, "SMId");
+            
+            account.BankAccount = bankAccount.Iban;
+            AccountProfile updateAccount = await _profileRepository.UpdateAccountAsync(account);
+
+            contract.PaymentMethod = payMetCRM.PaymentMethodId;
+            Contract updateContract = await _contractRepository.UpdateContractAsync(contract);
+
+
+            if (updateAccount.SmCustomerId == null)
+                throw new ServiceException("Error updating account", HttpStatusCode.BadRequest, "SmCustomerId");
 
             if (template._id != null)
             {
@@ -536,7 +555,29 @@ namespace customerportalapi.Services
 
             processes[0].ProcessStatus = (int)ProcessStatuses.Accepted;
             _processRepository.Update(processes[0]);
-           
+
+            List<Store> stores = await _storeRepository.GetStoresAsync();
+            Store store = stores.Find(x => x.StoreCode.Contains(card.Siteid));
+            if (store.StoreId == null)
+                throw new ServiceException("Store not found", HttpStatusCode.BadRequest, "StoreId");
+
+            PaymentMethodCRM payMetCRM = await _paymentMethodRepository.GetPaymentMethodByCard(store.StoreId.ToString());
+            if (payMetCRM.SMId == null)
+                throw new ServiceException("Error payment method crm", HttpStatusCode.BadRequest, "SMId");
+            
+            account.Token = card.Token;
+            account.TokenUpdateDate = DateTime.UtcNow.ToString("O");
+            AccountProfile updateAccount = await _profileRepository.UpdateAccountAsync(account);
+
+            if (updateAccount.SmCustomerId == null)
+                throw new ServiceException("Error updating account", HttpStatusCode.BadRequest, "SmCustomerId");
+
+            // Update contract
+            string smContractCode = process.SmContractCode;
+            Contract contract = await _contractRepository.GetContractAsync(smContractCode);
+            contract.PaymentMethod = payMetCRM.PaymentMethodId;
+            Contract updateContract = await _contractRepository.UpdateContractAsync(contract);
+
             return true;
         }
         public async Task<Card> GetCard(string username, string smContractCode)
