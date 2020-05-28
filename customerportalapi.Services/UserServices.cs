@@ -654,6 +654,9 @@ namespace customerportalapi.Services
                 CustomerType = entity.CustomerType,
                 Profilepicture = entity.Profilepicture,
                 PaymentMethodId = entity.PaymentMethodId,
+                BankAccount = entity.BankAccount,
+                Token = entity.Token,
+                TokenUpdateDate = entity.TokenUpdateDate,
                 AddressList = new List<Address>
                 {
                     new Address

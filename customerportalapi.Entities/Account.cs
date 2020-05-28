@@ -27,6 +27,12 @@ namespace customerportalapi.Entities
         public string Profilepicture { get; set; }
 
         public string PaymentMethodId { get; set; }
+
+        public string Token { get; set; }
+
+        public string BankAccount { get; set; }
+
+        public string TokenUpdateDate { get; set; }
     }
 
     public class AccountProfile
@@ -94,5 +100,11 @@ namespace customerportalapi.Entities
         public string Profilepicture { get; set; }
         
         public string PaymentMethodId { get; set; }
+
+        public string BankAccount { get; set; }
+
+        public string Token { get; set; }
+        
+        public string TokenUpdateDate { get; set; }
     }
 }

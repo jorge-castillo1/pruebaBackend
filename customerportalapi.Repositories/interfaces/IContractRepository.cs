@@ -9,6 +9,9 @@ namespace customerportalapi.Repositories.interfaces
     public interface IContractRepository
     {
         Task<List<Contract>> GetContractsAsync(string dni, string accountType);
+
         Task<Contract> GetContractAsync(string contractNumber);
+
+        Task<Contract> UpdateContractAsync(Contract cont);
     }
 }

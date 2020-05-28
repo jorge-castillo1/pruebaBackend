@@ -10,5 +10,7 @@ namespace customerportalapi.Entities
         public string StoreId { get; set; }
         public string SMId { get; set; }
         public string DocumentId { get; set; }
+        public string PaymentMethodId { get; set; }
+
     }
 }
