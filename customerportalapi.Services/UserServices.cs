@@ -83,6 +83,7 @@ namespace customerportalapi.Services
 
             entity.Language = user.Language;
             entity.Avatar = user.Profilepicture;
+            entity.Username = username;
             //entity.CustomerTypeInfo = new AccountCustomerType()
             //{
             //    CustomerType = accountType
