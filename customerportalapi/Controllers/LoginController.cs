@@ -23,6 +23,11 @@ namespace customerportalapi.Controllers
             _logger = logger;
         }
 
+        /// <summary>
+        /// Authenticate user against authenticator system
+        /// </summary>
+        /// <param name="value">Login credentials</param>
+        /// <returns>Access Token if succesfully logged</returns>
         // POST api/login
         [HttpPost]
         public async Task<ApiResponse> PostAsync([FromBody] Login value)
@@ -43,6 +48,11 @@ namespace customerportalapi.Controllers
             }
         }
 
+        /// <summary>
+        /// Change user password
+        /// </summary>
+        /// <param name="value">Old and New password data</param>
+        /// <returns>Access Token if succesfully changed password</returns>
         //POST api/login/passwordReset
         [HttpPost]
         [Route("passwordReset")]
@@ -65,6 +75,11 @@ namespace customerportalapi.Controllers
             }
         }
 
+        /// <summary>
+        /// Send mail to user with reset password instructions
+        /// </summary>
+        /// <param name="userName">Username</param>
+        /// <returns>Boolean if mail send</returns>
         // POST api/login/forgotPassword
         [HttpPost("forgotPassword/{userName}")]
         public async Task<ApiResponse> ForgotPassword(string userName)

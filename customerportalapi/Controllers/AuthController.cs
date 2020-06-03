@@ -23,6 +23,11 @@ namespace customerportalapi.Controllers
             _logger = logger;
         }
 
+        /// <summary>
+        /// Obtain a new Token from refresh token
+        /// </summary>
+        /// <param name="value">Refresh token</param>
+        /// <returns>Token access</returns>
         // POST api/auth/refreshtoken
         [HttpPost("refreshtoken")]
         public async Task<ApiResponse> RefreshTokenAsync([FromBody] RefreshToken value)
@@ -43,6 +48,10 @@ namespace customerportalapi.Controllers
             }
         }
 
+        /// <summary>
+        /// Logout from autenticator system
+        /// </summary>
+        /// <returns>Boolean</returns>
         [HttpGet("logout")]
         public async Task<ApiResponse> LogoutAsync()
         {
