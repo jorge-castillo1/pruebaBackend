@@ -210,29 +210,29 @@ namespace customerportalapi.Services
 
             // data
             form.Add(new StringContent("contractnumber"), "data[0][key]");
-            form.Add(new StringContent("company"), "data[1][key]");
-            form.Add(new StringContent("cif"), "data[2][key]");
-            form.Add(new StringContent("accountname"), "data[3][key]");
-            form.Add(new StringContent("address"), "data[4][key]");
-            form.Add(new StringContent("postalcode"), "data[5][key]");
-            form.Add(new StringContent("country"), "data[6][key]");
-            form.Add(new StringContent("clientname"), "data[7][key]");
-            form.Add(new StringContent("clientaddress"), "data[8][key]");
-            form.Add(new StringContent("clientpostalcode"), "data[9][key]");
-            form.Add(new StringContent("clientcountry"), "data[10][key]");
-            form.Add(new StringContent("iban"), "data[11][key]");
+            form.Add(new StringContent("companycountry"), "data[1][key]");
+            form.Add(new StringContent("companylegalname"), "data[2][key]");
+            form.Add(new StringContent("companycif"), "data[3][key]");
+            form.Add(new StringContent("companylegaladdress"), "data[4][key]");
+            form.Add(new StringContent("clientfullname"), "data[5][key]");
+            form.Add(new StringContent("iban"), "data[6][key]");
+            form.Add(new StringContent("clientaddress"), "data[7][key]");
+            form.Add(new StringContent("clientpostalcode"), "data[8][key]");
+            form.Add(new StringContent("clientcountry"), "data[9][key]");
+            form.Add(new StringContent("storecity"), "data[10][key]");
+            //form.Add(new StringContent("date"), "data[11][key]");
             form.Add(new StringContent(bankmethod.ContractNumber), "data[0][value]");
-            form.Add(new StringContent(store.CompanyName), "data[1][value]");
-            form.Add(new StringContent(store.CompanyCif), "data[2][value]");
-            form.Add(new StringContent(store.CompanyName), "data[3][value]");
+            form.Add(new StringContent(store.Country), "data[1][value]");
+            form.Add(new StringContent(store.CompanyName), "data[2][value]");
+            form.Add(new StringContent(store.CompanyCif), "data[3][value]");
             form.Add(new StringContent(store.CompanySocialAddress), "data[4][value]");
-            form.Add(new StringContent("00000"), "data[5][value]");
-            form.Add(new StringContent(store.Country), "data[6][value]");
-            form.Add(new StringContent(bankmethod.FullName), "data[7][value]");
-            form.Add(new StringContent(bankmethod.Address), "data[8][value]");
-            form.Add(new StringContent(bankmethod.PostalCode), "data[9][value]");
-            form.Add(new StringContent(bankmethod.Country), "data[10][value]");
-            form.Add(new StringContent(bankmethod.IBAN), "data[11][value]");
+            form.Add(new StringContent(bankmethod.FullName), "data[5][value]");
+            form.Add(new StringContent(bankmethod.IBAN), "data[6][value]");
+            form.Add(new StringContent(bankmethod.Address), "data[7][value]");
+            form.Add(new StringContent(bankmethod.PostalCode), "data[8][value]");
+            form.Add(new StringContent(bankmethod.Country), "data[9][value]");
+            form.Add(new StringContent(store.City), "data[10][value]");
+            //form.Add(new StringContent(DateTime.Today(short)), "data[11][value]");
             return form;
 
         }
