@@ -26,6 +26,11 @@ namespace customerportalapi.Controllers
             _logger = logger;
         }
 
+        /// <summary>
+        /// Obtain a contract from its contract number
+        /// </summary>
+        /// <param name="contractNumber">Contract number</param>
+        /// <returns>Contract data model</returns>
         [HttpGet("{contractNumber}")]
         public async Task<ApiResponse> GetAsync(string contractNumber)
         {
@@ -45,6 +50,12 @@ namespace customerportalapi.Controllers
             }
         }
 
+        /// <summary>
+        /// Download contract
+        /// </summary>
+        /// <param name="dni">user document identification number</param>
+        /// <param name="smContractCode">unique contract number from erp</param>
+        /// <returns>base64 string document</returns>
         [HttpGet("{dni}/{smContractCode}/download")]
         public async Task<ApiResponse> GetDownloadContractAsync(string dni, string smContractCode)
         {
@@ -64,6 +75,11 @@ namespace customerportalapi.Controllers
             }
         }
 
+        /// <summary>
+        /// Download invoice document
+        /// </summary>
+        /// <param name="invoiceDownload">Invoice information metadata</param>
+        /// <returns>base64 string document</returns>
         [HttpPost("invoices/download")]
         public async Task<ApiResponse> GetDownloadInvoiceAsync([FromBody] InvoiceDownload invoiceDownload)
         {
@@ -83,6 +99,11 @@ namespace customerportalapi.Controllers
             }
         }
 
+        /// <summary>
+        /// Obtain extended contract information from contract number
+        /// </summary>
+        /// <param name="contractNumber">friendly user contract number</param>
+        /// <returns>FullContract model data</returns>
         [HttpGet("full/{contractNumber}")]
         public async Task<ApiResponse> GetFullContractAsync(string contractNumber)
         {
@@ -102,6 +123,11 @@ namespace customerportalapi.Controllers
             }
         }
 
+        /// <summary>
+        /// Upload contract document to document repository
+        /// </summary>
+        /// <param name="document">Document content and metadata</param>
+        /// <returns>Unique document identification number</returns>
         [HttpPost()]
         public async Task<ApiResponse> UploadContractAsync([FromBody] Document document)
         {

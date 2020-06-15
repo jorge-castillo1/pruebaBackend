@@ -27,6 +27,11 @@ namespace customerportalapi.Controllers
             _logger = logger;
         }
 
+        /// <summary>
+        /// Receive changes on signature process status
+        /// </summary>
+        /// <param name="value">Signature status data</param>
+        /// <returns>Ok</returns>
         [HttpPost]
         public async Task<ActionResult> SignatureStatus([FromBody] SignatureStatus value)
         {

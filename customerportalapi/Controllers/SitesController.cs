@@ -27,6 +27,11 @@ namespace customerportalapi.Controllers
             _logger = logger;
         }
 
+        /// <summary>
+        /// Get sites list where current user has active contracts
+        /// </summary>
+        /// <param name="username">Username</param>
+        /// <returns>Site list</returns>
         [HttpGet("users/{username}")]
         // [Authorize(Roles = Role.Admin)]
         public async Task<ApiResponse> GetAsync(string username)
@@ -47,6 +52,14 @@ namespace customerportalapi.Controllers
             }
         }
 
+        /// <summary>
+        /// Search stores by country and/or city
+        /// </summary>
+        /// <param name="countryCode">Country code</param>
+        /// <param name="city">City</param>
+        /// <param name="skip">page number</param>
+        /// <param name="limit">page size</param>
+        /// <returns></returns>
         [HttpGet("stores")]
         public async Task<ApiResponse> GetAsync(string countryCode, string city, int skip, int? limit)
         {
@@ -70,6 +83,11 @@ namespace customerportalapi.Controllers
             }
         }
 
+        /// <summary>
+        /// Get unit information from unique unit id
+        /// </summary>
+        /// <param name="id">Unit identification Id</param>
+        /// <returns>Unit data model</returns>
         [HttpGet("units/{id:guid}")]
         public async Task<ApiResponse> GetUnitAsync(Guid id)
         {
@@ -85,6 +103,11 @@ namespace customerportalapi.Controllers
             }
         }
 
+        /// <summary>
+        /// Get unit information from unique erp system unit id 
+        /// </summary>
+        /// <param name="smid">ERP Unit identification Id </param>
+        /// <returns>Unit data model</returns>
         [HttpGet("units/{smid}")]
         public async Task<ApiResponse> GetUnitBySMIdAsync(string smid)
         {
@@ -100,6 +123,12 @@ namespace customerportalapi.Controllers
             }
         }
 
+        /// <summary>
+        /// Get unit contract
+        /// </summary>
+        /// <param name="smid">ERP Unit identification Id</param>
+        /// <param name="contractnumber">ERP contract identification number</param>
+        /// <returns></returns>
         [HttpGet("units/{smid}/{contractnumber}")]
         public async Task<ApiResponse> GetUnitContractAsync(string smid, string contractnumber)
         {
@@ -123,6 +152,10 @@ namespace customerportalapi.Controllers
             }
         }
 
+        /// <summary>
+        /// Get all available countries
+        /// </summary>
+        /// <returns>Country data model list</returns>
         [HttpGet("countries")]
         public async Task<ApiResponse> GetCountriesAsync()
         {
@@ -138,6 +171,11 @@ namespace customerportalapi.Controllers
             }
         }
 
+        /// <summary>
+        /// Get cities from country
+        /// </summary>
+        /// <param name="countryCode">Country code</param>
+        /// <returns>City data model list</returns>
         [HttpGet("cities")]
         public async Task<ApiResponse> GetCitiesAsync(string countryCode)
         {
@@ -153,6 +191,11 @@ namespace customerportalapi.Controllers
             }
         }
 
+        /// <summary>
+        /// Get stores from store code
+        /// </summary>
+        /// <param name="storeCode">Store code</param>
+        /// <returns>Store data model</returns>
         [HttpGet("stores/{storeCode}")]
         public async Task<ApiResponse> GetStoreAsync(string storeCode)
         {
@@ -168,6 +211,11 @@ namespace customerportalapi.Controllers
             }
         }
 
+        /// <summary>
+        /// Get site access code
+        /// </summary>
+        /// <param name="value">Access code credentials</param>
+        /// <returns>Site access code</returns>
         [HttpPost("access-code")]
         public async Task<ApiResponse> GetAccessCodeAsync([FromBody] AccessCode value)
         {
@@ -188,6 +236,11 @@ namespace customerportalapi.Controllers
             }
         }
 
+        /// <summary>
+        /// Get Last user invoices
+        /// </summary>
+        /// <param name="username">Username</param>
+        /// <returns>Last n user invoices</returns>
         [HttpGet("invoices/{username}")]
         public async Task<ApiResponse> GetInvoicesAsync(string username)
         {
