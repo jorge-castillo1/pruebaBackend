@@ -130,7 +130,7 @@ namespace customerportalapi.Services
             ContractFull response = new ContractFull();
             response.contract = await _contractRepository.GetContractAsync(smContractCode);
             if (response.contract.ContractNumber == null) throw new ServiceException("Contract does not exist.", HttpStatusCode.NotFound, "ContractNumber", "Not exist");
-            response.contract.TotalPrice = response.contract.Price + response.contract.Vat;
+            response.contract.TotalPrice = response.contract.Price + response.contract.Vat.Value;
             // String smContractNumber = response.contract.SmContractCode;
             response.smcontract = await _contractSMRepository.GetAccessCodeAsync(smContractCode);
             response.contract.StoreCode = response.contract.StoreData.StoreCode;
