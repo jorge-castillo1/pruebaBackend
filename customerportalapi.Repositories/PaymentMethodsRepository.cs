@@ -35,5 +35,33 @@ namespace customerportalapi.Repositories
 
             return JsonConvert.DeserializeObject<PaymentMethodCRM>(result.GetValue("result").ToString());
         }
+        public async Task<PaymentMethodCRM> GetPaymentMethodByCard(string storeId)
+        {
+            var httpClient = _clientFactory.CreateClient("httpClient");
+            var uri = new Uri(_configuration["GatewayUrl"] + _configuration["PaymentMethodsCRM"] + storeId + "/card/");
+
+            var response = await httpClient.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode) return new PaymentMethodCRM();
+            var content = await response.Content.ReadAsStringAsync();
+            JObject result = JObject.Parse(content);
+
+            return JsonConvert.DeserializeObject<PaymentMethodCRM>(result.GetValue("result").ToString());
+        }
+
+        public async Task<PaymentMethodCRM> GetPaymentMethodByBankAccount(string storeId)
+        {
+            var httpClient = _clientFactory.CreateClient("httpClient");
+            var uri = new Uri(_configuration["GatewayUrl"] + _configuration["PaymentMethodsCRM"] + storeId + "/bank/");
+
+            var response = await httpClient.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode) return new PaymentMethodCRM();
+            var content = await response.Content.ReadAsStringAsync();
+            JObject result = JObject.Parse(content);
+
+            return JsonConvert.DeserializeObject<PaymentMethodCRM>(result.GetValue("result").ToString());
+        }
+
     }
 }

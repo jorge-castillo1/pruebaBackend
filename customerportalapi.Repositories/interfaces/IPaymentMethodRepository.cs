@@ -7,5 +7,10 @@ namespace customerportalapi.Repositories.interfaces
     public interface IPaymentMethodRepository
     {
         Task<PaymentMethodCRM> GetPaymentMethod(string storeId);
+
+        Task<PaymentMethodCRM> GetPaymentMethodByCard(string storeId);
+
+        Task<PaymentMethodCRM> GetPaymentMethodByBankAccount(string storeId);
+
     }
 }

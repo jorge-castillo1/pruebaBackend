@@ -23,6 +23,10 @@ namespace customerportalapi.Controllers
         }
 
 
+        /// <summary>
+        /// Get available countries
+        /// </summary>
+        /// <returns>List of Countries</returns>
         [HttpGet]
         public async Task<ApiResponse> GetAsync()
         {

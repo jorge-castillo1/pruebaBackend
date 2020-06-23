@@ -23,6 +23,11 @@ namespace customerportalapi.Controllers
             _logger = logger;
         }
 
+        /// <summary>
+        /// Get User Profile
+        /// </summary>
+        /// <param name="username">Username</param>
+        /// <returns>User profile data model</returns>
         // GET api/users/{dni}
         [HttpGet("{username}")]
 
@@ -45,6 +50,12 @@ namespace customerportalapi.Controllers
             }
         }
 
+        /// <summary>
+        /// Get User Profile
+        /// </summary>
+        /// <param name="dni">User Document Identification Number</param>
+        /// <param name="accountType">Account type</param>
+        /// <returns>User profile data model</returns>
         // GET api/users/{dni}
         [HttpGet("{dni}/{accountType}")]
 
@@ -67,6 +78,11 @@ namespace customerportalapi.Controllers
             }
         }
 
+        /// <summary>
+        /// Update users profile
+        /// </summary>
+        /// <param name="value">Profile data to update</param>
+        /// <returns>Profile data updated</returns>
         // POST api/users
         [HttpPatch]
         [AuthorizeToken]
@@ -88,6 +104,12 @@ namespace customerportalapi.Controllers
             }
         }
 
+        /// <summary>
+        /// Invite users to customer portal
+        /// </summary>
+        /// <param name="value">Invitation data model</param>
+        /// <returns>Boolean</returns>
+        /// <remarks>Use API KEY for this api</remarks>
         // POST api/users/invite
         [HttpPost("invite")]
         [AuthorizeApiKey]
@@ -109,6 +131,12 @@ namespace customerportalapi.Controllers
             }
         }
 
+        /// <summary>
+        /// Allow users to access customer portal after accepting invitation with new credentials
+        /// </summary>
+        /// <param name="receivedToken">Invitation token</param>
+        /// <param name="value">New user credentials</param>
+        /// <returns>Access Token</returns>
         [HttpPut("confirm/user/{receivedToken}")]
         public async Task<ApiResponse> ConfirmAndChangeCredentials(string receivedToken, [FromBody] ResetPassword value)
         {
@@ -128,6 +156,11 @@ namespace customerportalapi.Controllers
             }
         }
 
+        /// <summary>
+        /// Allow users to access customer portal after accepting invitation
+        /// </summary>
+        /// <param name="receivedToken">Invitation token</param>
+        /// <returns>Access Token</returns>
         // PUT api/users/confirm/{receivedToken}
         [HttpPut("confirm/{receivedToken}")]
         public async Task<ApiResponse> Confirm(string receivedToken)
@@ -148,6 +181,11 @@ namespace customerportalapi.Controllers
             }
         }
 
+        /// <summary>
+        /// validate user from Access Token
+        /// </summary>
+        /// <param name="username">Username</param>
+        /// <returns>Boolean with result</returns>
         [HttpGet("{username}/validation")]
         public ApiResponse UniqueUsername(string username)
         {
@@ -167,6 +205,7 @@ namespace customerportalapi.Controllers
         [HttpPut("uninvite/{dni}")]
         [AuthorizeApiKey]
         [Obsolete]
+        [ApiExplorerSettings(IgnoreApi =true)]
         public async Task<ApiResponse> UnInviteDni(string dni)
         {
             try
@@ -190,6 +229,12 @@ namespace customerportalapi.Controllers
             }
         }
 
+        /// <summary>
+        /// Revoke customer portal access to users
+        /// </summary>
+        /// <param name="value">User invitation data to revoke</param>
+        /// <returns>Boolean with result</returns>
+        /// <remarks>Use API KEY for this api</remarks>
         // PUT api/users/uninvite/{dni}
         [HttpPut("uninvite")]
         [AuthorizeApiKey]
@@ -211,6 +256,11 @@ namespace customerportalapi.Controllers
             }
         }
 
+        /// <summary>
+        /// Get customer information from username
+        /// </summary>
+        /// <param name="username">Username</param>
+        /// <returns>Customer data model</returns>
         // GET api/users/accounts/{username}
         [HttpGet("accounts/{username}")]
         public async Task<ApiResponse> GetAccountAsync(string username)
@@ -231,8 +281,38 @@ namespace customerportalapi.Controllers
             }
         }
 
+        /// <summary>
+        /// Get customer information from document number
+        /// </summary>
+        /// <param name="documentNumber">Document Number</param>
+        /// <returns>Customer data model</returns>
+        // GET api/users/accounts/{documentNumber}/base
+        [HttpGet("accounts/{documentNumber}/base")]
+        public async Task<ApiResponse> GetAccountBydocumentNumberAsync(string documentNumber)
+        {
+            try
+            {
+                var entity = await _services.GetAccountByDocumentNumberAsync(documentNumber);
+                return new ApiResponse(entity);
+            }
+            catch (ServiceException se)
+            {
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
 
 
+        /// <summary>
+        /// Update customer information
+        /// </summary>
+        /// <param name="value">Account data model to update</param>
+        /// <param name="username">Username</param>
+        /// <returns>Account data updated</returns>
         // POST api/users/accounts
         [HttpPatch("accounts/{username}")]
         public async Task<ApiResponse> PatchAccountAsync([FromBody] Account value, string username)
@@ -253,6 +333,11 @@ namespace customerportalapi.Controllers
             }
         }
 
+        /// <summary>
+        /// Associate contact information to user 
+        /// </summary>
+        /// <param name="value">Contact Information</param>
+        /// <returns>Boolean with result</returns>
         // POST api/users/contact
         [HttpPost("contact")]
         [AuthorizeToken]
@@ -270,6 +355,13 @@ namespace customerportalapi.Controllers
             }
         }
 
+        /// <summary>
+        /// Update user roles
+        /// </summary>
+        /// <param name="username">Username</param>
+        /// <param name="role">role</param>
+        /// <returns></returns>
+        /// <remarks>Use API KEY for this api</remarks>
         [HttpPatch("role/{username}/{role}")]
         [AuthorizeApiKey]
         public async Task<ApiResponse> ChangeRole(string username, string role)
@@ -290,6 +382,13 @@ namespace customerportalapi.Controllers
             }
         }
 
+        /// <summary>
+        /// Remove user role
+        /// </summary>
+        /// <param name="username">Username</param>
+        /// <param name="role">Role to remove</param>
+        /// <returns>Boolean with result</returns>  
+        /// <remarks>Use API KEY for this api</remarks>
         [HttpPatch("role/remove/{username}/{role}")]
         [AuthorizeApiKey]
         public async Task<ApiResponse> RemoveRole(string username, string role)

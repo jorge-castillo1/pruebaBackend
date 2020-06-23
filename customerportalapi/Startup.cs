@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Http;
@@ -255,6 +256,23 @@ namespace customerportalapi
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new Info { Title = "CustomerPortalAPI", Version = "v1" });
+
+                var filePath = Path.Combine(System.AppContext.BaseDirectory, "CustomerPortalApi.xml");
+                c.IncludeXmlComments(filePath);
+
+                // Define the Api Key scheme that's in use
+                c.AddSecurityDefinition("apiKey", new ApiKeyScheme
+                {
+                    Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+                    Name = "Authorization",
+                    In = "header",
+                    Type = "apiKey"
+                });
+
+                c.AddSecurityRequirement(new Dictionary<string, IEnumerable<string>>
+                    {
+                        { "apiKey", new[] {"Bearer {token}"}}
+                    });
             });
 
             services.AddMongoDbCache(options =>

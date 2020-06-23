@@ -155,6 +155,25 @@ namespace customerportalapi.Services
             EmailTemplate template = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.UpdateBankAccount, LanguageTypes.en.ToString());
             string smContractCode = processedpaymentdocument.SmContractCode;
             Contract contract = await _contractRepository.GetContractAsync(smContractCode);
+        
+            List<Store> stores = await _storeRepository.GetStoresAsync();
+            Store store = stores.Find(x => x.StoreCode.Contains(contract.StoreCode));
+            if (store.StoreId == null)
+                throw new ServiceException("Store not found", HttpStatusCode.BadRequest, "StoreId");
+
+            PaymentMethodCRM payMetCRM = await _paymentMethodRepository.GetPaymentMethodByBankAccount(store.StoreId.ToString());
+            if (payMetCRM.SMId == null)
+                throw new ServiceException("Error payment method crm", HttpStatusCode.BadRequest, "SMId");
+            
+            account.BankAccount = bankAccount.Iban;
+            AccountProfile updateAccount = await _profileRepository.UpdateAccountAsync(account);
+
+            contract.PaymentMethod = payMetCRM.PaymentMethodId;
+            Contract updateContract = await _contractRepository.UpdateContractAsync(contract);
+
+
+            if (updateAccount.SmCustomerId == null)
+                throw new ServiceException("Error updating account", HttpStatusCode.BadRequest, "SmCustomerId");
 
             if (template._id != null)
             {
@@ -191,29 +210,29 @@ namespace customerportalapi.Services
 
             // data
             form.Add(new StringContent("contractnumber"), "data[0][key]");
-            form.Add(new StringContent("company"), "data[1][key]");
-            form.Add(new StringContent("cif"), "data[2][key]");
-            form.Add(new StringContent("accountname"), "data[3][key]");
-            form.Add(new StringContent("address"), "data[4][key]");
-            form.Add(new StringContent("postalcode"), "data[5][key]");
-            form.Add(new StringContent("country"), "data[6][key]");
-            form.Add(new StringContent("clientname"), "data[7][key]");
-            form.Add(new StringContent("clientaddress"), "data[8][key]");
-            form.Add(new StringContent("clientpostalcode"), "data[9][key]");
-            form.Add(new StringContent("clientcountry"), "data[10][key]");
-            form.Add(new StringContent("iban"), "data[11][key]");
+            form.Add(new StringContent("companycountry"), "data[1][key]");
+            form.Add(new StringContent("companylegalname"), "data[2][key]");
+            form.Add(new StringContent("companycif"), "data[3][key]");
+            form.Add(new StringContent("companylegaladdress"), "data[4][key]");
+            form.Add(new StringContent("clientfullname"), "data[5][key]");
+            form.Add(new StringContent("iban"), "data[6][key]");
+            form.Add(new StringContent("clientaddress"), "data[7][key]");
+            form.Add(new StringContent("clientpostalcode"), "data[8][key]");
+            form.Add(new StringContent("clientcountry"), "data[9][key]");
+            form.Add(new StringContent("storecity"), "data[10][key]");
+            //form.Add(new StringContent("date"), "data[11][key]");
             form.Add(new StringContent(bankmethod.ContractNumber), "data[0][value]");
-            form.Add(new StringContent(store.CompanyName), "data[1][value]");
-            form.Add(new StringContent(store.CompanyCif), "data[2][value]");
-            form.Add(new StringContent(store.CompanyName), "data[3][value]");
+            form.Add(new StringContent(store.Country), "data[1][value]");
+            form.Add(new StringContent(store.CompanyName), "data[2][value]");
+            form.Add(new StringContent(store.CompanyCif), "data[3][value]");
             form.Add(new StringContent(store.CompanySocialAddress), "data[4][value]");
-            form.Add(new StringContent("00000"), "data[5][value]");
-            form.Add(new StringContent(store.Country), "data[6][value]");
-            form.Add(new StringContent(bankmethod.FullName), "data[7][value]");
-            form.Add(new StringContent(bankmethod.Address), "data[8][value]");
-            form.Add(new StringContent(bankmethod.PostalCode), "data[9][value]");
-            form.Add(new StringContent(bankmethod.Country), "data[10][value]");
-            form.Add(new StringContent(bankmethod.IBAN), "data[11][value]");
+            form.Add(new StringContent(bankmethod.FullName), "data[5][value]");
+            form.Add(new StringContent(bankmethod.IBAN), "data[6][value]");
+            form.Add(new StringContent(bankmethod.Address), "data[7][value]");
+            form.Add(new StringContent(bankmethod.PostalCode), "data[8][value]");
+            form.Add(new StringContent(bankmethod.Country), "data[9][value]");
+            form.Add(new StringContent(store.City), "data[10][value]");
+            //form.Add(new StringContent(DateTime.Today(short)), "data[11][value]");
             return form;
 
         }
@@ -536,7 +555,29 @@ namespace customerportalapi.Services
 
             processes[0].ProcessStatus = (int)ProcessStatuses.Accepted;
             _processRepository.Update(processes[0]);
-           
+
+            List<Store> stores = await _storeRepository.GetStoresAsync();
+            Store store = stores.Find(x => x.StoreCode.Contains(card.Siteid));
+            if (store.StoreId == null)
+                throw new ServiceException("Store not found", HttpStatusCode.BadRequest, "StoreId");
+
+            PaymentMethodCRM payMetCRM = await _paymentMethodRepository.GetPaymentMethodByCard(store.StoreId.ToString());
+            if (payMetCRM.SMId == null)
+                throw new ServiceException("Error payment method crm", HttpStatusCode.BadRequest, "SMId");
+            
+            account.Token = card.Token;
+            account.TokenUpdateDate = DateTime.UtcNow.ToString("O");
+            AccountProfile updateAccount = await _profileRepository.UpdateAccountAsync(account);
+
+            if (updateAccount.SmCustomerId == null)
+                throw new ServiceException("Error updating account", HttpStatusCode.BadRequest, "SmCustomerId");
+
+            // Update contract
+            string smContractCode = process.SmContractCode;
+            Contract contract = await _contractRepository.GetContractAsync(smContractCode);
+            contract.PaymentMethod = payMetCRM.PaymentMethodId;
+            Contract updateContract = await _contractRepository.UpdateContractAsync(contract);
+
             return true;
         }
         public async Task<Card> GetCard(string username, string smContractCode)
@@ -778,7 +819,7 @@ namespace customerportalapi.Services
                 DocumentId = inv.DocumentId,
                 PayMethod = payMetCRM.SMId,
                 PayAmount = inv.Amount,
-                PayRef = pay.InvoiceNumber
+                PayRef = pay.InvoiceNumber.Replace("/", "")
             };
             bool makePayment = await _contractSMRepository.MakePayment(mPayment);
             

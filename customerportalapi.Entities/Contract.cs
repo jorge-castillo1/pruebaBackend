@@ -2,6 +2,8 @@
 {
     public class Contract
     {
+        public string ContractId { get; set; }
+
         public string ContractNumber { get; set; }
 
         public string SmContractCode { get; set; }

@@ -56,6 +56,25 @@ namespace customerportalapi.Repositories
             return contract;
         }
 
-        
+        public async Task<Contract> UpdateContractAsync(Contract cont)
+        {
+            var entity = new Contract();
+
+            var httpClient = _clientFactory.CreateClient("httpClient");
+            var method = new HttpMethod("PATCH");
+            var request = new HttpRequestMessage(method, new Uri(_configuration["GatewayUrl"] + _configuration["ContractsAPI"]))
+            {
+                Content = new StringContent(JsonConvert.SerializeObject(cont), Encoding.UTF8, "application/json")
+            };
+            var response = await httpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+            var content = await response.Content.ReadAsStringAsync();
+            JObject result = JObject.Parse(content);
+
+            return JsonConvert.DeserializeObject<Contract>(result.GetValue("result").ToString());
+
+        }
+
+
     }
 }

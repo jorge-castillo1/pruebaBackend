@@ -7,6 +7,10 @@
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>C:\Users\jordi\Source\Repos\Bluespace\Integration Services\backend\customerportalapi\customerportalapi.xml</DocumentationFile>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Remove="customerportalapi-20200102.txt" />
     <None Remove="customerportalapi-20200103.txt" />

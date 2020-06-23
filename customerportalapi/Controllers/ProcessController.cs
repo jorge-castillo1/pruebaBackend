@@ -22,6 +22,13 @@ namespace customerportalapi.Controllers
             _logger = logger;
         }
 
+        /// <summary>
+        /// Get pending process from user, contract and process type
+        /// </summary>
+        /// <param name="user">userName</param>
+        /// <param name="smContractCode">Unique contract number from erp</param>
+        /// <param name="processtype">Type of process</param>
+        /// <returns>Process data or empty list</returns>
         [HttpGet]
         public ApiResponse GetLastProcess(string user, string smContractCode = null, int? processtype = null)
         {
@@ -41,6 +48,12 @@ namespace customerportalapi.Controllers
             }
         }
 
+        /// <summary>
+        /// Cancels pending process matching contract and type
+        /// </summary>
+        /// <param name="smContractCode">Unique contract number from erp</param>
+        /// <param name="processtype">Type of process</param>
+        /// <returns></returns>
         [HttpPut("cancel/{smContractCode}/{processtype}")]
         public ApiResponse CancelSignature(string smContractCode, int processtype)
         {

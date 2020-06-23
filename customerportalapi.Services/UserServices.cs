@@ -83,6 +83,7 @@ namespace customerportalapi.Services
 
             entity.Language = user.Language;
             entity.Avatar = user.Profilepicture;
+            entity.Username = username;
             //entity.CustomerTypeInfo = new AccountCustomerType()
             //{
             //    CustomerType = accountType
@@ -471,6 +472,17 @@ namespace customerportalapi.Services
             return account;
         }
 
+        public async Task<Account> GetAccountByDocumentNumberAsync(string documentNumber)
+        {
+            AccountProfile accountProfile = await _profileRepository.GetAccountByDocumentNumberAsync(documentNumber);
+            if (accountProfile.DocumentNumber == null)
+                throw new ServiceException("Account does not exist.", HttpStatusCode.NotFound, "DocumentNumber", "Not exist");
+
+            var account = ToAccount(accountProfile);
+
+            return account;
+        }
+
         public async Task<Account> UpdateAccountAsync(Account value, string username)
         {
             //Invoke repository
@@ -642,6 +654,10 @@ namespace customerportalapi.Services
                 UseThisAddress = entity.UseThisAddress,
                 CustomerType = entity.CustomerType,
                 Profilepicture = entity.Profilepicture,
+                PaymentMethodId = entity.PaymentMethodId,
+                BankAccount = entity.BankAccount,
+                Token = entity.Token,
+                TokenUpdateDate = entity.TokenUpdateDate,
                 AddressList = new List<Address>
                 {
                     new Address
@@ -695,7 +711,11 @@ namespace customerportalapi.Services
 
             //5. Send email
             var message = new Email();
-            message.To.Add(form.EmailTo);
+            string email = form.EmailTo;
+            if (!(_config["Environment"] == nameof(EnvironmentTypes.PRO))) email = _config["MailStores"];
+
+            message.To.Add(email);
+            message.Cc.Add(user.Email);
             message.Subject = formContactTemplate.subject;
 
             string body;

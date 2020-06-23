@@ -23,6 +23,10 @@ namespace customerportalapi.Controllers
             _logger = logger;
         }
 
+        /// <summary>
+        /// Get customer portal list templates
+        /// </summary>
+        /// <returns>Template data model list</returns>
         //GET: api/templates
         [HttpGet]
         public async Task<ApiResponse> GetAsync()
@@ -39,6 +43,12 @@ namespace customerportalapi.Controllers
             }
         }
 
+        /// <summary>
+        /// Get customer portal template
+        /// </summary>
+        /// <param name="code">Template code</param>
+        /// <param name="language">Template language</param>
+        /// <returns>Template data model</returns>
         // GET api/templates/{language}
         [HttpGet("{code}/{language}")]
         public async Task<ApiResponse> GetAsync(int code, string language)
