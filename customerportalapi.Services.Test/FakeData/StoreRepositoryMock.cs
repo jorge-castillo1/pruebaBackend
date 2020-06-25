@@ -23,7 +23,8 @@ namespace customerportalapi.Services.Test.FakeData
                     CompanyCif = "FAKE123456",
                     CompanyName = "Fake Company Name S.L.",
                     CompanySocialAddress = "Fake Street, 10",
-                    Country = "FAKE"
+                    Country = "FAKE",
+                    City = "FAKE"
                 }
             )).Verifiable();
 

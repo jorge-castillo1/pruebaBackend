@@ -580,15 +580,15 @@ namespace customerportalapi.Services
 
             return true;
         }
-        public async Task<Card> GetCard(string username, string smContractCode)
+        public async Task<Card> GetCard(string username, string token)
         {
             // 1. Get token of data card
-            Card card = _cardRepository.GetCurrent(username, smContractCode);
-            if (card.Id == null)
-                throw new ServiceException("Current Card doesn´t exits", HttpStatusCode.BadRequest, "Username, smContractCode");
+            // Card card = _cardRepository.GetCurrent(username, smContractCode);
+            // if (card.Id == null)
+            //     throw new ServiceException("Current Card doesn´t exits", HttpStatusCode.BadRequest, "Username, smContractCode");
             
             // 2. Get Card from precognis
-            PaymentMethodGetCardResponse cardData = await _paymentRepository.GetCard(card.Token);
+            PaymentMethodGetCardResponse cardData = await _paymentRepository.GetCard(token);
 
             if (cardData.status == "error")
                 throw new ServiceException("Card data error", HttpStatusCode.BadRequest, "token");
@@ -596,27 +596,27 @@ namespace customerportalapi.Services
             // 3. Update own card data to prevent discrepancies
              Card cardToUpdate = new Card() 
             {
-                Id = card.Id,
-                ExternalId = card.ExternalId,
-                Idcustomer = card.Idcustomer,
-                Siteid = card.Siteid,
-                Token = card.Token,
-                Status = card.Status,
-                Message = card.Message,
+                Id = null,
+                ExternalId = null,
+                Idcustomer = null,
+                Siteid = null,
+                Token = null,
+                Status = null,
+                Message = null,
                 Cardholder = cardData.card_holder,
                 Expirydate = cardData.expirydate,
                 Typecard = cardData.type,
                 Cardnumber = cardData.cardnumber,
-                ContractNumber = card.ContractNumber,
-                SmContractCode = card.SmContractCode,
-                Username = card.Username,
-                Current = card.Current
+                ContractNumber = null,
+                SmContractCode = null,
+                Username = null,
+                Current = true
 
             };
-            Card updatedCard = _cardRepository.Update(cardToUpdate);
+           // Card updatedCard = _cardRepository.Update(cardToUpdate);
 
             // 4. 
-            return updatedCard;
+            return cardToUpdate;
 
         }
 
