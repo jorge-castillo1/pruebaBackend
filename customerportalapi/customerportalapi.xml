@@ -284,5 +284,19 @@
             <returns>Boolean with result</returns>  
             <remarks>Use API KEY for this api</remarks>
         </member>
+        <member name="M:customerportalapi.Controllers.WebTemplatesController.GetAsync">
+            <summary>
+            Get customer portal list templates
+            </summary>
+            <returns>Template data model list</returns>
+        </member>
+        <member name="M:customerportalapi.Controllers.WebTemplatesController.GetAsync(System.Int32,System.String)">
+            <summary>
+            Get customer portal template
+            </summary>
+            <param name="code">Template code</param>
+            <param name="language">Template language</param>
+            <returns>Template data model</returns>
+        </member>
     </members>
 </doc>
