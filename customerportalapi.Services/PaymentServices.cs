@@ -123,7 +123,9 @@ namespace customerportalapi.Services
         public async Task<bool> UpdatePaymentProcess(SignatureStatus value)
         {
             // Add Bank account to SM
-            SMBankAccount bankAccount = new SMBankAccount();
+            // 
+            
+
             User user = _userRepository.GetCurrentUser(value.User);
             string usertype = user.Usertype == (int)UserTypes.Business ? AccountType.Business : string.Empty;
             AccountProfile account = await _profileRepository.GetAccountAsync(user.Dni, usertype);
@@ -143,13 +145,13 @@ namespace customerportalapi.Services
                     processedpaymentdocument = signatures[0].Documents[docIndex];
             }
 
-            bankAccount.CustomerId = account.SmCustomerId;
-            bankAccount.PaymentMethodId = "AT5";
-            bankAccount.AccountName = processedpaymentdocument.BankAccountName;
-            bankAccount.AccountNumber = processedpaymentdocument.BankAccountOrderNumber;
-            bankAccount.Default = 1;
-            bankAccount.Iban = processedpaymentdocument.BankAccountOrderNumber;
-            await _accountSMRepository.AddBankAccountAsync(bankAccount);
+            // bankAccount.CustomerId = account.SmCustomerId;
+            // bankAccount.PaymentMethodId = "AT5";
+            // bankAccount.AccountName = processedpaymentdocument.BankAccountName;
+            // bankAccount.AccountNumber = processedpaymentdocument.BankAccountOrderNumber;
+            // bankAccount.Default = 1;
+            // bankAccount.Iban = processedpaymentdocument.BankAccountOrderNumber;
+            // await _accountSMRepository.AddBankAccountAsync(bankAccount);
 
             // Send email to the store
             EmailTemplate template = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.UpdateBankAccount, LanguageTypes.en.ToString());
@@ -165,7 +167,7 @@ namespace customerportalapi.Services
             if (payMetCRM.SMId == null)
                 throw new ServiceException("Error payment method crm", HttpStatusCode.BadRequest, "SMId");
             
-            account.BankAccount = bankAccount.Iban;
+            account.BankAccount = processedpaymentdocument.BankAccountOrderNumber;
             AccountProfile updateAccount = await _profileRepository.UpdateAccountAsync(account);
 
             contract.PaymentMethod = payMetCRM.PaymentMethodId;
