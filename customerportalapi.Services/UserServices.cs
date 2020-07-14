@@ -448,6 +448,9 @@ namespace customerportalapi.Services
             //6. Delete from IS
             _identityRepository.DeleteUser(user.ExternalId);
 
+            //7. Delete from Database
+            _userRepository.Delete(user);
+
             return Task.FromResult(true);
         }
 
