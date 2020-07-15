@@ -273,7 +273,8 @@ namespace customerportalapi.Services
                 Email message = new Email();
                 message.To.Add(user.Email);
                 message.Subject = invitationTemplate.subject;
-                message.Body = string.Format(invitationTemplate.body, user.Name, user.Username, user.Password,
+                string htmlbody = invitationTemplate.body.Replace("{", "{{").Replace("}", "}}").Replace("%{{", "{").Replace("}}%", "}");
+                message.Body = string.Format(htmlbody, user.Name, user.Username, user.Password,
                     $"{_config["InviteConfirmation"]}{user.Invitationtoken}");
                 result = await _mailRepository.Send(message);
             }
@@ -721,22 +722,25 @@ namespace customerportalapi.Services
             message.Cc.Add(user.Email);
             message.Subject = formContactTemplate.subject;
 
+            string htmlbody = formContactTemplate.body.Replace("{", "{{").Replace("}", "}}").Replace("%{{", "{").Replace("}}%", "}");
             string body;
             switch (type)
             {
                 case EmailTemplateTypes.FormContact:
                     body = string.Format(
-                        formContactTemplate.body,
+                        htmlbody,
                         userProfile.Fullname,
                         userProfile.MobilePhone,
                         userProfile.MobilePhone1,
                         user.Email,
                         form.Motive,
-                        form.Message);
+                        form.Message, 
+                        form.Preference,
+                        form.ContactMethod);
                     break;
                 case EmailTemplateTypes.FormOpinion:
                     body = string.Format(
-                        formContactTemplate.body,
+                        htmlbody,
                         userProfile.Fullname,
                         userProfile.MobilePhone,
                         userProfile.MobilePhone1,
@@ -746,7 +750,7 @@ namespace customerportalapi.Services
                 default:
                     string date = System.DateTime.Now.ToString("dd/MM/yyyy HH:mm");
                     body = string.Format(
-                        formContactTemplate.body,
+                        htmlbody,
                         userProfile.Fullname,
                         userProfile.MobilePhone,
                         userProfile.MobilePhone1,

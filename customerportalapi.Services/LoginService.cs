@@ -112,7 +112,8 @@ namespace customerportalapi.Services
                 Email message = new Email();
                 message.To.Add(user.Email);
                 message.Subject = forgotPasswordTemplate.subject;
-                message.Body = string.Format(forgotPasswordTemplate.body, user.Name, user.Password,
+                string htmlbody = forgotPasswordTemplate.body.Replace("{", "{{").Replace("}", "}}").Replace("%{{", "{").Replace("}}%", "}");
+                message.Body = string.Format(htmlbody, user.Name, user.Password,
                     $"{_config["ResetPassword"]}{user.ForgotPasswordtoken}");
                 result = await _mailRepository.Send(message);
             }
