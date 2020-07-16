@@ -79,6 +79,8 @@ namespace customerportalapi.Services
                     if (! (_configuration["Environment"] == nameof(EnvironmentTypes.PRO))) mailTo = _configuration["MailStores"];
                     message.To.Add(mailTo);
                     message.Subject = string.Format(requestDigitalContractTemplate.subject, contract.Customer, dni);
+                    // TODO: When we will implement client new template
+                    // string htmlbody = requestDigitalContractTemplate.body.Replace("{", "{{").Replace("}", "}}").Replace("%{{", "{").Replace("}}%", "}");
                     message.Body = string.Format(requestDigitalContractTemplate.body, contract.Customer, dni, contract.ContractNumber);
                     await _mailRepository.Send(message);
                 }
@@ -114,6 +116,8 @@ namespace customerportalapi.Services
                     if (! (_configuration["Environment"] == nameof(EnvironmentTypes.PRO))) mailTo = _configuration["MailStores"];
                     message.To.Add(mailTo);
                     message.Subject = string.Format(requestDigitalInvoiceTemplate.subject, user.Name, user.Dni, invoiceDownload.InvoiceNumber);
+                    // TODO: When we will implement client new template
+                    // string htmlbody = requestDigitalInvoiceTemplate.body.Replace("{", "{{").Replace("}", "}}").Replace("%{{", "{").Replace("}}%", "}");
                     message.Body = string.Format(requestDigitalInvoiceTemplate.body, user.Name, user.Dni, invoiceDownload.InvoiceNumber);
                     await _mailRepository.Send(message);
                 }
