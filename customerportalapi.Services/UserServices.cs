@@ -728,7 +728,7 @@ namespace customerportalapi.Services
             {
                 case EmailTemplateTypes.FormContact:
                     body = string.Format(
-                        formContactTemplate.body,
+                        htmlbody,
                         userProfile.Fullname,
                         userProfile.MobilePhone,
                         userProfile.MobilePhone1,
@@ -740,7 +740,7 @@ namespace customerportalapi.Services
                     break;
                 case EmailTemplateTypes.FormOpinion:
                     body = string.Format(
-                        formContactTemplate.body,
+                        htmlbody,
                         userProfile.Fullname,
                         userProfile.MobilePhone,
                         userProfile.MobilePhone1,
@@ -750,7 +750,7 @@ namespace customerportalapi.Services
                 default:
                     string date = System.DateTime.Now.ToString("dd/MM/yyyy HH:mm");
                     body = string.Format(
-                        formContactTemplate.body,
+                        htmlbody,
                         userProfile.Fullname,
                         userProfile.MobilePhone,
                         userProfile.MobilePhone1,
