@@ -1,5 +1,3 @@
-using System;
-
 namespace customerportalapi.Entities
 {
     public class Login

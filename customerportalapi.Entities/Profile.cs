@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace customerportalapi.Entities
+﻿namespace customerportalapi.Entities
 {
     public class Profile
     {

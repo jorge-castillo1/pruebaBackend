@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace customerportalapi.Entities
+﻿namespace customerportalapi.Entities
 {
     public class PaymentMethod
     {

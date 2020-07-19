@@ -1,7 +1,4 @@
-﻿using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
-
-namespace customerportalapi.Entities
+﻿namespace customerportalapi.Entities
 {
     public class InvoiceDownload
     {
