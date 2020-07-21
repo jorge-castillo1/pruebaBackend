@@ -273,7 +273,8 @@ namespace customerportalapi.Services
                 Email message = new Email();
                 message.To.Add(user.Email);
                 message.Subject = invitationTemplate.subject;
-                message.Body = string.Format(invitationTemplate.body, user.Name, user.Username, user.Password,
+                string htmlbody = invitationTemplate.body.Replace("{", "{{").Replace("}", "}}").Replace("%{{", "{").Replace("}}%", "}");
+                message.Body = string.Format(htmlbody, user.Name, user.Username, user.Password,
                     $"{_config["InviteConfirmation"]}{user.Invitationtoken}");
                 result = await _mailRepository.Send(message);
             }
@@ -720,7 +721,8 @@ namespace customerportalapi.Services
             message.To.Add(email);
             message.Cc.Add(user.Email);
             message.Subject = formContactTemplate.subject;
-
+            // TODO: When implements a client custom mail
+            // string htmlbody = formContactTemplate.body.Replace("{", "{{").Replace("}", "}}").Replace("%{{", "{").Replace("}}%", "}");
             string body;
             switch (type)
             {
@@ -732,7 +734,9 @@ namespace customerportalapi.Services
                         userProfile.MobilePhone1,
                         user.Email,
                         form.Motive,
-                        form.Message);
+                        form.Message, 
+                        form.Preference,
+                        form.ContactMethod);
                     break;
                 case EmailTemplateTypes.FormOpinion:
                     body = string.Format(

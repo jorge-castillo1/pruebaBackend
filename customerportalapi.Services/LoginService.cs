@@ -108,11 +108,12 @@ namespace customerportalapi.Services
 
             if (forgotPasswordTemplate._id != null)
             {
-                //6. Send email invitation
+                //6. Send forgot password invitation
                 Email message = new Email();
                 message.To.Add(user.Email);
                 message.Subject = forgotPasswordTemplate.subject;
-                message.Body = string.Format(forgotPasswordTemplate.body, user.Name, user.Password,
+                string htmlbody = forgotPasswordTemplate.body.Replace("{", "{{").Replace("}", "}}").Replace("%{{", "{").Replace("}}%", "}");
+                message.Body = string.Format(htmlbody, user.Name, user.Password,
                     $"{_config["ResetPassword"]}{user.ForgotPasswordtoken}");
                 result = await _mailRepository.Send(message);
             }
