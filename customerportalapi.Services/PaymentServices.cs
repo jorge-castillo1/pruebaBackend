@@ -842,5 +842,130 @@ namespace customerportalapi.Services
             
             return true;
         }
-    }    
+
+        public async Task<string> UpdateCardLoad(PaymentMethodUpdateCardData updateCardData)
+        {
+             //1. User must exists
+            int userType = UserUtils.GetUserType(updateCardData.AccountType);
+            User user = _userRepository.GetCurrentUserByDniAndType(updateCardData.Dni, userType);
+
+            if (user.Id == null)
+                throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
+
+            // 2. Validate data
+            PaymentMethodUpdateCardData cardmethod = (PaymentMethodUpdateCardData)updateCardData;
+
+            if (string.IsNullOrEmpty(cardmethod.SmContractCode))
+                throw new ServiceException("Contract number field can not be null.", HttpStatusCode.BadRequest, "ContractNumber", "Empty fields");
+            
+            var store = await _storeRepository.GetStoreAsync(cardmethod.SiteId);
+            
+            // 4. Get data to load card form string 
+
+            Profile userProfile = await _profileRepository.GetProfileAsync(user.Dni, updateCardData.AccountType);
+            SMContract smContract = await _contractSMRepository.GetAccessCodeAsync(cardmethod.SmContractCode);
+            string externalId = Guid.NewGuid().ToString();
+
+
+            string stringHtml = await _paymentRepository.UpdateCardLoad(updateCardData);
+            Card card = new Card()
+            {
+                SmContractCode = cardmethod.SmContractCode,
+                ContractNumber = cardmethod.ContractNumber,
+                ExternalId = externalId,
+                Username = user.Username
+            };
+            bool createCard = await _cardRepository.Create(card);
+            if (createCard == false)
+                throw new ServiceException("Error creating card", HttpStatusCode.BadRequest);
+
+            return stringHtml;
+        }
+
+        public async Task<bool> UpdateCardResponseAsync(PaymentMethodUpdateCardResponse updateCardResponse) 
+        {
+            // 0. Guardar paymentMethodData en colección Cards
+            Card findCard = _cardRepository.GetByExternalId(updateCardResponse.externalid);
+            
+           
+            if (findCard.Id == null) {
+                PaymentMethodCardConfirmationToken confirmation  = new PaymentMethodCardConfirmationToken()
+                {
+                    ExternalId = updateCardResponse.externalid,
+                    Confirmed = false,
+                    Channel = "WEBPORTAL"
+                };
+            
+                await _paymentRepository.ConfirmChangePaymentMethodCard(confirmation);
+
+                throw new ServiceException("Card doesn´t exist", HttpStatusCode.BadRequest);
+            }
+
+            Card card = new Card() 
+            {
+                Id = findCard.Id,
+                ExternalId = updateCardResponse.externalid,
+                Idcustomer = updateCardResponse.IdCustomer,
+                Siteid = updateCardResponse.siteid,
+                Token = updateCardResponse.token,
+                Status = updateCardResponse.status,
+                Message = updateCardResponse.message,
+                Cardholder = updateCardResponse.cardholder,
+                Expirydate = updateCardResponse.expirydate,
+                Typecard = updateCardResponse.typecard,
+                Cardnumber = updateCardResponse.cardnumber,
+                ContractNumber = findCard.ContractNumber,
+                SmContractCode = findCard.SmContractCode,
+                Username = findCard.Username,
+                Current = false
+
+            };
+            Card updateCard = _cardRepository.Update(card);
+
+            ProcessSearchFilter searchProcess = new ProcessSearchFilter();
+            searchProcess.ExternalId = updateCard.ExternalId;
+            searchProcess.ProcessStatus = (int)ProcessStatuses.Pending;
+            List<Process> processes = _processRepository.Find(searchProcess);
+            if (processes.Count > 1)
+                throw new ServiceException("User have two or more pending process for this externalId", HttpStatusCode.BadRequest, "ExternalId", "Pending process");
+
+
+            // Card verification failed
+            if (updateCardResponse.status != "00") {
+                Process cancelProcess = new Process();;
+                cancelProcess.Username = updateCard.Username;
+                cancelProcess.ProcessType = (int)ProcessTypes.PaymentMethodChangeCard;
+                cancelProcess.ProcessStatus = (int)ProcessStatuses.Canceled;
+                cancelProcess.ContractNumber = updateCard.ContractNumber;
+                cancelProcess.SmContractCode = updateCard.SmContractCode;
+                cancelProcess.Card = new ProcessCard()
+                {
+                    ExternalId = updateCard.ExternalId,
+                    Status = 0
+                };
+                cancelProcess.Documents = null;
+
+                await _processRepository.Create(cancelProcess);
+                throw new ServiceException("Error card verification", HttpStatusCode.BadRequest);
+            }
+           
+            Process process = new Process();
+            process.Username = updateCard.Username;
+            process.ProcessType = (int)ProcessTypes.PaymentMethodChangeCard;
+            process.ProcessStatus = (int)ProcessStatuses.Pending;
+            process.ContractNumber = updateCard.ContractNumber;
+            process.SmContractCode = updateCard.SmContractCode;
+            process.Card = new ProcessCard()
+            {
+                ExternalId = updateCard.ExternalId,
+                Status = 0
+            };
+            process.Documents = null;
+
+            await _processRepository.Create(process);
+            
+            return true;
+        }   
+    }
+
 }

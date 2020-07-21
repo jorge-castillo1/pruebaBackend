@@ -141,5 +141,28 @@ namespace customerportalapi.Repositories
             return value;
         }
 
+        public async Task<string> UpdateCardLoad(PaymentMethodUpdateCardData updateCardData)
+        {
+            string entity = "";
+
+            var httpClient = _clientFactory.CreateClient("httpClientPayment");
+            httpClient.BaseAddress = new Uri(_configuration["GatewayPaymentUrl"] + _configuration["UpdateCardEndpoint"]);
+             var keyValues = new List<KeyValuePair<string, string>>();
+            keyValues.Add(new KeyValuePair<string, string>("externalid", updateCardData.ExternalId));
+            keyValues.Add(new KeyValuePair<string, string>("channel", "WEBPORTAL"));
+            keyValues.Add(new KeyValuePair<string, string>("siteid", updateCardData.SiteId));
+            keyValues.Add(new KeyValuePair<string, string>("idcustomer", updateCardData.IdCustomer));
+            keyValues.Add(new KeyValuePair<string, string>("token", updateCardData.Token));
+            keyValues.Add(new KeyValuePair<string, string>("url", updateCardData.Url));
+            HttpContent content = new FormUrlEncodedContent(keyValues);
+
+            var response = await httpClient.PostAsync(httpClient.BaseAddress, content);
+            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode) return entity;
+
+            var value = await response.Content.ReadAsStringAsync();
+            return value;
+        }
+
     }
 }

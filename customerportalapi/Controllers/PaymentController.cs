@@ -201,5 +201,49 @@ namespace customerportalapi.Controllers
             }
         }
 
+        //POST api/payment/update-card/load
+        [HttpPost]
+        [Route("update-card/load")]
+        [AuthorizeToken]
+        public async Task<ApiResponse> UpdateCardLoad([FromBody] PaymentMethodUpdateCardData value)
+        {
+            try
+            {
+                var result = await _services.UpdateCardLoad(value);
+                return new ApiResponse(result);
+            }
+            catch (ServiceException se)
+            {
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+
+        //POST api/payment/update-card/response
+        [HttpPost]
+        [Route("update-card/response")]
+        [AuthorizeToken]
+        public async Task<ApiResponse> UpdateCardResponse([FromBody] PaymentMethodUpdateCardResponse value)
+        {
+            try
+            {
+                var result = await _services.UpdateCardResponseAsync(value);
+                return new ApiResponse(result);
+            }
+            catch (ServiceException se)
+            {
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+
     }
 }
