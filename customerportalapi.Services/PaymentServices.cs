@@ -185,7 +185,6 @@ namespace customerportalapi.Services
                 if (!(_configuration["Environment"] == nameof(EnvironmentTypes.PRO))) storeMail = _configuration["MailStores"];
                 message.To.Add(storeMail);
                 message.Subject = string.Format(template.subject, user.Name, user.Dni);
-                string htmlbody = template.body.Replace("{", "{{").Replace("}", "}}").Replace("%{{", "{").Replace("}}%", "}");
                 message.Body = string.Format(template.body, user.Name, user.Dni, processedpaymentdocument.DocumentNumber);
                 await _mailRepository.Send(message);
             }
