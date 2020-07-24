@@ -226,7 +226,6 @@ namespace customerportalapi.Controllers
         //POST api/payment/update-card/response
         [HttpPost]
         [Route("update-card/response")]
-        [AuthorizeToken]
         public async Task<ApiResponse> UpdateCardResponse([FromBody] PaymentMethodUpdateCardResponse value)
         {
             try

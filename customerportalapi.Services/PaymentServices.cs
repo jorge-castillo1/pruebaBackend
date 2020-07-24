@@ -865,6 +865,9 @@ namespace customerportalapi.Services
             Profile userProfile = await _profileRepository.GetProfileAsync(user.Dni, updateCardData.AccountType);
             SMContract smContract = await _contractSMRepository.GetAccessCodeAsync(cardmethod.SmContractCode);
             string externalId = Guid.NewGuid().ToString();
+            updateCardData.ExternalId = externalId;
+            updateCardData.IdCustomer = smContract.Customerid;
+            updateCardData.Url = _configuration["UpdateCardMethodCardResponse"];
 
 
             string stringHtml = await _paymentRepository.UpdateCardLoad(updateCardData);
