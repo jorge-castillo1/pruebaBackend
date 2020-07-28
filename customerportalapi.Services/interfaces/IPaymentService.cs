@@ -27,5 +27,9 @@ namespace customerportalapi.Services.interfaces
         Task<string> PayInvoiceByNewCardLoad(PaymentMethodPayInvoiceNewCard paymentMethod);
         
         Task<bool> PayInvoiceByNewCardResponse(PaymentMethodPayInvoiceNewCardResponse payRes);
+        
+        Task<string> UpdateCardLoad(PaymentMethodUpdateCardData updateCardData);
+        
+        Task<bool> UpdateCardResponseAsync(PaymentMethodUpdateCardResponse updateCardResponse);
     }
 }

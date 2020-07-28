@@ -13,7 +13,7 @@ container('dotnetcore') {
       dotnet test "./customerportalapi.Services.Test/customerportalapi.Services.Test.csproj"
       """
     }}
-    stage('sonarqube') {
+    /* stage('sonarqube') {
       gitlabCommitStatus(name: 'sonarqube')  {
         container('sonar') {
           def sqScannerMsBuildHome = tool 'QuantionNetSonarqube'
@@ -38,7 +38,7 @@ container('dotnetcore') {
           }
         }
       }
-    }
+    }*/
 
     stage("docker") {
       gitlabCommitStatus(name: 'docker')  {
