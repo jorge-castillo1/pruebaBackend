@@ -596,6 +596,7 @@ namespace customerportalapi.Services
 
             Enum.TryParse(typeof(ContactTypes), value.Type, true, out var option);
             Email emailMessage = null;
+            Email customerEmailMessage = null;
             switch (option)
             {
                 case ContactTypes.Opinion:
@@ -635,10 +636,11 @@ namespace customerportalapi.Services
 
                     //3. Send Email
                     emailMessage = GenerateEmail(EmailTemplateTypes.FormContact, user, userProfile, value);
+                    customerEmailMessage = GenerateEmail(EmailTemplateTypes.FormContactCustomer, user, userProfile, value);
 
                     break;
             }
-
+            await _mailRepository.Send(customerEmailMessage);
             var result = await _mailRepository.Send(emailMessage);
 
             return result;
@@ -721,9 +723,8 @@ namespace customerportalapi.Services
             message.To.Add(email);
             message.Cc.Add(user.Email);
             message.Subject = formContactTemplate.subject;
-            // TODO: When implements a client custom mail
-            // string htmlbody = formContactTemplate.body.Replace("{", "{{").Replace("}", "}}").Replace("%{{", "{").Replace("}}%", "}");
             string body;
+            string htmlbody;
             switch (type)
             {
                 case EmailTemplateTypes.FormContact:
@@ -737,6 +738,14 @@ namespace customerportalapi.Services
                         form.Message, 
                         form.Preference,
                         form.ContactMethod);
+                    break;
+                case EmailTemplateTypes.FormContactCustomer:
+                    htmlbody = formContactTemplate.body.Replace("{", "{{").Replace("}", "}}").Replace("%{{", "{").Replace("}}%", "}");
+                    body = string.Format(
+                        htmlbody,
+                        userProfile.Fullname,
+                        form.Motive,
+                        form.Message);
                     break;
                 case EmailTemplateTypes.FormOpinion:
                     body = string.Format(
