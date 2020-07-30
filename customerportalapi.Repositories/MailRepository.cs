@@ -57,7 +57,6 @@ namespace customerportalapi.Repositories
             }
 
             await _mailClient.SendAsync(message);
-            _mailClient.Disconnect(true);
 
             return true;
         }
