@@ -9,7 +9,10 @@
         ForgotPassword = 4,
         RequestDigitalContract = 5,
         UpdateBankAccount = 6,
-        RequestDigitalInvoice = 7
+        RequestDigitalInvoice = 7,
+        FormContactCustomer = 8,
+        FormCallCustomer = 9,
+        EditDataCustomer = 10
 
     }
 }
