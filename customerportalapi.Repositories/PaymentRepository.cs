@@ -62,6 +62,30 @@ namespace customerportalapi.Repositories
 
         }
 
+        public async Task<PaymentMethodCardConfirmationResponse> UpdateConfirmChangePaymentMethodCard(PaymentMethodCardConfirmationToken confirmation)
+        {
+            PaymentMethodCardConfirmationResponse entity = new PaymentMethodCardConfirmationResponse();
+
+            var httpClient = _clientFactory.CreateClient("httpClientPayment");
+            httpClient.BaseAddress = new Uri(_configuration["GatewayPaymentUrl"] + _configuration["UpdateCardConfirmationTokenEndpoint"]);
+
+            var keyValues = new List<KeyValuePair<string, string>>();
+            keyValues.Add(new KeyValuePair<string, string>("channel", "WEBPORTAL"));
+            keyValues.Add(new KeyValuePair<string, string>("externalid", confirmation.ExternalId));
+            keyValues.Add(new KeyValuePair<string, string>("confirmed", confirmation.Confirmed == true ? "true" : "false"));
+            HttpContent content = new FormUrlEncodedContent(keyValues);
+        
+            var response = await httpClient.PostAsync(httpClient.BaseAddress, content);
+            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode) return entity;
+
+            var value = await response.Content.ReadAsStringAsync();
+            JObject result = JObject.Parse(value);
+
+            return JsonConvert.DeserializeObject<PaymentMethodCardConfirmationResponse>(result.ToString());
+
+        }
+
         public async Task<PaymentMethodGetCardResponse> GetCard(string token)
         {
             PaymentMethodGetCardResponse entity = new PaymentMethodGetCardResponse();

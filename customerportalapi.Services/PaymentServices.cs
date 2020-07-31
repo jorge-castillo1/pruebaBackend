@@ -520,7 +520,7 @@ namespace customerportalapi.Services
                 Channel = "WEBPORTAL"
             };
            
-            PaymentMethodCardConfirmationResponse cardConfirmation = await _paymentRepository.ConfirmChangePaymentMethodCard(confirmation);
+            PaymentMethodCardConfirmationResponse cardConfirmation = await _paymentRepository.UpdateConfirmChangePaymentMethodCard(confirmation);
             if (cardConfirmation.Status != "success") {
                 ProcessCard processCard = processes[0].Card;
                 processes[0].Card = new ProcessCard()
@@ -899,7 +899,7 @@ namespace customerportalapi.Services
                     Channel = "WEBPORTAL"
                 };
             
-                await _paymentRepository.ConfirmChangePaymentMethodCard(confirmation);
+                await _paymentRepository.UpdateConfirmChangePaymentMethodCard(confirmation);
 
                 throw new ServiceException("Card doesn´t exist", HttpStatusCode.BadRequest);
             }
