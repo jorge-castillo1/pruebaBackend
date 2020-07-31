@@ -75,6 +75,7 @@ namespace customerportalapi.Services
                     Confirmed = false
                 };
                _paymentRepository.ConfirmChangePaymentMethodCard(confirmation);
+               _paymentRepository.UpdateConfirmChangePaymentMethodCard(confirmation);
             }
             else if (process.ProcessType == (int)ProcessTypes.PaymentMethodChangeCardSignature)
             {
@@ -86,6 +87,7 @@ namespace customerportalapi.Services
                     Confirmed = false
                 };
                _paymentRepository.ConfirmChangePaymentMethodCard(confirmation);
+               _paymentRepository.UpdateConfirmChangePaymentMethodCard(confirmation);
                 foreach(ProcessDocument processdocument in process.Documents)
                     _signatureRepository.CancelSignature(processdocument.DocumentId);
             }
