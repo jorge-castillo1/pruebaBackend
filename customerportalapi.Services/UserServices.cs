@@ -203,6 +203,18 @@ namespace customerportalapi.Services
             else if (entity.MobilePhone == user.Phone && !string.IsNullOrEmpty(user.Phone))
                 entity.MobilePhonePrincipal = true;
 
+            EmailTemplate editDataCustomerTemplate = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.EditDataCustomer, user.Language);
+          
+            if (editDataCustomerTemplate._id != null)
+            {
+                Email message = new Email();
+                message.To.Add(user.Email);
+                message.Subject = editDataCustomerTemplate.subject;
+                string htmlbody = editDataCustomerTemplate.body.Replace("{", "{{").Replace("}", "}}").Replace("%{{", "{").Replace("}}%", "}");
+                message.Body = string.Format(htmlbody, user.Name);
+                await _mailRepository.Send(message);
+            }
+
             return entity;
         }
 
@@ -574,6 +586,21 @@ namespace customerportalapi.Services
             }
 
             var account = ToAccount(entity);
+            User user = _userRepository.GetCurrentUser(username);
+            EmailTemplate editDataCustomerTemplate = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.EditDataCustomer, user.Language);
+          
+            if (editDataCustomerTemplate._id != null)
+            {
+                if (user.Id != null) {
+                    Email message = new Email();
+                    message.To.Add(user.Email);
+                    message.Subject = editDataCustomerTemplate.subject;
+                    string htmlbody = editDataCustomerTemplate.body.Replace("{", "{{").Replace("}", "}}").Replace("%{{", "{").Replace("}}%", "}");
+                    message.Body = string.Format(htmlbody, user.Name);
+                    await _mailRepository.Send(message);
+                }
+                    
+            }
 
             return account;
         }
@@ -599,6 +626,7 @@ namespace customerportalapi.Services
 
             Enum.TryParse(typeof(ContactTypes), value.Type, true, out var option);
             Email emailMessage = null;
+            Email customerEmailMessage = null;
             switch (option)
             {
                 case ContactTypes.Opinion:
@@ -623,6 +651,8 @@ namespace customerportalapi.Services
 
                     //3. Send Email
                     emailMessage = GenerateEmail(EmailTemplateTypes.FormCall, user, userProfile, value);
+                    customerEmailMessage = GenerateEmail(EmailTemplateTypes.FormCallCustomer, user, userProfile, value);
+                    await _mailRepository.Send(customerEmailMessage);
 
                     break;
                 case ContactTypes.Contact:
@@ -638,12 +668,12 @@ namespace customerportalapi.Services
 
                     //3. Send Email
                     emailMessage = GenerateEmail(EmailTemplateTypes.FormContact, user, userProfile, value);
-
+                    customerEmailMessage = GenerateEmail(EmailTemplateTypes.FormContactCustomer, user, userProfile, value);
+                    await _mailRepository.Send(customerEmailMessage);
                     break;
             }
-
+            
             var result = await _mailRepository.Send(emailMessage);
-
             return result;
         }
 
@@ -724,9 +754,8 @@ namespace customerportalapi.Services
             message.To.Add(email);
             message.Cc.Add(user.Email);
             message.Subject = formContactTemplate.subject;
-            // TODO: When implements a client custom mail
-            // string htmlbody = formContactTemplate.body.Replace("{", "{{").Replace("}", "}}").Replace("%{{", "{").Replace("}}%", "}");
             string body;
+            string htmlbody;
             switch (type)
             {
                 case EmailTemplateTypes.FormContact:
@@ -741,6 +770,14 @@ namespace customerportalapi.Services
                         form.Preference,
                         form.ContactMethod);
                     break;
+                case EmailTemplateTypes.FormContactCustomer:
+                    htmlbody = formContactTemplate.body.Replace("{", "{{").Replace("}", "}}").Replace("%{{", "{").Replace("}}%", "}");
+                    body = string.Format(
+                        htmlbody,
+                        userProfile.Fullname,
+                        form.MotiveValue,
+                        form.Message);
+                    break;
                 case EmailTemplateTypes.FormOpinion:
                     body = string.Format(
                         formContactTemplate.body,
@@ -749,6 +786,14 @@ namespace customerportalapi.Services
                         userProfile.MobilePhone1,
                         user.Email,
                         form.Message);
+                    break;
+                case EmailTemplateTypes.FormCallCustomer:
+                    htmlbody = formContactTemplate.body.Replace("{", "{{").Replace("}", "}}").Replace("%{{", "{").Replace("}}%", "}");
+                    body = string.Format(
+                        htmlbody,
+                        userProfile.Fullname,
+                        form.ContactMethodValue,
+                        form.PreferenceValue);
                     break;
                 default:
                     string date = System.DateTime.Now.ToString("dd/MM/yyyy HH:mm");
