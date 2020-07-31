@@ -498,7 +498,10 @@ namespace customerportalapi.Services
                 MobilePhone1 = value.Mobile1,
                 EmailAddress1 = value.Email1,
                 EmailAddress2 = value.Email2,
-                UseThisAddress = value.UseThisAddress
+                UseThisAddress = value.UseThisAddress,
+                Token = value.Token,
+                TokenUpdateDate = value.TokenUpdateDate,
+                BankAccount = value.BankAccount
             };
 
             foreach (var address in value.AddressList)
