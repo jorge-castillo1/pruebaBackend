@@ -1,5 +1,6 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using System;
 
 namespace customerportalapi.Entities
 {
@@ -47,5 +48,12 @@ namespace customerportalapi.Entities
 
         [BsonElement("forgotpasswordtoken")]
         public string ForgotPasswordtoken { get; set; }
+
+        [BsonElement("accesscodeattempts")]
+        public int AccessCodeAttempts { get; set; }
+
+        [BsonElement("lastaccesscodeattempts")]
+        [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
+        public DateTime LastAccessCodeAttempts { get; set; }
     }
 }

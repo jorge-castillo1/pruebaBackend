@@ -73,6 +73,22 @@ namespace customerportalapi.Services.Test.FakeData
                 },
             })).Verifiable();
 
+            db.Setup(x => x.GetContractAsync(It.IsAny<string>())).Returns(Task.FromResult(new Contract
+            {
+                ContractNumber = "1234567893",
+                ContractDate = "01/01/2020",
+                Store = "Fake Store 2",
+                StoreData = new Store
+                {
+                    StoreName = "Fake Store",
+                    Telephone = "Fake telephone",
+                    CoordinatesLatitude = "Fake CoordinatesLatitude",
+                    CoordinatesLongitude = "Fake CoordinatesLongitude",
+                    StoreCode = "RI1BBFRI120920060000"
+                },
+                SmContractCode = "123456789"
+            })).Verifiable();
+
             return db;
         }
 
