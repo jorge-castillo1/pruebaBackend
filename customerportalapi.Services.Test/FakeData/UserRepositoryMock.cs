@@ -17,7 +17,9 @@ namespace customerportalapi.Services.Test.FakeData
                 Language = "fake lang",
                 Profilepicture = "fake profile image",
                 Emailverified = false,
-                Usertype = 1
+                Usertype = 1,
+                LoginAttempts = 5,
+                LastLoginAttempts = System.DateTime.Now.ToUniversalTime().AddMinutes(-10)
             }).Verifiable();
 
             db.Setup(x => x.GetCurrentUserByDniAndType(It.IsAny<string>(), It.IsAny<int>())).Returns(new Entities.User()
@@ -27,7 +29,9 @@ namespace customerportalapi.Services.Test.FakeData
                 Language = "fake lang",
                 Profilepicture = "fake profile image",
                 Emailverified = false,
-                Usertype = 1
+                Usertype = 1,
+                LoginAttempts = 5,
+                LastLoginAttempts = System.DateTime.Now.ToUniversalTime().AddMinutes(-10)
             }).Verifiable();
 
             db.Setup(x => x.Create(It.IsAny<User>())).Returns(Task.FromResult(true)).Verifiable();
@@ -48,7 +52,9 @@ namespace customerportalapi.Services.Test.FakeData
                 Profilepicture = "fake profile image",
                 Emailverified = true,
                 Usertype = 1,
-                Username = "fake username"
+                Username = "fake username",
+                LoginAttempts = 0,
+                LastLoginAttempts = System.DateTime.Now.ToUniversalTime().AddMinutes(-10)
             }).Verifiable();
 
             db.Setup(x => x.GetCurrentUserByDniAndType(It.IsAny<string>(), It.IsAny<int>())).Returns(new User()
@@ -61,7 +67,9 @@ namespace customerportalapi.Services.Test.FakeData
                 Profilepicture = "fake profile image",
                 Emailverified = true,
                 Usertype = 1,
-                Username = "fake username"
+                Username = "fake username",
+                LoginAttempts = 0,
+                LastLoginAttempts = System.DateTime.Now.ToUniversalTime().AddMinutes(-10)
             }).Verifiable();
 
             db.Setup(x => x.Update(It.IsAny<User>())).Returns(new User()
@@ -72,12 +80,111 @@ namespace customerportalapi.Services.Test.FakeData
                 Language = "fake lang modified",
                 Profilepicture = "fake profile image modified",
                 Emailverified = true,
-                Usertype = 1
+                Usertype = 1,
+                LoginAttempts = 1,
+                LastLoginAttempts = System.DateTime.Now.ToUniversalTime()
             }).Verifiable();
 
             return db;
         }
 
+        public static Mock<IUserRepository> ValidUserRepository_With5Attempts()
+        {
+            var db = new Mock<IUserRepository>();
+            db.Setup(x => x.GetCurrentUser(It.IsAny<string>())).Returns(new User()
+            {
+                Id = "b02fc244-40e4-e511-80bf-00155d018a4f",
+                Dni = "12345678A",
+                Email = "fake email 1",
+                Name = "fake name",
+                Language = "fake lang",
+                Profilepicture = "fake profile image",
+                Emailverified = true,
+                Usertype = 1,
+                Username = "fake username",
+                LoginAttempts = 5,
+                LastLoginAttempts = System.DateTime.Now.ToUniversalTime().AddMinutes(-30)
+            }).Verifiable();
+
+            db.Setup(x => x.GetCurrentUserByDniAndType(It.IsAny<string>(), It.IsAny<int>())).Returns(new User()
+            {
+                Id = "b02fc244-40e4-e511-80bf-00155d018a4f",
+                Dni = "12345678A",
+                Email = "fake email 1",
+                Name = "fake name",
+                Language = "fake lang",
+                Profilepicture = "fake profile image",
+                Emailverified = true,
+                Usertype = 1,
+                Username = "fake username",
+                LoginAttempts = 5,
+                LastLoginAttempts = System.DateTime.Now.ToUniversalTime().AddMinutes(-30)
+            }).Verifiable();
+
+            db.Setup(x => x.Update(It.IsAny<User>())).Returns(new User()
+            {
+                Id = "b02fc244-40e4-e511-80bf-00155d018a4f",
+                Dni = "12345678A",
+                Email = "fake email 1 modified",
+                Language = "fake lang modified",
+                Profilepicture = "fake profile image modified",
+                Emailverified = true,
+                Usertype = 1,
+                LoginAttempts = 5,
+                LastLoginAttempts = System.DateTime.Now.ToUniversalTime()
+            }).Verifiable();
+
+            return db;
+        }
+
+        public static Mock<IUserRepository> InvalidUserRepository_With5Attempts()
+        {
+            var db = new Mock<IUserRepository>();
+            db.Setup(x => x.GetCurrentUser(It.IsAny<string>())).Returns(new User()
+            {
+                Id = "b02fc244-40e4-e511-80bf-00155d018a4f",
+                Dni = "12345678A",
+                Email = "fake email 1",
+                Name = "fake name",
+                Language = "fake lang",
+                Profilepicture = "fake profile image",
+                Emailverified = true,
+                Usertype = 1,
+                Username = "fake username",
+                LoginAttempts = 5,
+                LastLoginAttempts = System.DateTime.Now.ToUniversalTime().AddMinutes(-10)
+            }).Verifiable();
+
+            db.Setup(x => x.GetCurrentUserByDniAndType(It.IsAny<string>(), It.IsAny<int>())).Returns(new User()
+            {
+                Id = "b02fc244-40e4-e511-80bf-00155d018a4f",
+                Dni = "12345678A",
+                Email = "fake email 1",
+                Name = "fake name",
+                Language = "fake lang",
+                Profilepicture = "fake profile image",
+                Emailverified = true,
+                Usertype = 1,
+                Username = "fake username",
+                LoginAttempts = 5,
+                LastLoginAttempts = System.DateTime.Now.ToUniversalTime().AddMinutes(-10)
+            }).Verifiable();
+
+            db.Setup(x => x.Update(It.IsAny<User>())).Returns(new User()
+            {
+                Id = "b02fc244-40e4-e511-80bf-00155d018a4f",
+                Dni = "12345678A",
+                Email = "fake email 1 modified",
+                Language = "fake lang modified",
+                Profilepicture = "fake profile image modified",
+                Emailverified = true,
+                Usertype = 1,
+                LoginAttempts = 5,
+                LastLoginAttempts = System.DateTime.Now.ToUniversalTime()
+            }).Verifiable();
+
+            return db;
+        }
         public static Mock<IUserRepository> Valid_InActiveUser_Repository()
         {
             var db = new Mock<IUserRepository>();

@@ -5,6 +5,7 @@ using customerportalapi.Services.Test.FakeData;
 using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Org.BouncyCastle.Math.EC.Rfc7748;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -19,7 +20,7 @@ namespace customerportalapi.Services.Test
         private Mock<IIdentityRepository> _identityRepository;
         private Mock<IEmailTemplateRepository> _emailtemplateRepository;
         private Mock<IMailRepository> _mailRepository;
-        private Mock<IConfiguration> _config;
+        private IConfiguration _config;
 
         [TestInitialize]
         public void Setup()
@@ -28,11 +29,14 @@ namespace customerportalapi.Services.Test
             _identityRepository = IdentityRepositoryMock.IdentityRepository();
             _emailtemplateRepository = EmailTemplateRepositoryMock.EmailTemplateRepository();
             _mailRepository = MailRepositoryMock.MailRepository();
-            _config = new Mock<IConfiguration>();
+
+            var builder = new ConfigurationBuilder();
+            builder.AddJsonFile("appsettings.json");
+            _config = builder.Build();
         }
 
         [TestMethod]
-        public async Task AlSolicitarUnToken_DevuelveJWTToken()
+        public async Task AlSolicitarUnTokenConUnUsuarioValido_DevuelveJWTToken()
         {
             //Arrange
             Login credentials = new Login();
@@ -40,12 +44,81 @@ namespace customerportalapi.Services.Test
             credentials.Password = "12345678A";
 
             //Act
-            LoginService service = new LoginService(_identityRepository.Object, _userRepository.Object, _emailtemplateRepository.Object, _mailRepository.Object, _config.Object);
+            LoginService service = new LoginService(_identityRepository.Object, _userRepository.Object, _emailtemplateRepository.Object, _mailRepository.Object, _config);
             Token jwttoken = await service.GetToken(credentials);
 
             //Assert
             Assert.IsNotNull(jwttoken);
             Assert.AreEqual("Fake AccessToken", jwttoken.AccesToken);
+            _userRepository.Verify(x => x.Update(It.IsAny<User>()));
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ServiceException), "No se ha producido la excepción esperada")]
+        public async Task AlSolicitarUnTokenConUnUsuarioInValido_DevuelveExcepcion()
+        {
+            //Arrange
+            _userRepository = UserRepositoryMock.InvalidUserRepository();
+            Login credentials = new Login();
+            credentials.Username = "12345678A";
+            credentials.Password = "12345678A";
+
+            //Act
+            LoginService service = new LoginService(_identityRepository.Object, _userRepository.Object, _emailtemplateRepository.Object, _mailRepository.Object, _config);
+            Token jwttoken = await service.GetToken(credentials);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ServiceException), "No se ha producido la excepción esperada")]
+        public async Task LoginNoDisponibleParaUsuario_Con5IntentosFallidos_Y_Menos15Minutos()
+        {
+            //Arrange
+            _userRepository = UserRepositoryMock.InvalidUserRepository_With5Attempts();
+            Login credentials = new Login();
+            credentials.Username = "12345678A";
+            credentials.Password = "12345678A";
+
+            //Act
+            LoginService service = new LoginService(_identityRepository.Object, _userRepository.Object, _emailtemplateRepository.Object, _mailRepository.Object, _config);
+            Token jwttoken = await service.GetToken(credentials);
+        }
+
+        [TestMethod]
+        public async Task LoginDisponibleParaUsuario_Con5IntentosFallidos_Y_Mas15Minutos()
+        {
+            //Arrange
+            _userRepository = UserRepositoryMock.ValidUserRepository_With5Attempts();
+            Login credentials = new Login();
+            credentials.Username = "12345678A";
+            credentials.Password = "12345678A";
+
+            //Act
+            LoginService service = new LoginService(_identityRepository.Object, _userRepository.Object, _emailtemplateRepository.Object, _mailRepository.Object, _config);
+            Token jwttoken = await service.GetToken(credentials);
+
+            //Assert
+            Assert.IsNotNull(jwttoken);
+            Assert.AreEqual("Fake AccessToken", jwttoken.AccesToken);
+            _userRepository.Verify(x => x.Update(It.IsAny<User>()));
+        }
+
+        [TestMethod]
+        public async Task LoginDisponibleParaUsuario_ConMenos5Intentos()
+        {
+            //Arrange
+            _userRepository = UserRepositoryMock.ValidUserRepository();
+            Login credentials = new Login();
+            credentials.Username = "12345678A";
+            credentials.Password = "12345678A";
+
+            //Act
+            LoginService service = new LoginService(_identityRepository.Object, _userRepository.Object, _emailtemplateRepository.Object, _mailRepository.Object, _config);
+            Token jwttoken = await service.GetToken(credentials);
+
+            //Assert
+            Assert.IsNotNull(jwttoken);
+            Assert.AreEqual("Fake AccessToken", jwttoken.AccesToken);
+            _userRepository.Verify(x => x.Update(It.IsAny<User>()));
         }
 
         [TestMethod]
@@ -58,7 +131,7 @@ namespace customerportalapi.Services.Test
             credentials.NewPassword = "Fake New";
 
             //Act
-            LoginService service = new LoginService(_identityRepository.Object, _userRepository.Object, _emailtemplateRepository.Object, _mailRepository.Object, _config.Object);
+            LoginService service = new LoginService(_identityRepository.Object, _userRepository.Object, _emailtemplateRepository.Object, _mailRepository.Object, _config);
             Token newToken = await service.ChangePassword(credentials);
 
             //Assert
@@ -77,7 +150,7 @@ namespace customerportalapi.Services.Test
 
             //Act
             _userRepository = UserRepositoryMock.InvalidUserRepository();
-            LoginService service = new LoginService(_identityRepository.Object, _userRepository.Object, _emailtemplateRepository.Object, _mailRepository.Object, _config.Object);
+            LoginService service = new LoginService(_identityRepository.Object, _userRepository.Object, _emailtemplateRepository.Object, _mailRepository.Object, _config);
             await service.SendNewCredentialsAsync(userName);
         }
 
@@ -90,7 +163,7 @@ namespace customerportalapi.Services.Test
 
             //Act
             _userRepository = UserRepositoryMock.Valid_InActiveUser_Repository();
-            LoginService service = new LoginService(_identityRepository.Object, _userRepository.Object, _emailtemplateRepository.Object, _mailRepository.Object, _config.Object);
+            LoginService service = new LoginService(_identityRepository.Object, _userRepository.Object, _emailtemplateRepository.Object, _mailRepository.Object, _config);
             await service.SendNewCredentialsAsync(userName);
         }
 
@@ -103,7 +176,7 @@ namespace customerportalapi.Services.Test
 
             //Act
             _emailtemplateRepository = EmailTemplateRepositoryMock.Invalid_EmailTemplateRepository();
-            LoginService service = new LoginService(_identityRepository.Object, _userRepository.Object, _emailtemplateRepository.Object, _mailRepository.Object, _config.Object);
+            LoginService service = new LoginService(_identityRepository.Object, _userRepository.Object, _emailtemplateRepository.Object, _mailRepository.Object, _config);
             await service.SendNewCredentialsAsync(userName);
 
             //Assert verificar si se ha invocado a enviarcorreo
@@ -117,7 +190,7 @@ namespace customerportalapi.Services.Test
             string userName = "fakeUserName";
 
             //Act
-            LoginService service = new LoginService(_identityRepository.Object, _userRepository.Object, _emailtemplateRepository.Object, _mailRepository.Object, _config.Object);
+            LoginService service = new LoginService(_identityRepository.Object, _userRepository.Object, _emailtemplateRepository.Object, _mailRepository.Object, _config);
             await service.SendNewCredentialsAsync(userName);
 
             //Assert
