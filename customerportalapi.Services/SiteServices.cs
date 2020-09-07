@@ -10,6 +10,7 @@ using System.Net;
 using customerportalapi.Services.Exceptions;
 using customerportalapi.Entities.enums;
 using System.Threading;
+using Microsoft.Extensions.Configuration;
 
 namespace customerportalapi.Services
 {
@@ -21,11 +22,12 @@ namespace customerportalapi.Services
         private readonly IDistributedCache _distributedCache;
         private readonly IIdentityRepository _identityRepository;
         private readonly IContractSMRepository _contractSMRepository;
+        private readonly IConfiguration _config;
 
 
         public SiteServices(IUserRepository userRepository, IContractRepository contractRepository,
             IStoreRepository storeRepository, IDistributedCache distributedCache, IIdentityRepository identityRepository,
-            IContractSMRepository contractSMRepository)
+            IContractSMRepository contractSMRepository, IConfiguration config)
         {
             _userRepository = userRepository;
             _contractRepository = contractRepository;
@@ -33,6 +35,7 @@ namespace customerportalapi.Services
             _distributedCache = distributedCache;
             _identityRepository = identityRepository;
             _contractSMRepository = contractSMRepository;
+            _config = config;
         }
 
 
@@ -155,32 +158,70 @@ namespace customerportalapi.Services
             return await distributedCache.GetOrCreateCache("Store", async () => await _storeRepository.GetStoresAsync());
         }
 
-        public async Task<AccessCode> GetAccessCodeAsync(string contractId, string password) {
-            // TODO:
+        public async Task<bool> IsAccessCodeAvailableAsync()
+        {
             var user = Thread.CurrentPrincipal;
-            Token token = await _identityRepository.Authorize(new Login()
+            User loginUser = _userRepository.GetCurrentUser(user.Identity.Name);
+            
+            //Check bad access code attempts and validate timestamp to allow try again
+            if (DateTime.Now.ToUniversalTime().AddMinutes(Int32.Parse(_config["AccessCodeUnblockedTime"]) * -1) > loginUser.LastAccessCodeAttempts)
+                return true;
+
+            if (loginUser.AccessCodeAttempts < Int32.Parse(_config["AccessCodeMaxAttempts"]))
+                return true;
+            else
+                return false;
+        }
+
+        public async Task<AccessCode> GetAccessCodeAsync(string contractId, string password) {
+            
+            var user = Thread.CurrentPrincipal;
+            User loginUser = _userRepository.GetCurrentUser(user.Identity.Name);
+
+            try
             {
-                Username = user.Identity.Name,
-                Password = password
-            });
-            AccessCode entity = new AccessCode();
-            entity.AccesToken = token.AccesToken;
-            entity.RefreshToken = token.RefreshToken;
-            entity.IdToken = token.IdToken;
-            entity.TokenType = token.TokenType;
-            entity.ExpiresIn = token.ExpiresIn;
-            entity.Scope = token.Scope;
+                Token token = await _identityRepository.Authorize(new Login()
+                {
+                    Username = user.Identity.Name,
+                    Password = password
+                });
 
-            if (entity.AccesToken == null) {
-                throw new ServiceException("Password not valid", HttpStatusCode.BadRequest);
+                if (token.AccesToken == null)
+                {
+                    throw new ServiceException("Password not valid", HttpStatusCode.BadRequest);
+                }
+
+                //Initialize invalid attempt
+                loginUser.AccessCodeAttempts = 0;
+                loginUser.LastAccessCodeAttempts = DateTime.Now.ToUniversalTime();
+                _userRepository.Update(loginUser);
+
+                AccessCode entity = new AccessCode();
+                entity.AccesToken = token.AccesToken;
+                entity.RefreshToken = token.RefreshToken;
+                entity.IdToken = token.IdToken;
+                entity.TokenType = token.TokenType;
+                entity.ExpiresIn = token.ExpiresIn;
+                entity.Scope = token.Scope;
+
+                Contract contract = await _contractRepository.GetContractAsync(contractId);
+                SMContract smContract = await _contractSMRepository.GetAccessCodeAsync(contract.SmContractCode);
+
+                entity.Password = smContract.Password;
+                entity.ContractId = contractId;
+
+                return entity;
             }
-            Contract contract = await _contractRepository.GetContractAsync(contractId);
-            SMContract smContract = await _contractSMRepository.GetAccessCodeAsync(contract.SmContractCode);
+            catch (Exception ex)
+            {
+                
+                //Accumulate invalid attempt
+                loginUser.AccessCodeAttempts = loginUser.AccessCodeAttempts + 1;
+                loginUser.LastAccessCodeAttempts = DateTime.Now.ToUniversalTime();
+                _userRepository.Update(loginUser);
 
-            entity.Password = smContract.Password;
-            entity.ContractId = contractId;
-
-            return entity;
+                throw ex;
+            }
         }
 
         public async Task<Unit> GetUnitAsync(Guid id)

@@ -170,6 +170,12 @@
             <param name="value">Access code credentials</param>
             <returns>Site access code</returns>
         </member>
+        <member name="M:customerportalapi.Controllers.SitesController.IsAccessCodeAvailableAsync">
+            <summary>
+            Checks if site access code is available due to invalid password attempts
+            </summary>
+            <returns>bool</returns>
+        </member>
         <member name="M:customerportalapi.Controllers.SitesController.GetInvoicesAsync(System.String)">
             <summary>
             Get Last user invoices

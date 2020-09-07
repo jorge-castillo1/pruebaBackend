@@ -237,6 +237,30 @@ namespace customerportalapi.Controllers
         }
 
         /// <summary>
+        /// Checks if site access code is available due to invalid password attempts
+        /// </summary>
+        /// <returns>bool</returns>
+        [HttpPost("access-code-available")]
+        public async Task<ApiResponse> IsAccessCodeAvailableAsync()
+        {
+            try
+            {
+                var entity = await _services.IsAccessCodeAvailableAsync();
+                return new ApiResponse(entity);
+            }
+            catch (ServiceException ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+
+        /// <summary>
         /// Get Last user invoices
         /// </summary>
         /// <param name="username">Username</param>
