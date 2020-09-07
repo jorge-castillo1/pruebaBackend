@@ -32,14 +32,53 @@ namespace customerportalapi.Services
             _config = config;
         }
 
-        public async Task<Token> GetToken(Login credentials){
-            try{
-                return await _identityRepository.Authorize(credentials);
-            }
-            catch(HttpRequestException ex){
-                throw new ServiceException("Login Failed", HttpStatusCode.Unauthorized);
-            }
+        public async Task<Token> GetToken(Login credentials)
+        {
+            User loginUser = null;
+            loginUser = _userRepository.GetCurrentUser(credentials.Username);
+            
+            if (loginUser.Id != null)
+            {
+                Token token = null;
 
+                try
+                {
+                    if (DateTime.Now.ToUniversalTime().AddMinutes(Int32.Parse(_config["LoginUnblockedTime"]) * -1) > loginUser.LastLoginAttempts)
+                    {
+                        token = await _identityRepository.Authorize(credentials);
+
+                        //Initialize login attempts
+                        loginUser.LoginAttempts = 0;
+                        loginUser.LastLoginAttempts = DateTime.Now.ToUniversalTime();
+                        _userRepository.Update(loginUser);
+                    }
+                    else if (loginUser.LoginAttempts < Int32.Parse(_config["LoginMaxAttempts"]))
+                    {
+                        token = await _identityRepository.Authorize(credentials);
+
+                        //Initialize login attempts
+                        loginUser.LoginAttempts = 0;
+                        loginUser.LastLoginAttempts = DateTime.Now.ToUniversalTime();
+                        _userRepository.Update(loginUser);
+                    }
+                }
+                catch
+                {
+                    //Accumulate invalid attempt
+                    loginUser.LoginAttempts = loginUser.LoginAttempts + 1;
+                    loginUser.LastLoginAttempts = DateTime.Now.ToUniversalTime();
+                    _userRepository.Update(loginUser);
+
+                    throw new ServiceException("Login Failed", HttpStatusCode.Unauthorized, "LoginAttempts", $"Attempts: {loginUser.LoginAttempts} , last attempt:{loginUser.LastLoginAttempts.ToLocalTime()}");
+                }
+
+                if (token == null)
+                    throw new ServiceException("Login Failed", HttpStatusCode.Unauthorized, "LoginAttempts", $"Attempts: {loginUser.LoginAttempts} , last attempt:{loginUser.LastLoginAttempts.ToLocalTime()}");
+                else
+                    return token;
+            }
+            else
+                throw new ServiceException("Login Failed", HttpStatusCode.Unauthorized);
         }
 
         public async Task<Token> ChangePassword(ResetPassword credentials)

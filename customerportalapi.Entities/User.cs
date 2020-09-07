@@ -49,6 +49,13 @@ namespace customerportalapi.Entities
         [BsonElement("forgotpasswordtoken")]
         public string ForgotPasswordtoken { get; set; }
 
+        [BsonElement("loginattempts")]
+        public int LoginAttempts { get; set; }
+
+        [BsonElement("lastloginattempts")]
+        [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
+        public DateTime LastLoginAttempts { get; set; }
+
         [BsonElement("accesscodeattempts")]
         public int AccessCodeAttempts { get; set; }
 
