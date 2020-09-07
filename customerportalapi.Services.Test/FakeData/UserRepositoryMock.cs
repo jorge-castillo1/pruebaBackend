@@ -19,7 +19,9 @@ namespace customerportalapi.Services.Test.FakeData
                 Emailverified = false,
                 Usertype = 1,
                 LoginAttempts = 5,
-                LastLoginAttempts = System.DateTime.Now.ToUniversalTime().AddMinutes(-10)
+                LastLoginAttempts = System.DateTime.Now.ToUniversalTime().AddMinutes(-10),
+                AccessCodeAttempts = 5,
+                LastAccessCodeAttempts = System.DateTime.Now.ToUniversalTime().AddMinutes(-10)
             }).Verifiable();
 
             db.Setup(x => x.GetCurrentUserByDniAndType(It.IsAny<string>(), It.IsAny<int>())).Returns(new Entities.User()
@@ -31,7 +33,9 @@ namespace customerportalapi.Services.Test.FakeData
                 Emailverified = false,
                 Usertype = 1,
                 LoginAttempts = 5,
-                LastLoginAttempts = System.DateTime.Now.ToUniversalTime().AddMinutes(-10)
+                LastLoginAttempts = System.DateTime.Now.ToUniversalTime().AddMinutes(-10),
+                AccessCodeAttempts = 5,
+                LastAccessCodeAttempts = System.DateTime.Now.ToUniversalTime().AddMinutes(-10)
             }).Verifiable();
 
             db.Setup(x => x.Create(It.IsAny<User>())).Returns(Task.FromResult(true)).Verifiable();
@@ -54,7 +58,9 @@ namespace customerportalapi.Services.Test.FakeData
                 Usertype = 1,
                 Username = "fake username",
                 LoginAttempts = 0,
-                LastLoginAttempts = System.DateTime.Now.ToUniversalTime().AddMinutes(-10)
+                LastLoginAttempts = System.DateTime.Now.ToUniversalTime().AddMinutes(-10),
+                AccessCodeAttempts = 0,
+                LastAccessCodeAttempts = System.DateTime.Now.ToUniversalTime().AddMinutes(-30)
             }).Verifiable();
 
             db.Setup(x => x.GetCurrentUserByDniAndType(It.IsAny<string>(), It.IsAny<int>())).Returns(new User()
@@ -69,7 +75,9 @@ namespace customerportalapi.Services.Test.FakeData
                 Usertype = 1,
                 Username = "fake username",
                 LoginAttempts = 0,
-                LastLoginAttempts = System.DateTime.Now.ToUniversalTime().AddMinutes(-10)
+                LastLoginAttempts = System.DateTime.Now.ToUniversalTime().AddMinutes(-10),
+                AccessCodeAttempts = 0,
+                LastAccessCodeAttempts = System.DateTime.Now.ToUniversalTime().AddMinutes(-30)
             }).Verifiable();
 
             db.Setup(x => x.Update(It.IsAny<User>())).Returns(new User()
@@ -82,7 +90,9 @@ namespace customerportalapi.Services.Test.FakeData
                 Emailverified = true,
                 Usertype = 1,
                 LoginAttempts = 1,
-                LastLoginAttempts = System.DateTime.Now.ToUniversalTime()
+                LastLoginAttempts = System.DateTime.Now.ToUniversalTime(),
+                AccessCodeAttempts = 1,
+                LastAccessCodeAttempts = System.DateTime.Now.ToUniversalTime()
             }).Verifiable();
 
             return db;
@@ -103,7 +113,9 @@ namespace customerportalapi.Services.Test.FakeData
                 Usertype = 1,
                 Username = "fake username",
                 LoginAttempts = 5,
-                LastLoginAttempts = System.DateTime.Now.ToUniversalTime().AddMinutes(-30)
+                LastLoginAttempts = System.DateTime.Now.ToUniversalTime().AddMinutes(-30),
+                AccessCodeAttempts = 5,
+                LastAccessCodeAttempts = System.DateTime.Now.ToUniversalTime().AddMinutes(-30)
             }).Verifiable();
 
             db.Setup(x => x.GetCurrentUserByDniAndType(It.IsAny<string>(), It.IsAny<int>())).Returns(new User()
@@ -131,7 +143,9 @@ namespace customerportalapi.Services.Test.FakeData
                 Emailverified = true,
                 Usertype = 1,
                 LoginAttempts = 5,
-                LastLoginAttempts = System.DateTime.Now.ToUniversalTime()
+                LastLoginAttempts = System.DateTime.Now.ToUniversalTime(),
+                AccessCodeAttempts = 5,
+                LastAccessCodeAttempts = System.DateTime.Now.ToUniversalTime()
             }).Verifiable();
 
             return db;

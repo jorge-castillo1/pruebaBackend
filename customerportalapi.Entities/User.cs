@@ -56,5 +56,11 @@ namespace customerportalapi.Entities
         [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
         public DateTime LastLoginAttempts { get; set; }
 
+        [BsonElement("accesscodeattempts")]
+        public int AccessCodeAttempts { get; set; }
+
+        [BsonElement("lastaccesscodeattempts")]
+        [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
+        public DateTime LastAccessCodeAttempts { get; set; }
     }
 }

@@ -13,6 +13,7 @@ namespace customerportalapi.Services.interfaces
         Task<List<Country>> GetStoresCountriesAsync();
         Task<List<City>> GetStoresCitiesAsync(string countryCode);
         Task<Store> GetStoreAsync(string storeCode);
+        Task<bool> IsAccessCodeAvailableAsync();
         Task<AccessCode> GetAccessCodeAsync(string contractId, string password);
         Task<Unit> GetUnitAsync(Guid id);
         Task<Unit> GetUnitBySMIdAsync(string smid);
