@@ -47,5 +47,8 @@ namespace customerportalapi.Entities
         public string CompanySocialAddress { get; set; }
 
         public string AccessType { get; set; }
+        
+        public string StoreImage { get; set; }
+
     }
 }
