@@ -50,5 +50,11 @@ namespace customerportalapi.Entities
         
         public string StoreImage { get; set; }
 
+        public string EkomiCustomerId { get; set; }
+
+        public string EkomiLanguage { get; set; }
+        
+        public string EkomiWidgetsToken { get; set; }
+
     }
 }
