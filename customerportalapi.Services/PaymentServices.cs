@@ -595,16 +595,16 @@ namespace customerportalapi.Services
             if (cardData.status == "error")
                 throw new ServiceException("Card data error", HttpStatusCode.BadRequest, "token");
             
-            // 3. Update own card data to prevent discrepancies
-             Card cardToUpdate = new Card() 
+            // 3. Compose response
+             Card card = new Card() 
             {
                 Id = null,
                 ExternalId = null,
                 Idcustomer = null,
                 Siteid = null,
-                Token = null,
-                Status = null,
-                Message = null,
+                Token = token,
+                Status = cardData.status,
+                Message = cardData.message,
                 Cardholder = cardData.card_holder,
                 Expirydate = cardData.expirydate,
                 Typecard = cardData.type,
@@ -615,10 +615,8 @@ namespace customerportalapi.Services
                 Current = true
 
             };
-           // Card updatedCard = _cardRepository.Update(cardToUpdate);
 
-            // 4. 
-            return cardToUpdate;
+            return card;
 
         }
 
