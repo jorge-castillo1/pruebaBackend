@@ -59,6 +59,43 @@
             </summary>
             <returns>List of Countries</returns>
         </member>
+        <member name="M:customerportalapi.Controllers.EkomiWidgetController.GetEkomiWidget(System.String,System.String)">
+            <summary>
+            Get pending process from user, contract and process type
+            </summary>
+            <param name="siteId">siteId</param>
+            <param name="ekomiLanguage">EkomiLanguage</param>
+            <returns>Ekomiwidget data</returns>
+        </member>
+        <member name="M:customerportalapi.Controllers.EkomiWidgetController.CreateEkomiWidget(customerportalapi.Entities.EkomiWidget)">
+            <summary>
+            Create new ekomiWidget
+            </summary>
+            <param name="ekomkiWidget">Ekomiwidget</param>
+            <returns></returns>
+        </member>
+        <member name="M:customerportalapi.Controllers.EkomiWidgetController.CreateMultipleEkomiWidget(System.Collections.Generic.List{customerportalapi.Entities.EkomiWidget})">
+            <summary>
+            Create new multiple ekomiWidgets
+            </summary>
+            <param name="ekomkiWidgets">Ekomiwidget List</param>
+            <returns></returns>
+        </member>
+        <member name="M:customerportalapi.Controllers.EkomiWidgetController.UpdateEkomiWidget(customerportalapi.Entities.EkomiWidget)">
+            <summary>
+            Update ekomiWidget
+            </summary>
+            <param name="ekomkiWidget">Ekomiwidget</param>
+            <returns>EkomiWidget</returns>
+        </member>
+        <member name="M:customerportalapi.Controllers.EkomiWidgetController.DeleteEkomiWidget(System.String)">
+            <summary>
+            Delete ekomiWidget
+            </summary>
+            <param name="id">Ekomiwidget id</param>
+            <returns></returns>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:customerportalapi.Controllers.EkomiWidgetController.FindEkomiWidget(customerportalapi.Entities.EkomiWidgetSearchFilter)" -->
         <member name="M:customerportalapi.Controllers.EventsController.SignatureStatus(customerportalapi.Entities.SignatureStatus)">
             <summary>
             Receive changes on signature process status

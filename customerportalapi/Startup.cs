@@ -87,6 +87,11 @@ namespace customerportalapi
                 IMongoDatabase database = GetDatabase();
                 return new MongoCollectionWrapper<Pay>(database, "pays");
             });
+            services.AddScoped<IMongoCollectionWrapper<EkomiWidget>>(serviceProvider =>
+            {
+                IMongoDatabase database = GetDatabase();
+                return new MongoCollectionWrapper<EkomiWidget>(database, "ekomiwidgets");
+            });
 
             //Mail service
             services.AddScoped(serviceProvider =>
@@ -123,6 +128,7 @@ namespace customerportalapi
             services.AddScoped<IUserAccountRepository, UserAccountRepository>();
             services.AddScoped<IPaymentMethodRepository, PaymentMethodsRepository>();
             services.AddScoped<IPayRepository, PayRepository>();
+            services.AddScoped<IEkomiWidgetRepository, EkomiWidgetRepository>();
 
             //Register Business Services
             services.AddTransient<IUserServices, UserServices>();
@@ -134,6 +140,7 @@ namespace customerportalapi
             services.AddTransient<IPaymentService, PaymentServices>();
             services.AddTransient<IProcessService, ProcessService>();
             services.AddTransient<IContractServices, ContractServices>();
+            services.AddTransient<IEkomiWidgetService, EkomiWidgetService>();
 
             services.AddHttpClient("httpClient", c =>
             {
