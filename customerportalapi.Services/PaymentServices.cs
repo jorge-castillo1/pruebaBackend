@@ -519,8 +519,14 @@ namespace customerportalapi.Services
                 Confirmed = value.Status == "document_completed" ? true : false,
                 Channel = "WEBPORTAL"
             };
+            
+            PaymentMethodCardConfirmationResponse cardConfirmation;
+            if (process.Card.Update == true) {
+                cardConfirmation = await _paymentRepository.UpdateConfirmChangePaymentMethodCard(confirmation);
+            } else {
+                cardConfirmation = await _paymentRepository.ConfirmChangePaymentMethodCard(confirmation);
+            }
            
-            PaymentMethodCardConfirmationResponse cardConfirmation = await _paymentRepository.UpdateConfirmChangePaymentMethodCard(confirmation);
             if (cardConfirmation.Status != "success") {
                 ProcessCard processCard = processes[0].Card;
                 processes[0].Card = new ProcessCard()
@@ -874,7 +880,8 @@ namespace customerportalapi.Services
                 SmContractCode = cardmethod.SmContractCode,
                 ContractNumber = cardmethod.ContractNumber,
                 ExternalId = externalId,
-                Username = user.Username
+                Username = user.Username,
+                Update = true
             };
             bool createCard = await _cardRepository.Create(card);
             if (createCard == false)
@@ -918,7 +925,8 @@ namespace customerportalapi.Services
                 ContractNumber = findCard.ContractNumber,
                 SmContractCode = findCard.SmContractCode,
                 Username = findCard.Username,
-                Current = false
+                Current = false,
+                Update = findCard.Update
 
             };
             Card updateCard = _cardRepository.Update(card);
@@ -942,7 +950,8 @@ namespace customerportalapi.Services
                 cancelProcess.Card = new ProcessCard()
                 {
                     ExternalId = updateCard.ExternalId,
-                    Status = 0
+                    Status = 0,
+                    Update = true
                 };
                 cancelProcess.Documents = null;
 
@@ -959,7 +968,8 @@ namespace customerportalapi.Services
             process.Card = new ProcessCard()
             {
                 ExternalId = updateCard.ExternalId,
-                Status = 0
+                Status = 0,
+                Update = true
             };
             process.Documents = null;
 
