@@ -22,6 +22,10 @@ namespace customerportalapi.Services
         public EkomiWidget GetEkomiWidget(string siteId, string ekomiLanguage)
         {
             EkomiWidget ekomiWidget = _ekomiWidgetRepository.Get(siteId, ekomiLanguage);
+            if (ekomiWidget.Id == null) {
+                // Default language
+                ekomiWidget = _ekomiWidgetRepository.Get(siteId, "en");
+            }
        
             return ekomiWidget;
         }
