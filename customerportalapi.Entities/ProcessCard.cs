@@ -12,5 +12,8 @@ namespace customerportalapi.Entities
 
         [BsonElement("externalId")]
         public string ExternalId { get; set; }
+
+        [BsonElement("update")]
+        public bool Update { get; set; }
     }
 }

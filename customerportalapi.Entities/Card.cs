@@ -53,6 +53,9 @@ namespace customerportalapi.Entities
 
         [BsonElement("documentId")]
         public string DocumentId { get; set; }
+        
+        [BsonElement("update")]
+        public bool Update { get; set; }
 
     }
 }
