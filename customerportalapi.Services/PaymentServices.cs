@@ -440,7 +440,8 @@ namespace customerportalapi.Services
             process.Card = new ProcessCard()
             {
                 ExternalId = cardmethod.ExternalId,
-                Status = 1
+                Status = 1,
+                Update = processes[0].Card.Update
             };
             process.Documents.Add(new ProcessDocument()
             {
@@ -532,7 +533,8 @@ namespace customerportalapi.Services
                 processes[0].Card = new ProcessCard()
                 {
                     ExternalId = processCard.ExternalId,
-                    Status = 1
+                    Status = 1,
+                    Update = processCard.Update
                 };
                 processes[0].ProcessStatus = (int)ProcessStatuses.Canceled;
 
@@ -926,7 +928,7 @@ namespace customerportalapi.Services
                 SmContractCode = findCard.SmContractCode,
                 Username = findCard.Username,
                 Current = false,
-                Update = findCard.Update
+                Update = true
 
             };
             Card updateCard = _cardRepository.Update(card);
