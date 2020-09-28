@@ -159,7 +159,7 @@ namespace customerportalapi.Services
             Contract contract = await _contractRepository.GetContractAsync(smContractCode);
         
             List<Store> stores = await _storeRepository.GetStoresAsync();
-            Store store = stores.Find(x => x.StoreCode.Contains(contract.StoreCode));
+            Store store = stores.Find(x => x.StoreCode.Contains(contract.StoreData.StoreCode));
             if (store.StoreId == null)
                 throw new ServiceException("Store not found", HttpStatusCode.BadRequest, "StoreId");
 
