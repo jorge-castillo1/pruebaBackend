@@ -129,6 +129,7 @@ namespace customerportalapi
             services.AddScoped<IPaymentMethodRepository, PaymentMethodsRepository>();
             services.AddScoped<IPayRepository, PayRepository>();
             services.AddScoped<IEkomiWidgetRepository, EkomiWidgetRepository>();
+            services.AddScoped<IOpportunityCRMRepository, OpportunityCRMRepository>();
 
             //Register Business Services
             services.AddTransient<IUserServices, UserServices>();

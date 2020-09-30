@@ -39,6 +39,12 @@
         public string AccessType {get; set; }
 
         public string TimeZone { get; set; }
+
         public string MapLink { get; set; }
+        
+        public string OpportunityId { get; set; }
+
+        public string ExpectedMoveIn { get; set; }
+
     }
 }
