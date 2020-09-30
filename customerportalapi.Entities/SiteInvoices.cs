@@ -8,6 +8,9 @@ namespace customerportalapi.Entities
 
         public string StoreCode { get; set; }
 
+        public string StoreId { get; set; }
+
+
         public List<Invoice> Invoices { get; set; } = new List<Invoice>();
     }
 }
