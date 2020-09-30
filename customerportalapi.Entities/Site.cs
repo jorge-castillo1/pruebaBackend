@@ -16,6 +16,8 @@ namespace customerportalapi.Entities
 
         public string StoreCode { get; set; }
 
+        public string StoreId { get; set; }
+
         public List<Contract> Contracts { get; } = new List<Contract>();
     }
 }

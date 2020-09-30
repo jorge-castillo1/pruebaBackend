@@ -59,9 +59,11 @@ namespace customerportalapi.Services
                 x.StoreData.CoordinatesLatitude,
                 x.StoreData.CoordinatesLongitude,
                 x.StoreData.EmailAddress1,
-                x.StoreData.StoreCode
+                x.StoreData.StoreCode,
+                x.StoreData.StoreId
             }))
             {
+                string storeId = storegroup.Key.StoreId.ToString();
                 Site site = new Site
                 {
                     Name = storegroup.Key.Name,
@@ -69,7 +71,8 @@ namespace customerportalapi.Services
                     CoordinatesLatitude = storegroup.Key.CoordinatesLatitude,
                     CoordinatesLongitude = storegroup.Key.CoordinatesLongitude,
                     EmailAddress1 = storegroup.Key.EmailAddress1,
-                    StoreCode = storegroup.Key.StoreCode
+                    StoreCode = storegroup.Key.StoreCode,
+                    StoreId = storeId
                 };
 
                 foreach (var contract in storegroup)
@@ -278,13 +281,16 @@ namespace customerportalapi.Services
             foreach (var storegroup in entitylist.GroupBy(x => new
             {
                 Name = x.StoreData.StoreName,
-                x.StoreData.StoreCode
+                x.StoreData.StoreCode,
+                x.StoreData.StoreId
             }))
             {
-                  SiteInvoices site = new SiteInvoices
+                string storeId = storegroup.Key.StoreId.ToString();
+                SiteInvoices site = new SiteInvoices
                 {
                     Name = storegroup.Key.Name,
-                    StoreCode = storegroup.Key.StoreCode
+                    StoreCode = storegroup.Key.StoreCode,
+                    StoreId = storeId
                 };
 
                 site.Invoices.AddRange(filteredInvoices.FindAll(x => x.SiteID == site.StoreCode));
