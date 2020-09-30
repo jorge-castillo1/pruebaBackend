@@ -23,6 +23,8 @@ namespace customerportalapi.Services
         private readonly IUserRepository _userRepository;
         private readonly IStoreRepository _storeRepository;
 
+        private readonly IOpportunityCRMRepository _opportunityRepository;
+
 
         public ContractServices(
             IConfiguration configuration, 
@@ -32,7 +34,8 @@ namespace customerportalapi.Services
             IEmailTemplateRepository emailTemplateRepository, 
             IDocumentRepository documentRepository,
             IUserRepository userRepository,
-            IStoreRepository storeRepository
+            IStoreRepository storeRepository,
+            IOpportunityCRMRepository opportunityRepository
          )
         {
             _configuration = configuration;
@@ -43,6 +46,7 @@ namespace customerportalapi.Services
             _documentRepository = documentRepository;
             _userRepository = userRepository;
             _storeRepository = storeRepository;
+            _opportunityRepository = opportunityRepository;
         }
 
         public async Task<Contract> GetContractAsync(string contractNumber)
@@ -138,6 +142,13 @@ namespace customerportalapi.Services
             // String smContractNumber = response.contract.SmContractCode;
             response.smcontract = await _contractSMRepository.GetAccessCodeAsync(smContractCode);
             response.contract.StoreCode = response.contract.StoreData.StoreCode;
+            OpportunityCRM opportunity;
+            if (!String.IsNullOrEmpty(response.contract.OpportunityId))
+            {
+                opportunity = await _opportunityRepository.GetOpportunity(response.contract.OpportunityId);
+                response.contract.OpportunityId = opportunity.OpportunityId;
+                response.contract.ExpectedMoveIn = opportunity.ExpectedMoveIn;
+            }
             return response;
         }
 

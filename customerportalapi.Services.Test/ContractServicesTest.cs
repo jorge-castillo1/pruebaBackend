@@ -26,6 +26,7 @@ namespace customerportalapi.Services.Test
         private Mock<IMailRepository> _mailRepository;
         private Mock<IEmailTemplateRepository> _emailTemplateRepository;
         private Mock<IDocumentRepository> _documentRepository;
+        private Mock<IOpportunityCRMRepository> _opportunityCRMRepository;
 
         [TestInitialize]
         public void Setup()
@@ -39,6 +40,7 @@ namespace customerportalapi.Services.Test
             _mailRepository = MailRepositoryMock.MailRepository();
             _emailTemplateRepository = EmailTemplateRepositoryMock.EmailTemplateRepository();
             _documentRepository = DocumentRepositoryMock.DocumentRepository();
+            _opportunityCRMRepository = OpportunityCRMRepositoryMock.OpportunityCRMRepository();
 
             var builder = new ConfigurationBuilder();
             builder.AddJsonFile("appsettings.json");
@@ -54,7 +56,17 @@ namespace customerportalapi.Services.Test
             Mock<IContractRepository> contractInvalid = ContractRepositoryMock.InvalidContractRepository();
 
             //Act
-            ContractServices service = new ContractServices(_configuration, contractInvalid.Object, _contractSMRepository.Object, _mailRepository.Object, _emailTemplateRepository.Object, _documentRepository.Object, _userRepository.Object, _storeRepository.Object);
+            ContractServices service = new ContractServices
+            (
+                _configuration, contractInvalid.Object, 
+                _contractSMRepository.Object, 
+                _mailRepository.Object, 
+                _emailTemplateRepository.Object,
+                _documentRepository.Object, 
+                _userRepository.Object, 
+                _storeRepository.Object, 
+                _opportunityCRMRepository.Object
+            );
             await service.GetContractAsync(contractNumber);
 
         }
@@ -67,7 +79,18 @@ namespace customerportalapi.Services.Test
             Mock<IContractRepository> contractRep = ContractRepositoryMock.ValidContractRepository();
 
             //Act
-            ContractServices service = new ContractServices(_configuration, contractRep.Object, _contractSMRepository.Object, _mailRepository.Object, _emailTemplateRepository.Object, _documentRepository.Object, _userRepository.Object, _storeRepository.Object);
+            ContractServices service = new ContractServices
+            (
+                _configuration, 
+                contractRep.Object, 
+                _contractSMRepository.Object, 
+                _mailRepository.Object, 
+                _emailTemplateRepository.Object, 
+                _documentRepository.Object, 
+                _userRepository.Object, 
+                _storeRepository.Object,
+                _opportunityCRMRepository.Object
+            );
             Contract contract = await service.GetContractAsync(contractNumber);
 
             //Assert
