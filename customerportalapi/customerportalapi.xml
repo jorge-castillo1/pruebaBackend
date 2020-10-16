@@ -103,6 +103,12 @@
             <param name="value">Signature status data</param>
             <returns>Ok</returns>
         </member>
+        <member name="M:customerportalapi.Controllers.LanguagesController.GetLanguagesAsync">
+            <summary>
+            Get available countries
+            </summary>
+            <returns>List of Countries</returns>
+        </member>
         <member name="M:customerportalapi.Controllers.LoginController.PostAsync(customerportalapi.Entities.Login)">
             <summary>
             Authenticate user against authenticator system
