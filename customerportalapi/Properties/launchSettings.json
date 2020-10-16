@@ -42,6 +42,7 @@
         "DOCUMENTS_SEARCH_ENDPOINT": "api/documents/search/",
         "SMAccountAPI": "smapi/account/",
         "CountriesAPI": "crmapi/Countries/",
+        "LanguagesAPI": "crmapi/Languages/",
         "DocumentsAPI": "api/documents/",
         "GATEWAYSIGNATUREURL": "https://localhost:44329/",
         "CustomerPortal_ApiKey": "F56A2E61-6D3C-4C3F-B1B5-16C335EADA96",
@@ -71,6 +72,7 @@
         "ProfileAPI": "crmapi/Contacts/",
         "ASPNETCORE_ENVIRONMENT": "Development",
         "CountriesAPI": "crmapi/Countries/",
+        "LanguagesAPI": "crmapi/Languages/",
         "StoresAPI": "crmapi/Sites/"
       },
       "applicationUrl": "https://localhost:44332;http://localhost:44333"
@@ -94,6 +96,7 @@
         "MONGO_DATABASE": "customerportal",
         "ProfileAPI": "crmapi/Contacts/",
         "CountriesAPI": "crmapi/Countries/",
+        "LanguagesAPI": "crmapi/Languages/",
         "StoresAPI": "crmapi/Sites/"
       },
       "httpPort": 53489,

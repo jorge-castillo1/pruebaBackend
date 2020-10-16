@@ -130,6 +130,7 @@ namespace customerportalapi
             services.AddScoped<IPayRepository, PayRepository>();
             services.AddScoped<IEkomiWidgetRepository, EkomiWidgetRepository>();
             services.AddScoped<IOpportunityCRMRepository, OpportunityCRMRepository>();
+            services.AddScoped<ILanguageRepository, LanguageRepository>();
 
             //Register Business Services
             services.AddTransient<IUserServices, UserServices>();
@@ -142,6 +143,7 @@ namespace customerportalapi
             services.AddTransient<IProcessService, ProcessService>();
             services.AddTransient<IContractServices, ContractServices>();
             services.AddTransient<IEkomiWidgetService, EkomiWidgetService>();
+            services.AddTransient<ILanguageServices, LanguageServices>();
 
             services.AddHttpClient("httpClient", c =>
             {

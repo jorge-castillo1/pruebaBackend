@@ -56,6 +56,8 @@ namespace customerportalapi.Entities
 
         public string Language { get; set; }
 
+        public string LanguageId { get; set; }
+
         public string Avatar { get; set; }
 
         public AccountCustomerType CustomerTypeInfo { get; set; }
