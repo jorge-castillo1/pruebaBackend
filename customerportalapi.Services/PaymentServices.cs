@@ -10,6 +10,8 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace customerportalapi.Services
 {
@@ -30,6 +32,7 @@ namespace customerportalapi.Services
         private readonly ICardRepository _cardRepository;
         private readonly IPaymentMethodRepository _paymentMethodRepository;
         private readonly IPayRepository _payRepository;
+        private readonly ILogger<PaymentServices> _logger;
 
         public PaymentServices(
             IConfiguration configuration, 
@@ -46,7 +49,8 @@ namespace customerportalapi.Services
             IContractSMRepository contractSMRepository,
             ICardRepository cardRepository,
             IPaymentMethodRepository paymentMethodRepository,
-            IPayRepository payRepository
+            IPayRepository payRepository,
+            ILogger<PaymentServices> logger
         )
         {
             _configuration = configuration;
@@ -65,6 +69,7 @@ namespace customerportalapi.Services
             _cardRepository = cardRepository;
             _paymentMethodRepository = paymentMethodRepository;
             _payRepository = payRepository;
+            _logger = logger;
         }
 
         public async Task<bool> ChangePaymentMethod(PaymentMethod paymentMethod)
@@ -658,6 +663,8 @@ namespace customerportalapi.Services
 
             // 3. Get SmContract 
             SMContract smContract = await _contractSMRepository.GetAccessCodeAsync(payInvoice.SmContractCode);
+            string smContractlog = JsonConvert.SerializeObject(smContract);
+            _logger.LogInformation("smContractlog:" + smContractlog);
 
             if (smContract.Customerid == null)
                 throw new ServiceException("Contract sm found", HttpStatusCode.BadRequest, "SmContractCode");
@@ -667,9 +674,16 @@ namespace customerportalapi.Services
             payInvoice.IdCustomer = smContract.Customerid;
 
             // 5. Pay
+            string before = JsonConvert.SerializeObject(payInvoice);
+            _logger.LogInformation("before:" + before);
+
             PaymentMethodPayInvoiceResponse payResponse = await _paymentRepository.PayInvoice(payInvoice);
             if (payResponse.result != "00")
                 throw new ServiceException("Error payment", HttpStatusCode.BadRequest, "result");
+            string after = JsonConvert.SerializeObject(payResponse);
+            _logger.LogInformation("after:" + after);
+
+
 
             // 6. Get CRM PayMethods
             List<Store> stores = await _storeRepository.GetStoresAsync();
@@ -678,6 +692,8 @@ namespace customerportalapi.Services
                 throw new ServiceException("Store not found", HttpStatusCode.BadRequest, "StoreId");
 
             PaymentMethodCRM payMetCRM = await _paymentMethodRepository.GetPaymentMethod(store.StoreId.ToString());
+            string payMetCRMlog = JsonConvert.SerializeObject(payMetCRM);
+            _logger.LogInformation("payMetCRMlog:" + payMetCRMlog);
             if (payMetCRM.SMId == null)
                 throw new ServiceException("Error payment method crm", HttpStatusCode.BadRequest, "SMId");
         
@@ -692,6 +708,9 @@ namespace customerportalapi.Services
                 DocumentId = inv.DocumentId
             };
             bool makePayment = await _contractSMRepository.MakePayment(mPayment);
+
+            string makePaymentlog = JsonConvert.SerializeObject(makePayment);
+            _logger.LogInformation("makePaymentlog:" + makePaymentlog);
 
             return payResponse;
         }
