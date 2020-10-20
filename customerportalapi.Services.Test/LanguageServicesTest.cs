@@ -34,7 +34,7 @@ namespace customerportalapi.Services.Test
 
             //Assert
             Assert.IsNotNull(languages);
-            Assert.AreEqual(1, languages.Count);
+            Assert.AreEqual(4, languages.Count);
         }
     }
 }

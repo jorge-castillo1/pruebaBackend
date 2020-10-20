@@ -108,7 +108,7 @@ namespace customerportalapi.Services.Test
                 EkomiWidgetTokens = "fake ekomiwidgetTokens",
                 SiteId = "fake siteId"
             };
-            
+
 
             _ekomiWidgetRepository = EkomiWidgetRepositoryMock.EkomiWidgetRepository();
 
@@ -123,7 +123,7 @@ namespace customerportalapi.Services.Test
         public void DeleteEkomiWidget_returns_task_bool()
         {
             string id = "b02fc244-40e4-e511-80bf-00155d018a4g";
-            
+
             _ekomiWidgetRepository = EkomiWidgetRepositoryMock.EkomiWidgetRepository();
 
             EkomiWidgetService service = new EkomiWidgetService(_ekomiWidgetRepository.Object);
@@ -141,7 +141,7 @@ namespace customerportalapi.Services.Test
                 EkomiCustomerId = "fake customerId"
             };
 
-            
+
             _ekomiWidgetRepository = EkomiWidgetRepositoryMock.EkomiWidgetRepository();
 
             EkomiWidgetService service = new EkomiWidgetService(_ekomiWidgetRepository.Object);

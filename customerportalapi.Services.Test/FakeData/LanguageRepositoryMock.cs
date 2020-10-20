@@ -20,6 +20,27 @@ namespace customerportalapi.Services.Test.FakeData
                     Name = "English",
                     IsoCode = "EN",
                     StatusCode = "1"
+                },
+                new Language()
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Spanish",
+                    IsoCode = "ES",
+                    StatusCode = "1"
+                },
+                new Language()
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Portuguese",
+                    IsoCode = "PT",
+                    StatusCode = "1"
+                },
+                new Language()
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Français",
+                    IsoCode = "FR",
+                    StatusCode = "1"
                 }
             })).Verifiable();
 
