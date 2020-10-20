@@ -18,7 +18,7 @@ namespace customerportalapi.Services.Test.FakeData
                 Fullname = "fake name",
                 Address = "fake Address",
                 DocumentNumber = "fake Document Number",
-                Language = "fake language",
+                Language = "English",
                 EmailAddress1 = "fake email 1",
                 EmailAddress2 = "fake email 2"
             })).Verifiable();
@@ -28,7 +28,7 @@ namespace customerportalapi.Services.Test.FakeData
                 Fullname = "fake name",
                 Address = "fake Address modified",
                 DocumentNumber = "fake Document Number",
-                Language = "fake language modified",
+                Language = "English",
                 EmailAddress1 = "fake email 1 modified",
                 EmailAddress2 = "fake email 2 modified"
             })).Verifiable();
@@ -44,7 +44,7 @@ namespace customerportalapi.Services.Test.FakeData
             {
                 SmCustomerId = "RAAAAAAAAAAAAA0000"
             })).Verifiable();
-            
+
 
             return db;
         }

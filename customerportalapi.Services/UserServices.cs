@@ -23,16 +23,18 @@ namespace customerportalapi.Services
         private readonly IConfiguration _config;
         private readonly ILoginService _loginService;
         private readonly IUserAccountRepository _userAccountRepository;
+        private readonly ILanguageRepository _languageRepository;
 
         public UserServices(
-            IUserRepository userRepository, 
-            IProfileRepository profileRepository, 
-            IMailRepository mailRepository, 
-            IEmailTemplateRepository emailTemplateRepository, 
-            IIdentityRepository identityRepository, 
-            IConfiguration config, 
+            IUserRepository userRepository,
+            IProfileRepository profileRepository,
+            IMailRepository mailRepository,
+            IEmailTemplateRepository emailTemplateRepository,
+            IIdentityRepository identityRepository,
+            IConfiguration config,
             ILoginService loginService,
-            IUserAccountRepository userAccountRepository
+            IUserAccountRepository userAccountRepository,
+            ILanguageRepository languageRepository
         )
         {
             _userRepository = userRepository;
@@ -43,13 +45,14 @@ namespace customerportalapi.Services
             _config = config;
             _loginService = loginService;
             _userAccountRepository = userAccountRepository;
+            _languageRepository = languageRepository;
         }
 
 
         public async Task<Profile> GetProfileAsync(string username)
         {
             //Add customer portal Business Logic
-            
+
             User user = _userRepository.GetCurrentUser(username);
             if (user.Id == null)
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
@@ -61,7 +64,14 @@ namespace customerportalapi.Services
             //2. If exist complete data from external repository
             //Invoke repository
             string accountType = (user.Usertype == (int)UserTypes.Business) ? AccountType.Business : AccountType.Residential;
-            var entity = await _profileRepository.GetProfileAsync(user.Dni, accountType);
+            Profile entity = await _profileRepository.GetProfileAsync(user.Dni, accountType);
+
+            List<Language> languages = await _languageRepository.GetLanguagesAsync();
+            Language langEntity = languages.Find(x => x.Name == entity.Language);
+            if (user.Language != langEntity.IsoCode.ToLower()) {
+                user.Language = langEntity.IsoCode.ToLower();
+                _userRepository.Update(user);
+            }
 
             //3. Set Email Principal according to external data. No two principal emails allowed
             entity.EmailAddress1Principal = false;
@@ -204,7 +214,7 @@ namespace customerportalapi.Services
                 entity.MobilePhonePrincipal = true;
 
             EmailTemplate editDataCustomerTemplate = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.EditDataCustomer, user.Language);
-          
+
             if (editDataCustomerTemplate._id != null)
             {
                 Email message = new Email();
@@ -474,12 +484,12 @@ namespace customerportalapi.Services
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
 
             //Invoke repository
-            string accountType = UserUtils.GetAccountType(user.Usertype);            
+            string accountType = UserUtils.GetAccountType(user.Usertype);
             AccountProfile entity = await _profileRepository.GetAccountAsync(user.Dni, accountType);
             UserAccount userAccount = _userAccountRepository.GetAccount(username);
             if (userAccount.Profilepicture != null)
                 entity.Profilepicture = userAccount.Profilepicture;
-            
+
             if (entity == null)
                 throw new ServiceException("Account is not found.", HttpStatusCode.NotFound, "Account", "Not exist");
 
@@ -554,13 +564,13 @@ namespace customerportalapi.Services
             if (entity == null)
                 throw new ServiceException("Account is not found.", HttpStatusCode.NotFound, "Account", "Not exist");
 
-            
-            UserAccount userAccount = _userAccountRepository.GetAccount(username);
-            
 
-            if (userAccount.Id == null) 
+            UserAccount userAccount = _userAccountRepository.GetAccount(username);
+
+
+            if (userAccount.Id == null)
             {
-                UserAccount newUserAccount = new UserAccount() 
+                UserAccount newUserAccount = new UserAccount()
                 {
                     Username = username,
                     Profilepicture = value.Profilepicture
@@ -569,11 +579,11 @@ namespace customerportalapi.Services
                 bool create = await _userAccountRepository.Create(newUserAccount);
                 if (create == true)
                     entity.Profilepicture = value.Profilepicture;
-                
-            } 
-            else 
+
+            }
+            else
             {
-                UserAccount userAccountToUpdate = new UserAccount() 
+                UserAccount userAccountToUpdate = new UserAccount()
                 {
                     Id = userAccount.Id,
                     Username = username,
@@ -588,7 +598,7 @@ namespace customerportalapi.Services
             var account = ToAccount(entity);
             User user = _userRepository.GetCurrentUser(username);
             EmailTemplate editDataCustomerTemplate = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.EditDataCustomer, user.Language);
-          
+
             if (editDataCustomerTemplate._id != null)
             {
                 if (user.Id != null) {
@@ -599,7 +609,7 @@ namespace customerportalapi.Services
                     message.Body = string.Format(htmlbody, user.Name);
                     await _mailRepository.Send(message);
                 }
-                    
+
             }
 
             return account;
@@ -672,7 +682,7 @@ namespace customerportalapi.Services
                     await _mailRepository.Send(customerEmailMessage);
                     break;
             }
-            
+
             var result = await _mailRepository.Send(emailMessage);
             return result;
         }
@@ -766,7 +776,7 @@ namespace customerportalapi.Services
                         userProfile.MobilePhone1,
                         user.Email,
                         form.Motive,
-                        form.Message, 
+                        form.Message,
                         form.Preference,
                         form.ContactMethod);
                     break;
@@ -835,10 +845,10 @@ namespace customerportalapi.Services
             {
                 Fullname = entity.Name,
                 DocumentNumber = entity.Dni,
-                Username = entity.Username            
+                Username = entity.Username
             };
-        }        
-        
+        }
+
         public async Task<bool> ChangeRole(string username, string role)
         {
             User user = _userRepository.GetCurrentUser(username);
@@ -865,7 +875,7 @@ namespace customerportalapi.Services
             if (userIdentity.ID == null) throw new ServiceException("User not found", HttpStatusCode.NotFound);
             if (userIdentity.Groups == null || !userIdentity.Groups.Exists(x => x.Display == role)) return false;
             GroupResults group = await _identityRepository.FindGroup(role);
-            return await _identityRepository.RemoveUserFromGroup(userIdentity, group.Groups[0]);   
+            return await _identityRepository.RemoveUserFromGroup(userIdentity, group.Groups[0]);
         }
 
         public bool ValidateUsername(string username)
