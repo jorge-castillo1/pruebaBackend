@@ -8,6 +8,7 @@ using System.Text;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 
 namespace customerportalapi.Repositories
 {
@@ -16,10 +17,14 @@ namespace customerportalapi.Repositories
         private readonly IConfiguration _configuration;
         private readonly IHttpClientFactory _clientFactory;
 
-        public PaymentRepository(IConfiguration configuration, IHttpClientFactory clientFactory)
+        private readonly ILogger<PaymentRepository> _logger;
+
+
+        public PaymentRepository(IConfiguration configuration, IHttpClientFactory clientFactory, ILogger<PaymentRepository> logger)
         {
             _configuration = configuration;
             _clientFactory = clientFactory;
+            _logger = logger;
         }
 
         public async Task<string> ChangePaymentMethodCard(HttpContent content)
@@ -34,7 +39,7 @@ namespace customerportalapi.Repositories
             if (!response.IsSuccessStatusCode) return entity;
 
             var value = await response.Content.ReadAsStringAsync();
-            
+
             return value;
         }
 
@@ -50,7 +55,7 @@ namespace customerportalapi.Repositories
             keyValues.Add(new KeyValuePair<string, string>("externalid", confirmation.ExternalId));
             keyValues.Add(new KeyValuePair<string, string>("confirmed", confirmation.Confirmed == true ? "true" : "false"));
             HttpContent content = new FormUrlEncodedContent(keyValues);
-        
+
             var response = await httpClient.PostAsync(httpClient.BaseAddress, content);
             response.EnsureSuccessStatusCode();
             if (!response.IsSuccessStatusCode) return entity;
@@ -74,7 +79,7 @@ namespace customerportalapi.Repositories
             keyValues.Add(new KeyValuePair<string, string>("externalid", confirmation.ExternalId));
             keyValues.Add(new KeyValuePair<string, string>("confirmed", confirmation.Confirmed == true ? "true" : "false"));
             HttpContent content = new FormUrlEncodedContent(keyValues);
-        
+
             var response = await httpClient.PostAsync(httpClient.BaseAddress, content);
             response.EnsureSuccessStatusCode();
             if (!response.IsSuccessStatusCode) return entity;
@@ -93,7 +98,7 @@ namespace customerportalapi.Repositories
             var httpClient = _clientFactory.CreateClient("httpClientPayment");
             httpClient.BaseAddress = new Uri(_configuration["GatewayPaymentUrl"] + _configuration["GetCardEndpoint"]);
 
-           
+
             var response = await httpClient.GetAsync("?token="+ token + "&channel=WEBPORTAL", HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
             if (!response.IsSuccessStatusCode) return entity;
@@ -123,6 +128,8 @@ namespace customerportalapi.Repositories
             keyValues.Add(new KeyValuePair<string, string>("documentid", payInvoice.Ourref));
             HttpContent content = new FormUrlEncodedContent(keyValues);
 
+            _logger.LogInformation("PaymentRepositoryPayInvoice:" + Guid.NewGuid().ToString() + "||" + payInvoice.Amount.ToString().Replace(",", ".") +"||" );
+
             var response = await httpClient.PostAsync(httpClient.BaseAddress, content);
             response.EnsureSuccessStatusCode();
             if (!response.IsSuccessStatusCode) return entity;
@@ -140,7 +147,7 @@ namespace customerportalapi.Repositories
 
             var httpClient = _clientFactory.CreateClient("httpClientPayment");
             httpClient.BaseAddress = new Uri(_configuration["GatewayPaymentUrl"] + _configuration["PayInvoiceNewCard"]);
-            
+
             var keyValues = new List<KeyValuePair<string, string>>();
             keyValues.Add(new KeyValuePair<string, string>("recurrent", payInvoiceNewCard.Recurrent == true ?  "true" : "false"));
             keyValues.Add(new KeyValuePair<string, string>("externalid", payInvoiceNewCard.ExternalId));
@@ -161,7 +168,7 @@ namespace customerportalapi.Repositories
             if (!response.IsSuccessStatusCode) return entity;
 
             var value = await response.Content.ReadAsStringAsync();
-            
+
             return value;
         }
 
