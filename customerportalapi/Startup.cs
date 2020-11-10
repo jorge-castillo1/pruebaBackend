@@ -22,13 +22,19 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using MongoDbCache;
-using Serilog;
+using Quantion.MongoDbLogger;
 using Swashbuckle.AspNetCore.Swagger;
 
 namespace customerportalapi
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class Startup
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public Startup(IConfiguration configuration, IHostingEnvironment env)
         {
             var builder = new ConfigurationBuilder()
@@ -39,16 +45,17 @@ namespace customerportalapi
             //configuration = builder.Build();
             //Configuration = configuration;
             Configuration = builder.BuildAndReplacePlaceholders();
-
-            Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Debug()
-                .WriteTo.RollingFile(Path.Combine(env.ContentRootPath, "customerportalapi-{Date}.txt"))
-                .CreateLogger();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
+        /// <summary>
+        /// This method gets called by the runtime. Use this method to add services to the container.
+        /// </summary>
+        /// <param name="services"></param>
         public void ConfigureServices(IServiceCollection services)
         {
             //Mongo Database services
@@ -293,6 +300,15 @@ namespace customerportalapi
                 options.ExpiredScanInterval = TimeSpan.FromMinutes(10);
             });
 
+            //Adds custom MongoDb Logger
+            services.AddLogging(configure => configure.AddProvider(new MongoDbLoggerProvider(
+                new MongoDbLoggerConfiguration()
+                {
+                    ConnectionString = Configuration.GetConnectionString("customerportaldb"),
+                    DatabaseName = Configuration["DatabaseName"]
+                })
+            ));
+
             services.AddAuthentication(options =>
             {
                 options.DefaultChallengeScheme = "scheme name";
@@ -305,11 +321,15 @@ namespace customerportalapi
             });
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        /// <summary>
+        /// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        /// </summary>
+        /// <param name="app"></param>
+        /// <param name="env"></param>
+        /// <param name="loggerFactory"></param>
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             //Register Logger
-            loggerFactory.AddSerilog();
 
             if (env.IsDevelopment())
             {
