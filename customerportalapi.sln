@@ -18,7 +18,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7CD22D29-E0B2-40B3-84CC-3BC6F99FDD16}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
-		..\..\..\..\..\OneDrive\Escritorio\nuget.config = ..\..\..\..\..\OneDrive\Escritorio\nuget.config
+		nuget.config = nuget.config
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "customerportalapi.Services", "customerportalapi.Services\customerportalapi.Services.csproj", "{2BA82D16-B188-41D2-86BD-79112BE901FD}"
