@@ -16,7 +16,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using MongoDbCache;
-using Quantion.MongoDbLogger;
+using Serilog;
 using Swashbuckle.AspNetCore.Swagger;
 using System;
 using System.Collections.Generic;
@@ -24,6 +24,7 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using Serilog;
 
 namespace customerportalapi
 {
@@ -45,6 +46,11 @@ namespace customerportalapi
             //configuration = builder.Build();
             //Configuration = configuration;
             Configuration = builder.BuildAndReplacePlaceholders();
+
+            // creates custom collection `applog`
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.MongoDB($"{Configuration.GetConnectionString("customerportaldb")}/{Configuration["DatabaseName"]}", collectionName: "logs")
+                .CreateLogger();
         }
 
         /// <summary>
@@ -57,7 +63,7 @@ namespace customerportalapi
         /// </summary>
         /// <param name="services"></param>
         public void ConfigureServices(IServiceCollection services)
-        {
+        {          
             //Mongo Database services
             services.AddScoped<IMongoCollectionWrapper<User>>(serviceProvider =>
             {
@@ -300,15 +306,6 @@ namespace customerportalapi
                 options.ExpiredScanInterval = TimeSpan.FromMinutes(10);
             });
 
-            //Adds custom MongoDb Logger
-            services.AddLogging(configure => configure.AddProvider(new MongoDbLoggerProvider(
-                new MongoDbLoggerConfiguration()
-                {
-                    ConnectionString = Configuration.GetConnectionString("customerportaldb"),
-                    DatabaseName = Configuration["DatabaseName"]
-                })
-            ));
-
             services.AddAuthentication(options =>
             {
                 options.DefaultChallengeScheme = "scheme name";
@@ -330,6 +327,7 @@ namespace customerportalapi
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             //Register Logger
+            loggerFactory.AddSerilog();
 
             if (env.IsDevelopment())
             {
