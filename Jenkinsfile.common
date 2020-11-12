@@ -3,7 +3,7 @@ container('dotnetcore') {
 
     stage('build') { gitlabCommitStatus(name: 'build') {
       sh """
-	  dotnet restore ./customerportalapi.sln -source https://nexus.quantion.com/repository/nuget-group/
+	  dotnet restore --source https://nexus.quantion.com/repository/nuget-group/
       dotnet build -c Release -o /app
       """  }}
 
