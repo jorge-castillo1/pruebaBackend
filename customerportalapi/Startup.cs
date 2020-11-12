@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using AutoWrapper;
+﻿using AutoWrapper;
 using customerportalapi.Entities;
 using customerportalapi.Repositories;
 using customerportalapi.Repositories.interfaces;
@@ -24,6 +18,12 @@ using MongoDB.Driver;
 using MongoDbCache;
 using Quantion.MongoDbLogger;
 using Swashbuckle.AspNetCore.Swagger;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
 
 namespace customerportalapi
 {
