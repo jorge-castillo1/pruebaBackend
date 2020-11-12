@@ -48,8 +48,9 @@ namespace customerportalapi
             Configuration = builder.BuildAndReplacePlaceholders();
 
             // creates custom collection `applog`
+            IMongoDatabase db = GetDatabase();
             Log.Logger = new LoggerConfiguration()
-                .WriteTo.MongoDB($"{Configuration.GetConnectionString("customerportaldb")}/{Configuration["DatabaseName"]}", collectionName: "logs")
+                .WriteTo.MongoDB(db, collectionName: "logs")
                 .CreateLogger();
         }
 
