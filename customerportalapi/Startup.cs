@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using AutoWrapper;
+﻿using AutoWrapper;
 using customerportalapi.Entities;
 using customerportalapi.Repositories;
 using customerportalapi.Repositories.interfaces;
@@ -24,11 +18,24 @@ using MongoDB.Driver;
 using MongoDbCache;
 using Serilog;
 using Swashbuckle.AspNetCore.Swagger;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using Serilog;
 
 namespace customerportalapi
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class Startup
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public Startup(IConfiguration configuration, IHostingEnvironment env)
         {
             var builder = new ConfigurationBuilder()
@@ -40,17 +47,24 @@ namespace customerportalapi
             //Configuration = configuration;
             Configuration = builder.BuildAndReplacePlaceholders();
 
+            // creates custom collection `applog`
+            IMongoDatabase db = GetDatabase();
             Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Debug()
-                .WriteTo.RollingFile(Path.Combine(env.ContentRootPath, "customerportalapi-{Date}.txt"))
+                .WriteTo.MongoDB(db, collectionName: "logs")
                 .CreateLogger();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
+        /// <summary>
+        /// This method gets called by the runtime. Use this method to add services to the container.
+        /// </summary>
+        /// <param name="services"></param>
         public void ConfigureServices(IServiceCollection services)
-        {
+        {          
             //Mongo Database services
             services.AddScoped<IMongoCollectionWrapper<User>>(serviceProvider =>
             {
@@ -305,7 +319,12 @@ namespace customerportalapi
             });
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        /// <summary>
+        /// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        /// </summary>
+        /// <param name="app"></param>
+        /// <param name="env"></param>
+        /// <param name="loggerFactory"></param>
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             //Register Logger
