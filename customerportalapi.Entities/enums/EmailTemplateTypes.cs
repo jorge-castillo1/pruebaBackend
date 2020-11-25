@@ -12,7 +12,8 @@
         RequestDigitalInvoice = 7,
         FormContactCustomer = 8,
         FormCallCustomer = 9,
-        EditDataCustomer = 10
+        EditDataCustomer = 10,
+        EditAccessCode = 11
 
     }
 }
