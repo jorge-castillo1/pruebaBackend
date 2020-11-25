@@ -23,11 +23,23 @@ namespace customerportalapi.Services
         private readonly IIdentityRepository _identityRepository;
         private readonly IContractSMRepository _contractSMRepository;
         private readonly IConfiguration _config;
+        private readonly IMailRepository _mailRepository;
+        private readonly IEmailTemplateRepository _emailTemplateRepository;
 
 
-        public SiteServices(IUserRepository userRepository, IContractRepository contractRepository,
-            IStoreRepository storeRepository, IDistributedCache distributedCache, IIdentityRepository identityRepository,
-            IContractSMRepository contractSMRepository, IConfiguration config)
+
+
+        public SiteServices(
+            IUserRepository userRepository,
+            IContractRepository contractRepository,
+            IStoreRepository storeRepository,
+            IDistributedCache distributedCache,
+            IIdentityRepository identityRepository,
+            IContractSMRepository contractSMRepository,
+            IConfiguration config,
+            IMailRepository mailRepository,
+            IEmailTemplateRepository emailTemplateRepository
+        )
         {
             _userRepository = userRepository;
             _contractRepository = contractRepository;
@@ -36,6 +48,8 @@ namespace customerportalapi.Services
             _identityRepository = identityRepository;
             _contractSMRepository = contractSMRepository;
             _config = config;
+            _mailRepository = mailRepository;
+            _emailTemplateRepository = emailTemplateRepository;
         }
 
 
@@ -301,8 +315,9 @@ namespace customerportalapi.Services
         }
 
         public async Task<bool> UpdateAccessCodeAsync(string contractId, string password) {
+            var user = Thread.CurrentPrincipal;
+            User currentUser = _userRepository.GetCurrentUser(user.Identity.Name);
             // 1. GetContract to get subcontract
-
             SMContract smContract = await _contractSMRepository.GetAccessCodeAsync(contractId);
 
              if (smContract.Contractnumber == null)
@@ -328,6 +343,19 @@ namespace customerportalapi.Services
 
             if (updateAccCode == false)
                 throw new ServiceException("Error updating accessCode.", HttpStatusCode.InternalServerError);
+
+
+            EmailTemplate editDataCustomerTemplate = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.EditAccessCode, currentUser.Language);
+
+            if (editDataCustomerTemplate._id != null)
+            {
+                Email message = new Email();
+                message.To.Add(currentUser.Email);
+                message.Subject = editDataCustomerTemplate.subject;
+                string htmlbody = editDataCustomerTemplate.body.Replace("{", "{{").Replace("}", "}}").Replace("%{{", "{").Replace("}}%", "}");
+                message.Body = string.Format(htmlbody, currentUser.Name);
+                await _mailRepository.Send(message);
+            }
 
             return updateAccCode;
 
