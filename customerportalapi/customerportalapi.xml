@@ -173,7 +173,7 @@
         </member>
         <member name="M:customerportalapi.Controllers.SitesController.GetUnitBySMIdAsync(System.String)">
             <summary>
-            Get unit information from unique erp system unit id 
+            Get unit information from unique erp system unit id
             </summary>
             <param name="smid">ERP Unit identification Id </param>
             <returns>Unit data model</returns>
@@ -218,6 +218,13 @@
             Checks if site access code is available due to invalid password attempts
             </summary>
             <returns>bool</returns>
+        </member>
+        <member name="M:customerportalapi.Controllers.SitesController.UpdateCodeAsync(customerportalapi.Entities.AccessCode)">
+            <summary>
+            Update access code
+            </summary>
+            <param name="value">Update Access code credentials</param>
+            <returns>Bool</returns>
         </member>
         <member name="M:customerportalapi.Controllers.SitesController.GetInvoicesAsync(System.String)">
             <summary>

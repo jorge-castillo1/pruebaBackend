@@ -18,5 +18,7 @@ namespace customerportalapi.Services.interfaces
         Task<Unit> GetUnitAsync(Guid id);
         Task<Unit> GetUnitBySMIdAsync(string smid);
         Task<List<SiteInvoices>> GetLastInvoices(string username);
+        Task<bool> UpdateAccessCodeAsync(string contractId, string black);
+
     }
 }

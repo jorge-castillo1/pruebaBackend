@@ -104,7 +104,7 @@ namespace customerportalapi.Controllers
         }
 
         /// <summary>
-        /// Get unit information from unique erp system unit id 
+        /// Get unit information from unique erp system unit id
         /// </summary>
         /// <param name="smid">ERP Unit identification Id </param>
         /// <returns>Unit data model</returns>
@@ -259,6 +259,34 @@ namespace customerportalapi.Controllers
                 throw;
             }
         }
+
+        /// <summary>
+        /// Update access code
+        /// </summary>
+        /// <param name="value">Update Access code credentials</param>
+        /// <returns>Bool</returns>
+        [HttpPatch("access-code")]
+        public async Task<ApiResponse> UpdateCodeAsync([FromBody] AccessCode value)
+        {
+            try
+            {
+                var entity = await _services.UpdateAccessCodeAsync(value.ContractId, value.Password);
+                return new ApiResponse(entity);
+            }
+            catch(ServiceException ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+
+
+
 
         /// <summary>
         /// Get Last user invoices

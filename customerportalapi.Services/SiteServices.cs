@@ -165,7 +165,7 @@ namespace customerportalapi.Services
         {
             var user = Thread.CurrentPrincipal;
             User loginUser = _userRepository.GetCurrentUser(user.Identity.Name);
-            
+
             //Check bad access code attempts and validate timestamp to allow try again
             if (DateTime.Now.ToUniversalTime().AddMinutes(Int32.Parse(_config["AccessCodeUnblockedTime"]) * -1) > loginUser.LastAccessCodeAttempts)
                 return true;
@@ -177,7 +177,7 @@ namespace customerportalapi.Services
         }
 
         public async Task<AccessCode> GetAccessCodeAsync(string contractId, string password) {
-            
+
             var user = Thread.CurrentPrincipal;
             User loginUser = _userRepository.GetCurrentUser(user.Identity.Name);
 
@@ -217,7 +217,7 @@ namespace customerportalapi.Services
             }
             catch (Exception ex)
             {
-                
+
                 //Accumulate invalid attempt
                 loginUser.AccessCodeAttempts = loginUser.AccessCodeAttempts + 1;
                 loginUser.LastAccessCodeAttempts = DateTime.Now.ToUniversalTime();
@@ -258,7 +258,7 @@ namespace customerportalapi.Services
             List<Invoice> invoices = new List<Invoice>();
             invoices = await _contractSMRepository.GetInvoicesAsync(contractNumber);
 
-            //4. Only returns 3 invoices for every Site 
+            //4. Only returns 3 invoices for every Site
             List<Invoice> filteredInvoices = new List<Invoice>();
             var sites = invoices.GroupBy(x => x.SiteID);
             foreach (var sitegroup in sites)
@@ -299,5 +299,41 @@ namespace customerportalapi.Services
 
             return siteInvoices;
         }
+
+        public async Task<bool> UpdateAccessCodeAsync(string contractId, string password) {
+            // 1. GetContract to get subcontract
+
+            SMContract smContract = await _contractSMRepository.GetAccessCodeAsync(contractId);
+
+             if (smContract.Contractnumber == null)
+                throw new ServiceException("Contract does not exist.", HttpStatusCode.NotFound, "contractId", "Not exist");
+
+            // 2. Get subcontract SM
+            SubContract subContract = await _contractSMRepository.GetSubContractAsync(contractId, smContract.Unitid);
+
+            if (subContract.SubContractId == null)
+                throw new ServiceException("SubContractId does not exist.", HttpStatusCode.NotFound, "SubContractId", "Not exist");
+
+            if (password == smContract.Password)
+                throw new ServiceException("Security access code error", HttpStatusCode.BadRequest);
+
+            // 3. Update  password in SM
+            UpdateAccessCode updateAccessCode = new UpdateAccessCode {
+                SubContractId = subContract.SubContractId,
+                UnitId = smContract.Unitid,
+                Code = password
+            };
+
+            bool updateAccCode = await _contractSMRepository.UpdateAccessCodeAsync(updateAccessCode);
+
+            if (updateAccCode == false)
+                throw new ServiceException("Error updating accessCode.", HttpStatusCode.InternalServerError);
+
+            return updateAccCode;
+
+
+
+        }
+
     }
 }
