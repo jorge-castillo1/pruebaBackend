@@ -21,7 +21,7 @@ namespace customerportalapi.Repositories
             _configuration = configuration;
             _clientFactory = clientFactory;
         }
-        
+
         public async Task<SMContract> GetAccessCodeAsync(string contractId)
         {
             var httpClient = _clientFactory.CreateClient("httpClient");
@@ -58,6 +58,31 @@ namespace customerportalapi.Repositories
             var postContent = new StringContent(JsonConvert.SerializeObject(makePayment), Encoding.UTF8, "application/json");
 
             var response = await httpClient.PostAsync(url, postContent);
+            response.EnsureSuccessStatusCode();
+            return response.IsSuccessStatusCode;
+        }
+
+        public async Task<SubContract> GetSubContractAsync(string contractId, string unitId)
+        {
+            var httpClient = _clientFactory.CreateClient("httpClient");
+            var url = new Uri(_configuration["GatewaySmUrl"] + _configuration["ContractSMAPI"] + contractId + "/" + unitId);
+
+            var response = await httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode) return new SubContract();
+            var content = await response.Content.ReadAsStringAsync();
+            JObject result = JObject.Parse(content);
+
+            return JsonConvert.DeserializeObject<SubContract>(result.GetValue("result").ToString());
+        }
+
+        public async Task<bool> UpdateAccessCodeAsync(UpdateAccessCode updateAccessCode)
+        {
+            var httpClient = _clientFactory.CreateClient("httpClient");
+            var url = new Uri(_configuration["GatewaySmUrl"] + _configuration["ContractSMAPI"] + "access-code");
+            var putContent = new StringContent(JsonConvert.SerializeObject(updateAccessCode), Encoding.UTF8, "application/json");
+
+            var response = await httpClient.PutAsync(url, putContent);
             response.EnsureSuccessStatusCode();
             return response.IsSuccessStatusCode;
         }
