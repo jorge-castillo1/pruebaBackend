@@ -345,7 +345,6 @@ namespace customerportalapi.Services
                 throw new ServiceException("Error updating accessCode.", HttpStatusCode.InternalServerError);
 
 
-
             EmailTemplate editDataCustomerTemplate = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.EditAccessCode, currentUser.Language);
 
             if (editDataCustomerTemplate._id != null)
