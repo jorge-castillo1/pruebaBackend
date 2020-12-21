@@ -287,6 +287,7 @@ namespace customerportalapi.Services
 
         private HttpContent FillFormUrlEncodedCardMethod(Store store, Profile user, SMContract smContract, string externalId)
         {
+            string language = getCountryLangByLanguage(user.Language);
             var keyValues = new List<KeyValuePair<string, string>>();
             keyValues.Add(new KeyValuePair<string, string>("externalid", externalId));
             keyValues.Add(new KeyValuePair<string, string>("channel", "WEBPORTAL"));
@@ -296,9 +297,65 @@ namespace customerportalapi.Services
             keyValues.Add(new KeyValuePair<string, string>("nif", user.DocumentNumber));
             keyValues.Add(new KeyValuePair<string, string>("idcustomer", smContract.Customerid));
             keyValues.Add(new KeyValuePair<string, string>("url", _configuration["ChangePaymentMethodCardResponse"]));
+            keyValues.Add(new KeyValuePair<string, string>("language", language));
             HttpContent content = new FormUrlEncodedContent(keyValues);
             return content;
+        }
 
+        private string getCountryLangByLanguage(string language) {
+            switch (language)
+            {
+                case "en":
+                    return "en_GB";
+                case "es":
+                    return "es_ES";
+                case "ca":
+                    return "ca_ES";
+                case "gl":
+                    return "gl_ES";
+                case "eu":
+                    return "eu_ES";
+                case "pt":
+                    return "pt_PT";
+                case "fr":
+                    return "fr_FR";
+                case "de":
+                    return "de_DE";
+                case "da":
+                    return "da_DK";
+                case "nl":
+                    return "nl_NL";
+                case "el":
+                    return "el_GR";
+                case "hu":
+                    return "hu_HU";
+                case "is":
+                    return "is_IS";
+                case "it":
+                    return "it_IT";
+                case "bg":
+                    return "bg_BG";
+                case "cs":
+                    return "cs_CZ";
+                case "lv":
+                    return "lv_LV";
+                case "lt":
+                    return "lt_LT";
+                case "no":
+                    return "no_NO";
+                case "pl":
+                    return "pl_PL";
+                case "ro":
+                    return "ro_RO";
+                case "et":
+                    return "et_EE";
+                case "fi":
+                    return "fi_FI";
+                case "tr":
+                    return "tr_TR";
+                default:
+                    return "en_GB";
+            }
         }
 
         public async Task<bool> ChangePaymentMethodCardResponseAsync(PaymentMethodCardData cardData)
@@ -756,6 +813,7 @@ namespace customerportalapi.Services
             paymentMethod.Amount = inv.Amount;
             paymentMethod.IdCustomer = smContract.Customerid;
             paymentMethod.Url =  _configuration["PayInvoiceByNewCardMethodCardResponse"];
+            paymentMethod.Language = getCountryLangByLanguage(user.Language);
 
             string stringHtml = await _paymentRepository.PayInvoiceNewCard(paymentMethod);
 
@@ -895,6 +953,7 @@ namespace customerportalapi.Services
             updateCardData.ExternalId = externalId;
             updateCardData.IdCustomer = smContract.Customerid;
             updateCardData.Url = _configuration["UpdateCardMethodCardResponse"];
+            updateCardData.Language = getCountryLangByLanguage(user.Language);
 
 
             string stringHtml = await _paymentRepository.UpdateCardLoad(updateCardData);

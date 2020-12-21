@@ -17,6 +17,7 @@ namespace customerportalapi.Entities
         public string Dni { get; set; }
         public string SmContractCode { get; set; }
         public string ContractNumber { get; set; }
+        public string Language { get; set; }
 
     }
 }
