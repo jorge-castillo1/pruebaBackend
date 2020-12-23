@@ -161,6 +161,7 @@ namespace customerportalapi.Repositories
             keyValues.Add(new KeyValuePair<string, string>("amount", payInvoiceNewCard.Amount.ToString().Replace(",", ".")));
             keyValues.Add(new KeyValuePair<string, string>("ourref", payInvoiceNewCard.Ourref));
             keyValues.Add(new KeyValuePair<string, string>("documentid", payInvoiceNewCard.DocumentId));
+            keyValues.Add(new KeyValuePair<string, string>("language", payInvoiceNewCard.Language));
             HttpContent content = new FormUrlEncodedContent(keyValues);
 
             var response = await httpClient.PostAsync(httpClient.BaseAddress, content);
@@ -185,6 +186,7 @@ namespace customerportalapi.Repositories
             keyValues.Add(new KeyValuePair<string, string>("idcustomer", updateCardData.IdCustomer));
             keyValues.Add(new KeyValuePair<string, string>("token", updateCardData.Token));
             keyValues.Add(new KeyValuePair<string, string>("url", updateCardData.Url));
+            keyValues.Add(new KeyValuePair<string, string>("language", updateCardData.Language));
             HttpContent content = new FormUrlEncodedContent(keyValues);
 
             var response = await httpClient.PostAsync(httpClient.BaseAddress, content);
