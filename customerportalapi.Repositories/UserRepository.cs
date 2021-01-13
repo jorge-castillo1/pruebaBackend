@@ -27,6 +27,18 @@ namespace customerportalapi.Repositories
             return user;
         }
 
+        public User GetCurrentUserByUsernameOrEmail(string usernameOrEmail)
+        {
+            User user = new User();
+
+            var usersInfo = _users.FindOne(t => t.Username == usernameOrEmail || t.Email == usernameOrEmail);
+            foreach (var u in usersInfo)
+            {
+                user = u;
+            }
+            return user;
+        }
+
         public User GetCurrentUserByDniAndType(string dni, int userType)
         {
             User user = new User();

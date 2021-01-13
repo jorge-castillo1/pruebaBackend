@@ -85,7 +85,7 @@ namespace customerportalapi.Services
         {
             try {
                 //1. Get User From backend
-                User currentUser = _userRepository.GetCurrentUser(credentials.Username);
+                User currentUser = _userRepository.GetCurrentUserByUsernameOrEmail(credentials.Username);
 
                 //2. Validate Old Password is valid
                 Token validateOld = await _identityRepository.Authorize(new Login()

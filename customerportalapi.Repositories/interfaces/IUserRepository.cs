@@ -6,6 +6,8 @@ namespace customerportalapi.Repositories.interfaces
     public interface IUserRepository
     {
         User GetCurrentUser(string username);
+        User GetCurrentUserByUsernameOrEmail(string usernameOrEmail);
+
         User GetCurrentUserByDniAndType(string dni, int userType);
         User Update(User user);
         User UpdateById(User user);
