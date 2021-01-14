@@ -53,7 +53,7 @@ namespace customerportalapi.Services
         {
             //Add customer portal Business Logic
 
-            User user = _userRepository.GetCurrentUser(username);
+            User user = _userRepository.GetCurrentUserByUsername(username);
             if (user.Id == null)
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
 
@@ -250,21 +250,30 @@ namespace customerportalapi.Services
             User user = _userRepository.GetCurrentUserByDniAndType(value.Dni, userType);
             if (user.Id == null)
             {
-                //4. Create user in portal database
-                user = new User
+                //3.1 Find some user with this email
+                user = _userRepository.GetCurrentUserByEmail(value.Email);
+                if (user.Id == null)
                 {
-                    Username = userName,
-                    Dni = value.Dni,
-                    Email = value.Email,
-                    Name = value.Fullname,
-                    Password = password,
-                    Language = UserUtils.GetLanguage(value.Language),
-                    Usertype = UserUtils.GetUserType(value.CustomerType),
-                    Emailverified = false,
-                    Invitationtoken = Guid.NewGuid().ToString()
-                };
+                    //4. Create user in portal database
+                    user = new User
+                    {
+                        Username = userName,
+                        Dni = value.Dni,
+                        Email = value.Email,
+                        Name = value.Fullname,
+                        Password = password,
+                        Language = UserUtils.GetLanguage(value.Language),
+                        Usertype = UserUtils.GetUserType(value.CustomerType),
+                        Emailverified = false,
+                        Invitationtoken = Guid.NewGuid().ToString()
+                    };
 
-                result = await _userRepository.Create(user);
+                    result = await _userRepository.Create(user);
+                }
+                else
+                {
+                    throw new ServiceException("Invitation user fails. Email in use by another user", HttpStatusCode.NotFound, "Email", "Already in use");
+                }
             }
             else
             {
@@ -479,7 +488,7 @@ namespace customerportalapi.Services
 
         public async Task<Account> GetAccountAsync(string username)
         {
-            User user = _userRepository.GetCurrentUser(username);
+            User user = _userRepository.GetCurrentUserByUsername(username);
             if (user.Id == null)
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
 
@@ -596,7 +605,7 @@ namespace customerportalapi.Services
             }
 
             var account = ToAccount(entity);
-            User user = _userRepository.GetCurrentUser(username);
+            User user = _userRepository.GetCurrentUserByUsername(username);
             EmailTemplate editDataCustomerTemplate = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.EditDataCustomer, user.Language);
 
             if (editDataCustomerTemplate._id != null)
@@ -625,7 +634,7 @@ namespace customerportalapi.Services
             if (currentUser == null)
                 throw new ServiceException("Error retrieving the current user.", HttpStatusCode.NotFound, "Current user", "Not logged");
 
-            User user = _userRepository.GetCurrentUser(currentUser.Identity.Name);
+            User user = _userRepository.GetCurrentUserByUsername(currentUser.Identity.Name);
             if (user.Id == null)
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
 
@@ -829,7 +838,7 @@ namespace customerportalapi.Services
         {
             //Invoke repository
 
-            User user = _userRepository.GetCurrentUser(username);
+            User user = _userRepository.GetCurrentUserByUsername(username);
 
             Profile profile = ToProfile(user);
             if (profile == null)
@@ -851,7 +860,7 @@ namespace customerportalapi.Services
 
         public async Task<bool> ChangeRole(string username, string role)
         {
-            User user = _userRepository.GetCurrentUser(username);
+            User user = _userRepository.GetCurrentUserByUsername(username);
             UserIdentity userIdentity = await _identityRepository.GetUser(user.ExternalId);
             if (userIdentity.ID == null) throw new ServiceException("User not found", HttpStatusCode.NotFound);
             GroupResults group = await _identityRepository.FindGroup(role);
@@ -870,7 +879,7 @@ namespace customerportalapi.Services
 
         public async Task<bool> RemoveRole(string username, string role)
         {
-            User user = _userRepository.GetCurrentUser(username);
+            User user = _userRepository.GetCurrentUserByUsername(username);
             UserIdentity userIdentity = await _identityRepository.GetUser(user.ExternalId);
             if (userIdentity.ID == null) throw new ServiceException("User not found", HttpStatusCode.NotFound);
             if (userIdentity.Groups == null || !userIdentity.Groups.Exists(x => x.Display == role)) return false;
@@ -880,7 +889,7 @@ namespace customerportalapi.Services
 
         public bool ValidateUsername(string username)
         {
-            User user = _userRepository.GetCurrentUser(username);
+            User user = _userRepository.GetCurrentUserByUsername(username);
             return (user.Id == null);
         }
     }

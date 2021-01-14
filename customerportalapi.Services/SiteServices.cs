@@ -56,7 +56,7 @@ namespace customerportalapi.Services
         public async Task<List<Site>> GetContractsAsync(string username)
         {
             //Add customer portal Business Logic
-            User user = _userRepository.GetCurrentUser(username);
+            User user = _userRepository.GetCurrentUserByUsername(username);
             if (user.Id == null)
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
 
@@ -178,7 +178,7 @@ namespace customerportalapi.Services
         public async Task<bool> IsAccessCodeAvailableAsync()
         {
             var user = Thread.CurrentPrincipal;
-            User loginUser = _userRepository.GetCurrentUser(user.Identity.Name);
+            User loginUser = _userRepository.GetCurrentUserByUsername(user.Identity.Name);
 
             //Check bad access code attempts and validate timestamp to allow try again
             if (DateTime.Now.ToUniversalTime().AddMinutes(Int32.Parse(_config["AccessCodeUnblockedTime"]) * -1) > loginUser.LastAccessCodeAttempts)
@@ -193,7 +193,7 @@ namespace customerportalapi.Services
         public async Task<AccessCode> GetAccessCodeAsync(string contractId, string password) {
 
             var user = Thread.CurrentPrincipal;
-            User loginUser = _userRepository.GetCurrentUser(user.Identity.Name);
+            User loginUser = _userRepository.GetCurrentUserByUsername(user.Identity.Name);
 
             try
             {
@@ -255,7 +255,7 @@ namespace customerportalapi.Services
         {
             List<SiteInvoices> siteInvoices = new List<SiteInvoices>();
             //Add customer portal Business Logic
-            User user = _userRepository.GetCurrentUser(username);
+            User user = _userRepository.GetCurrentUserByUsername(username);
             if (user.Id == null)
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
 
@@ -316,7 +316,7 @@ namespace customerportalapi.Services
 
         public async Task<bool> UpdateAccessCodeAsync(string contractId, string password) {
             var user = Thread.CurrentPrincipal;
-            User currentUser = _userRepository.GetCurrentUser(user.Identity.Name);
+            User currentUser = _userRepository.GetCurrentUserByUsername(user.Identity.Name);
             // 1. GetContract to get subcontract
             SMContract smContract = await _contractSMRepository.GetAccessCodeAsync(contractId);
 

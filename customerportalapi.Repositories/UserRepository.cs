@@ -15,7 +15,7 @@ namespace customerportalapi.Repositories
             _users = users;
         }
 
-        public User GetCurrentUser(string username)
+        public User GetCurrentUserByUsername(string username)
         {
             User user = new User();
 
@@ -27,11 +27,11 @@ namespace customerportalapi.Repositories
             return user;
         }
 
-        public User GetCurrentUserByUsernameOrEmail(string usernameOrEmail)
+        public User GetCurrentUserByEmail(string email)
         {
             User user = new User();
 
-            var usersInfo = _users.FindOne(t => t.Username == usernameOrEmail || t.Email == usernameOrEmail);
+            var usersInfo = _users.FindOne(t => t.Email == email);
             foreach (var u in usersInfo)
             {
                 user = u;
