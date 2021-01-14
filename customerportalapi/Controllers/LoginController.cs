@@ -81,12 +81,12 @@ namespace customerportalapi.Controllers
         /// <param name="userName">Username</param>
         /// <returns>Boolean if mail send</returns>
         // POST api/login/forgotPassword
-        [HttpPost("forgotPassword/{userName}")]
-        public async Task<ApiResponse> ForgotPassword(string userName)
+        [HttpPost("forgotPassword")]
+        public async Task<ApiResponse> ForgotPassword([FromBody] Login credentials)
         {
             try
             {
-                var entity = await _service.SendNewCredentialsAsync(userName);
+                var entity = await _service.SendNewCredentialsAsync(credentials);
                 return new ApiResponse(entity);
             }
             catch (ServiceException se)
