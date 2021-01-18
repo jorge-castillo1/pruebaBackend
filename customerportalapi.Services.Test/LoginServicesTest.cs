@@ -122,7 +122,7 @@ namespace customerportalapi.Services.Test
         }
 
         [TestMethod]
-        public async Task AlCambiarContraseña_SeValidaQueExistaUsuario()
+        public async Task AlCambiarContraseña_SeValidaQueExistaUsuario_ByUsername()
         {
             //Arrange
             ResetPassword credentials = new ResetPassword();
@@ -137,7 +137,28 @@ namespace customerportalapi.Services.Test
             //Assert
             Assert.IsNotNull(newToken);
             Assert.AreEqual("Fake AccessToken", newToken.AccesToken);
-            _userRepository.Verify(x => x.GetCurrentUser(It.IsAny<string>()));
+            _userRepository.Verify(x => x.GetCurrentUserByUsername(It.IsAny<string>()));
+            _identityRepository.Verify(x => x.UpdateUser(It.IsAny<UserIdentity>()));
+        }
+
+        [TestMethod]
+        public async Task AlCambiarContraseña_SeValidaQueExistaUsuario_ByEmail()
+        {
+            //Arrange
+            ResetPassword credentials = new ResetPassword();
+            credentials.Username = null;
+            credentials.Email = "fake@email.com";
+            credentials.OldPassword = "Fake Old";
+            credentials.NewPassword = "Fake New";
+
+            //Act
+            LoginService service = new LoginService(_identityRepository.Object, _userRepository.Object, _emailtemplateRepository.Object, _mailRepository.Object, _config);
+            Token newToken = await service.ChangePassword(credentials);
+
+            //Assert
+            Assert.IsNotNull(newToken);
+            Assert.AreEqual("Fake AccessToken", newToken.AccesToken);
+            _userRepository.Verify(x => x.GetCurrentUserByEmail(It.IsAny<string>()));
             _identityRepository.Verify(x => x.UpdateUser(It.IsAny<UserIdentity>()));
         }
 
@@ -146,12 +167,17 @@ namespace customerportalapi.Services.Test
         public async Task AlOlvidarContraseñaConUsernameInvalido_SeProduceUnError()
         {
             //Arrange
-            string userName = "fakeUserName";
+            Login credential = new Login
+            {
+                Username = "fakeUserName",
+                Email = null,
+                Password = null
+            };
 
             //Act
             _userRepository = UserRepositoryMock.InvalidUserRepository();
             LoginService service = new LoginService(_identityRepository.Object, _userRepository.Object, _emailtemplateRepository.Object, _mailRepository.Object, _config);
-            await service.SendNewCredentialsAsync(userName);
+            await service.SendNewCredentialsAsync(credential);
         }
 
         [TestMethod]
@@ -159,12 +185,17 @@ namespace customerportalapi.Services.Test
         public async Task AlOlvidarContraseñaSinAceptarInvitacion_SeProduceUnError()
         {
             //Arrange
-            string userName = "fakeUserName";
+            Login credential = new Login
+            {
+                Username = "fakeUserName",
+                Email = null,
+                Password = null
+            };
 
             //Act
             _userRepository = UserRepositoryMock.Valid_InActiveUser_Repository();
             LoginService service = new LoginService(_identityRepository.Object, _userRepository.Object, _emailtemplateRepository.Object, _mailRepository.Object, _config);
-            await service.SendNewCredentialsAsync(userName);
+            await service.SendNewCredentialsAsync(credential);
         }
 
         [TestMethod]
@@ -172,12 +203,17 @@ namespace customerportalapi.Services.Test
         public async Task AlOlvidarContraseñaYNoexistePlantilla_NoSeEnviaUnCorreo()
         {
             //Arrange
-            string userName = "fakeUserName";
+            Login credential = new Login
+            {
+                Username = "fakeUserName",
+                Email = null,
+                Password = null
+            };
 
             //Act
             _emailtemplateRepository = EmailTemplateRepositoryMock.Invalid_EmailTemplateRepository();
             LoginService service = new LoginService(_identityRepository.Object, _userRepository.Object, _emailtemplateRepository.Object, _mailRepository.Object, _config);
-            await service.SendNewCredentialsAsync(userName);
+            await service.SendNewCredentialsAsync(credential);
 
             //Assert verificar si se ha invocado a enviarcorreo
             _mailRepository.Verify(x => x.Send(It.IsAny<Email>()));
@@ -187,13 +223,19 @@ namespace customerportalapi.Services.Test
         public async Task AlOlvidarContraseña_SeEnviaUnCorreoMediantePlantilla()
         {
             //Arrange
-            string userName = "fakeUserName";
+            Login credential = new Login
+            {
+                Username = null,
+                Email = "fakeData@email.com",
+                Password = null
+            };
 
             //Act
             LoginService service = new LoginService(_identityRepository.Object, _userRepository.Object, _emailtemplateRepository.Object, _mailRepository.Object, _config);
-            await service.SendNewCredentialsAsync(userName);
+            await service.SendNewCredentialsAsync(credential);
 
             //Assert
+            _userRepository.Verify(x => x.GetCurrentUserByEmail(It.IsAny<string>()));
             _userRepository.Verify(x => x.Update(It.IsAny<User>()));
             _emailtemplateRepository.Verify(x => x.getTemplate(It.IsAny<int>(), It.IsAny<string>()));
             _mailRepository.Verify(x => x.Send(It.IsAny<Email>()));

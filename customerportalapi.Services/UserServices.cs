@@ -283,8 +283,7 @@ namespace customerportalapi.Services
                 };
 
                 result = await _userRepository.Create(user);
-            }
-            
+            }            
             else
             {
                 //5. If emailverified is false resend email invitation otherwise throw error

@@ -54,6 +54,20 @@ namespace customerportalapi.Repositories.Test
         }
 
         [TestMethod]
+        public void AlRecuperarUnUsuarioConEmailExistente_NoSeProducenErrores()
+        {
+            //Arrange
+            User user = new User();
+            UserRepository _userRepository = new UserRepository(_configurations, _users.Object);
+
+            //Act
+            user = _userRepository.GetCurrentUserByEmail("fakeuser@email.com");
+
+            //Assert
+            Assert.AreEqual("fakeuser@email.com", user.Email);
+        }
+
+        [TestMethod]
         public void AlRecuperarUnUsuarioInexistente_NoSeProducenErrores()
         {
             //Arrange

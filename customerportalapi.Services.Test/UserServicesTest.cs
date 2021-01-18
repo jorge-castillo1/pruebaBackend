@@ -312,6 +312,28 @@ namespace customerportalapi.Services.Test
             _mailRepository.Verify(x => x.Send(It.IsAny<Email>()));
         }
 
+        [TestMethod]
+        [ExpectedException(typeof(ServiceException), "No se ha producido la excepci�n esperada.")]
+        public async Task AlInvitarUnUsuarioConUnEmailEnUso_RetornaError()
+        {
+            //Arrange
+            Invitation invitation = new Invitation();
+            invitation.Dni = "FakeDni";
+            invitation.Email = "fakeuser@email.com";
+            invitation.CustomerType = "Residential";
+            invitation.Fullname = "Fake User";
+            invitation.Language = "French";
+
+            //Act
+            Mock<IUserRepository> _userRepositoryInvalid = UserRepositoryMock.ValidUserRepository_ByEmail();
+            UserServices service = new UserServices(_userRepositoryInvalid.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object, _serviceLogin, _userAccountRepository.Object, _languageRepository.Object);
+            bool result = await service.InviteUserAsync(invitation);
+
+            //Assert
+            Assert.IsTrue(result);
+            _userRepositoryInvalid.Verify(x => x.GetCurrentUserByEmail(It.IsAny<string>()));
+        }
+
 
         [TestMethod]
         [ExpectedException(typeof(ServiceException), "No se ha producido la excepci�n esperada.")]

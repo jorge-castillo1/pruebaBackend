@@ -10,7 +10,7 @@ namespace customerportalapi.Services.Test.FakeData
         public static Mock<IUserRepository> InvalidUserRepository()
         {
             var db = new Mock<IUserRepository>();
-            db.Setup(x => x.GetCurrentUser(It.IsAny<string>())).Returns(new Entities.User()
+            db.Setup(x => x.GetCurrentUserByUsername(It.IsAny<string>())).Returns(new Entities.User()
             {
                 Dni = "12345678A",
                 Email = "fake email",
@@ -23,6 +23,8 @@ namespace customerportalapi.Services.Test.FakeData
                 AccessCodeAttempts = 5,
                 LastAccessCodeAttempts = System.DateTime.Now.ToUniversalTime().AddMinutes(-10)
             }).Verifiable();
+
+            db.Setup(x => x.GetCurrentUserByEmail(It.IsAny<string>())).Returns(new Entities.User()).Verifiable();
 
             db.Setup(x => x.GetCurrentUserByDniAndType(It.IsAny<string>(), It.IsAny<int>())).Returns(new Entities.User()
             {
@@ -46,7 +48,24 @@ namespace customerportalapi.Services.Test.FakeData
         public static Mock<IUserRepository> ValidUserRepository()
         {
             var db = new Mock<IUserRepository>();
-            db.Setup(x => x.GetCurrentUser(It.IsAny<string>())).Returns(new User()
+            db.Setup(x => x.GetCurrentUserByUsername(It.IsAny<string>())).Returns(new User()
+            {
+                Id = "b02fc244-40e4-e511-80bf-00155d018a4f",
+                Dni = "12345678A",
+                Email = "fake email 1",
+                Name = "fake name",
+                Language = "en",
+                Profilepicture = "fake profile image",
+                Emailverified = true,
+                Usertype = 1,
+                Username = "fake username",
+                LoginAttempts = 0,
+                LastLoginAttempts = System.DateTime.Now.ToUniversalTime().AddMinutes(-10),
+                AccessCodeAttempts = 0,
+                LastAccessCodeAttempts = System.DateTime.Now.ToUniversalTime().AddMinutes(-30)
+            }).Verifiable();
+
+            db.Setup(x => x.GetCurrentUserByEmail(It.IsAny<string>())).Returns(new User()
             {
                 Id = "b02fc244-40e4-e511-80bf-00155d018a4f",
                 Dni = "12345678A",
@@ -101,7 +120,7 @@ namespace customerportalapi.Services.Test.FakeData
         public static Mock<IUserRepository> ValidUserRepository_With5Attempts()
         {
             var db = new Mock<IUserRepository>();
-            db.Setup(x => x.GetCurrentUser(It.IsAny<string>())).Returns(new User()
+            db.Setup(x => x.GetCurrentUserByUsername(It.IsAny<string>())).Returns(new User()
             {
                 Id = "b02fc244-40e4-e511-80bf-00155d018a4f",
                 Dni = "12345678A",
@@ -154,7 +173,7 @@ namespace customerportalapi.Services.Test.FakeData
         public static Mock<IUserRepository> InvalidUserRepository_With5Attempts()
         {
             var db = new Mock<IUserRepository>();
-            db.Setup(x => x.GetCurrentUser(It.IsAny<string>())).Returns(new User()
+            db.Setup(x => x.GetCurrentUserByUsername(It.IsAny<string>())).Returns(new User()
             {
                 Id = "b02fc244-40e4-e511-80bf-00155d018a4f",
                 Dni = "12345678A",
@@ -202,7 +221,7 @@ namespace customerportalapi.Services.Test.FakeData
         public static Mock<IUserRepository> Valid_InActiveUser_Repository()
         {
             var db = new Mock<IUserRepository>();
-            db.Setup(x => x.GetCurrentUser(It.IsAny<string>())).Returns(new User()
+            db.Setup(x => x.GetCurrentUserByUsername(It.IsAny<string>())).Returns(new User()
             {
                 Id = "b02fc244-40e4-e511-80bf-00155d018a4f",
                 Dni = "12345678A",
@@ -213,7 +232,9 @@ namespace customerportalapi.Services.Test.FakeData
                 Usertype = 1
             }).Verifiable();
 
-             db.Setup(x => x.GetCurrentUserByDniAndType(It.IsAny<string>(), It.IsAny<int>())).Returns(new User()
+            db.Setup(x => x.GetCurrentUserByEmail(It.IsAny<string>())).Returns(new User()).Verifiable();
+
+            db.Setup(x => x.GetCurrentUserByDniAndType(It.IsAny<string>(), It.IsAny<int>())).Returns(new User()
             {
                 Id = "b02fc244-40e4-e511-80bf-00155d018a4f",
                 Dni = "12345678A",
@@ -273,6 +294,57 @@ namespace customerportalapi.Services.Test.FakeData
             var db = new Mock<IUserRepository>();
             db.Setup(x => x.GetUserByInvitationToken(It.IsAny<string>())).Returns(new User()).Verifiable();
             db.Setup(x => x.GetUserByForgotPasswordToken(It.IsAny<string>())).Returns(new User()).Verifiable();
+
+            return db;
+        }
+
+        public static Mock<IUserRepository> ValidUserRepository_ByEmail()
+        {
+            var db = new Mock<IUserRepository>();
+            db.Setup(x => x.GetCurrentUserByUsername(It.IsAny<string>())).Returns(new Entities.User()
+            {
+                Dni = "12345678A",
+                Email = "fake email",
+                Language = "en",
+                Profilepicture = "fake profile image",
+                Emailverified = false,
+                Usertype = 1,
+                LoginAttempts = 5,
+                LastLoginAttempts = System.DateTime.Now.ToUniversalTime().AddMinutes(-10),
+                AccessCodeAttempts = 5,
+                LastAccessCodeAttempts = System.DateTime.Now.ToUniversalTime().AddMinutes(-10)
+            }).Verifiable();
+
+            db.Setup(x => x.GetCurrentUserByEmail(It.IsAny<string>())).Returns(new Entities.User()
+            {
+                Id = "id",
+                Dni = "12345678A",
+                Email = "fake email",
+                Language = "en",
+                Profilepicture = "fake profile image",
+                Emailverified = true,
+                Usertype = 1,
+                LoginAttempts = 5,
+                LastLoginAttempts = System.DateTime.Now.ToUniversalTime().AddMinutes(-10),
+                AccessCodeAttempts = 5,
+                LastAccessCodeAttempts = System.DateTime.Now.ToUniversalTime().AddMinutes(-10)
+            }).Verifiable();
+
+            db.Setup(x => x.GetCurrentUserByDniAndType(It.IsAny<string>(), It.IsAny<int>())).Returns(new Entities.User()
+            {
+                Dni = "12345678A",
+                Email = "fake email",
+                Language = "en",
+                Profilepicture = "fake profile image",
+                Emailverified = false,
+                Usertype = 1,
+                LoginAttempts = 5,
+                LastLoginAttempts = System.DateTime.Now.ToUniversalTime().AddMinutes(-10),
+                AccessCodeAttempts = 5,
+                LastAccessCodeAttempts = System.DateTime.Now.ToUniversalTime().AddMinutes(-10)
+            }).Verifiable();
+
+            db.Setup(x => x.Create(It.IsAny<User>())).Returns(Task.FromResult(true)).Verifiable();
 
             return db;
         }
