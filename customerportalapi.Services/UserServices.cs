@@ -181,12 +181,12 @@ namespace customerportalapi.Services
             if (profile.EmailAddress1Principal && !string.IsNullOrEmpty(profile.EmailAddress1)) 
             {   
                 if (this.VerifyDisponibilityEmail(profile.EmailAddress1, profile.DocumentNumber))
-                    throw new ServiceException("Principal email are in use by another user.", HttpStatusCode.BadRequest, "Principal email", "In use");
+                    throw new ServiceException("Principal email are in use by another user.", HttpStatusCode.BadRequest, FieldNames.Principalemail, ValidationMessages.InUse);
             }
             if (profile.EmailAddress2Principal && !string.IsNullOrEmpty(profile.EmailAddress2))
             {
                 if (this.VerifyDisponibilityEmail(profile.EmailAddress2, profile.DocumentNumber))
-                    throw new ServiceException("Principal email are in use by another user.", HttpStatusCode.BadRequest, "Principal email", "In use");
+                    throw new ServiceException("Principal email are in use by another user.", HttpStatusCode.BadRequest, FieldNames.Principalemail, ValidationMessages.InUse);
             }
 
             var emailToUpdate = profile.EmailAddress1Principal ? profile.EmailAddress1 : profile.EmailAddress2;
