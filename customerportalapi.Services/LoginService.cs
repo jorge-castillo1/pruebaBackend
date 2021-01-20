@@ -165,11 +165,11 @@ namespace customerportalapi.Services
             }
 
             if (user.Id == null)
-                throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "UserName or Email", "Not exist");
+                throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, FieldNames.UserOrEmail, ValidationMessages.NotExist);
 
             //2. If emailverified is false, first invitation was not accepted yet
             if (!user.Emailverified)
-                throw new ServiceException("User must accept invitation before use forgot password function", HttpStatusCode.NotFound, "User", "Invitation not accepted yet");
+                throw new ServiceException("User must accept invitation before use forgot password function", HttpStatusCode.NotFound, FieldNames.User, ValidationMessages.InvitationNotAccepted) ;
 
             var pwd = new Password(true, true, true, false, 6);
             var password = pwd.Next();

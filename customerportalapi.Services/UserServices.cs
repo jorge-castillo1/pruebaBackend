@@ -323,7 +323,7 @@ namespace customerportalapi.Services
         }
 
         public async Task<Token> ConfirmAndChangeCredentialsAsync(string receivedToken, ResetPassword value)
-        {
+            {
             // 1. Validate user
             if (string.IsNullOrEmpty(receivedToken)) throw new ServiceException("User must have a received Token.", HttpStatusCode.BadRequest, "Received Token", "Empty field");
 
@@ -343,7 +343,7 @@ namespace customerportalapi.Services
             if (value.Username != null && value.Username != "")
             {
                 if(value.Username.Contains('@'))
-                    throw new ServiceException("Username must not include @", HttpStatusCode.BadRequest, "Username", "Must not include @"); // TODO: test postman
+                    throw new ServiceException("Username must not include @", HttpStatusCode.BadRequest, "Username", "Must not include @");
 
                 if (ValidateUsername(value.Username)) user.Username = value.Username;
                 else throw new ServiceException("Username must be unique", HttpStatusCode.BadRequest, "Username", "Must be unique");
