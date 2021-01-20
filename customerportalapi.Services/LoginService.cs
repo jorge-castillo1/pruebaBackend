@@ -35,11 +35,20 @@ namespace customerportalapi.Services
         public async Task<Token> GetToken(Login credentials)
         {
             User loginUser = null;
-            loginUser = _userRepository.GetCurrentUser(credentials.Username);
-            
+            // Find by User by Username or Email
+            if (credentials.Username != null)
+            {
+                loginUser = _userRepository.GetCurrentUserByUsername(credentials.Username);
+            } else if (credentials.Email != null && loginUser == null)
+            {
+                loginUser = _userRepository.GetCurrentUserByEmail(credentials.Email);
+            }
+
             if (loginUser.Id != null)
             {
                 Token token = null;
+                //Set username with DB info
+                credentials.Username = loginUser.Username;
 
                 try
                 {
@@ -85,50 +94,82 @@ namespace customerportalapi.Services
         {
             try {
                 //1. Get User From backend
-                User currentUser = _userRepository.GetCurrentUser(credentials.Username);
+                User currentUser = null;
 
-                //2. Validate Old Password is valid
-                Token validateOld = await _identityRepository.Authorize(new Login()
+                //1.1 Fidn User by Username or Email
+                if (credentials.Username != null)
                 {
-                    Username = credentials.Username,
-                    Password = credentials.OldPassword
-                });
-
-                //3. Update user
-                UserIdentity user = await _identityRepository.GetUser(currentUser.ExternalId);
-                if (user != null)
+                    currentUser = _userRepository.GetCurrentUserByUsername(credentials.Username);
+                }
+                else if (credentials.Email != null && currentUser == null)
                 {
-                    user.Password = credentials.NewPassword;
-                    user = await _identityRepository.UpdateUser(user);
+                    currentUser = _userRepository.GetCurrentUserByEmail(credentials.Email);
                 }
 
-                //4. Get new Token
-                Token newToken = await _identityRepository.Authorize(new Login()
+                if (currentUser.Id != null)
                 {
-                    Username = credentials.Username,
-                    Password = credentials.NewPassword
-                });
+                    credentials.Username = currentUser.Username;
 
-                return newToken;
+                    //2. Validate Old Password is valid
+                    Token validateOld = await _identityRepository.Authorize(new Login()
+                    {
+                        Username = credentials.Username,
+                        Password = credentials.OldPassword
+                    });
+
+                    //3. Update user
+                    UserIdentity user = await _identityRepository.GetUser(currentUser.ExternalId);
+                    if (user != null)
+                    {
+                        user.Password = credentials.NewPassword;
+                        user = await _identityRepository.UpdateUser(user);
+                    }
+
+                    //4. Get new Token
+                    Token newToken = await _identityRepository.Authorize(new Login()
+                    {
+                        Username = credentials.Username,
+                        Password = credentials.NewPassword
+                    });
+
+                    return newToken;
+
+                }
+                else
+                {
+                    throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "UserName or Email", "Not exist");
+                }
 
             } catch(HttpRequestException ex) {
                 throw new ServiceException("Password not valid", HttpStatusCode.BadRequest);
 
             }
+
         }
 
-        public async Task<bool> SendNewCredentialsAsync(string userName)
+        public async Task<bool> SendNewCredentialsAsync(Login credentials)
         {
             bool result = false;
 
             //1. Get user from bbdd
-            User user = _userRepository.GetCurrentUser(userName);
+            User user = null;
+            
+            //1.1 Find by Username or Email
+            if (credentials.Username != null)
+            {
+                user = _userRepository.GetCurrentUserByUsername(credentials.Username);
+            }
+            else if (credentials.Email != null && user == null)
+            {
+                user = _userRepository.GetCurrentUserByEmail(credentials.Email);
+            }
+
             if (user.Id == null)
-                throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "UserName", "Not exist");
+                throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, FieldNames.UserOrEmail, ValidationMessages.NotExist);
 
             //2. If emailverified is false, first invitation was not accepted yet
             if (!user.Emailverified)
-                throw new ServiceException("User must accept invitation before use forgot password function", HttpStatusCode.NotFound, "User", "Invitation not accepted yet");
+                throw new ServiceException("User must accept invitation before use forgot password function", HttpStatusCode.NotFound, FieldNames.User, ValidationMessages.InvitationNotAccepted) ;
 
             var pwd = new Password(true, true, true, false, 6);
             var password = pwd.Next();
@@ -152,7 +193,7 @@ namespace customerportalapi.Services
                 message.To.Add(user.Email);
                 message.Subject = forgotPasswordTemplate.subject;
                 string htmlbody = forgotPasswordTemplate.body.Replace("{", "{{").Replace("}", "}}").Replace("%{{", "{").Replace("}}%", "}");
-                message.Body = string.Format(htmlbody, user.Name, user.Password,
+                message.Body = string.Format(htmlbody, user.Name, user.Username, user.Password,
                     $"{_config["ResetPassword"]}{user.ForgotPasswordtoken}");
                 result = await _mailRepository.Send(message);
             }

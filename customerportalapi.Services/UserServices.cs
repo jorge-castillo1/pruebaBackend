@@ -53,7 +53,7 @@ namespace customerportalapi.Services
         {
             //Add customer portal Business Logic
 
-            User user = _userRepository.GetCurrentUser(username);
+            User user = _userRepository.GetCurrentUserByUsername(username);
             if (user.Id == null)
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
 
@@ -175,17 +175,30 @@ namespace customerportalapi.Services
 
             if (profile.EmailAddress2Principal && string.IsNullOrEmpty(profile.EmailAddress2))
                 throw new ServiceException("Principal email can not be null.", HttpStatusCode.BadRequest, "Principal email", "Empty field");
+       
+            //3. Verify that principal email not in use
+           
+            if (profile.EmailAddress1Principal && !string.IsNullOrEmpty(profile.EmailAddress1)) 
+            {   
+                if (this.VerifyDisponibilityEmail(profile.EmailAddress1, profile.DocumentNumber))
+                    throw new ServiceException("Principal email are in use by another user.", HttpStatusCode.BadRequest, FieldNames.Principalemail, ValidationMessages.InUse);
+            }
+            if (profile.EmailAddress2Principal && !string.IsNullOrEmpty(profile.EmailAddress2))
+            {
+                if (this.VerifyDisponibilityEmail(profile.EmailAddress2, profile.DocumentNumber))
+                    throw new ServiceException("Principal email are in use by another user.", HttpStatusCode.BadRequest, FieldNames.Principalemail, ValidationMessages.InUse);
+            }
 
             var emailToUpdate = profile.EmailAddress1Principal ? profile.EmailAddress1 : profile.EmailAddress2;
 
-            //3. Set Phone Principal according to data
+            //4. Set Phone Principal according to data
             string phoneToUpdate = string.Empty;
             if (profile.MobilePhone1Principal && !string.IsNullOrEmpty(profile.MobilePhone1))
                 phoneToUpdate = profile.MobilePhone1;
             else if (profile.MobilePhonePrincipal && !string.IsNullOrEmpty(profile.MobilePhone))
                 phoneToUpdate = profile.MobilePhone;
 
-            //4. Compare language, email and image for backend changes
+            //5. Compare language, email and image for backend changes
             if (user.Language != profile.Language ||
                 user.Profilepicture != profile.Avatar ||
                 user.Email != emailToUpdate ||
@@ -199,7 +212,7 @@ namespace customerportalapi.Services
                 user = _userRepository.Update(user);
             }
 
-            //5. Invoke repository for other changes
+            //6. Invoke repository for other changes
             var entity = await _profileRepository.UpdateProfileAsync(profile);
             entity.Language = user.Language;
             entity.Avatar = user.Profilepicture;
@@ -247,7 +260,12 @@ namespace customerportalapi.Services
             var pwd = new Password(true, true, true, false, 6);
             var password = pwd.Next();
 
-            User user = _userRepository.GetCurrentUserByDniAndType(value.Dni, userType);
+            //3.1 Find some user with this email or without confirm email
+            User user = _userRepository.GetCurrentUserByEmail(value.Email);
+            if (user.Id != null && user.Emailverified) 
+                throw new ServiceException("Invitation user fails. Email in use by another user", HttpStatusCode.NotFound, "Email", "Already in use");
+                        
+            user = _userRepository.GetCurrentUserByDniAndType(value.Dni, userType);
             if (user.Id == null)
             {
                 //4. Create user in portal database
@@ -265,7 +283,7 @@ namespace customerportalapi.Services
                 };
 
                 result = await _userRepository.Create(user);
-            }
+            }            
             else
             {
                 //5. If emailverified is false resend email invitation otherwise throw error
@@ -305,7 +323,7 @@ namespace customerportalapi.Services
         }
 
         public async Task<Token> ConfirmAndChangeCredentialsAsync(string receivedToken, ResetPassword value)
-        {
+            {
             // 1. Validate user
             if (string.IsNullOrEmpty(receivedToken)) throw new ServiceException("User must have a received Token.", HttpStatusCode.BadRequest, "Received Token", "Empty field");
 
@@ -324,6 +342,9 @@ namespace customerportalapi.Services
             // 2. Change useranme
             if (value.Username != null && value.Username != "")
             {
+                if(value.Username.Contains('@'))
+                    throw new ServiceException("Username must not include @", HttpStatusCode.BadRequest, "Username", "Must not include @");
+
                 if (ValidateUsername(value.Username)) user.Username = value.Username;
                 else throw new ServiceException("Username must be unique", HttpStatusCode.BadRequest, "Username", "Must be unique");
             }
@@ -479,7 +500,7 @@ namespace customerportalapi.Services
 
         public async Task<Account> GetAccountAsync(string username)
         {
-            User user = _userRepository.GetCurrentUser(username);
+            User user = _userRepository.GetCurrentUserByUsername(username);
             if (user.Id == null)
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
 
@@ -596,7 +617,7 @@ namespace customerportalapi.Services
             }
 
             var account = ToAccount(entity);
-            User user = _userRepository.GetCurrentUser(username);
+            User user = _userRepository.GetCurrentUserByUsername(username);
             EmailTemplate editDataCustomerTemplate = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.EditDataCustomer, user.Language);
 
             if (editDataCustomerTemplate._id != null)
@@ -625,7 +646,7 @@ namespace customerportalapi.Services
             if (currentUser == null)
                 throw new ServiceException("Error retrieving the current user.", HttpStatusCode.NotFound, "Current user", "Not logged");
 
-            User user = _userRepository.GetCurrentUser(currentUser.Identity.Name);
+            User user = _userRepository.GetCurrentUserByUsername(currentUser.Identity.Name);
             if (user.Id == null)
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
 
@@ -829,7 +850,7 @@ namespace customerportalapi.Services
         {
             //Invoke repository
 
-            User user = _userRepository.GetCurrentUser(username);
+            User user = _userRepository.GetCurrentUserByUsername(username);
 
             Profile profile = ToProfile(user);
             if (profile == null)
@@ -851,7 +872,7 @@ namespace customerportalapi.Services
 
         public async Task<bool> ChangeRole(string username, string role)
         {
-            User user = _userRepository.GetCurrentUser(username);
+            User user = _userRepository.GetCurrentUserByUsername(username);
             UserIdentity userIdentity = await _identityRepository.GetUser(user.ExternalId);
             if (userIdentity.ID == null) throw new ServiceException("User not found", HttpStatusCode.NotFound);
             GroupResults group = await _identityRepository.FindGroup(role);
@@ -870,7 +891,7 @@ namespace customerportalapi.Services
 
         public async Task<bool> RemoveRole(string username, string role)
         {
-            User user = _userRepository.GetCurrentUser(username);
+            User user = _userRepository.GetCurrentUserByUsername(username);
             UserIdentity userIdentity = await _identityRepository.GetUser(user.ExternalId);
             if (userIdentity.ID == null) throw new ServiceException("User not found", HttpStatusCode.NotFound);
             if (userIdentity.Groups == null || !userIdentity.Groups.Exists(x => x.Display == role)) return false;
@@ -880,8 +901,14 @@ namespace customerportalapi.Services
 
         public bool ValidateUsername(string username)
         {
-            User user = _userRepository.GetCurrentUser(username);
+            User user = _userRepository.GetCurrentUserByUsername(username);
             return (user.Id == null);
+        }
+
+        private bool VerifyDisponibilityEmail(string email, string dni)
+        {
+            User userByEmail = _userRepository.GetCurrentUserByEmail(email);
+            return (userByEmail.Id != null && userByEmail.Dni != dni);
         }
     }
 }

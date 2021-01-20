@@ -15,11 +15,23 @@ namespace customerportalapi.Repositories
             _users = users;
         }
 
-        public User GetCurrentUser(string username)
+        public User GetCurrentUserByUsername(string username)
         {
             User user = new User();
 
             var usersInfo = _users.FindOne(t => t.Username == username);
+            foreach (var u in usersInfo)
+            {
+                user = u;
+            }
+            return user;
+        }
+
+        public User GetCurrentUserByEmail(string email)
+        {
+            User user = new User();
+
+            var usersInfo = _users.FindOne(t => t.Email == email);
             foreach (var u in usersInfo)
             {
                 user = u;

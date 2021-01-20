@@ -108,7 +108,7 @@ namespace customerportalapi.Services
             else if (list.Count == 0)
             {
 
-                User user = _userRepository.GetCurrentUser(invoiceDownload.Username);
+                User user = _userRepository.GetCurrentUserByUsername(invoiceDownload.Username);
                 Store store = await _storeRepository.GetStoreAsync(invoiceDownload.StoreCode);
 
                 EmailTemplate requestDigitalInvoiceTemplate = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.RequestDigitalInvoice, LanguageTypes.en.ToString());

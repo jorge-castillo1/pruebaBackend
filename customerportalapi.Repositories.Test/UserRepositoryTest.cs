@@ -47,7 +47,21 @@ namespace customerportalapi.Repositories.Test
             UserRepository _userRepository = new UserRepository(_configurations, _users.Object);
             
             //Act
-            user = _userRepository.GetCurrentUser("12345678Z");
+            user = _userRepository.GetCurrentUserByUsername("12345678Z");
+
+            //Assert
+            Assert.AreEqual("fakeuser@email.com", user.Email);
+        }
+
+        [TestMethod]
+        public void AlRecuperarUnUsuarioConEmailExistente_NoSeProducenErrores()
+        {
+            //Arrange
+            User user = new User();
+            UserRepository _userRepository = new UserRepository(_configurations, _users.Object);
+
+            //Act
+            user = _userRepository.GetCurrentUserByEmail("fakeuser@email.com");
 
             //Assert
             Assert.AreEqual("fakeuser@email.com", user.Email);
@@ -65,7 +79,7 @@ namespace customerportalapi.Repositories.Test
             UserRepository _userRepository = new UserRepository(_configurations, _usersInvalid.Object);
 
             //Act
-            user = _userRepository.GetCurrentUser("00000000Z");
+            user = _userRepository.GetCurrentUserByUsername("00000000Z");
 
             //Assert
             Assert.IsNull(user.Dni);
@@ -76,7 +90,7 @@ namespace customerportalapi.Repositories.Test
         {
             //Arrange
             UserRepository _userRepository = new UserRepository(_configurations, _users.Object);
-            User testUser =_userRepository.GetCurrentUser("12345678Z");
+            User testUser =_userRepository.GetCurrentUserByUsername("12345678Z");
             
             //Act
             testUser.Email = "fakeuser@changed.com";

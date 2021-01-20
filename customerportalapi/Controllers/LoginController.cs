@@ -78,19 +78,23 @@ namespace customerportalapi.Controllers
         /// <summary>
         /// Send mail to user with reset password instructions
         /// </summary>
-        /// <param name="userName">Username</param>
+        /// <param name="credentials">Login data</param>
         /// <returns>Boolean if mail send</returns>
         // POST api/login/forgotPassword
-        [HttpPost("forgotPassword/{userName}")]
-        public async Task<ApiResponse> ForgotPassword(string userName)
+        [HttpPost("forgotPassword")]
+        public async Task<ApiResponse> ForgotPassword([FromBody] Login credentials)
         {
             try
             {
-                var entity = await _service.SendNewCredentialsAsync(userName);
+                var entity = await _service.SendNewCredentialsAsync(credentials);
                 return new ApiResponse(entity);
             }
             catch (ServiceException se)
             {
+                if (se.Field == FieldNames.UserOrEmail && se.FieldMessage == ValidationMessages.NotExist || se.Field == FieldNames.User && se.FieldMessage == ValidationMessages.InvitationNotAccepted)
+                {
+                    return new ApiResponse(true);
+                }
                 return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
             }
             catch (Exception ex)

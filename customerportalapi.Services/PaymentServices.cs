@@ -131,7 +131,7 @@ namespace customerportalapi.Services
             //
 
 
-            User user = _userRepository.GetCurrentUser(value.User);
+            User user = _userRepository.GetCurrentUserByUsername(value.User);
             string usertype = user.Usertype == (int)UserTypes.Business ? AccountType.Business : string.Empty;
             AccountProfile account = await _profileRepository.GetAccountAsync(user.Dni, usertype);
 
@@ -446,7 +446,7 @@ namespace customerportalapi.Services
             //1. User must exists
             PaymentMethodCardSignature cardmethod = (PaymentMethodCardSignature)paymentMethodCardSignature;
             int userType = UserUtils.GetUserType(cardmethod.AccountType);
-            User user = _userRepository.GetCurrentUser(cardmethod.Username);
+            User user = _userRepository.GetCurrentUserByUsername(cardmethod.Username);
 
             if (user.Id == null)
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
@@ -568,7 +568,7 @@ namespace customerportalapi.Services
         public async Task<bool> UpdatePaymentCardProcess(SignatureStatus value, Process process)
         {
             // Get user
-            User user = _userRepository.GetCurrentUser(value.User);
+            User user = _userRepository.GetCurrentUserByUsername(value.User);
             string usertype = user.Usertype == (int)UserTypes.Business ? AccountType.Business : string.Empty;
             AccountProfile account = await _profileRepository.GetAccountAsync(user.Dni, usertype);
 
@@ -777,7 +777,7 @@ namespace customerportalapi.Services
         public async Task<string> PayInvoiceByNewCardLoad(PaymentMethodPayInvoiceNewCard paymentMethod)
         {
              //1. User must exists
-            User user = _userRepository.GetCurrentUser (paymentMethod.Username);
+            User user = _userRepository.GetCurrentUserByUsername(paymentMethod.Username);
 
             if (user.Id == null)
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");

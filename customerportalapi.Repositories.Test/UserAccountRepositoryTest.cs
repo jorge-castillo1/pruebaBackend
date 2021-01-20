@@ -67,7 +67,7 @@ namespace customerportalapi.Repositories.Test
             UserRepository _userRepository = new UserRepository(_configurations, _usersInvalid.Object);
 
             //Act
-            user = _userRepository.GetCurrentUser("00000000Z");
+            user = _userRepository.GetCurrentUserByUsername("00000000Z");
 
             //Assert
             Assert.IsNull(user.Id);
