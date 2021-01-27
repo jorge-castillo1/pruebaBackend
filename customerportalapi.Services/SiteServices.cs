@@ -58,7 +58,7 @@ namespace customerportalapi.Services
             //Add customer portal Business Logic
             User user = _userRepository.GetCurrentUserByUsername(username);
             if (user.Id == null)
-                throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
+                throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, FieldNames.Username, ValidationMessages.NotExist);
 
             //2. If exist complete data from external repository
             //Invoke repository
@@ -257,21 +257,34 @@ namespace customerportalapi.Services
             //Add customer portal Business Logic
             User user = _userRepository.GetCurrentUserByUsername(username);
             if (user.Id == null)
-                throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
+                throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, FieldNames.Username, ValidationMessages.NotExist);
 
             //2. If exist complete data from external repository
             //Invoke repository
             string accountType = (user.Usertype == (int)UserTypes.Business) ? AccountType.Business : AccountType.Residential;
-            List<Contract> entitylist = await _contractRepository.GetContractsAsync(user.Dni, accountType);
+            List<Contract> contracts = await _contractRepository.GetContractsAsync(user.Dni, accountType);
 
             //3. From one contract get customer invoces
-            if (entitylist.Count == 0)
+            if (contracts.Count == 0)
                 return siteInvoices;
 
-            string contractNumber = entitylist[0].SmContractCode;
+            // string contractNumber = contracts[0].SmContractCode;
+            // List<Invoice> invoices = new List<Invoice>();
+            // invoices = await _contractSMRepository.GetInvoicesAsync(contractNumber);
             List<Invoice> invoices = new List<Invoice>();
-            invoices = await _contractSMRepository.GetInvoicesAsync(contractNumber);
 
+            foreach (Contract contract in contracts)
+            {
+                List<Invoice> invoicesByContract = new List<Invoice>();
+                invoicesByContract = await _contractSMRepository.GetInvoicesAsync(contract.SmContractCode);
+                invoices.AddRange(invoicesByContract);
+            }
+
+            List<Invoice> invoicesOrderByDocumentDate = new List<Invoice>();
+            List<Invoice> invoicesOrderByOutStanding = new List<Invoice>();
+            invoicesOrderByDocumentDate.AddRange(invoices.OrderByDescending(x => x.DocumentDate));
+            invoicesOrderByOutStanding.AddRange(invoices.OrderByDescending(x => x.OutStanding));
+            /*
             //4. Only returns 3 invoices for every Site
             List<Invoice> filteredInvoices = new List<Invoice>();
             var sites = invoices.GroupBy(x => x.SiteID);
@@ -289,10 +302,11 @@ namespace customerportalapi.Services
                     num++;
                 }
             }
+            */
 
             //5. Complete siteContracts with filteredInvoices
             //List<Site> stores = new List<Site>();
-            foreach (var storegroup in entitylist.GroupBy(x => new
+            foreach (var storegroup in contracts.GroupBy(x => new
             {
                 Name = x.StoreData.StoreName,
                 x.StoreData.StoreCode,
@@ -307,7 +321,35 @@ namespace customerportalapi.Services
                     StoreId = storeId
                 };
 
-                site.Invoices.AddRange(filteredInvoices.FindAll(x => x.SiteID == site.StoreCode));
+                List<ContractInvoices> contractInvoices = new List<ContractInvoices>();
+                foreach (var contract in storegroup)
+                {
+                    ContractInvoices contractInvoice = new ContractInvoices
+                    {
+                        ContractId = contract.ContractId,
+                        ContractNumber = contract.ContractNumber,
+                        SmContractCode = contract.SmContractCode,
+                        Unit = contract.Unit
+                    };
+
+                    var num = 0;
+                    List<Invoice> invoicesOrder = new List<Invoice>();
+
+                    foreach (Invoice invoice in invoicesOrderByDocumentDate)
+                    {
+                        string unitName = !string.IsNullOrEmpty(invoice.UnitDescription) ? invoice.UnitDescription.Split(':')[0] : null;
+                        if (!string.IsNullOrEmpty(unitName) && unitName == contract.Unit.UnitName && (invoice.OutStanding != 0 || num < 3))
+                        {
+                            invoicesOrder.Add(invoice);
+                            num++;
+                        }
+                    }
+
+                    contractInvoice.Invoices.AddRange(invoicesOrder.OrderByDescending(x => x.OutStanding));
+                    contractInvoices.Add(contractInvoice);
+                }
+
+                site.Contracts.AddRange(contractInvoices);
                 siteInvoices.Add(site);
             }
 
