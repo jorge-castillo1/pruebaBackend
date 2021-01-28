@@ -21,7 +21,7 @@ namespace customerportalapi.Entities
 
         public string SmContractCode { get; set; }
 
-
+        public string StoreCode { get; set; }
 
         public List<Invoice> Invoices { get; set; } = new List<Invoice>();
     }

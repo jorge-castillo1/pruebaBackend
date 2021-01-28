@@ -12,6 +12,5 @@ namespace customerportalapi.Repositories.interfaces
         Task<bool> MakePayment(MakePayment makePayment);
         Task<SubContract> GetSubContractAsync(string contractId, string unitId);
         Task<bool> UpdateAccessCodeAsync(UpdateAccessCode updateAccessCode);
-
     }
 }

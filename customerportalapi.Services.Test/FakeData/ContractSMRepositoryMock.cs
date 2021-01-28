@@ -52,7 +52,7 @@ namespace customerportalapi.Services.Test.FakeData
                     {
                       SiteID = "RI1BBFRI120920060001",
                       DocumentDate = DateTime.Parse("2019-04-16"),
-                      UnitDescription = "6104: SS3PSS",
+                      UnitDescription = "6105: SS3PSS",
                       Amount = 190.00M,
                       OurReference = "SJ19/284",
                       OutStanding = 0.00M
@@ -61,10 +61,10 @@ namespace customerportalapi.Services.Test.FakeData
                     {
                       SiteID = "RI1BBFRI120920060001",
                       DocumentDate = DateTime.Parse("2019-05-16"),
-                      UnitDescription = "6104: SS3PSS",
+                      UnitDescription = "6105: SS3PSS",
                       Amount = 90.37M,
                       OurReference = "SJ19/282",
-                      OutStanding = 0.00M
+                      OutStanding = 1.00M
                     },
                     new Invoice()
                     {
@@ -79,7 +79,7 @@ namespace customerportalapi.Services.Test.FakeData
                     {
                       SiteID = "XX1EJ1XX280720060000",
                       DocumentDate = DateTime.Parse("2019-02-16"),
-                      UnitDescription = "4100: SS15PT",
+                      UnitDescription = "5101: SS15PT",
                       Amount = 97.55M,
                       OurReference = "P19/233",
                       OutStanding = 0.00M
