@@ -99,7 +99,9 @@ namespace customerportalapi.Services
                     SMContract contractSM = await _contractSMRepository.GetAccessCodeAsync(contract.SmContractCode);
                     contract.TimeZone = contractSM.Timezone;
                     contract.StoreData = null;
-                    site.Contracts.Add(contract);
+                    // only active contracts, if the contract has "terminated", the field "Leaving" have information
+                    if (String.IsNullOrEmpty(contractSM.Leaving))
+                        site.Contracts.Add(contract);
                 }
 
                 stores.Add(site);
