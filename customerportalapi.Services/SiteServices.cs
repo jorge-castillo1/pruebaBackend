@@ -1,16 +1,16 @@
-﻿using System;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Linq;
-using customerportalapi.Entities;
+﻿using customerportalapi.Entities;
+using customerportalapi.Entities.enums;
 using customerportalapi.Repositories.interfaces;
+using customerportalapi.Services.Exceptions;
 using customerportalapi.Services.interfaces;
 using Microsoft.Extensions.Caching.Distributed;
-using System.Net;
-using customerportalapi.Services.Exceptions;
-using customerportalapi.Entities.enums;
-using System.Threading;
 using Microsoft.Extensions.Configuration;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace customerportalapi.Services
 {
@@ -58,7 +58,7 @@ namespace customerportalapi.Services
             //Add customer portal Business Logic
             User user = _userRepository.GetCurrentUserByUsername(username);
             if (user.Id == null)
-                throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
+                throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, FieldNames.Username, ValidationMessages.NotExist);
 
             //2. If exist complete data from external repository
             //Invoke repository
@@ -255,46 +255,25 @@ namespace customerportalapi.Services
 
         public async Task<List<SiteInvoices>> GetLastInvoices(string username)
         {
+            int limitInvoices = 3;
             List<SiteInvoices> siteInvoices = new List<SiteInvoices>();
             //Add customer portal Business Logic
             User user = _userRepository.GetCurrentUserByUsername(username);
             if (user.Id == null)
-                throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
+                throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, FieldNames.Username, ValidationMessages.NotExist);
 
             //2. If exist complete data from external repository
             //Invoke repository
             string accountType = (user.Usertype == (int)UserTypes.Business) ? AccountType.Business : AccountType.Residential;
-            List<Contract> entitylist = await _contractRepository.GetContractsAsync(user.Dni, accountType);
+            List<Contract> contracts = await _contractRepository.GetContractsAsync(user.Dni, accountType);
 
-            //3. From one contract get customer invoces
-            if (entitylist.Count == 0)
+            //3. From contracts get customer invoces
+            if (contracts.Count == 0)
                 return siteInvoices;
 
-            string contractNumber = entitylist[0].SmContractCode;
-            List<Invoice> invoices = new List<Invoice>();
-            invoices = await _contractSMRepository.GetInvoicesAsync(contractNumber);
-
-            //4. Only returns 3 invoices for every Site
-            List<Invoice> filteredInvoices = new List<Invoice>();
-            var sites = invoices.GroupBy(x => x.SiteID);
-            foreach (var sitegroup in sites)
-            {
-                var orderGroup = sitegroup.OrderByDescending(x => x.DocumentDate);
-                var num = 0;
-                foreach (var orderedinvoice in orderGroup)
-                {
-                    if (num < 3 || orderedinvoice.OutStanding > 0 || orderedinvoice.OutStanding < 0)
-                    {
-                        filteredInvoices.Add(orderedinvoice);
-                    }
-
-                    num++;
-                }
-            }
-
-            //5. Complete siteContracts with filteredInvoices
-            //List<Site> stores = new List<Site>();
-            foreach (var storegroup in entitylist.GroupBy(x => new
+            //4. Group contract by Store
+            string previusStoreId = "";
+            foreach (var storegroup in contracts.GroupBy(x => new
             {
                 Name = x.StoreData.StoreName,
                 x.StoreData.StoreCode,
@@ -309,7 +288,44 @@ namespace customerportalapi.Services
                     StoreId = storeId
                 };
 
-                site.Invoices.AddRange(filteredInvoices.FindAll(x => x.SiteID == site.StoreCode));
+                List<ContractInvoices> contractInvoices = new List<ContractInvoices>();
+                List<Invoice> invoicesByCustomerId = new List<Invoice>();
+                List<Invoice> invoicesByCustomerIdOrdered = new List<Invoice>();
+                foreach (var contract in storegroup)
+                {
+                    List<Invoice> invoicesFiltered = new List<Invoice>();
+
+                    ContractInvoices contractInvoice = new ContractInvoices
+                    {
+                        ContractId = contract.ContractId,
+                        ContractNumber = contract.ContractNumber,
+                        SmContractCode = contract.SmContractCode,
+                        StoreCode = contract.StoreData.StoreCode
+                    };
+
+                    // Only get invoices if previusStoreId is diferent about current Site / StoreId
+                    // GetInvoicesAsync use SmContractCode for get CustomerID, CustomerId is unique by Site / StoreId
+                    if (previusStoreId != site.StoreId)
+                    {
+                        previusStoreId = site.StoreId;
+                        invoicesByCustomerId = await _contractSMRepository.GetInvoicesAsync(contract.SmContractCode);
+                        invoicesByCustomerIdOrdered.AddRange(invoicesByCustomerId.OrderByDescending(x => x.DocumentDate));
+                    }
+
+                    // First, find unpaid invoices, invoice.OutStanding != 0
+                    GetInvoicesWhitOutStanding(contract.Unit.UnitName, invoicesByCustomerIdOrdered, invoicesFiltered);
+
+                    // Second, if invoices by contract is menor to  limitInvoices(3 by default), find invoices by DocumentDate
+                    if (invoicesFiltered.Count < limitInvoices && invoicesByCustomerIdOrdered.Count > 0)
+                    {
+                        GetInvoicesByDocumentDate(limitInvoices, contract.Unit.UnitName, invoicesByCustomerIdOrdered, invoicesFiltered);
+                    }
+
+                    contractInvoice.Invoices.AddRange(invoicesFiltered);
+                    contractInvoices.Add(contractInvoice);
+                }
+
+                site.Contracts.AddRange(contractInvoices);
                 siteInvoices.Add(site);
             }
 
@@ -346,7 +362,6 @@ namespace customerportalapi.Services
             if (updateAccCode == false)
                 throw new ServiceException("Error updating accessCode.", HttpStatusCode.InternalServerError);
 
-
             EmailTemplate editDataCustomerTemplate = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.EditAccessCode, currentUser.Language);
 
             if (editDataCustomerTemplate._id != null)
@@ -360,10 +375,49 @@ namespace customerportalapi.Services
             }
 
             return updateAccCode;
-
-
-
         }
 
+        private string GetUnitName(string unitDescription){
+            string unitName = !string.IsNullOrEmpty(unitDescription) ? unitDescription.Split(':')[0] : null;
+
+            return unitName;
+        }
+
+        private void GetInvoicesWhitOutStanding(string unitName, List<Invoice> invoicesByCustomerId, List<Invoice> invoicesFiltered)
+        {
+            
+            foreach (Invoice invoice in invoicesByCustomerId)
+            {
+                string InvoiceUnitName = GetUnitName(invoice.UnitDescription);
+                bool contains = invoicesFiltered.Contains(invoice);
+                if (!string.IsNullOrEmpty(InvoiceUnitName) && InvoiceUnitName == unitName && !contains && invoice.OutStanding != 0)
+                {
+                    invoicesFiltered.Add(invoice);
+                }
+            }
+        }
+
+        private void GetInvoicesByDocumentDate(int limitInvoices, string unitName, List<Invoice> invoicesByCustomerId, List<Invoice> invoicesFiltered)
+        {
+            int pos = 0;
+            int num = invoicesFiltered.Count;
+
+            while (num < limitInvoices)
+            {
+                Invoice invoice = invoicesByCustomerId[pos];
+                string invoiceUnitName = GetUnitName(invoice.UnitDescription);
+                bool contains = invoicesFiltered.Contains(invoice);
+                if (!string.IsNullOrEmpty(invoiceUnitName) && invoiceUnitName == unitName && !contains && num < limitInvoices)
+                {
+                    invoicesFiltered.Add(invoice);
+                    num++;
+                }
+
+                if (pos == (invoicesByCustomerId.Count - 1))
+                    num = limitInvoices;
+
+                pos++;
+            }
+        }
     }
 }
