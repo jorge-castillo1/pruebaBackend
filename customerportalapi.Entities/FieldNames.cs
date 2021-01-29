@@ -9,6 +9,7 @@ namespace customerportalapi.Entities
         public const string UserOrEmail = "UserOrEmail";
         public const string User = "User";
         public const string Principalemail = "Principal email";
+        public const string Username = "Username";
 
     }
 }

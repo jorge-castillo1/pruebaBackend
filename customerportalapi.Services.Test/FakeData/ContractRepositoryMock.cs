@@ -26,7 +26,19 @@ namespace customerportalapi.Services.Test.FakeData
                        Telephone = "Fake telephone",
                        CoordinatesLatitude = "Fake CoordinatesLatitude",
                        CoordinatesLongitude = "Fake CoordinatesLongitude",
-                       StoreCode="RI1BBFRI120920060001"
+                       StoreCode ="RI1BBFRI120920060001",
+                       StoreId = Guid.Parse("00000000-0000-0000-0000-000000000001")
+                   },
+                   Unit = new Unit
+                   {
+                        Depth = "4.96",
+                        Height = "2.5",
+                        Size = "14.5000000000",
+                        SmUnitId = "BD17",
+                        Subtype = "GR",
+                        UnitCategory = "SS",
+                        UnitName = "6104",
+                        Width = "2.92"
                    }
                 },
                 new Contract
@@ -40,7 +52,19 @@ namespace customerportalapi.Services.Test.FakeData
                        Telephone = "Fake telephone",
                        CoordinatesLatitude = "Fake CoordinatesLatitude",
                        CoordinatesLongitude = "Fake CoordinatesLongitude",
-                       StoreCode="RI1BBFRI120920060001"
+                       StoreCode="RI1BBFRI120920060001",
+                       StoreId = Guid.Parse("00000000-0000-0000-0000-000000000001")
+                   },
+                   Unit = new Unit
+                   {
+                        Depth = "4.96",
+                        Height = "2.5",
+                        Size = "14.5000000000",
+                        SmUnitId = "BD17",
+                        Subtype = "GR",
+                        UnitCategory = "SS",
+                        UnitName = "6105",
+                        Width = "2.92"
                    }
                 },
                 new Contract
@@ -54,7 +78,19 @@ namespace customerportalapi.Services.Test.FakeData
                        Telephone = "Fake telephone",
                        CoordinatesLatitude = "Fake CoordinatesLatitude",
                        CoordinatesLongitude = "Fake CoordinatesLongitude",
-                       StoreCode="RI1BBFRI120920060000"
+                       StoreCode="RI1BBFRI120920060000",
+                       StoreId = Guid.Parse("00000000-0000-0000-0000-000000000002")
+                   },
+                   Unit = new Unit
+                   {
+                        Depth = "4.96",
+                        Height = "2.5",
+                        Size = "14.5000000000",
+                        SmUnitId = "BD17",
+                        Subtype = "GR",
+                        UnitCategory = "SS",
+                        UnitName = "4100",
+                        Width = "2.92"
                    }
                 },
                 new Contract
@@ -68,7 +104,19 @@ namespace customerportalapi.Services.Test.FakeData
                        Telephone = "Fake telephone",
                        CoordinatesLatitude = "Fake CoordinatesLatitude",
                        CoordinatesLongitude = "Fake CoordinatesLongitude",
-                       StoreCode="RI1BBFRI120920060000"
+                       StoreCode="RI1BBFRI120920060000",
+                       StoreId = Guid.Parse("00000000-0000-0000-0000-000000000002")
+                   },
+                   Unit = new Unit
+                   {
+                        Depth = "4.96",
+                        Height = "2.5",
+                        Size = "14.5000000000",
+                        SmUnitId = "BD17",
+                        Subtype = "GR",
+                        UnitCategory = "SS",
+                        UnitName = "5101",
+                        Width = "2.92"
                    }
                 },
             })).Verifiable();
@@ -84,7 +132,8 @@ namespace customerportalapi.Services.Test.FakeData
                     Telephone = "Fake telephone",
                     CoordinatesLatitude = "Fake CoordinatesLatitude",
                     CoordinatesLongitude = "Fake CoordinatesLongitude",
-                    StoreCode = "RI1BBFRI120920060000"
+                    StoreCode = "RI1BBFRI120920060000",
+                    StoreId = Guid.Parse("00000000-0000-0000-0000-000000000002")
                 },
                 SmContractCode = "123456789"
             })).Verifiable();

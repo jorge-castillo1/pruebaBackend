@@ -172,7 +172,9 @@ namespace customerportalapi.Services.Test
 
             //Assert
             Assert.IsTrue(siteInvoices.Count == 2);
-            Assert.IsTrue(siteInvoices[0].Invoices.Count(x => x.SiteID == "RI1BBFRI120920060001") == 3);
+            Assert.IsTrue(siteInvoices[0].Contracts.Count == 2);
+            Assert.IsTrue(siteInvoices[0].Contracts[0].Invoices.Count(x => x.SiteID == "RI1BBFRI120920060001") == 3);
+            Assert.IsTrue(siteInvoices[0].Contracts[1].Invoices.Count(x => x.SiteID == "RI1BBFRI120920060001") == 2);
         }
 
         [TestMethod]
@@ -188,7 +190,7 @@ namespace customerportalapi.Services.Test
 
             //Assert
             Assert.IsTrue(siteInvoices.Count == 2);
-            Assert.IsTrue(siteInvoices[0].Invoices.Count(x => x.SiteID == "RI1BBFRI120920060001") == 0);
+            Assert.IsTrue(siteInvoices[0].Contracts[0].Invoices.Count(x => x.SiteID == "RI1BBFRI120920060001") == 0);
         }
     }
 }
