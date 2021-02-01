@@ -107,5 +107,32 @@ namespace customerportalapi.Services.Test.FakeData
 
             return db;
         }
+
+        public static Mock<IContractSMRepository> ContractSMRepositoryInactiveContractSM()
+        {
+            var db = new Mock<IContractSMRepository>();
+            db.Setup(x => x.GetAccessCodeAsync(It.IsAny<string>())).Returns(Task.FromResult(new SMContract()
+            {
+                Password = "fake password",
+                Contractnumber = "fake contract number",
+                Customerid = "fake customer id",
+                Leaving = "01/01/2021"
+            })).Verifiable();
+
+            db.Setup(x => x.GetInvoicesAsync(It.IsAny<string>())).Returns(Task.FromResult(new List<Invoice>()
+                {
+                    new Invoice()
+                    {
+                      SiteID = "RI1BBFRI120920060001",
+                      DocumentDate = DateTime.Parse("2019-01-16"),
+                      UnitDescription = "6104: SS3PSS",
+                      Amount = 139.34M,
+                      OurReference = "SJ19/281",
+                      OutStanding = 0.00M
+                    }
+                }));
+
+            return db;
+        }
     }
 }
