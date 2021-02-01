@@ -91,17 +91,19 @@ namespace customerportalapi.Services
 
                 foreach (var contract in storegroup)
                 {
-                    //ToDo: remove this and clean contract entity
-                    contract.StoreCode = contract.StoreData.StoreCode;
-                    contract.AccessType = contract.StoreData.AccessType;
-                    contract.MapLink = contract.StoreData.MapLink;
-
                     SMContract contractSM = await _contractSMRepository.GetAccessCodeAsync(contract.SmContractCode);
-                    contract.TimeZone = contractSM.Timezone;
-                    contract.StoreData = null;
-                    // only active contracts, if the contract has "terminated", the field "Leaving" have information
+                    // only active contracts, if the contract has "terminated", the field "Leaving" have information.
                     if (String.IsNullOrEmpty(contractSM.Leaving))
+                    {
+                        //ToDo: remove this and clean contract entity
+                        contract.StoreCode = contract.StoreData.StoreCode;
+                        contract.AccessType = contract.StoreData.AccessType;
+                        contract.MapLink = contract.StoreData.MapLink;
+
+                        contract.TimeZone = contractSM.Timezone;
+                        contract.StoreData = null;
                         site.Contracts.Add(contract);
+                    }
                 }
 
                 stores.Add(site);
@@ -312,7 +314,7 @@ namespace customerportalapi.Services
                         if (previousStoreId != site.StoreId)
                         {
                             previousStoreId = site.StoreId;
-                            invoicesByCustomerId = await _contractSMRepository.GetInvoicesAsync(contract.SmContractCode);
+                            invoicesByCustomerId = await _contractSMRepository.GetInvoicesByCustomerIdAsync(contractSM.Customerid);
                             invoicesByCustomerIdOrdered.AddRange(invoicesByCustomerId.OrderByDescending(x => x.DocumentDate));
                         }
 
