@@ -267,12 +267,12 @@ namespace customerportalapi.Services
             string accountType = (user.Usertype == (int)UserTypes.Business) ? AccountType.Business : AccountType.Residential;
             List<Contract> contracts = await _contractRepository.GetContractsAsync(user.Dni, accountType);
 
-            //3. From contracts get customer invoces
+            //3. From contracts get customer invoices
             if (contracts.Count == 0)
                 return siteInvoices;
 
             //4. Group contract by Store
-            string previusStoreId = "";
+            string previousStoreId = "";
             foreach (var storegroup in contracts.GroupBy(x => new
             {
                 Name = x.StoreData.StoreName,
@@ -293,36 +293,41 @@ namespace customerportalapi.Services
                 List<Invoice> invoicesByCustomerIdOrdered = new List<Invoice>();
                 foreach (var contract in storegroup)
                 {
-                    List<Invoice> invoicesFiltered = new List<Invoice>();
-
-                    ContractInvoices contractInvoice = new ContractInvoices
+                    SMContract contractSM = await _contractSMRepository.GetAccessCodeAsync(contract.SmContractCode);                    
+                    // only active contracts, if the contract has "terminated", the field "Leaving" have information
+                    if (String.IsNullOrEmpty(contractSM.Leaving))
                     {
-                        ContractId = contract.ContractId,
-                        ContractNumber = contract.ContractNumber,
-                        SmContractCode = contract.SmContractCode,
-                        StoreCode = contract.StoreData.StoreCode
-                    };
+                        List<Invoice> invoicesFiltered = new List<Invoice>();
 
-                    // Only get invoices if previusStoreId is diferent about current Site / StoreId
-                    // GetInvoicesAsync use SmContractCode for get CustomerID, CustomerId is unique by Site / StoreId
-                    if (previusStoreId != site.StoreId)
-                    {
-                        previusStoreId = site.StoreId;
-                        invoicesByCustomerId = await _contractSMRepository.GetInvoicesAsync(contract.SmContractCode);
-                        invoicesByCustomerIdOrdered.AddRange(invoicesByCustomerId.OrderByDescending(x => x.DocumentDate));
+                        ContractInvoices contractInvoice = new ContractInvoices
+                        {
+                            ContractId = contract.ContractId,
+                            ContractNumber = contract.ContractNumber,
+                            SmContractCode = contract.SmContractCode,
+                            StoreCode = contract.StoreData.StoreCode
+                        };
+
+                        // Only get invoices if previousStoreId is different about current Site / StoreId
+                        // GetInvoicesAsync use SmContractCode for get CustomerID, CustomerId is unique by Site / StoreId
+                        if (previousStoreId != site.StoreId)
+                        {
+                            previousStoreId = site.StoreId;
+                            invoicesByCustomerId = await _contractSMRepository.GetInvoicesAsync(contract.SmContractCode);
+                            invoicesByCustomerIdOrdered.AddRange(invoicesByCustomerId.OrderByDescending(x => x.DocumentDate));
+                        }
+
+                        // First, find unpaid invoices, invoice.OutStanding != 0
+                        GetInvoicesWhitOutStanding(contract.Unit.UnitName, invoicesByCustomerIdOrdered, invoicesFiltered);
+
+                        // Second, if invoices by contract is minor to  limitInvoices(3 by default), find invoices by DocumentDate
+                        if (invoicesFiltered.Count < limitInvoices && invoicesByCustomerIdOrdered.Count > 0)
+                        {
+                            GetInvoicesByDocumentDate(limitInvoices, contract.Unit.UnitName, invoicesByCustomerIdOrdered, invoicesFiltered);
+                        }
+
+                        contractInvoice.Invoices.AddRange(invoicesFiltered);
+                        contractInvoices.Add(contractInvoice);
                     }
-
-                    // First, find unpaid invoices, invoice.OutStanding != 0
-                    GetInvoicesWhitOutStanding(contract.Unit.UnitName, invoicesByCustomerIdOrdered, invoicesFiltered);
-
-                    // Second, if invoices by contract is menor to  limitInvoices(3 by default), find invoices by DocumentDate
-                    if (invoicesFiltered.Count < limitInvoices && invoicesByCustomerIdOrdered.Count > 0)
-                    {
-                        GetInvoicesByDocumentDate(limitInvoices, contract.Unit.UnitName, invoicesByCustomerIdOrdered, invoicesFiltered);
-                    }
-
-                    contractInvoice.Invoices.AddRange(invoicesFiltered);
-                    contractInvoices.Add(contractInvoice);
                 }
 
                 site.Contracts.AddRange(contractInvoices);
