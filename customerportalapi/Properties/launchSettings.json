@@ -16,6 +16,7 @@
         "Key": "Value",
         "MONGO_URL": "mongodb://localhost:27017",
         "InvoiceSMAPI": "smapi/Invoice/",
+        "InvoiceByCustomerIdSMAPI": "smapi/Invoice/customer",
         "InvoicePaymentSMAPI": "smapi/Invoice/payment/",
         "PaymentMethodsCRM": "crmapi/Payments/",
         "OpportunityCRM": "crmapi/Opportunity/",

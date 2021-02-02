@@ -161,7 +161,7 @@ namespace customerportalapi.Services.Test
         }
 
         [TestMethod]
-        public async Task AlSolicitarInformacionDeUltimasFacturas_DevuelveLas3Ultimas()
+        public async Task AlSolicitarInformacionDeUltimasFacturas_DevuelveLas3Ultimas_PorContrato()
         {
             //Arrange
             string username = "fake user";
@@ -173,6 +173,8 @@ namespace customerportalapi.Services.Test
             //Assert
             Assert.IsTrue(siteInvoices.Count == 2);
             Assert.IsTrue(siteInvoices[0].Contracts.Count == 2);
+
+            //Invoices by Site & Contract
             Assert.IsTrue(siteInvoices[0].Contracts[0].Invoices.Count(x => x.SiteID == "RI1BBFRI120920060001") == 3);
             Assert.IsTrue(siteInvoices[0].Contracts[1].Invoices.Count(x => x.SiteID == "RI1BBFRI120920060001") == 2);
         }
@@ -191,6 +193,43 @@ namespace customerportalapi.Services.Test
             //Assert
             Assert.IsTrue(siteInvoices.Count == 2);
             Assert.IsTrue(siteInvoices[0].Contracts[0].Invoices.Count(x => x.SiteID == "RI1BBFRI120920060001") == 0);
+        }
+
+        [TestMethod]
+        public async Task AlSolicitarInformacionDeUltimasFacturasDeUnClienteSinFacturas_NoDevuelveNingunaFactura_contractoInactivo()
+        {
+            //Arrange
+            string username = "fake user";
+            _contractSMRepository = ContractSMRepositoryMock.ContractSMRepositoryInactiveContractSM();
+            SiteServices service = new SiteServices(_userRepository.Object, _contractRepository.Object, _storeRepository.Object, _distributedCache.Object, _identityRepository.Object, _contractSMRepository.Object, _config, _mailRepository.Object, _emailTemplateRepository.Object);
+
+            //Act
+            List<SiteInvoices> siteInvoices = await service.GetLastInvoices(username);
+
+            //Assert
+            Assert.IsTrue(siteInvoices.Count == 2);
+            Assert.IsTrue(siteInvoices[0].Contracts.Count == 0);
+        }
+
+        [TestMethod]
+        public async Task AlSolicitarInformacionDeUltimasFacturas_DevuelveLasUltimas_SinPagar_PorContrato()
+        {
+            //Arrange
+            string username = "fake user";
+
+            _contractSMRepository = ContractSMRepositoryMock.ContractSMRepositoryUnpaidInvoices();
+            SiteServices service = new SiteServices(_userRepository.Object, _contractRepository.Object, _storeRepository.Object, _distributedCache.Object, _identityRepository.Object, _contractSMRepository.Object, _config, _mailRepository.Object, _emailTemplateRepository.Object);
+
+            //Act
+            List<SiteInvoices> siteInvoices = await service.GetLastInvoices(username);
+
+            //Assert
+            Assert.IsTrue(siteInvoices.Count == 2);
+            Assert.IsTrue(siteInvoices[0].Contracts.Count == 2);
+
+            //Invoices by Site & Contract
+            Assert.IsTrue(siteInvoices[0].Contracts[0].Invoices.Count(x => x.SiteID == "RI1BBFRI120920060001") == 4);
+            Assert.IsTrue(siteInvoices[0].Contracts[1].Invoices.Count(x => x.SiteID == "RI1BBFRI120920060001") == 2);
         }
     }
 }

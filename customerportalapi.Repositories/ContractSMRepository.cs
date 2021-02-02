@@ -50,6 +50,20 @@ namespace customerportalapi.Repositories
             return JsonConvert.DeserializeObject<List<Invoice>>(result.GetValue("result").ToString());
         }
 
+        public async Task<List<Invoice>> GetInvoicesByCustomerIdAsync(string cutomerId)
+        {
+            var httpClient = _clientFactory.CreateClient("httpClient");
+            httpClient.BaseAddress = new Uri(_configuration["GatewaySmUrl"] + _configuration["InvoiceByCustomerIdSMAPI"] + "/" + cutomerId);
+
+            var response = await httpClient.GetAsync(cutomerId, HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode) return new List<Invoice>();
+            var content = await response.Content.ReadAsStringAsync();
+            JObject result = JObject.Parse(content);
+
+            return JsonConvert.DeserializeObject<List<Invoice>>(result.GetValue("result").ToString());
+        }
+
         public async Task<bool> MakePayment(MakePayment makePayment)
         {
             var httpClient = _clientFactory.CreateClient("httpClient");
