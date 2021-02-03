@@ -53,7 +53,7 @@ namespace customerportalapi.Repositories
         public async Task<List<Invoice>> GetInvoicesByCustomerIdAsync(string cutomerId)
         {
             var httpClient = _clientFactory.CreateClient("httpClient");
-            httpClient.BaseAddress = new Uri(_configuration["GatewaySmUrl"] + _configuration["InvoiceByCustomerIdSMAPI"] + "/" + cutomerId);
+            httpClient.BaseAddress = new Uri(_configuration["GatewaySmUrl"] + _configuration["InvoiceByCustomerIdSMAPI"] + cutomerId);
 
             var response = await httpClient.GetAsync(cutomerId, HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
