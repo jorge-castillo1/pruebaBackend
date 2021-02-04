@@ -269,7 +269,7 @@ namespace customerportalapi.Services
             string externalId = Guid.NewGuid().ToString();
 
             HttpContent content = FillFormUrlEncodedCardMethod(store, userProfile, smContract, externalId);
-
+            
             string stringHtml = await _paymentRepository.ChangePaymentMethodCard(content);
             Card card = new Card()
             {
