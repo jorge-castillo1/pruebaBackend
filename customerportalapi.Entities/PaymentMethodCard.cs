@@ -15,5 +15,10 @@ namespace customerportalapi.Entities
         public string idCustomer { get; set; }
         public string ContractNumber { get; set; }
         public string SmContractCode { get; set; }
-    }
+        public string email { get; set; }
+        public string phoneNumber { get; set; }
+        public string phonePrefix { get; set; }
+        public string CountryISOCodeNumeric { get; set; }
+        public Address address { get; set; }
+}
 }

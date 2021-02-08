@@ -252,23 +252,21 @@ namespace customerportalapi.Services
             User user = _userRepository.GetCurrentUserByDniAndType(paymentMethod.Dni, userType);
 
             if (user.Id == null)
-                throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
+                throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, FieldNames.Dni, ValidationMessages.NotExist);
 
             // 2. Validate data
             PaymentMethodCard cardmethod = (PaymentMethodCard)paymentMethod;
-
-            if (string.IsNullOrEmpty(cardmethod.SmContractCode))
-                throw new ServiceException("Contract number field can not be null.", HttpStatusCode.BadRequest, "ContractNumber", "Empty fields");
+            checkFields(cardmethod);
 
             var store = await _storeRepository.GetStoreAsync(cardmethod.SiteId);
 
             // 4. Get data to load card form string
 
             Profile userProfile = await _profileRepository.GetProfileAsync(user.Dni, paymentMethod.AccountType);
-            SMContract smContract = await _contractSMRepository.GetAccessCodeAsync(cardmethod.SmContractCode);
+            // SMContract smContract = await _contractSMRepository.GetAccessCodeAsync(cardmethod.SmContractCode);
             string externalId = Guid.NewGuid().ToString();
 
-            HttpContent content = FillFormUrlEncodedCardMethod(store, userProfile, smContract, externalId);
+            HttpContent content = FillFormUrlEncodedCardMethod(store, userProfile, cardmethod, externalId);
             
             string stringHtml = await _paymentRepository.ChangePaymentMethodCard(content);
             Card card = new Card()
@@ -285,7 +283,7 @@ namespace customerportalapi.Services
             return stringHtml;
         }
 
-        private HttpContent FillFormUrlEncodedCardMethod(Store store, Profile user, SMContract smContract, string externalId)
+        private HttpContent FillFormUrlEncodedCardMethod(Store store, Profile user, PaymentMethodCard cardmethod, string externalId)
         {
             string language = getCountryLangByLanguage(user.Language);
             var keyValues = new List<KeyValuePair<string, string>>();
@@ -295,7 +293,7 @@ namespace customerportalapi.Services
             keyValues.Add(new KeyValuePair<string, string>("name", user.Name));
             keyValues.Add(new KeyValuePair<string, string>("surnames", user.Surname));
             keyValues.Add(new KeyValuePair<string, string>("nif", user.DocumentNumber));
-            keyValues.Add(new KeyValuePair<string, string>("idcustomer", smContract.Customerid));
+            keyValues.Add(new KeyValuePair<string, string>("idcustomer", cardmethod.idCustomer));
             keyValues.Add(new KeyValuePair<string, string>("url", _configuration["ChangePaymentMethodCardResponse"]));
             keyValues.Add(new KeyValuePair<string, string>("language", language));
             HttpContent content = new FormUrlEncodedContent(keyValues);
@@ -1058,6 +1056,65 @@ namespace customerportalapi.Services
             await _processRepository.Create(process);
 
             return true;
+        }
+
+        private void checkFields(PaymentMethodCard cardmethod)
+        {
+
+            if (string.IsNullOrEmpty(cardmethod.SmContractCode))
+                throw new ServiceException("Contract number field can not be null.", HttpStatusCode.BadRequest, FieldNames.ContractNumber, ValidationMessages.EmptyFields);
+
+            if (string.IsNullOrEmpty(cardmethod.email))
+                throw new ServiceException("Email field can not be null.", HttpStatusCode.BadRequest, FieldNames.Email, ValidationMessages.EmptyFields);
+
+            if (cardmethod.email.Length > 254)
+                throw new ServiceException("Email field must not be longer to 254.", HttpStatusCode.BadRequest, FieldNames.Email, ValidationMessages.LongerTo);
+
+            if (string.IsNullOrEmpty(cardmethod.phoneNumber))
+                throw new ServiceException("Phone number can not be null.", HttpStatusCode.BadRequest, FieldNames.PhoneNumber, ValidationMessages.EmptyFields);
+
+            if (cardmethod.phoneNumber.Length > 15)
+                throw new ServiceException("Phone number field must not be longer to 15.", HttpStatusCode.BadRequest, FieldNames.Email, ValidationMessages.LongerTo);
+
+            if (string.IsNullOrEmpty(cardmethod.address.Street1))
+                throw new ServiceException("Street1 can not be null.", HttpStatusCode.BadRequest, FieldNames.Street, ValidationMessages.EmptyFields);
+
+            if (cardmethod.address.Street1.Length > 50)
+                throw new ServiceException("Street1 field must not be longer to 50.", HttpStatusCode.BadRequest, FieldNames.Street, ValidationMessages.LongerTo);
+
+            if (cardmethod.address.Street2.Length > 50)
+                throw new ServiceException("Street2 field must not be longer to 50.", HttpStatusCode.BadRequest, FieldNames.Street, ValidationMessages.LongerTo);
+
+            if (cardmethod.address.Street3.Length > 50)
+                throw new ServiceException("Street3 field must not be longer to 50.", HttpStatusCode.BadRequest, FieldNames.Street, ValidationMessages.LongerTo);
+
+            if (string.IsNullOrEmpty(cardmethod.address.ZipOrPostalCode))
+                throw new ServiceException("Zip Or Postal Code can not be null.", HttpStatusCode.BadRequest, FieldNames.ZipOrPostalCode, ValidationMessages.EmptyFields);
+
+            if (cardmethod.address.ZipOrPostalCode.Length > 16)
+                throw new ServiceException("Zip Or Postal Code field must not be longer to 16.", HttpStatusCode.BadRequest, FieldNames.ZipOrPostalCode, ValidationMessages.LongerTo);
+
+            if (string.IsNullOrEmpty(cardmethod.address.City))
+                throw new ServiceException("City can not be null.", HttpStatusCode.BadRequest, FieldNames.City, ValidationMessages.EmptyFields);
+
+            if (cardmethod.address.City.Length > 50)
+                throw new ServiceException("City field must not be longer to 50.", HttpStatusCode.BadRequest, FieldNames.City, ValidationMessages.LongerTo);
+
+            if (string.IsNullOrEmpty(cardmethod.CountryISOCodeNumeric))
+                throw new ServiceException("Country ISO Code Numeric can not be null.", HttpStatusCode.BadRequest, FieldNames.CountryISOCodeNumeric, ValidationMessages.EmptyFields);
+
+            if (cardmethod.CountryISOCodeNumeric.Length > 3)
+                throw new ServiceException("City field must not be longer to 3.", HttpStatusCode.BadRequest, FieldNames.City, ValidationMessages.LongerTo);
+
+            if (string.IsNullOrEmpty(cardmethod.phonePrefix))
+                throw new ServiceException("Phone Prefix can not be null.", HttpStatusCode.BadRequest, FieldNames.PhonePrefix, ValidationMessages.EmptyFields);
+
+            if (cardmethod.phonePrefix.Length > 3)
+                throw new ServiceException("Phone Prefix field must not be longer to 3.", HttpStatusCode.BadRequest, FieldNames.PhonePrefix, ValidationMessages.LongerTo);
+
+            if (string.IsNullOrEmpty(cardmethod.idCustomer))
+                throw new ServiceException("Id Customer can not be null.", HttpStatusCode.BadRequest, FieldNames.IdCustomer, ValidationMessages.EmptyFields);
+
         }
     }
 
