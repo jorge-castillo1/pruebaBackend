@@ -10,5 +10,9 @@ namespace customerportalapi.Entities
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string FullName { get; set; }
+
+        public string NumericCode { get; set; }
+
+        public string PhonePrefix { get; set; }
     }
 }
