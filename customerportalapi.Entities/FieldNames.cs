@@ -20,6 +20,7 @@ namespace customerportalapi.Entities
         public const string CountryISOCodeNumeric = "CountryISOCodeNumeric";
         public const string PhonePrefix = "phonePrefix";
         public const string IdCustomer = "idCustomer";
+        public const string SiteId = "SiteId";
 
     }
 }
