@@ -20,5 +20,5 @@ namespace customerportalapi.Entities
         public string PhonePrefix { get; set; }
         public string CountryISOCodeNumeric { get; set; }
         public Address Address { get; set; }
-}
+    }
 }

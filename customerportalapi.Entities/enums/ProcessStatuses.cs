@@ -8,6 +8,7 @@ namespace customerportalapi.Entities.enums
     {
         Pending = 0,
         Accepted = 1,
-        Canceled = 2
+        Canceled = 2,
+        Started = 3
     }
 }
