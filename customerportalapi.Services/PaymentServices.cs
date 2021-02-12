@@ -279,7 +279,7 @@ namespace customerportalapi.Services
                 ProcessType = (int)ProcessTypes.PaymentMethodChangeCard,
                 ProcessStatus = (int)ProcessStatuses.Started
             };
-            CancelProcessByFilter(filter);
+            bool result = await CancelProcessByFilter(filter);
 
             HttpContent content = FillFormUrlEncodedCardMethod(userProfile, cardmethod, user);
             
@@ -993,8 +993,7 @@ namespace customerportalapi.Services
                 ProcessType = (int)ProcessTypes.PaymentMethodChangeCard,
                 ProcessStatus = (int)ProcessStatuses.Started
             };
-
-            CancelProcessByFilter(filter);
+            bool result = await CancelProcessByFilter(filter);
 
             string stringHtml = await _paymentRepository.UpdateCardLoad(updateCardData);
             
@@ -1229,7 +1228,7 @@ namespace customerportalapi.Services
 
         }
 
-        private void CancelProcessByFilter(ProcessSearchFilter filter)
+        private async Task<bool> CancelProcessByFilter(ProcessSearchFilter filter)
         {
             List<Process> processes = _processRepository.Find(filter);
             if (processes.Count > 0)
@@ -1244,9 +1243,12 @@ namespace customerportalapi.Services
                     Channel = "WEBPORTAL",
                     Confirmed = false
                 };
-                _paymentRepository.ConfirmChangePaymentMethodCard(confirmation);
-                _paymentRepository.UpdateConfirmChangePaymentMethodCard(confirmation);
+                await _paymentRepository.ConfirmChangePaymentMethodCard(confirmation);
+                await _paymentRepository.UpdateConfirmChangePaymentMethodCard(confirmation);
+                return true;
             }
+
+            return false;
         }
 
          private async Task<PaymentMethodCardSignature> GetPaymentMethodCardSignature(Process process, Card card)
