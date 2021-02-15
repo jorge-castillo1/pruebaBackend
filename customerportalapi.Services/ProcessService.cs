@@ -132,5 +132,32 @@ namespace customerportalapi.Services
             return process;
         }
 
-    }
+        public int CancelAllProcessesByUsernameAndProcesstype(string username, int processtype)
+        {
+
+            ProcessSearchFilter filter = new ProcessSearchFilter()
+            {
+                UserName = username,
+                ProcessType = processtype
+            };
+            List<Process> processes = _processRepository.Find(filter);
+            if (processes.Count == 0) throw new ServiceException("Process not found", HttpStatusCode.NotFound);
+            foreach (Process pro in processes)
+            {
+                pro.ProcessStatus = (int)ProcessStatuses.Canceled;
+                _processRepository.Update(pro);
+                ProcessCard card = pro.Card;
+                PaymentMethodCardConfirmationToken confirmation = new PaymentMethodCardConfirmationToken()
+                {
+                    ExternalId = card.ExternalId,
+                    Channel = "WEBPORTAL",
+                    Confirmed = false
+                };
+                var res = _paymentRepository.ConfirmChangePaymentMethodCard(confirmation);
+                var res2 = _paymentRepository.UpdateConfirmChangePaymentMethodCard(confirmation);
+            }
+            return processes.Count;
+        }
+
+        }
 }

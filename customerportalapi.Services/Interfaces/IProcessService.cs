@@ -11,5 +11,6 @@ namespace customerportalapi.Services.Interfaces
         List<Process> GetLastProcesses(string user, string smContractCode, int? processtype);
         bool CancelProcess(string contractnumber, int processtype);
         Process UpdateSignatureProcess(SignatureStatus value);
+        int CancelAllProcessesByUsernameAndProcesstype(string username, int processtype);
     }
 }
