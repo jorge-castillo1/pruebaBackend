@@ -1072,7 +1072,7 @@ namespace customerportalapi.Services
 
             ProcessSearchFilter searchProcess = new ProcessSearchFilter();
             searchProcess.ExternalId = updateCard.ExternalId;
-            searchProcess.ProcessStatus = (int)ProcessStatuses.Pending;
+            searchProcess.ProcessStatus = (int)ProcessStatuses.Started;
             List<Process> processes = _processRepository.Find(searchProcess);
             if (processes.Count > 1)
                 throw new ServiceException("User have two or more pending process for this externalId", HttpStatusCode.BadRequest, "ExternalId", "Pending process");
