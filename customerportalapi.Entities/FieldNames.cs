@@ -21,6 +21,13 @@ namespace customerportalapi.Entities
         public const string PhonePrefix = "phonePrefix";
         public const string IdCustomer = "idCustomer";
         public const string SiteId = "SiteId";
+        public const string SMContractCode = "SMContractCode";
+        public const string Ourreference = "Ourreference";
+        public const string Ourref = "Ourref";
+        public const string Token = "Token";
+        public const string SMId = "SMId";
+        public const string StoreId = "StoreId";
+        public const string result = "result";
 
     }
 }

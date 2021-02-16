@@ -733,29 +733,29 @@ namespace customerportalapi.Services
         {
             // 1. Check payInvoice required values
             if (payInvoice.SiteId == null || payInvoice.SiteId == "")
-                throw new ServiceException("SiteId is required", HttpStatusCode.BadRequest, "SiteId");
+                throw new ServiceException("SiteId is required", HttpStatusCode.BadRequest, FieldNames.SiteId);
 
             if (payInvoice.SmContractCode == null || payInvoice.SmContractCode == "")
-                throw new ServiceException("SmContractCode is required", HttpStatusCode.BadRequest, "SmContractCode");
+                throw new ServiceException("SmContractCode is required", HttpStatusCode.BadRequest, FieldNames.SMContractCode);
 
             if (payInvoice.Ourref == null || payInvoice.Ourref == "")
-                throw new ServiceException("Ourref is required", HttpStatusCode.BadRequest, "Ourref");
+                throw new ServiceException("Ourref is required", HttpStatusCode.BadRequest, FieldNames.Ourref);
 
             if (payInvoice.Token == null || payInvoice.Token == "")
-                throw new ServiceException("Token is required", HttpStatusCode.BadRequest, "Token");
+                throw new ServiceException("Token is required", HttpStatusCode.BadRequest, FieldNames.Token);
 
             if (payInvoice.Username == null || payInvoice.Username == "")
-                throw new ServiceException("Username is required", HttpStatusCode.BadRequest, "Username");
+                throw new ServiceException("Username is required", HttpStatusCode.BadRequest, FieldNames.Username);
 
             // 2. Get Invoice
             List<Invoice> invoices = await _contractSMRepository.GetInvoicesAsync(payInvoice.SmContractCode);
             if (invoices.Count <= 0)
-                throw new ServiceException("Invoices not found", HttpStatusCode.BadRequest, "smContractCode");
+                throw new ServiceException("Invoices not found", HttpStatusCode.BadRequest, FieldNames.SMContractCode);
 
                Invoice inv = invoices.Find(x => x.OurReference.Contains(payInvoice.Ourref));
 
             if (inv.OurReference == null)
-                throw new ServiceException("Invoice not found", HttpStatusCode.BadRequest, "Ourreference");
+                throw new ServiceException("Invoice not found", HttpStatusCode.BadRequest, FieldNames.Ourreference);
 
             // 3. Get SmContract
             SMContract smContract = await _contractSMRepository.GetAccessCodeAsync(payInvoice.SmContractCode);
@@ -763,7 +763,7 @@ namespace customerportalapi.Services
             _logger.LogInformation("smContractlog:" + smContractlog);
 
             if (smContract.Customerid == null)
-                throw new ServiceException("Contract sm found", HttpStatusCode.BadRequest, "SmContractCode");
+                throw new ServiceException("Contract sm found", HttpStatusCode.BadRequest, FieldNames.SMContractCode);
 
             // 4. Set data
             payInvoice.Amount = inv.Amount;
@@ -775,7 +775,7 @@ namespace customerportalapi.Services
 
             PaymentMethodPayInvoiceResponse payResponse = await _paymentRepository.PayInvoice(payInvoice);
             if (payResponse.result != "00")
-                throw new ServiceException("Error payment", HttpStatusCode.BadRequest, "result");
+                throw new ServiceException("Error payment", HttpStatusCode.BadRequest, FieldNames.result);
             string after = JsonConvert.SerializeObject(payResponse);
             _logger.LogInformation("after:" + after);
 
@@ -785,13 +785,13 @@ namespace customerportalapi.Services
             List<Store> stores = await _storeRepository.GetStoresAsync();
             Store store = stores.Find(x => x.StoreCode.Contains(payInvoice.SiteId));
             if (store.StoreId == null)
-                throw new ServiceException("Store not found", HttpStatusCode.BadRequest, "StoreId");
+                throw new ServiceException("Store not found", HttpStatusCode.BadRequest, FieldNames.StoreId);
 
             PaymentMethodCRM payMetCRM = await _paymentMethodRepository.GetPaymentMethod(store.StoreId.ToString());
             string payMetCRMlog = JsonConvert.SerializeObject(payMetCRM);
             _logger.LogInformation("payMetCRMlog:" + payMetCRMlog);
             if (payMetCRM.SMId == null)
-                throw new ServiceException("Error payment method crm", HttpStatusCode.BadRequest, "SMId");
+                throw new ServiceException("Error payment method crm", HttpStatusCode.BadRequest, FieldNames.SMId);
 
             // 7. MakePayment SM
             MakePayment mPayment = new MakePayment()
@@ -817,12 +817,12 @@ namespace customerportalapi.Services
             User user = _userRepository.GetCurrentUserByUsername(paymentMethod.Username);
 
             if (user.Id == null)
-                throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
+                throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, FieldNames.Username, ValidationMessages.EmptyFields);
 
             // 2. Validate data
 
             if (string.IsNullOrEmpty(paymentMethod.SmContractCode))
-                throw new ServiceException("Contract number field can not be null.", HttpStatusCode.BadRequest, "SMContractCode", "Empty fields");
+                throw new ServiceException("Contract number field can not be null.", HttpStatusCode.BadRequest, FieldNames.SMContractCode, ValidationMessages.EmptyFields);
 
             var store = await _storeRepository.GetStoreAsync(paymentMethod.SiteId);
 
@@ -833,12 +833,12 @@ namespace customerportalapi.Services
 
             List<Invoice> invoices = await _contractSMRepository.GetInvoicesAsync(paymentMethod.SmContractCode);
             if (invoices.Count <= 0)
-                throw new ServiceException("Invoices not found", HttpStatusCode.BadRequest, "smContractCode");
+                throw new ServiceException("Invoices not found", HttpStatusCode.BadRequest, FieldNames.SMContractCode);
 
                Invoice inv = invoices.Find(x => x.OurReference.Contains(paymentMethod.Ourref));
 
             if (inv.OurReference == null)
-                throw new ServiceException("Invoice not found", HttpStatusCode.BadRequest, "Ourreference");
+                throw new ServiceException("Invoice not found", HttpStatusCode.BadRequest, FieldNames.Ourreference);
             string externalId = Guid.NewGuid().ToString();
 
             paymentMethod.ExternalId = externalId;
