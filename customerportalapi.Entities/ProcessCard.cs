@@ -15,5 +15,14 @@ namespace customerportalapi.Entities
 
         [BsonElement("update")]
         public bool Update { get; set; }
+
+        [BsonElement("email")]
+        public string Email { get; set; }
+
+        [BsonElement("phoneNumber")]
+        public string PhoneNumber { get; set; }
+
+        [BsonElement("address")]
+        public Address Address { get; set; }
     }
 }

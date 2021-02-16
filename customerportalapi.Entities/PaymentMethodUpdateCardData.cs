@@ -18,6 +18,11 @@ namespace customerportalapi.Entities
         public string SmContractCode { get; set; }
         public string ContractNumber { get; set; }
         public string Language { get; set; }
+        public string Email { get; set; }
+        public string PhoneNumber { get; set; }
+        public string PhonePrefix { get; set; }
+        public string CountryISOCodeNumeric { get; set; }
+        public Address Address { get; set; }
 
     }
 }

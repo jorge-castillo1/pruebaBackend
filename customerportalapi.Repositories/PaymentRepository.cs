@@ -177,6 +177,7 @@ namespace customerportalapi.Repositories
         {
             string entity = "";
 
+            string phoneNumber = updateCardData.PhonePrefix + "|" + updateCardData.PhoneNumber;
             var httpClient = _clientFactory.CreateClient("httpClientPayment");
             httpClient.BaseAddress = new Uri(_configuration["GatewayPaymentUrl"] + _configuration["UpdateCardEndpoint"]);
              var keyValues = new List<KeyValuePair<string, string>>();
@@ -187,6 +188,14 @@ namespace customerportalapi.Repositories
             keyValues.Add(new KeyValuePair<string, string>("token", updateCardData.Token));
             keyValues.Add(new KeyValuePair<string, string>("url", updateCardData.Url));
             keyValues.Add(new KeyValuePair<string, string>("language", updateCardData.Language));
+            keyValues.Add(new KeyValuePair<string, string>("HPP_CUSTOMER_EMAIL", updateCardData.Email));
+            keyValues.Add(new KeyValuePair<string, string>("HPP_CUSTOMER_PHONENUMBER_MOBILE", phoneNumber));
+            keyValues.Add(new KeyValuePair<string, string>("HPP_BILLING_STREET1", updateCardData.Address.Street1));
+            keyValues.Add(new KeyValuePair<string, string>("HPP_BILLING_STREET2", updateCardData.Address.Street2));
+            keyValues.Add(new KeyValuePair<string, string>("HPP_BILLING_STREET3", updateCardData.Address.Street2));
+            keyValues.Add(new KeyValuePair<string, string>("HPP_BILLING_CITY", updateCardData.Address.City));
+            keyValues.Add(new KeyValuePair<string, string>("HPP_BILLING_POSTALCODE", updateCardData.Address.ZipOrPostalCode));
+            keyValues.Add(new KeyValuePair<string, string>("HPP_BILLING_COUNTRY", updateCardData.CountryISOCodeNumeric));
             HttpContent content = new FormUrlEncodedContent(keyValues);
 
             var response = await httpClient.PostAsync(httpClient.BaseAddress, content);

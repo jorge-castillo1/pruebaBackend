@@ -72,5 +72,30 @@ namespace customerportalapi.Controllers
                 throw;
             }
         }
+
+        /// <summary>
+        /// Cancels all process matching username and type
+        /// </summary>
+        /// <param name="username">Username</param>
+        /// <param name="processtype">Type of process</param>
+        /// <returns></returns>
+        [HttpPut("cancel/{username}/{processtype}/all")]
+        public ApiResponse CancelAllProcessByUsernameAndType(string username, int processtype)
+        {
+            try
+            {
+                var result = _service.CancelAllProcessesByUsernameAndProcesstype(username, processtype);
+                return new ApiResponse(result);
+            }
+            catch (ServiceException se)
+            {
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
     }
 }
