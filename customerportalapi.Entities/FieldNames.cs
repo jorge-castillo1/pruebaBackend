@@ -28,6 +28,7 @@ namespace customerportalapi.Entities
         public const string SMId = "SMId";
         public const string StoreId = "StoreId";
         public const string result = "result";
+        public const string StateOrProvince = "StateOrProvince";
 
     }
 }

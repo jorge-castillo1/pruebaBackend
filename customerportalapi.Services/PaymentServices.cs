@@ -439,11 +439,11 @@ namespace customerportalapi.Services
             Card updateCard = _cardRepository.Update(card);
 
             ProcessSearchFilter searchProcess = new ProcessSearchFilter();
-            searchProcess.ExternalId = updateCard.ExternalId;
+            searchProcess.CardExternalId = updateCard.ExternalId;
             searchProcess.ProcessStatus = (int)ProcessStatuses.Started;
             List<Process> processes = _processRepository.Find(searchProcess);
             if (processes.Count > 1)
-                throw new ServiceException("User have two or more started process for this externalId", HttpStatusCode.BadRequest, "ExternalId", "Pending process");
+                throw new ServiceException("User have two or more started process for this externalId", HttpStatusCode.BadRequest, "CardExternalId", "Pending process");
 
 
             // Card verification failed
@@ -503,7 +503,7 @@ namespace customerportalapi.Services
                 };
 
                 PaymentMethodCardConfirmationResponse cardConfirmation = await _paymentRepository.ConfirmChangePaymentMethodCard(confirmation);
-                throw new ServiceException("Card not found", HttpStatusCode.BadRequest, "ExternalId");
+                throw new ServiceException("Card not found", HttpStatusCode.BadRequest, "CardExternalId");
             }
 
             cardmethod.CardHolderName = card.Cardholder;
@@ -514,18 +514,17 @@ namespace customerportalapi.Services
 
             // 2. Update process confirmCardSignature
             ProcessSearchFilter searchProcess = new ProcessSearchFilter();
-            searchProcess.ExternalId = cardmethod.ExternalId;
             searchProcess.UserName = user.Username;
             searchProcess.ProcessType = (int)ProcessTypes.PaymentMethodChangeCard;
             searchProcess.SmContractCode = cardmethod.SmContractCode;
             searchProcess.ProcessStatus = (int)ProcessStatuses.Started;
-            searchProcess.ExternalId = cardmethod.ExternalId;
+            searchProcess.CardExternalId = cardmethod.ExternalId;
             List<Process> processes = _processRepository.Find(searchProcess);
             if (processes.Count > 1)
-                throw new ServiceException("User have two or more started process for this externalId & ProcessType", HttpStatusCode.BadRequest, "ExternalId", "Started process");
+                throw new ServiceException("User have two or more started process for this externalId & ProcessType", HttpStatusCode.BadRequest, "CardExternalId", "Started process");
 
             if (processes.Count == 0)
-                throw new ServiceException("User don't have started process for this externalId & ProcessType", HttpStatusCode.BadRequest, "ExternalId", "Started process");
+                throw new ServiceException("User don't have started process for this externalId & ProcessType", HttpStatusCode.BadRequest, "CardExternalId", "Started process");
 
 
             Process process = new Process();
@@ -610,10 +609,10 @@ namespace customerportalapi.Services
             AccountProfile account = await _profileRepository.GetAccountAsync(user.Dni, usertype);
 
             ProcessSearchFilter searchProcess = new ProcessSearchFilter();
-            searchProcess.ExternalId = process.Card.ExternalId;
+            searchProcess.CardExternalId = process.Card.ExternalId;
             List<Process> processes = _processRepository.Find(searchProcess);
             if (processes.Count > 1)
-                throw new ServiceException("User have multiple pending process for this externalId", HttpStatusCode.BadRequest, "ExternalId", "Pending process");
+                throw new ServiceException("User have multiple pending process for this externalId", HttpStatusCode.BadRequest, "CardExternalId", "Pending process");
 
             PaymentMethodCardConfirmationToken confirmation  = new PaymentMethodCardConfirmationToken()
             {
@@ -659,7 +658,7 @@ namespace customerportalapi.Services
 
             Card card = _cardRepository.GetByExternalId(process.Card.ExternalId);
             if (card.Id == null)
-                throw new ServiceException("Card doesn´t exits", HttpStatusCode.BadRequest, "ExternalId");
+                throw new ServiceException("Card doesn´t exits", HttpStatusCode.BadRequest, "CardExternalId");
 
             card.Current = true;
             _cardRepository.Update(card);
@@ -925,14 +924,14 @@ namespace customerportalapi.Services
 
             // Check if exist process ProcessStatuses.Started (Previous step)
             ProcessSearchFilter searchProcess = new ProcessSearchFilter();
-            searchProcess.ExternalId = payRes.ExternalId;
+            searchProcess.PayExternalId = payRes.ExternalId;
             searchProcess.ProcessStatus = (int)ProcessStatuses.Started;
             List<Process> processes = _processRepository.Find(searchProcess);
             if (processes.Count > 1)
-                throw new ServiceException("User have two or more started process for this externalId", HttpStatusCode.BadRequest, "ExternalId", "Pending process");
+                throw new ServiceException("User have two or more started process for this externalId", HttpStatusCode.BadRequest, "CardExternalId", "Pending process");
 
             if (processes.Count == 0)
-                throw new ServiceException("User don't have started process for this externalId & ProcessType", HttpStatusCode.BadRequest, "ExternalId", "Started process");
+                throw new ServiceException("User don't have started process for this externalId & ProcessType", HttpStatusCode.BadRequest, "CardExternalId", "Started process");
 
 
             // 2. Pay verification failed
@@ -1110,11 +1109,11 @@ namespace customerportalapi.Services
             Card updateCard = _cardRepository.Update(card);
 
             ProcessSearchFilter searchProcess = new ProcessSearchFilter();
-            searchProcess.ExternalId = updateCard.ExternalId;
+            searchProcess.CardExternalId = updateCard.ExternalId;
             searchProcess.ProcessStatus = (int)ProcessStatuses.Started;
             List<Process> processes = _processRepository.Find(searchProcess);
             if (processes.Count > 1)
-                throw new ServiceException("User have two or more started process for this externalId", HttpStatusCode.BadRequest, "ExternalId", "Pending process");
+                throw new ServiceException("User have two or more started process for this externalId", HttpStatusCode.BadRequest, "CardExternalId", "Pending process");
 
             // Card verification failed
             if (updateCardResponse.status != "00") {
@@ -1275,16 +1274,36 @@ namespace customerportalapi.Services
                 Process pro = processes[0];
                 pro.ProcessStatus = (int)ProcessStatuses.Canceled;
                 _processRepository.Update(pro);
-                ProcessCard card = pro.Card;
-                PaymentMethodCardConfirmationToken confirmation = new PaymentMethodCardConfirmationToken()
+
+                string externalId = null;
+
+                // Change payment method
+                if (!string.IsNullOrEmpty(pro.Id) && pro.Card != null && !string.IsNullOrEmpty(pro.Card.ExternalId))
                 {
-                    ExternalId = card.ExternalId,
-                    Channel = "WEBPORTAL",
-                    Confirmed = false
-                };
-                await _paymentRepository.ConfirmChangePaymentMethodCard(confirmation);
-                await _paymentRepository.UpdateConfirmChangePaymentMethodCard(confirmation);
-                return true;
+                    externalId = pro.Card.ExternalId;
+                }
+
+                // Paymen invoice
+                if (string.IsNullOrEmpty(externalId) && pro.Pay != null && !string.IsNullOrEmpty(pro.Id) && !string.IsNullOrEmpty(pro.Pay.ExternalId))
+                {
+                    externalId = pro.Pay.ExternalId;
+                }
+
+                // Cancel new card o exist card on Precognis
+                if (externalId != null)
+                {
+
+                    PaymentMethodCardConfirmationToken confirmation = new PaymentMethodCardConfirmationToken()
+                {
+                        ExternalId = externalId,
+                        Channel = "WEBPORTAL",
+                        Confirmed = false
+                    };
+                    await _paymentRepository.ConfirmChangePaymentMethodCard(confirmation);
+                    await _paymentRepository.UpdateConfirmChangePaymentMethodCard(confirmation);
+                    return true;
+                }
+
             }
 
             return false;
@@ -1365,11 +1384,17 @@ namespace customerportalapi.Services
             if (cardmethod.Address.City.Length > 50)
                 throw new ServiceException("City field must not be longer to 50.", HttpStatusCode.BadRequest, FieldNames.City, ValidationMessages.LongerTo);
 
+            if (string.IsNullOrEmpty(cardmethod.Address.StateOrProvince))
+                throw new ServiceException("City can not be null.", HttpStatusCode.BadRequest, FieldNames.StateOrProvince, ValidationMessages.EmptyFields);
+
+            if (cardmethod.Address.StateOrProvince.Length > 50)
+                throw new ServiceException("City field must not be longer to 50.", HttpStatusCode.BadRequest, FieldNames.StateOrProvince, ValidationMessages.LongerTo);
+
             if (string.IsNullOrEmpty(cardmethod.CountryISOCodeNumeric))
                 throw new ServiceException("Country ISO Code Numeric can not be null.", HttpStatusCode.BadRequest, FieldNames.CountryISOCodeNumeric, ValidationMessages.EmptyFields);
 
             if (cardmethod.CountryISOCodeNumeric.Length > 3)
-                throw new ServiceException("City field must not be longer to 3.", HttpStatusCode.BadRequest, FieldNames.City, ValidationMessages.LongerTo);
+                throw new ServiceException("City field must not be longer to 3.", HttpStatusCode.BadRequest, FieldNames.CountryISOCodeNumeric, ValidationMessages.LongerTo);
 
             if (string.IsNullOrEmpty(cardmethod.PhonePrefix))
                 throw new ServiceException("Phone Prefix can not be null.", HttpStatusCode.BadRequest, FieldNames.PhonePrefix, ValidationMessages.EmptyFields);

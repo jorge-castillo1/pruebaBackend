@@ -148,6 +148,8 @@ namespace customerportalapi.Repositories
             var httpClient = _clientFactory.CreateClient("httpClientPayment");
             httpClient.BaseAddress = new Uri(_configuration["GatewayPaymentUrl"] + _configuration["PayInvoiceNewCard"]);
 
+            string phoneNumber = payInvoiceNewCard.PhonePrefix + "|" + payInvoiceNewCard.PhoneNumber;
+            phoneNumber = phoneNumber.Replace(" ", "");
             var keyValues = new List<KeyValuePair<string, string>>();
             keyValues.Add(new KeyValuePair<string, string>("recurrent", payInvoiceNewCard.Recurrent == true ?  "true" : "false"));
             keyValues.Add(new KeyValuePair<string, string>("externalid", payInvoiceNewCard.ExternalId));
@@ -162,6 +164,15 @@ namespace customerportalapi.Repositories
             keyValues.Add(new KeyValuePair<string, string>("ourref", payInvoiceNewCard.Ourref));
             keyValues.Add(new KeyValuePair<string, string>("documentid", payInvoiceNewCard.DocumentId));
             keyValues.Add(new KeyValuePair<string, string>("language", payInvoiceNewCard.Language));
+            keyValues.Add(new KeyValuePair<string, string>("HPP_CUSTOMER_EMAIL", payInvoiceNewCard.Email));
+            keyValues.Add(new KeyValuePair<string, string>("HPP_CUSTOMER_PHONENUMBER_MOBILE", phoneNumber));
+            keyValues.Add(new KeyValuePair<string, string>("HPP_BILLING_STREET1", payInvoiceNewCard.Address.Street1));
+            keyValues.Add(new KeyValuePair<string, string>("HPP_BILLING_STREET2", payInvoiceNewCard.Address.Street2));
+            keyValues.Add(new KeyValuePair<string, string>("HPP_BILLING_STREET3", payInvoiceNewCard.Address.Street2));
+            keyValues.Add(new KeyValuePair<string, string>("HPP_BILLING_CITY", payInvoiceNewCard.Address.City));
+            keyValues.Add(new KeyValuePair<string, string>("HPP_BILLING_STATE", payInvoiceNewCard.Address.StateOrProvince));
+            keyValues.Add(new KeyValuePair<string, string>("HPP_BILLING_POSTALCODE", payInvoiceNewCard.Address.ZipOrPostalCode));
+            keyValues.Add(new KeyValuePair<string, string>("HPP_BILLING_COUNTRY", payInvoiceNewCard.CountryISOCodeNumeric));
             HttpContent content = new FormUrlEncodedContent(keyValues);
 
             var response = await httpClient.PostAsync(httpClient.BaseAddress, content);

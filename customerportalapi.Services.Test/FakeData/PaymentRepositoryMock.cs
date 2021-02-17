@@ -19,7 +19,7 @@ namespace customerportalapi.Services.Test.FakeData
             db.Setup(x => x.ConfirmChangePaymentMethodCard(It.IsAny<PaymentMethodCardConfirmationToken>())).Returns(Task.FromResult(
                 new PaymentMethodCardConfirmationResponse()
                 {
-                    ExternalId = "fake ExternalId",
+                    ExternalId = "fake CardExternalId",
                     Message = "success",
                     Status = "Success"
                 }
