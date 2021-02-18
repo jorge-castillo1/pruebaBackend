@@ -1205,7 +1205,7 @@ namespace customerportalapi.Services
                 throw new ServiceException("Country ISO Code Numeric can not be null.", HttpStatusCode.BadRequest, FieldNames.CountryISOCodeNumeric, ValidationMessages.EmptyFields);
 
             if (cardmethod.CountryISOCodeNumeric.Length > 3)
-                throw new ServiceException("City field must not be longer to 3.", HttpStatusCode.BadRequest, FieldNames.City, ValidationMessages.LongerTo);
+                throw new ServiceException("Country ISO Code Numeric field must not be longer to 3.", HttpStatusCode.BadRequest, FieldNames.City, ValidationMessages.LongerTo);
 
             if (string.IsNullOrEmpty(cardmethod.PhonePrefix))
                 throw new ServiceException("Phone Prefix can not be null.", HttpStatusCode.BadRequest, FieldNames.PhonePrefix, ValidationMessages.EmptyFields);
@@ -1265,7 +1265,7 @@ namespace customerportalapi.Services
                 throw new ServiceException("Country ISO Code Numeric can not be null.", HttpStatusCode.BadRequest, FieldNames.CountryISOCodeNumeric, ValidationMessages.EmptyFields);
 
             if (cardmethod.CountryISOCodeNumeric.Length > 3)
-                throw new ServiceException("City field must not be longer to 3.", HttpStatusCode.BadRequest, FieldNames.City, ValidationMessages.LongerTo);
+                throw new ServiceException("Country ISO Code Numeric field must not be longer to 3.", HttpStatusCode.BadRequest, FieldNames.City, ValidationMessages.LongerTo);
 
             if (string.IsNullOrEmpty(cardmethod.PhonePrefix))
                 throw new ServiceException("Phone Prefix can not be null.", HttpStatusCode.BadRequest, FieldNames.PhonePrefix, ValidationMessages.EmptyFields);
@@ -1406,7 +1406,7 @@ namespace customerportalapi.Services
                 throw new ServiceException("Country ISO Code Numeric can not be null.", HttpStatusCode.BadRequest, FieldNames.CountryISOCodeNumeric, ValidationMessages.EmptyFields);
 
             if (cardmethod.CountryISOCodeNumeric.Length > 3)
-                throw new ServiceException("City field must not be longer to 3.", HttpStatusCode.BadRequest, FieldNames.CountryISOCodeNumeric, ValidationMessages.LongerTo);
+                throw new ServiceException("Country ISO Code Numeric field must not be longer to 3.", HttpStatusCode.BadRequest, FieldNames.CountryISOCodeNumeric, ValidationMessages.LongerTo);
 
             if (string.IsNullOrEmpty(cardmethod.PhonePrefix))
                 throw new ServiceException("Phone Prefix can not be null.", HttpStatusCode.BadRequest, FieldNames.PhonePrefix, ValidationMessages.EmptyFields);
