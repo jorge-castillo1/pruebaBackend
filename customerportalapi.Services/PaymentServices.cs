@@ -1306,7 +1306,7 @@ namespace customerportalapi.Services
                 {
 
                     PaymentMethodCardConfirmationToken confirmation = new PaymentMethodCardConfirmationToken()
-                {
+                    {
                         ExternalId = externalId,
                         Channel = "WEBPORTAL",
                         Confirmed = false
