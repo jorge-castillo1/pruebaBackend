@@ -1022,6 +1022,10 @@ namespace customerportalapi.Services
             if (user.Id == null)
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
 
+            //2. Get the udpated token
+            AccountProfile account = await _profileRepository.GetAccountByDocumentNumberAsync(user.Dni);
+            updateCardData.Token = account.Token;
+
             // 2. Validate data
             PaymentMethodUpdateCardData cardmethod = (PaymentMethodUpdateCardData)updateCardData;
 
