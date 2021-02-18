@@ -814,7 +814,7 @@ namespace customerportalapi.Services
             User user = _userRepository.GetCurrentUserByUsername(paymentMethod.Username);
 
             if (user.Id == null)
-                throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, FieldNames.Username, ValidationMessages.EmptyFields);
+                throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, FieldNames.Username, ValidationMessages.NotExist);
 
             // 2. Validate data
 
