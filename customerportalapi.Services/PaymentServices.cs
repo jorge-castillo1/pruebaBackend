@@ -812,7 +812,7 @@ namespace customerportalapi.Services
 
         public async Task<string> PayInvoiceByNewCardLoad(PaymentMethodPayInvoiceNewCard paymentMethod)
         {
-             //1. User must exists
+            //1. User must exists
             User user = _userRepository.GetCurrentUserByUsername(paymentMethod.Username);
 
             if (user.Id == null)
@@ -862,6 +862,9 @@ namespace customerportalapi.Services
             };
             bool result = await CancelProcessByFilter(filter);
 
+            string paymentMethodlog = JsonConvert.SerializeObject(paymentMethod);
+            _logger.LogInformation("paymentMethodlog:" + paymentMethod);
+
             string stringHtml = await _paymentRepository.PayInvoiceNewCard(paymentMethod);
 
             Pay pay = new Pay()
@@ -899,6 +902,9 @@ namespace customerportalapi.Services
 
         public async Task<bool> PayInvoiceByNewCardResponse(PaymentMethodPayInvoiceNewCardResponse payRes)
         {
+            string payReslog = JsonConvert.SerializeObject(payRes);
+            _logger.LogInformation("payReslog:" + payRes);
+
             // 1. Save pay response in Pay collection
             Pay findPay = _payRepository.GetByExternalId(payRes.ExternalId);
 
@@ -981,7 +987,14 @@ namespace customerportalapi.Services
                 PayAmount = inv.Amount,
                 PayRef = pay.InvoiceNumber.Replace("/", "")
             };
+
+            string pmPaymentlog = JsonConvert.SerializeObject(mPayment);
+            _logger.LogInformation("mPayment:" + mPayment);
+
             bool makePayment = await _contractSMRepository.MakePayment(mPayment);
+
+            string makePaymentlog = JsonConvert.SerializeObject(makePayment);
+            _logger.LogInformation("makePayment:" + makePayment);
 
             Process process = new Process();
             process.Id = processes[0].Id;
