@@ -1397,10 +1397,10 @@ namespace customerportalapi.Services
                 throw new ServiceException("City field must not be longer to 50.", HttpStatusCode.BadRequest, FieldNames.City, ValidationMessages.LongerTo);
 
             if (string.IsNullOrEmpty(cardmethod.Address.StateOrProvince))
-                throw new ServiceException("City can not be null.", HttpStatusCode.BadRequest, FieldNames.StateOrProvince, ValidationMessages.EmptyFields);
+                throw new ServiceException("State Or Province can not be null.", HttpStatusCode.BadRequest, FieldNames.StateOrProvince, ValidationMessages.EmptyFields);
 
             if (cardmethod.Address.StateOrProvince.Length > 50)
-                throw new ServiceException("City field must not be longer to 50.", HttpStatusCode.BadRequest, FieldNames.StateOrProvince, ValidationMessages.LongerTo);
+                throw new ServiceException("State Or Province field must not be longer to 50.", HttpStatusCode.BadRequest, FieldNames.StateOrProvince, ValidationMessages.LongerTo);
 
             if (string.IsNullOrEmpty(cardmethod.CountryISOCodeNumeric))
                 throw new ServiceException("Country ISO Code Numeric can not be null.", HttpStatusCode.BadRequest, FieldNames.CountryISOCodeNumeric, ValidationMessages.EmptyFields);
