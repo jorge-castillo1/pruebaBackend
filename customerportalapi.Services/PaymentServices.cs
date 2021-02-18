@@ -447,21 +447,21 @@ namespace customerportalapi.Services
 
 
             // Card verification failed
-            if (cardData.Status != "00") {
-                Process cancelProcess = new Process();;
+            if (cardData.Status != "00")
+            {
+                Process cancelProcess = new Process();
+                cancelProcess.Id = processes[0].Id;
                 cancelProcess.Username = updateCard.Username;
                 cancelProcess.ProcessType = (int)ProcessTypes.PaymentMethodChangeCard;
                 cancelProcess.ProcessStatus = (int)ProcessStatuses.Canceled;
                 cancelProcess.ContractNumber = updateCard.ContractNumber;
                 cancelProcess.SmContractCode = updateCard.SmContractCode;
-                cancelProcess.Card = new ProcessCard()
-                {
-                    ExternalId = updateCard.ExternalId,
-                    Status = 0
-                };
+                cancelProcess.Card = processes[0].Card;
+                cancelProcess.Card.ExternalId = updateCard.ExternalId;
+                cancelProcess.Card.Status = 0;
                 cancelProcess.Documents = null;
 
-                await _processRepository.Create(cancelProcess);
+                _processRepository.Update(cancelProcess);
                 throw new ServiceException("Error card verification", HttpStatusCode.BadRequest);
             }
 
@@ -536,12 +536,10 @@ namespace customerportalapi.Services
             process.SmContractCode = cardmethod.SmContractCode;
             process.CreationDate = processes[0].CreationDate;
             process.ModifiedDate = System.DateTime.Now;
-            process.Card = new ProcessCard()
-            {
-                ExternalId = cardmethod.ExternalId,
-                Status = 1,
-                Update = processes[0].Card.Update
-            };
+            process.Card = processes[0].Card;
+            process.Card.ExternalId = cardmethod.ExternalId;
+            process.Card.Status = 1;
+            process.Card.Update = processes[0].Card.Update;
             process.Documents.Add(new ProcessDocument()
             {
                 DocumentId = documentid.ToString(),
@@ -1072,7 +1070,8 @@ namespace customerportalapi.Services
                 Status = 0,
                 Email = cardmethod.Email,
                 PhoneNumber = cardmethod.PhoneNumber,
-                Address = cardmethod.Address
+                Address = cardmethod.Address,
+                Update = true
             };
             process.Documents = null;
 
