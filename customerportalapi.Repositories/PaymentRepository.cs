@@ -170,7 +170,6 @@ namespace customerportalapi.Repositories
             keyValues.Add(new KeyValuePair<string, string>("HPP_BILLING_STREET2", payInvoiceNewCard.Address.Street2));
             keyValues.Add(new KeyValuePair<string, string>("HPP_BILLING_STREET3", payInvoiceNewCard.Address.Street2));
             keyValues.Add(new KeyValuePair<string, string>("HPP_BILLING_CITY", payInvoiceNewCard.Address.City));
-            keyValues.Add(new KeyValuePair<string, string>("HPP_BILLING_STATE", payInvoiceNewCard.Address.StateOrProvince));
             keyValues.Add(new KeyValuePair<string, string>("HPP_BILLING_POSTALCODE", payInvoiceNewCard.Address.ZipOrPostalCode));
             keyValues.Add(new KeyValuePair<string, string>("HPP_BILLING_COUNTRY", payInvoiceNewCard.CountryISOCodeNumeric));
             HttpContent content = new FormUrlEncodedContent(keyValues);

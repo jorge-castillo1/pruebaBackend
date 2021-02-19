@@ -843,7 +843,7 @@ namespace customerportalapi.Services
             paymentMethod.Nif = userProfile.DocumentNumber;
             paymentMethod.Name = userProfile.Name;
             paymentMethod.Surnames = userProfile.Surname;
-            paymentMethod.DocumentId = paymentMethod.Ourref;
+            paymentMethod.DocumentId = inv.DocumentId;
             paymentMethod.Amount = inv.Amount;
             paymentMethod.IdCustomer = smContract.Customerid;
             paymentMethod.Url =  _configuration["PayInvoiceByNewCardMethodCardResponse"];
@@ -1399,12 +1399,6 @@ namespace customerportalapi.Services
 
             if (cardmethod.Address.City.Length > 50)
                 throw new ServiceException("City field must not be longer to 50.", HttpStatusCode.BadRequest, FieldNames.City, ValidationMessages.LongerTo);
-
-            if (string.IsNullOrEmpty(cardmethod.Address.StateOrProvince))
-                throw new ServiceException("State Or Province can not be null.", HttpStatusCode.BadRequest, FieldNames.StateOrProvince, ValidationMessages.EmptyFields);
-
-            if (cardmethod.Address.StateOrProvince.Length > 50)
-                throw new ServiceException("State Or Province field must not be longer to 50.", HttpStatusCode.BadRequest, FieldNames.StateOrProvince, ValidationMessages.LongerTo);
 
             if (string.IsNullOrEmpty(cardmethod.CountryISOCodeNumeric))
                 throw new ServiceException("Country ISO Code Numeric can not be null.", HttpStatusCode.BadRequest, FieldNames.CountryISOCodeNumeric, ValidationMessages.EmptyFields);
