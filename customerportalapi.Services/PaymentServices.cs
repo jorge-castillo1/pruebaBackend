@@ -509,9 +509,6 @@ namespace customerportalapi.Services
             cardmethod.CardHolderName = card.Cardholder;
             Profile userProfile = await _profileRepository.GetProfileAsync(user.Dni, cardmethod.AccountType);
 
-            var form = FillFormCardMethod(store, cardmethod, user, userProfile);
-            Guid documentid = await _signatureRepository.CreateSignature(form);
-
             // 2. Update process confirmCardSignature
             ProcessSearchFilter searchProcess = new ProcessSearchFilter();
             searchProcess.UserName = user.Username;
@@ -526,6 +523,14 @@ namespace customerportalapi.Services
             if (processes.Count == 0)
                 throw new ServiceException("User don't have started process for this externalId & ProcessType", HttpStatusCode.BadRequest, "CardExternalId", "Started process");
 
+            // if current process if for change to Card, use card email for user notification
+            if (!string.IsNullOrEmpty(processes[0].Id) && !string.IsNullOrEmpty(processes[0].Card.Email)) 
+            {
+                user.Email = processes[0].Card.Email;
+            }
+
+            var form = FillFormCardMethod(store, cardmethod, user, userProfile);
+            Guid documentid = await _signatureRepository.CreateSignature(form);
 
             Process process = new Process();
             process.Id = processes[0].Id;
