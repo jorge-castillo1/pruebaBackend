@@ -439,11 +439,11 @@ namespace customerportalapi.Services
             Card updateCard = _cardRepository.Update(card);
 
             ProcessSearchFilter searchProcess = new ProcessSearchFilter();
-            searchProcess.ExternalId = updateCard.ExternalId;
+            searchProcess.CardExternalId = updateCard.ExternalId;
             searchProcess.ProcessStatus = (int)ProcessStatuses.Started;
             List<Process> processes = _processRepository.Find(searchProcess);
             if (processes.Count > 1)
-                throw new ServiceException("User have two or more pending process for this externalId", HttpStatusCode.BadRequest, "ExternalId", "Pending process");
+                throw new ServiceException("User have two or more started process for this externalId", HttpStatusCode.BadRequest, "CardExternalId", "Pending process");
 
 
             // Card verification failed
@@ -503,7 +503,7 @@ namespace customerportalapi.Services
                 };
 
                 PaymentMethodCardConfirmationResponse cardConfirmation = await _paymentRepository.ConfirmChangePaymentMethodCard(confirmation);
-                throw new ServiceException("Card not found", HttpStatusCode.BadRequest, "ExternalId");
+                throw new ServiceException("Card not found", HttpStatusCode.BadRequest, "CardExternalId");
             }
 
             cardmethod.CardHolderName = card.Cardholder;
@@ -514,18 +514,17 @@ namespace customerportalapi.Services
 
             // 2. Update process confirmCardSignature
             ProcessSearchFilter searchProcess = new ProcessSearchFilter();
-            searchProcess.ExternalId = cardmethod.ExternalId;
             searchProcess.UserName = user.Username;
             searchProcess.ProcessType = (int)ProcessTypes.PaymentMethodChangeCard;
             searchProcess.SmContractCode = cardmethod.SmContractCode;
             searchProcess.ProcessStatus = (int)ProcessStatuses.Started;
-            searchProcess.ExternalId = cardmethod.ExternalId;
+            searchProcess.CardExternalId = cardmethod.ExternalId;
             List<Process> processes = _processRepository.Find(searchProcess);
             if (processes.Count > 1)
-                throw new ServiceException("User have two or more started process for this externalId & ProcessType", HttpStatusCode.BadRequest, "ExternalId", "Started process");
+                throw new ServiceException("User have two or more started process for this externalId & ProcessType", HttpStatusCode.BadRequest, "CardExternalId", "Started process");
 
             if (processes.Count == 0)
-                throw new ServiceException("User don't have started process for this externalId & ProcessType", HttpStatusCode.BadRequest, "ExternalId", "Started process");
+                throw new ServiceException("User don't have started process for this externalId & ProcessType", HttpStatusCode.BadRequest, "CardExternalId", "Started process");
 
 
             Process process = new Process();
@@ -608,10 +607,10 @@ namespace customerportalapi.Services
             AccountProfile account = await _profileRepository.GetAccountAsync(user.Dni, usertype);
 
             ProcessSearchFilter searchProcess = new ProcessSearchFilter();
-            searchProcess.ExternalId = process.Card.ExternalId;
+            searchProcess.CardExternalId = process.Card.ExternalId;
             List<Process> processes = _processRepository.Find(searchProcess);
             if (processes.Count > 1)
-                throw new ServiceException("User have multiple pending process for this externalId", HttpStatusCode.BadRequest, "ExternalId", "Pending process");
+                throw new ServiceException("User have multiple pending process for this externalId", HttpStatusCode.BadRequest, "CardExternalId", "Pending process");
 
             PaymentMethodCardConfirmationToken confirmation  = new PaymentMethodCardConfirmationToken()
             {
@@ -657,7 +656,7 @@ namespace customerportalapi.Services
 
             Card card = _cardRepository.GetByExternalId(process.Card.ExternalId);
             if (card.Id == null)
-                throw new ServiceException("Card doesn´t exits", HttpStatusCode.BadRequest, "ExternalId");
+                throw new ServiceException("Card doesn´t exits", HttpStatusCode.BadRequest, "CardExternalId");
 
             card.Current = true;
             _cardRepository.Update(card);
@@ -731,29 +730,29 @@ namespace customerportalapi.Services
         {
             // 1. Check payInvoice required values
             if (payInvoice.SiteId == null || payInvoice.SiteId == "")
-                throw new ServiceException("SiteId is required", HttpStatusCode.BadRequest, "SiteId");
+                throw new ServiceException("SiteId is required", HttpStatusCode.BadRequest, FieldNames.SiteId);
 
             if (payInvoice.SmContractCode == null || payInvoice.SmContractCode == "")
-                throw new ServiceException("SmContractCode is required", HttpStatusCode.BadRequest, "SmContractCode");
+                throw new ServiceException("SmContractCode is required", HttpStatusCode.BadRequest, FieldNames.SMContractCode);
 
             if (payInvoice.Ourref == null || payInvoice.Ourref == "")
-                throw new ServiceException("Ourref is required", HttpStatusCode.BadRequest, "Ourref");
+                throw new ServiceException("Ourref is required", HttpStatusCode.BadRequest, FieldNames.Ourref);
 
             if (payInvoice.Token == null || payInvoice.Token == "")
-                throw new ServiceException("Token is required", HttpStatusCode.BadRequest, "Token");
+                throw new ServiceException("Token is required", HttpStatusCode.BadRequest, FieldNames.Token);
 
             if (payInvoice.Username == null || payInvoice.Username == "")
-                throw new ServiceException("Username is required", HttpStatusCode.BadRequest, "Username");
+                throw new ServiceException("Username is required", HttpStatusCode.BadRequest, FieldNames.Username);
 
             // 2. Get Invoice
             List<Invoice> invoices = await _contractSMRepository.GetInvoicesAsync(payInvoice.SmContractCode);
             if (invoices.Count <= 0)
-                throw new ServiceException("Invoices not found", HttpStatusCode.BadRequest, "smContractCode");
+                throw new ServiceException("Invoices not found", HttpStatusCode.BadRequest, FieldNames.SMContractCode);
 
                Invoice inv = invoices.Find(x => x.OurReference.Contains(payInvoice.Ourref));
 
             if (inv.OurReference == null)
-                throw new ServiceException("Invoice not found", HttpStatusCode.BadRequest, "Ourreference");
+                throw new ServiceException("Invoice not found", HttpStatusCode.BadRequest, FieldNames.Ourreference);
 
             // 3. Get SmContract
             SMContract smContract = await _contractSMRepository.GetAccessCodeAsync(payInvoice.SmContractCode);
@@ -761,7 +760,7 @@ namespace customerportalapi.Services
             _logger.LogInformation("smContractlog:" + smContractlog);
 
             if (smContract.Customerid == null)
-                throw new ServiceException("Contract sm found", HttpStatusCode.BadRequest, "SmContractCode");
+                throw new ServiceException("Contract sm found", HttpStatusCode.BadRequest, FieldNames.SMContractCode);
 
             // 4. Set data
             payInvoice.Amount = inv.Amount;
@@ -773,7 +772,7 @@ namespace customerportalapi.Services
 
             PaymentMethodPayInvoiceResponse payResponse = await _paymentRepository.PayInvoice(payInvoice);
             if (payResponse.result != "00")
-                throw new ServiceException("Error payment", HttpStatusCode.BadRequest, "result");
+                throw new ServiceException("Error payment", HttpStatusCode.BadRequest, FieldNames.result);
             string after = JsonConvert.SerializeObject(payResponse);
             _logger.LogInformation("after:" + after);
 
@@ -783,13 +782,13 @@ namespace customerportalapi.Services
             List<Store> stores = await _storeRepository.GetStoresAsync();
             Store store = stores.Find(x => x.StoreCode.Contains(payInvoice.SiteId));
             if (store.StoreId == null)
-                throw new ServiceException("Store not found", HttpStatusCode.BadRequest, "StoreId");
+                throw new ServiceException("Store not found", HttpStatusCode.BadRequest, FieldNames.StoreId);
 
             PaymentMethodCRM payMetCRM = await _paymentMethodRepository.GetPaymentMethod(store.StoreId.ToString());
             string payMetCRMlog = JsonConvert.SerializeObject(payMetCRM);
             _logger.LogInformation("payMetCRMlog:" + payMetCRMlog);
             if (payMetCRM.SMId == null)
-                throw new ServiceException("Error payment method crm", HttpStatusCode.BadRequest, "SMId");
+                throw new ServiceException("Error payment method crm", HttpStatusCode.BadRequest, FieldNames.SMId);
 
             // 7. MakePayment SM
             MakePayment mPayment = new MakePayment()
@@ -811,16 +810,16 @@ namespace customerportalapi.Services
 
         public async Task<string> PayInvoiceByNewCardLoad(PaymentMethodPayInvoiceNewCard paymentMethod)
         {
-             //1. User must exists
+            //1. User must exists
             User user = _userRepository.GetCurrentUserByUsername(paymentMethod.Username);
 
             if (user.Id == null)
-                throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
+                throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, FieldNames.Username, ValidationMessages.NotExist);
 
             // 2. Validate data
 
             if (string.IsNullOrEmpty(paymentMethod.SmContractCode))
-                throw new ServiceException("Contract number field can not be null.", HttpStatusCode.BadRequest, "SMContractCode", "Empty fields");
+                throw new ServiceException("Contract number field can not be null.", HttpStatusCode.BadRequest, FieldNames.SMContractCode, ValidationMessages.EmptyFields);
 
             var store = await _storeRepository.GetStoreAsync(paymentMethod.SiteId);
 
@@ -831,12 +830,12 @@ namespace customerportalapi.Services
 
             List<Invoice> invoices = await _contractSMRepository.GetInvoicesAsync(paymentMethod.SmContractCode);
             if (invoices.Count <= 0)
-                throw new ServiceException("Invoices not found", HttpStatusCode.BadRequest, "smContractCode");
+                throw new ServiceException("Invoices not found", HttpStatusCode.BadRequest, FieldNames.SMContractCode);
 
                Invoice inv = invoices.Find(x => x.OurReference.Contains(paymentMethod.Ourref));
 
             if (inv.OurReference == null)
-                throw new ServiceException("Invoice not found", HttpStatusCode.BadRequest, "Ourreference");
+                throw new ServiceException("Invoice not found", HttpStatusCode.BadRequest, FieldNames.Ourreference);
             string externalId = Guid.NewGuid().ToString();
 
             paymentMethod.ExternalId = externalId;
@@ -844,11 +843,25 @@ namespace customerportalapi.Services
             paymentMethod.Nif = userProfile.DocumentNumber;
             paymentMethod.Name = userProfile.Name;
             paymentMethod.Surnames = userProfile.Surname;
-            paymentMethod.DocumentId = paymentMethod.Ourref;
+            paymentMethod.DocumentId = inv.DocumentId;
             paymentMethod.Amount = inv.Amount;
             paymentMethod.IdCustomer = smContract.Customerid;
             paymentMethod.Url =  _configuration["PayInvoiceByNewCardMethodCardResponse"];
             paymentMethod.Language = getCountryLangByLanguage(user.Language);
+
+            checkFieldsPaymentCardLoad(paymentMethod);
+
+            ProcessSearchFilter filter = new ProcessSearchFilter()
+            {
+                UserName = user.Username,
+                SmContractCode = paymentMethod.SmContractCode,
+                ProcessType = (int)ProcessTypes.Payment,
+                ProcessStatus = (int)ProcessStatuses.Started
+            };
+            bool result = await CancelProcessByFilter(filter);
+
+            string paymentMethodlog = JsonConvert.SerializeObject(paymentMethod);
+            _logger.LogInformation("paymentMethodlog:" + paymentMethod);
 
             string stringHtml = await _paymentRepository.PayInvoiceNewCard(paymentMethod);
 
@@ -867,11 +880,29 @@ namespace customerportalapi.Services
             };
             bool createPay = await _payRepository.Create(pay);
 
+            Process process = new Process();
+            process.Username = paymentMethod.Username;
+            process.ProcessType = (int)ProcessTypes.Payment;
+            process.ProcessStatus = (int)ProcessStatuses.Started;
+            process.ContractNumber = null;
+            process.SmContractCode = paymentMethod.SmContractCode;
+            process.Pay = new ProcessPay()
+            {
+                ExternalId = paymentMethod.ExternalId,
+                InvoiceNumber = paymentMethod.Ourref
+            };
+            process.Documents = null;
+
+            await _processRepository.Create(process);
+
             return stringHtml;
         }
 
         public async Task<bool> PayInvoiceByNewCardResponse(PaymentMethodPayInvoiceNewCardResponse payRes)
         {
+            string payReslog = JsonConvert.SerializeObject(payRes);
+            _logger.LogInformation("payReslog:" + payRes);
+
             // 1. Save pay response in Pay collection
             Pay findPay = _payRepository.GetByExternalId(payRes.ExternalId);
 
@@ -895,9 +926,22 @@ namespace customerportalapi.Services
             };
             Pay updatePay = _payRepository.Update(pay);
 
+            // Check if exist process ProcessStatuses.Started (Previous step)
+            ProcessSearchFilter searchProcess = new ProcessSearchFilter();
+            searchProcess.PayExternalId = payRes.ExternalId;
+            searchProcess.ProcessStatus = (int)ProcessStatuses.Started;
+            List<Process> processes = _processRepository.Find(searchProcess);
+            if (processes.Count > 1)
+                throw new ServiceException("User have two or more started process for this externalId", HttpStatusCode.BadRequest, "CardExternalId", "Pending process");
+
+            if (processes.Count == 0)
+                throw new ServiceException("User don't have started process for this externalId & ProcessType", HttpStatusCode.BadRequest, "CardExternalId", "Started process");
+
+
             // 2. Pay verification failed
             if (payRes.Status != "00") {
-                Process cancelProcess = new Process();;
+                Process cancelProcess = new Process();
+                cancelProcess.Id = processes[0].Id;
                 cancelProcess.Username = updatePay.Username;
                 cancelProcess.ProcessType = (int)ProcessTypes.Payment;
                 cancelProcess.ProcessStatus = (int)ProcessStatuses.Canceled;
@@ -910,25 +954,24 @@ namespace customerportalapi.Services
                 };
                 cancelProcess.Documents = null;
 
-                await _processRepository.Create(cancelProcess);
+                _processRepository.Update(cancelProcess);
                 throw new ServiceException("Payment error", HttpStatusCode.BadRequest);
             }
-
-             // 3. Get CRM PayMethods
+            // 3. Get CRM PayMethods
             List<Store> stores = await _storeRepository.GetStoresAsync();
             Store store = stores.Find(x => x.StoreCode.Contains(payRes.SiteId));
             if (store.StoreId == null)
-                throw new ServiceException("Store not found", HttpStatusCode.BadRequest, "StoreId");
+                throw new ServiceException("Store not found", HttpStatusCode.BadRequest, FieldNames.StoreId);
 
             // 4. Get Payment Method from CRM
             PaymentMethodCRM payMetCRM = await _paymentMethodRepository.GetPaymentMethod(store.StoreId.ToString());
             if (payMetCRM.SMId == null)
-                throw new ServiceException("Error payment method crm", HttpStatusCode.BadRequest, "SMId");
+                throw new ServiceException("Error payment method crm", HttpStatusCode.BadRequest, FieldNames.SMId);
 
              // 4. Get Invoice
             List<Invoice> invoices = await _contractSMRepository.GetInvoicesAsync(pay.SmContractCode);
             if (invoices.Count <= 0)
-                throw new ServiceException("Invoices not found", HttpStatusCode.BadRequest, "smContractCode");
+                throw new ServiceException("Invoices not found", HttpStatusCode.BadRequest, FieldNames.SMContractCode);
 
             Invoice inv = invoices.Find(x => x.OurReference.Contains(pay.InvoiceNumber));
 
@@ -942,9 +985,17 @@ namespace customerportalapi.Services
                 PayAmount = inv.Amount,
                 PayRef = pay.InvoiceNumber.Replace("/", "")
             };
+
+            string pmPaymentlog = JsonConvert.SerializeObject(mPayment);
+            _logger.LogInformation("mPayment:" + mPayment);
+
             bool makePayment = await _contractSMRepository.MakePayment(mPayment);
 
+            string makePaymentlog = JsonConvert.SerializeObject(makePayment);
+            _logger.LogInformation("makePayment:" + makePayment);
+
             Process process = new Process();
+            process.Id = processes[0].Id;
             process.Username = updatePay.Username;
             process.ProcessType = (int)ProcessTypes.Payment;
             process.ProcessStatus = (int)ProcessStatuses.Accepted;
@@ -957,7 +1008,7 @@ namespace customerportalapi.Services
             };
             process.Documents = null;
 
-            await _processRepository.Create(process);
+            _processRepository.Update(process);
 
             return true;
         }
@@ -970,6 +1021,10 @@ namespace customerportalapi.Services
 
             if (user.Id == null)
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
+
+            //2. Get the udpated token
+            AccountProfile account = await _profileRepository.GetAccountByDocumentNumberAsync(user.Dni);
+            updateCardData.Token = account.Token;
 
             // 2. Validate data
             PaymentMethodUpdateCardData cardmethod = (PaymentMethodUpdateCardData)updateCardData;
@@ -1070,11 +1125,11 @@ namespace customerportalapi.Services
             Card updateCard = _cardRepository.Update(card);
 
             ProcessSearchFilter searchProcess = new ProcessSearchFilter();
-            searchProcess.ExternalId = updateCard.ExternalId;
+            searchProcess.CardExternalId = updateCard.ExternalId;
             searchProcess.ProcessStatus = (int)ProcessStatuses.Started;
             List<Process> processes = _processRepository.Find(searchProcess);
             if (processes.Count > 1)
-                throw new ServiceException("User have two or more pending process for this externalId", HttpStatusCode.BadRequest, "ExternalId", "Pending process");
+                throw new ServiceException("User have two or more started process for this externalId", HttpStatusCode.BadRequest, "CardExternalId", "Pending process");
 
             // Card verification failed
             if (updateCardResponse.status != "00") {
@@ -1154,7 +1209,7 @@ namespace customerportalapi.Services
                 throw new ServiceException("Country ISO Code Numeric can not be null.", HttpStatusCode.BadRequest, FieldNames.CountryISOCodeNumeric, ValidationMessages.EmptyFields);
 
             if (cardmethod.CountryISOCodeNumeric.Length > 3)
-                throw new ServiceException("City field must not be longer to 3.", HttpStatusCode.BadRequest, FieldNames.City, ValidationMessages.LongerTo);
+                throw new ServiceException("Country ISO Code Numeric field must not be longer to 3.", HttpStatusCode.BadRequest, FieldNames.City, ValidationMessages.LongerTo);
 
             if (string.IsNullOrEmpty(cardmethod.PhonePrefix))
                 throw new ServiceException("Phone Prefix can not be null.", HttpStatusCode.BadRequest, FieldNames.PhonePrefix, ValidationMessages.EmptyFields);
@@ -1214,7 +1269,7 @@ namespace customerportalapi.Services
                 throw new ServiceException("Country ISO Code Numeric can not be null.", HttpStatusCode.BadRequest, FieldNames.CountryISOCodeNumeric, ValidationMessages.EmptyFields);
 
             if (cardmethod.CountryISOCodeNumeric.Length > 3)
-                throw new ServiceException("City field must not be longer to 3.", HttpStatusCode.BadRequest, FieldNames.City, ValidationMessages.LongerTo);
+                throw new ServiceException("Country ISO Code Numeric field must not be longer to 3.", HttpStatusCode.BadRequest, FieldNames.City, ValidationMessages.LongerTo);
 
             if (string.IsNullOrEmpty(cardmethod.PhonePrefix))
                 throw new ServiceException("Phone Prefix can not be null.", HttpStatusCode.BadRequest, FieldNames.PhonePrefix, ValidationMessages.EmptyFields);
@@ -1235,16 +1290,36 @@ namespace customerportalapi.Services
                 Process pro = processes[0];
                 pro.ProcessStatus = (int)ProcessStatuses.Canceled;
                 _processRepository.Update(pro);
-                ProcessCard card = pro.Card;
-                PaymentMethodCardConfirmationToken confirmation = new PaymentMethodCardConfirmationToken()
+
+                string externalId = null;
+
+                // Change payment method
+                if (!string.IsNullOrEmpty(pro.Id) && pro.Card != null && !string.IsNullOrEmpty(pro.Card.ExternalId))
                 {
-                    ExternalId = card.ExternalId,
-                    Channel = "WEBPORTAL",
-                    Confirmed = false
-                };
-                await _paymentRepository.ConfirmChangePaymentMethodCard(confirmation);
-                await _paymentRepository.UpdateConfirmChangePaymentMethodCard(confirmation);
-                return true;
+                    externalId = pro.Card.ExternalId;
+                }
+
+                // Paymen invoice
+                if (string.IsNullOrEmpty(externalId) && pro.Pay != null && !string.IsNullOrEmpty(pro.Id) && !string.IsNullOrEmpty(pro.Pay.ExternalId))
+                {
+                    externalId = pro.Pay.ExternalId;
+                }
+
+                // Cancel new card o exist card on Precognis
+                if (externalId != null)
+                {
+
+                    PaymentMethodCardConfirmationToken confirmation = new PaymentMethodCardConfirmationToken()
+                    {
+                        ExternalId = externalId,
+                        Channel = "WEBPORTAL",
+                        Confirmed = false
+                    };
+                    await _paymentRepository.ConfirmChangePaymentMethodCard(confirmation);
+                    await _paymentRepository.UpdateConfirmChangePaymentMethodCard(confirmation);
+                    return true;
+                }
+
             }
 
             return false;
@@ -1279,6 +1354,67 @@ namespace customerportalapi.Services
             };
 
             return paymentMethodCardSignature;
+        }
+
+        private void checkFieldsPaymentCardLoad(PaymentMethodPayInvoiceNewCard cardmethod)
+        {
+            if (string.IsNullOrEmpty(cardmethod.SiteId))
+                throw new ServiceException("Site Id field can not be null.", HttpStatusCode.BadRequest, FieldNames.SiteId, ValidationMessages.EmptyFields);
+
+            if (string.IsNullOrEmpty(cardmethod.SmContractCode))
+                throw new ServiceException("Contract number field can not be null.", HttpStatusCode.BadRequest, FieldNames.ContractNumber, ValidationMessages.EmptyFields);
+
+            if (string.IsNullOrEmpty(cardmethod.Email))
+                throw new ServiceException("Email field can not be null.", HttpStatusCode.BadRequest, FieldNames.Email, ValidationMessages.EmptyFields);
+
+            if (cardmethod.Email.Length > 254)
+                throw new ServiceException("Email field must not be longer to 254.", HttpStatusCode.BadRequest, FieldNames.Email, ValidationMessages.LongerTo);
+
+            if (string.IsNullOrEmpty(cardmethod.PhoneNumber))
+                throw new ServiceException("Phone number can not be null.", HttpStatusCode.BadRequest, FieldNames.PhoneNumber, ValidationMessages.EmptyFields);
+
+            if (cardmethod.PhoneNumber.Length > 15)
+                throw new ServiceException("Phone number field must not be longer to 15.", HttpStatusCode.BadRequest, FieldNames.Email, ValidationMessages.LongerTo);
+
+            if (string.IsNullOrEmpty(cardmethod.Address.Street1))
+                throw new ServiceException("Street1 can not be null.", HttpStatusCode.BadRequest, FieldNames.Street, ValidationMessages.EmptyFields);
+
+            if (cardmethod.Address.Street1.Length > 50)
+                throw new ServiceException("Street1 field must not be longer to 50.", HttpStatusCode.BadRequest, FieldNames.Street, ValidationMessages.LongerTo);
+
+            if (cardmethod.Address.Street2.Length > 50)
+                throw new ServiceException("Street2 field must not be longer to 50.", HttpStatusCode.BadRequest, FieldNames.Street, ValidationMessages.LongerTo);
+
+            if (cardmethod.Address.Street3.Length > 50)
+                throw new ServiceException("Street3 field must not be longer to 50.", HttpStatusCode.BadRequest, FieldNames.Street, ValidationMessages.LongerTo);
+
+            if (string.IsNullOrEmpty(cardmethod.Address.ZipOrPostalCode))
+                throw new ServiceException("Zip Or Postal Code can not be null.", HttpStatusCode.BadRequest, FieldNames.ZipOrPostalCode, ValidationMessages.EmptyFields);
+
+            if (cardmethod.Address.ZipOrPostalCode.Length > 16)
+                throw new ServiceException("Zip Or Postal Code field must not be longer to 16.", HttpStatusCode.BadRequest, FieldNames.ZipOrPostalCode, ValidationMessages.LongerTo);
+
+            if (string.IsNullOrEmpty(cardmethod.Address.City))
+                throw new ServiceException("City can not be null.", HttpStatusCode.BadRequest, FieldNames.City, ValidationMessages.EmptyFields);
+
+            if (cardmethod.Address.City.Length > 50)
+                throw new ServiceException("City field must not be longer to 50.", HttpStatusCode.BadRequest, FieldNames.City, ValidationMessages.LongerTo);
+
+            if (string.IsNullOrEmpty(cardmethod.CountryISOCodeNumeric))
+                throw new ServiceException("Country ISO Code Numeric can not be null.", HttpStatusCode.BadRequest, FieldNames.CountryISOCodeNumeric, ValidationMessages.EmptyFields);
+
+            if (cardmethod.CountryISOCodeNumeric.Length > 3)
+                throw new ServiceException("Country ISO Code Numeric field must not be longer to 3.", HttpStatusCode.BadRequest, FieldNames.CountryISOCodeNumeric, ValidationMessages.LongerTo);
+
+            if (string.IsNullOrEmpty(cardmethod.PhonePrefix))
+                throw new ServiceException("Phone Prefix can not be null.", HttpStatusCode.BadRequest, FieldNames.PhonePrefix, ValidationMessages.EmptyFields);
+
+            if (cardmethod.PhonePrefix.Length > 3)
+                throw new ServiceException("Phone Prefix field must not be longer to 3.", HttpStatusCode.BadRequest, FieldNames.PhonePrefix, ValidationMessages.LongerTo);
+
+            if (string.IsNullOrEmpty(cardmethod.IdCustomer))
+                throw new ServiceException("Id Customer can not be null.", HttpStatusCode.BadRequest, FieldNames.IdCustomer, ValidationMessages.EmptyFields);
+
         }
 
     }
