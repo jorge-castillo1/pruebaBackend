@@ -178,6 +178,14 @@ namespace customerportalapi.Services
             contract.PaymentMethod = payMetCRM.PaymentMethodId;
             Contract updateContract = await _contractRepository.UpdateContractAsync(contract);
 
+            ApsRequest request = new ApsRequest()
+            {
+                Dni = user.Dni,
+                ContractNumber = processedpaymentdocument.SmContractCode,
+                IBAN = processedpaymentdocument.BankAccountOrderNumber
+            };
+
+            ApsData aps = await _contractSMRepository.GetAps(request);
 
             if (updateAccount.SmCustomerId == null)
                 throw new ServiceException("Error updating account", HttpStatusCode.BadRequest, "SmCustomerId");
