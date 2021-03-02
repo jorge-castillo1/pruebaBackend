@@ -412,6 +412,10 @@ namespace customerportalapi.Services
 
         public async Task<bool> ChangePaymentMethodCardResponseAsync(PaymentMethodCardData cardData)
         {
+
+            string data = JsonConvert.SerializeObject(cardData);
+            _logger.LogInformation("ChangePaymentMethodCardResponseAsync:" + data);
+
             // 0. Guardar paymentMethodData en colección Cards
             Card findCard = _cardRepository.GetByExternalId(cardData.ExternalId);
 
@@ -489,6 +493,8 @@ namespace customerportalapi.Services
         }
         public async Task<bool> ChangePaymentMethodCard(PaymentMethodCardSignature paymentMethodCardSignature)
         {
+            string payment = JsonConvert.SerializeObject(paymentMethodCardSignature);
+            _logger.LogInformation("ChangePaymentMethodCard:" + payment);
             //1. User must exists
             PaymentMethodCardSignature cardmethod = (PaymentMethodCardSignature)paymentMethodCardSignature;
             User user = _userRepository.GetCurrentUserByUsername(cardmethod.Username);
