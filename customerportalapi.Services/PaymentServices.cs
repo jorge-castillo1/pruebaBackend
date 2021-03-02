@@ -103,6 +103,7 @@ namespace customerportalapi.Services
             ApsRequest request = new ApsRequest()
             {
                 Dni = user.Dni,
+                Username = user.Username,
                 ContractNumber = bankmethod.SmContractCode,
                 IBAN = bankmethod.IBAN
             };
