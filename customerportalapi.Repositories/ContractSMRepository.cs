@@ -112,7 +112,6 @@ namespace customerportalapi.Repositories
 
             var content = await response.Content.ReadAsStringAsync();
             JObject result = JObject.Parse(content);
-
             return JsonConvert.DeserializeObject<ApsData>(result.GetValue("result").ToString());
 
         }
