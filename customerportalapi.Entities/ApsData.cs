@@ -9,5 +9,6 @@ namespace customerportalapi.Entities
         public string Reference { get; set; }
         public string IBAN { get; set; }
         public string Dni { get; set; }
+        public string Username { get; set; }
     }
 }
