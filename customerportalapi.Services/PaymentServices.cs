@@ -99,14 +99,25 @@ namespace customerportalapi.Services
             if (processes.Count > 0)
                 throw new ServiceException("User have same pending process for this contract number", HttpStatusCode.BadRequest, "ContractNumber", "Pending process");
 
-            //4. Generate and send Document To SignatureAPI
+            //5. Get Aps
+            ApsRequest request = new ApsRequest()
+            {
+                Dni = user.Dni,
+                Username = user.Username,
+                ContractNumber = bankmethod.SmContractCode,
+                IBAN = bankmethod.IBAN
+            };
 
+            ApsData aps = await _contractSMRepository.GetAps(request);
+            bankmethod.ApsReference = aps.Reference;
+
+            //6. Generate and send Document To SignatureAPI
             var store = await _storeRepository.GetStoreAsync(bankmethod.StoreCode);
 
             var form = FillFormBankMethod(store, bankmethod, user);
             Guid documentid = await _signatureRepository.CreateSignature(form);
 
-            //5. Create a change method payment process
+            //7. Create a change method payment process
             Process process = new Process();
             process.Username = user.Username;
             process.ProcessType = (int)ProcessTypes.PaymentMethodChangeBank;
@@ -178,7 +189,6 @@ namespace customerportalapi.Services
             contract.PaymentMethod = payMetCRM.PaymentMethodId;
             Contract updateContract = await _contractRepository.UpdateContractAsync(contract);
 
-
             if (updateAccount.SmCustomerId == null)
                 throw new ServiceException("Error updating account", HttpStatusCode.BadRequest, "SmCustomerId");
 
@@ -229,6 +239,7 @@ namespace customerportalapi.Services
             form.Add(new StringContent("clientcountry"), "data[9][key]");
             form.Add(new StringContent("storecity"), "data[10][key]");
             //form.Add(new StringContent("date"), "data[11][key]");
+            form.Add(new StringContent("aps"), "data[11][key]");
             form.Add(new StringContent(bankmethod.ContractNumber), "data[0][value]");
             form.Add(new StringContent(store.Country), "data[1][value]");
             form.Add(new StringContent(store.CompanyName), "data[2][value]");
@@ -241,6 +252,7 @@ namespace customerportalapi.Services
             form.Add(new StringContent(bankmethod.Country), "data[9][value]");
             form.Add(new StringContent(store.City), "data[10][value]");
             //form.Add(new StringContent(DateTime.Today(short)), "data[11][value]");
+            form.Add(new StringContent(bankmethod.ApsReference), "data[11][value]");
             return form;
 
         }

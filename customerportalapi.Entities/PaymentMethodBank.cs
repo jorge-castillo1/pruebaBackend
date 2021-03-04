@@ -16,5 +16,6 @@ namespace customerportalapi.Entities
         public string State { get; set; }
         public string Country { get; set; }
         public string StoreCode { get; set; }
+        public string ApsReference { get; set; }
     }
 }

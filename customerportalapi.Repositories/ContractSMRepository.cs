@@ -100,5 +100,20 @@ namespace customerportalapi.Repositories
             response.EnsureSuccessStatusCode();
             return response.IsSuccessStatusCode;
         }
+
+        public async Task<ApsData> GetAps(ApsRequest request)
+        {
+            var httpClient = _clientFactory.CreateClient("httpClient");
+            var url = new Uri(_configuration["GatewaySmUrl"]+ _configuration["ContractSMAPI"]+ "aps");
+            var postContent = new StringContent(JsonConvert.SerializeObject(request), Encoding.UTF8, "application/json");
+
+            var response = await httpClient.PostAsync(url, postContent);
+            response.EnsureSuccessStatusCode();
+
+            var content = await response.Content.ReadAsStringAsync();
+            JObject result = JObject.Parse(content);
+            return JsonConvert.DeserializeObject<ApsData>(result.GetValue("result").ToString());
+
+        }
     }
 }
