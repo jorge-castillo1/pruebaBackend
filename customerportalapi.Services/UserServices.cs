@@ -10,6 +10,7 @@ using customerportalapi.Services.Exceptions;
 using System.Net;
 using System.Threading;
 using PasswordGenerator;
+using System.Linq;
 
 namespace customerportalapi.Services
 {
@@ -24,6 +25,11 @@ namespace customerportalapi.Services
         private readonly ILoginService _loginService;
         private readonly IUserAccountRepository _userAccountRepository;
         private readonly ILanguageRepository _languageRepository;
+        private readonly IContractRepository _contractRepository;
+        private readonly IContractSMRepository _contractSMRepository;
+        private readonly IOpportunityCRMRepository _opportunityRepository;
+        private readonly IStoreRepository _storeRepository;
+
 
         public UserServices(
             IUserRepository userRepository,
@@ -34,7 +40,11 @@ namespace customerportalapi.Services
             IConfiguration config,
             ILoginService loginService,
             IUserAccountRepository userAccountRepository,
-            ILanguageRepository languageRepository
+            ILanguageRepository languageRepository,
+            IContractRepository contractRepository,
+            IContractSMRepository contractSMRepository,
+            IOpportunityCRMRepository opportunityRepository,
+            IStoreRepository storeRepository
         )
         {
             _userRepository = userRepository;
@@ -46,6 +56,10 @@ namespace customerportalapi.Services
             _loginService = loginService;
             _userAccountRepository = userAccountRepository;
             _languageRepository = languageRepository;
+            _contractRepository = contractRepository;
+            _contractSMRepository = contractSMRepository;
+            _opportunityRepository = opportunityRepository;
+            _storeRepository = storeRepository;
         }
 
 
@@ -264,7 +278,10 @@ namespace customerportalapi.Services
             User user = _userRepository.GetCurrentUserByEmail(value.Email);
             if (user.Id != null && user.Emailverified) 
                 throw new ServiceException("Invitation user fails. Email in use by another user", HttpStatusCode.NotFound, "Email", "Already in use");
-                        
+
+            // Mandatory data validation  
+            ContractFull contract = await GetContract(user.Dni, userType);
+
             user = _userRepository.GetCurrentUserByDniAndType(value.Dni, userType);
             if (user.Id == null)
             {
@@ -909,6 +926,88 @@ namespace customerportalapi.Services
         {
             User userByEmail = _userRepository.GetCurrentUserByEmail(email);
             return (userByEmail.Id != null && userByEmail.Dni != dni);
+        }
+
+        private async Task<ContractFull> GetContract(string Dni, int userType)
+        {
+            ContractFull response = new ContractFull();
+            // TODO: Crear propiedad con todas las propiedades a bool, de esta forma se puede construir luego el email para IT Bluespace
+            List<string> fieldsRequired = new List<string>();
+
+            string accountType = (userType == (int)UserTypes.Business) ? AccountType.Business : AccountType.Residential;
+            List<Contract> contracts = await _contractRepository.GetContractsAsync(Dni, accountType);
+
+            if (contracts.Count == 0)
+                fieldsRequired.Add("Contract not found: Dni: " + Dni +" - "+ accountType);
+            //throw new ServiceException("Contract not found: Dni: " + Dni + " - " + accountType, HttpStatusCode.BadRequest, FieldNames.Contract, ValidationMessages.NotFound);
+
+
+            foreach (Contract contract in contracts)
+            {
+
+                if (string.IsNullOrEmpty(contract.SmContractCode))
+                    throw new ServiceException("SmContractCode required, ContractNumber:" + contract.ContractNumber, HttpStatusCode.BadRequest, FieldNames.SMContractCode, ValidationMessages.Required);
+
+                SMContract contractSM = await _contractSMRepository.GetAccessCodeAsync(contract.SmContractCode);
+
+                // only active contracts, if the contract has "terminated", the field "Leaving" have information.
+                if (String.IsNullOrEmpty(contractSM.Leaving))
+                {
+                    // Store
+                    if (response.contract.StoreData.StoreId == null)
+                        throw new ServiceException("StoreId required, ContractNumber:" + contract.ContractNumber, HttpStatusCode.BadRequest, FieldNames.StoreId, ValidationMessages.Required);
+
+                    string storeId = response.contract.StoreData.StoreId.ToString();
+                    Store store = await _storeRepository.GetStoreAsync(storeId);
+
+                    if (store.StoreId == null)
+                        throw new ServiceException("Store not found, StoreId:" + storeId, HttpStatusCode.BadRequest, FieldNames.StoreId, ValidationMessages.NotFound);
+
+                    if (string.IsNullOrEmpty(store.OpeningDaysFirst))
+                        throw new ServiceException("OpeningDaysFirst required, StoreId:" + storeId, HttpStatusCode.BadRequest, FieldNames.OpeningDaysFirst, ValidationMessages.Required);
+                    
+                    if (string.IsNullOrEmpty(store.OpeningDaysLast))
+                        throw new ServiceException("OpeningDaysLast required, StoreId:" + storeId, HttpStatusCode.BadRequest, FieldNames.OpeningDaysLast, ValidationMessages.Required);
+
+                    if (string.IsNullOrEmpty(store.OpeningHoursFrom))
+                        throw new ServiceException("OpeningHoursFrom required, StoreId:" + storeId, HttpStatusCode.BadRequest, FieldNames.OpeningHoursFrom, ValidationMessages.Required);
+
+                    if (string.IsNullOrEmpty(store.OpeningHoursTo))
+                        throw new ServiceException("OpeningHoursTo required, StoreId:" + storeId, HttpStatusCode.BadRequest, FieldNames.OpeningHoursTo, ValidationMessages.Required);
+
+                    if (string.IsNullOrEmpty(contract.StoreData.StoreName))
+                        throw new ServiceException("StoreName required, ContractNumber:" + contract.ContractNumber, HttpStatusCode.BadRequest, FieldNames.StoreName, ValidationMessages.Required);
+
+                    if (string.IsNullOrEmpty(contract.StoreData.City))
+                        throw new ServiceException("City required, ContractNumber:" + contract.ContractNumber, HttpStatusCode.BadRequest, FieldNames.City, ValidationMessages.Required);
+
+                    // OpportunityCRM
+                    if (string.IsNullOrEmpty(contract.OpportunityId))
+                        throw new ServiceException("OpportunityId required, ContractNumber:" + contract.ContractNumber, HttpStatusCode.BadRequest, FieldNames.OpportunityId, ValidationMessages.Required);
+                    
+                    OpportunityCRM opportunity = await _opportunityRepository.GetOpportunity(contract.OpportunityId);
+
+                    if (string.IsNullOrEmpty(opportunity.OpportunityId))
+                        throw new ServiceException("Opportunity not found, OpportunityId:" + contract.OpportunityId, HttpStatusCode.BadRequest, FieldNames.OpportunityId, ValidationMessages.NotFound);
+
+                    if (string.IsNullOrEmpty(opportunity.ExpectedMoveIn))
+                        throw new ServiceException("Opportunity.ExpectedMoveIn required:" + contract.OpportunityId, HttpStatusCode.BadRequest, FieldNames.ExpectedMoveIn, ValidationMessages.Required);
+
+                    response.contract = contract;
+                    response.smcontract = contractSM;
+                    response.contract.OpportunityId = opportunity.OpportunityId;
+                    response.contract.ExpectedMoveIn = opportunity.ExpectedMoveIn;
+                }
+            }
+
+            if (string.IsNullOrEmpty(response.contract.ContractId) || string.IsNullOrEmpty(response.smcontract.Contractnumber))
+                throw new ServiceException("Witout active contract: " + Dni + " : " + accountType, HttpStatusCode.BadRequest, FieldNames.Contract, ValidationMessages.NotExist);
+
+            // TODO: Crear propiedad con todas las propiedades a bool, de esta forma se puede construir luego el email para IT Bluespace
+            if (fieldsRequired.Count > 0)
+                throw new ServiceException("Witout active contract: " + Dni + " : " + accountType, HttpStatusCode.BadRequest, FieldNames.Contract, ValidationMessages.NotExist);
+            return response;
+
         }
     }
 }

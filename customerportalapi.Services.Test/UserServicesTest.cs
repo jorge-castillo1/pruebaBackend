@@ -22,7 +22,11 @@ namespace customerportalapi.Services.Test
         private ILoginService _serviceLogin;
         private Mock<IUserAccountRepository> _userAccountRepository;
         private Mock<ILanguageRepository> _languageRepository;
-
+        private Mock<IContractRepository> _contractRepository;
+        private Mock<IContractSMRepository> _contractSMRepository;
+        private Mock<IOpportunityCRMRepository> _opportunityRepository;
+        private Mock<IStoreRepository> _storeRepository;
+        
 
         [TestInitialize]
         public void Setup()
@@ -36,6 +40,10 @@ namespace customerportalapi.Services.Test
             _serviceLogin = new LoginService(_identityRepository.Object, _userRepository.Object, _emailtemplateRepository.Object, _mailRepository.Object, _config.Object);
             _userAccountRepository = UserAccountRepositoryMock.ValidUserRepository();
             _languageRepository = LanguageRepositoryMock.LanguageRepository();
+            _contractRepository = ContractRepositoryMock.ContractRepository();
+            _contractSMRepository = ContractSMRepositoryMock.ContractSMRepository();
+            _opportunityRepository = OpportunityCRMRepositoryMock.OpportunityCRMRepository();
+            _storeRepository = StoreRepositoryMock.StoreRepository();
 
         }
 
@@ -57,10 +65,13 @@ namespace customerportalapi.Services.Test
                 _identityRepository.Object, 
                 _config.Object, _serviceLogin, 
                 _userAccountRepository.Object, 
-                _languageRepository.Object
+                _languageRepository.Object,
+                 _contractRepository.Object,
+                _contractSMRepository.Object,
+                _opportunityRepository.Object,
+                _storeRepository.Object
             );
             await service.GetProfileAsync(username);
-
             //Assert
         }
 
@@ -71,7 +82,7 @@ namespace customerportalapi.Services.Test
             string username = "12345678A";
 
             //Act
-            UserServices service = new UserServices(_userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object, _serviceLogin, _userAccountRepository.Object, _languageRepository.Object);
+            UserServices service = new UserServices(_userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object, _serviceLogin, _userAccountRepository.Object, _languageRepository.Object, _contractRepository.Object, _contractSMRepository.Object, _opportunityRepository.Object, _storeRepository.Object);
             Profile usuario = await service.GetProfileAsync(username);
 
             //Assert
@@ -93,7 +104,7 @@ namespace customerportalapi.Services.Test
             Mock<IUserRepository> _userRepositoryInvalid = UserRepositoryMock.InvalidUserRepository();
 
             //Act
-            UserServices service = new UserServices(_userRepositoryInvalid.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object, _serviceLogin, _userAccountRepository.Object, _languageRepository.Object);
+            UserServices service = new UserServices(_userRepositoryInvalid.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object, _serviceLogin, _userAccountRepository.Object, _languageRepository.Object, _contractRepository.Object, _contractSMRepository.Object, _opportunityRepository.Object, _storeRepository.Object);
             await service.UpdateProfileAsync(profile);
 
             //Assert
@@ -114,7 +125,7 @@ namespace customerportalapi.Services.Test
             profile.Avatar = "new profile image";
 
             //Act
-            UserServices service = new UserServices(_userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object, _serviceLogin, _userAccountRepository.Object, _languageRepository.Object);
+            UserServices service = new UserServices(_userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object, _serviceLogin, _userAccountRepository.Object, _languageRepository.Object, _contractRepository.Object, _contractSMRepository.Object, _opportunityRepository.Object, _storeRepository.Object);
             Profile result = await service.UpdateProfileAsync(profile);
 
             //Assert
@@ -135,7 +146,7 @@ namespace customerportalapi.Services.Test
             profile.Avatar = "new profile image";
 
             //Act
-            UserServices service = new UserServices(_userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object, _serviceLogin, _userAccountRepository.Object, _languageRepository.Object);
+            UserServices service = new UserServices(_userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object, _serviceLogin, _userAccountRepository.Object, _languageRepository.Object, _contractRepository.Object, _contractSMRepository.Object, _opportunityRepository.Object, _storeRepository.Object);
             Profile result = await service.UpdateProfileAsync(profile);
 
             //Assert
@@ -156,7 +167,7 @@ namespace customerportalapi.Services.Test
             profile.Avatar = "new profile image";
 
             //Act
-            UserServices service = new UserServices(_userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object, _serviceLogin, _userAccountRepository.Object, _languageRepository.Object);
+            UserServices service = new UserServices(_userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object, _serviceLogin, _userAccountRepository.Object, _languageRepository.Object, _contractRepository.Object, _contractSMRepository.Object, _opportunityRepository.Object, _storeRepository.Object);
             Profile result = await service.UpdateProfileAsync(profile);
 
             //Assert
@@ -176,7 +187,7 @@ namespace customerportalapi.Services.Test
             profile.Avatar = "new profile image";
 
             //Act
-            UserServices service = new UserServices(_userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object, _serviceLogin, _userAccountRepository.Object, _languageRepository.Object);
+            UserServices service = new UserServices(_userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object, _serviceLogin, _userAccountRepository.Object, _languageRepository.Object, _contractRepository.Object, _contractSMRepository.Object, _opportunityRepository.Object, _storeRepository.Object);
             Profile result = await service.UpdateProfileAsync(profile);
 
             //Assert
@@ -205,7 +216,7 @@ namespace customerportalapi.Services.Test
             invitation.Language = "French";
 
             //Act
-            UserServices service = new UserServices(_userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object, _serviceLogin, _userAccountRepository.Object, _languageRepository.Object);
+            UserServices service = new UserServices(_userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object, _serviceLogin, _userAccountRepository.Object, _languageRepository.Object, _contractRepository.Object, _contractSMRepository.Object, _opportunityRepository.Object, _storeRepository.Object);
             await service.InviteUserAsync(invitation);
 
         }
@@ -223,7 +234,7 @@ namespace customerportalapi.Services.Test
             invitation.Language = "French";
 
             //Act
-            UserServices service = new UserServices(_userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object, _serviceLogin, _userAccountRepository.Object, _languageRepository.Object);
+            UserServices service = new UserServices(_userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object, _serviceLogin, _userAccountRepository.Object, _languageRepository.Object, _contractRepository.Object, _contractSMRepository.Object, _opportunityRepository.Object, _storeRepository.Object);
             await service.InviteUserAsync(invitation);
         }
 
@@ -240,7 +251,7 @@ namespace customerportalapi.Services.Test
 
             //Act
             Mock<IUserRepository> _userRepositoryInvalid = UserRepositoryMock.InvalidUserRepository();
-            UserServices service = new UserServices(_userRepositoryInvalid.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object, _serviceLogin, _userAccountRepository.Object, _languageRepository.Object);
+            UserServices service = new UserServices(_userRepositoryInvalid.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object, _serviceLogin, _userAccountRepository.Object, _languageRepository.Object, _contractRepository.Object, _contractSMRepository.Object, _opportunityRepository.Object, _storeRepository.Object);
             bool result = await service.InviteUserAsync(invitation);
 
             //Assert
@@ -262,7 +273,7 @@ namespace customerportalapi.Services.Test
             invitation.Language = "French";
 
             //Act
-            UserServices service = new UserServices(_userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object, _serviceLogin, _userAccountRepository.Object, _languageRepository.Object);
+            UserServices service = new UserServices(_userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object, _serviceLogin, _userAccountRepository.Object, _languageRepository.Object, _contractRepository.Object, _contractSMRepository.Object, _opportunityRepository.Object, _storeRepository.Object);
             bool result = await service.InviteUserAsync(invitation);
 
             //Assert
@@ -281,7 +292,7 @@ namespace customerportalapi.Services.Test
 
             //Act
             Mock<IUserRepository> _userRepositoryInvalid = UserRepositoryMock.Valid_InActiveUser_Repository();
-            UserServices service = new UserServices(_userRepositoryInvalid.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object, _serviceLogin, _userAccountRepository.Object, _languageRepository.Object);
+            UserServices service = new UserServices(_userRepositoryInvalid.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object, _serviceLogin, _userAccountRepository.Object, _languageRepository.Object, _contractRepository.Object, _contractSMRepository.Object, _opportunityRepository.Object, _storeRepository.Object);
             bool result = await service.InviteUserAsync(invitation);
 
             //Assert
@@ -303,7 +314,7 @@ namespace customerportalapi.Services.Test
 
             //Act
             Mock<IUserRepository> _userRepositoryInvalid = UserRepositoryMock.InvalidUserRepository();
-            UserServices service = new UserServices(_userRepositoryInvalid.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object, _serviceLogin, _userAccountRepository.Object, _languageRepository.Object);
+            UserServices service = new UserServices(_userRepositoryInvalid.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object, _serviceLogin, _userAccountRepository.Object, _languageRepository.Object, _contractRepository.Object, _contractSMRepository.Object, _opportunityRepository.Object, _storeRepository.Object);
             bool result = await service.InviteUserAsync(invitation);
 
             //Assert
@@ -326,7 +337,7 @@ namespace customerportalapi.Services.Test
 
             //Act
             Mock<IUserRepository> _userRepositoryInvalid = UserRepositoryMock.ValidUserRepository_ByEmail();
-            UserServices service = new UserServices(_userRepositoryInvalid.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object, _serviceLogin, _userAccountRepository.Object, _languageRepository.Object);
+            UserServices service = new UserServices(_userRepositoryInvalid.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object, _serviceLogin, _userAccountRepository.Object, _languageRepository.Object, _contractRepository.Object, _contractSMRepository.Object, _opportunityRepository.Object, _storeRepository.Object);
             bool result = await service.InviteUserAsync(invitation);
 
             //Assert
@@ -343,7 +354,7 @@ namespace customerportalapi.Services.Test
             string invitationToken = string.Empty;
 
             //Act
-            UserServices service = new UserServices(_userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object, _serviceLogin, _userAccountRepository.Object, _languageRepository.Object);
+            UserServices service = new UserServices(_userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object, _serviceLogin, _userAccountRepository.Object, _languageRepository.Object, _contractRepository.Object, _contractSMRepository.Object, _opportunityRepository.Object, _storeRepository.Object);
             await service.ConfirmUserAsync(invitationToken);
         }
 
@@ -355,7 +366,7 @@ namespace customerportalapi.Services.Test
 
             //Act
             Mock<IUserRepository> userRepositoryInvalid = UserRepositoryMock.Invalid_ActiveUserByToken_Repository();
-            UserServices service = new UserServices(userRepositoryInvalid.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object, _serviceLogin, _userAccountRepository.Object, _languageRepository.Object);
+            UserServices service = new UserServices(userRepositoryInvalid.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object, _serviceLogin, _userAccountRepository.Object, _languageRepository.Object, _contractRepository.Object, _contractSMRepository.Object, _opportunityRepository.Object, _storeRepository.Object);
             Token tokenResult = await service.ConfirmUserAsync(invitationToken);
 
             //Assert
@@ -370,7 +381,7 @@ namespace customerportalapi.Services.Test
 
             //Act
             Mock<IUserRepository> userRepositoryInvalid = UserRepositoryMock.Valid_InActiveUserByToken_Repository();
-            UserServices service = new UserServices(userRepositoryInvalid.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object, _serviceLogin, _userAccountRepository.Object, _languageRepository.Object);
+            UserServices service = new UserServices(userRepositoryInvalid.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object, _serviceLogin, _userAccountRepository.Object, _languageRepository.Object, _contractRepository.Object, _contractSMRepository.Object, _opportunityRepository.Object, _storeRepository.Object);
             Token tokenResult = await service.ConfirmUserAsync(invitationToken);
 
             //Assert
@@ -396,7 +407,7 @@ namespace customerportalapi.Services.Test
             };
             
             //Act
-            UserServices service = new UserServices(_userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object, _serviceLogin, _userAccountRepository.Object, _languageRepository.Object);
+            UserServices service = new UserServices(_userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object, _serviceLogin, _userAccountRepository.Object, _languageRepository.Object, _contractRepository.Object, _contractSMRepository.Object, _opportunityRepository.Object, _storeRepository.Object);
             await service.UnInviteUserAsync(value);
 
             //_identityRepository.Verify(x => x.DeleteUser(string userId));
@@ -416,7 +427,7 @@ namespace customerportalapi.Services.Test
             Mock<IUserRepository> _userRepositoryInvalid = UserRepositoryMock.InvalidUserRepository();
 
             //Act
-            UserServices service = new UserServices(_userRepositoryInvalid.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object, _serviceLogin, _userAccountRepository.Object, _languageRepository.Object);
+            UserServices service = new UserServices(_userRepositoryInvalid.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object, _serviceLogin, _userAccountRepository.Object, _languageRepository.Object, _contractRepository.Object, _contractSMRepository.Object, _opportunityRepository.Object, _storeRepository.Object);
             await service.UnInviteUserAsync(value);
         }
 
@@ -432,7 +443,7 @@ namespace customerportalapi.Services.Test
 
             //Act
             Mock<IUserRepository> userRepositoryInvalid = UserRepositoryMock.Valid_InActiveUser_Repository();
-            UserServices service = new UserServices(userRepositoryInvalid.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object, _serviceLogin, _userAccountRepository.Object, _languageRepository.Object);
+            UserServices service = new UserServices(userRepositoryInvalid.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object, _serviceLogin, _userAccountRepository.Object, _languageRepository.Object, _contractRepository.Object, _contractSMRepository.Object, _opportunityRepository.Object, _storeRepository.Object);
             bool result = await service.UnInviteUserAsync(value);
 
             //Assert
@@ -451,7 +462,7 @@ namespace customerportalapi.Services.Test
 
             //Act
             Mock<IUserRepository> userRepository = UserRepositoryMock.ValidUserRepository();
-            UserServices service = new UserServices(userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object, _serviceLogin, _userAccountRepository.Object, _languageRepository.Object);
+            UserServices service = new UserServices(userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object, _serviceLogin, _userAccountRepository.Object, _languageRepository.Object, _contractRepository.Object, _contractSMRepository.Object, _opportunityRepository.Object, _storeRepository.Object);
             bool result = await service.UnInviteUserAsync(value);
 
             //Assert
