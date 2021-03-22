@@ -13,5 +13,6 @@ namespace customerportalapi.Entities
         public const string LongerTo = "Longer to";
         public const string Required = "Required";
         public const string NotFound = "Not found";
+        public const string AlreadyInUse = "Already In Use";
     }
 }

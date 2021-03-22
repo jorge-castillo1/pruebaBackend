@@ -13,7 +13,8 @@
         FormContactCustomer = 8,
         FormCallCustomer = 9,
         EditDataCustomer = 10,
-        EditAccessCode = 11
+        EditAccessCode = 11,
+        InvitationError = 12
 
     }
 }
