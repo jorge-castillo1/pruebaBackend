@@ -10,12 +10,12 @@ namespace customerportalapi.Entities
 
         public MandatoryData Email { get; set; }
         public MandatoryData Dni { get; set; }
-        public MandatoryData EmailInUse { get; set; }
-        public MandatoryData Contact { get; set; }
+        public MandatoryData NewEmail { get; set; }
+        public MandatoryData FirstName { get; set; }
         public MandatoryData Contract { get; set; }
-        public MandatoryData ActiveContract { get; set; }
         public MandatoryData SmContractCode { get; set; }
-        public MandatoryData Password { get; set; }
+        public MandatoryData ActiveContract { get; set; }
+        public MandatoryData UnitPassword { get; set; }
         public MandatoryData UnitName { get; set; }
         public MandatoryData UnitLocation { get; set; }
         public MandatoryData Store { get; set; }
