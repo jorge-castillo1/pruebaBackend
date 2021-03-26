@@ -268,13 +268,12 @@ namespace customerportalapi.Services
             //1. Validate email not empty
             if (string.IsNullOrEmpty(value.Email))
                 throw new ServiceException("User must have a valid email address.", HttpStatusCode.BadRequest, FieldNames.Email, ValidationMessages.EmptyFields);
-            
 
             //2. Validate dni not empty
             if (string.IsNullOrEmpty(value.Dni))
                 throw new ServiceException("User must have a valid document number.", HttpStatusCode.BadRequest, FieldNames.Dni, ValidationMessages.EmptyFields);
 
-            //3. Find some user with this email or without confirm email
+            //3. Find some user with this email and without confirm email
             User user = _userRepository.GetCurrentUserByEmail(value.Email);
             if (!string.IsNullOrEmpty(user.Id) && user.Emailverified)
                 throw new ServiceException("Invitation user fails. Email in use by another user", HttpStatusCode.NotFound, FieldNames.Email, ValidationMessages.AlreadyInUse);
@@ -299,7 +298,6 @@ namespace customerportalapi.Services
             var password = pwd.Next();
             int templateId;
 
-            user = _userRepository.GetCurrentUserByDniAndType(value.Dni, userType);
             if (user.Id == null)
             {
                 //7.1 Create user in portal database
