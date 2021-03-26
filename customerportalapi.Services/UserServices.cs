@@ -1045,16 +1045,12 @@ namespace customerportalapi.Services
                     invitationData.SmContractCode.SetValueAndState(contract.SmContractCode, StateEnum.Checked);
 
                     SMContract contractSM = await _contractSMRepository.GetAccessCodeAsync(contract.SmContractCode);
-                    if (contractSM == null)
-                    {
-                        invitationData.SMContract.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
-                        await SendEmailInvitationError(invitationData);
-                        throw new ServiceException("User without SMcontract, SmContractCode: " + contract.SmContractCode, HttpStatusCode.BadRequest, FieldNames.SMContractCode, ValidationMessages.NotFound);
-                    }
-                    invitationData.SMContract.SetValueAndState(contractSM.Contractnumber, StateEnum.Checked);
+                    invitationData.SMContract.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
+                    if (contractSM != null && string.IsNullOrEmpty(contractSM.Contractnumber))
+                        invitationData.SMContract.SetValueAndState(contractSM.Contractnumber, StateEnum.Checked);
 
                     // only active contracts, if the contract has "terminated", the field "Leaving" have information.
-                    if (String.IsNullOrEmpty(contractSM.Leaving) && invitationData.ActiveContract.State == StateEnum.Unchecked)
+                    if (contractSM != null && String.IsNullOrEmpty(contractSM.Leaving) && invitationData.ActiveContract.State == StateEnum.Unchecked)
                     {
                         invitationData.ActiveContract.SetValueAndState(StateEnum.Checked.ToString(), StateEnum.Checked);
 
