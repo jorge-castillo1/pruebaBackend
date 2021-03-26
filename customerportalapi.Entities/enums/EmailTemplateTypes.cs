@@ -15,6 +15,6 @@
         EditDataCustomer = 10,
         EditAccessCode = 11,
         InvitationError = 12,
-        InvitationStandar= 13,
+        InvitationStandard= 13,
     }
 }

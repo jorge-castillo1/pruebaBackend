@@ -31,6 +31,7 @@ namespace customerportalapi.Services
         private readonly IContractSMRepository _contractSMRepository;
         private readonly IOpportunityCRMRepository _opportunityRepository;
         private readonly IStoreRepository _storeRepository;
+        private readonly ISizeCodeRepository _sizeCodeRepository;
 
 
         public UserServices(
@@ -46,7 +47,8 @@ namespace customerportalapi.Services
             IContractRepository contractRepository,
             IContractSMRepository contractSMRepository,
             IOpportunityCRMRepository opportunityRepository,
-            IStoreRepository storeRepository
+            IStoreRepository storeRepository,
+            ISizeCodeRepository sizeCodeRepository
         )
         {
             _userRepository = userRepository;
@@ -62,6 +64,7 @@ namespace customerportalapi.Services
             _contractSMRepository = contractSMRepository;
             _opportunityRepository = opportunityRepository;
             _storeRepository = storeRepository;
+            _sizeCodeRepository = sizeCodeRepository;
         }
 
 
@@ -260,52 +263,36 @@ namespace customerportalapi.Services
         public async Task<bool> InviteUserAsync(Invitation value)
         {
             bool result = false;
-            InvitationMandatoryData fieldsRequired = new InvitationMandatoryData();
+            InvitationMandatoryData invitationFields = InitInvitationData();
 
             //1. Validate email not empty
             if (string.IsNullOrEmpty(value.Email))
-            {
-                fieldsRequired.Email = GetMandatiryData(ValidationMessages.Required, StateEnum.Error);
-                await SendEmailInvitationError(fieldsRequired);
                 throw new ServiceException("User must have a valid email address.", HttpStatusCode.BadRequest, FieldNames.Email, ValidationMessages.EmptyFields);
-            }
-            fieldsRequired.Email = GetMandatiryData(value.Email, StateEnum.Checked);
+            
 
             //2. Validate dni not empty
             if (string.IsNullOrEmpty(value.Dni))
-            {
-                fieldsRequired.Dni = GetMandatiryData(ValidationMessages.Required, StateEnum.Error);
-                await SendEmailInvitationError(fieldsRequired);
                 throw new ServiceException("User must have a valid document number.", HttpStatusCode.BadRequest, FieldNames.Dni, ValidationMessages.EmptyFields);
-            }
-            fieldsRequired.Dni= GetMandatiryData(value.Dni, StateEnum.Checked);
 
-            //3.1 Find some user with this email or without confirm email
+            //3. Find some user with this email or without confirm email
             User user = _userRepository.GetCurrentUserByEmail(value.Email);
             if (!string.IsNullOrEmpty(user.Id) && user.Emailverified)
-            {
-                fieldsRequired.NewEmail = GetMandatiryData(ValidationMessages.InUse, StateEnum.Error);
-                await SendEmailInvitationError(fieldsRequired);
                 throw new ServiceException("Invitation user fails. Email in use by another user", HttpStatusCode.NotFound, FieldNames.Email, ValidationMessages.AlreadyInUse);
-            }
-            fieldsRequired.NewEmail = GetMandatiryData(StateEnum.Checked.ToString(), StateEnum.Checked);
 
-            //5. If emailverified is true throw error
+            //4. If emailverified is true throw error
             var userType = UserUtils.GetUserType(value.CustomerType);
             user = _userRepository.GetCurrentUserByDniAndType(value.Dni, userType);
             if (!string.IsNullOrEmpty(user.Id) && user.Emailverified)
-            {
                 throw new ServiceException("Invitation user fails. User was actived before", HttpStatusCode.NotFound, FieldNames.User, ValidationMessages.AlreadyInvited);
-            }
 
-            // Get Mandatory data    
+            //5. Find Mandatory data    
             string accountType = (userType == (int)UserTypes.Business) ? AccountType.Business : AccountType.Residential;
-            await GetMandatoryData(fieldsRequired, value, accountType);
+            await FindInvitationMandatoryData(invitationFields, value, accountType);
 
-            // Check mandatory data
-            await CheckMandatoryData(fieldsRequired);
+            //6. Check all mandatory data
+            await CheckMandatoryData(invitationFields);
 
-            //3. If no user exists create user
+            //7. check if user exists
             var userName = userType == 0 ? value.Dni : "B" + value.Dni;
 
             var pwd = new Password(true, true, true, false, 6);
@@ -315,7 +302,7 @@ namespace customerportalapi.Services
             user = _userRepository.GetCurrentUserByDniAndType(value.Dni, userType);
             if (user.Id == null)
             {
-                //4. Create user in portal database
+                //7.1 Create user in portal database
                 user = new User
                 {
                     Username = userName,
@@ -326,8 +313,8 @@ namespace customerportalapi.Services
                     Language = UserUtils.GetLanguage(value.Language),
                     Usertype = UserUtils.GetUserType(value.CustomerType),
                     Emailverified = false,
+                    Invitationtoken = Guid.NewGuid().ToString(),
                     LastEmailSent = EmailTemplateTypes.InvitationWelcome.ToString(),
-                    Invitationtoken = Guid.NewGuid().ToString()
                 };
 
                 result = await _userRepository.Create(user);
@@ -335,21 +322,19 @@ namespace customerportalapi.Services
             }            
             else
             {
-                //7. Update invitation data
+                //7.2 Update invitation data
                 user.Email = value.Email;
                 user.Name = value.Fullname;
                 user.Password = password;
                 user.Language = UserUtils.GetLanguage(value.Language);
                 user.Usertype = UserUtils.GetUserType(value.CustomerType);
                 user.Invitationtoken = Guid.NewGuid().ToString();
-                user.LastEmailSent = EmailTemplateTypes.InvitationStandar.ToString();
+                user.LastEmailSent = EmailTemplateTypes.InvitationStandard.ToString();
                 _userRepository.Update(user);
-                templateId = (int)EmailTemplateTypes.InvitationStandar;
+                templateId = (int)EmailTemplateTypes.InvitationStandard;
             }
 
-            // REMOVE only for demo
-            templateId = (int)EmailTemplateTypes.InvitationWelcome;
-            //5. Get Email Invitation Template
+            //8. Get Email Invitation Template
             EmailTemplate invitationTemplate = _emailTemplateRepository.getTemplate(templateId, user.Language);
             if (invitationTemplate._id == null)
             {
@@ -359,16 +344,11 @@ namespace customerportalapi.Services
             if (string.IsNullOrEmpty(invitationTemplate._id))
                 throw new ServiceException("Email template not found, templateCode: " + templateId, HttpStatusCode.NotFound, FieldNames.Email + FieldNames.Template, ValidationMessages.NotFound);
 
-            //6. Send email invitation
+            //9. Send email invitation
             Email message = new Email();
             message.To.Add(user.Email);
             message.Subject = invitationTemplate.subject;
-
-            if(templateId == (int)EmailTemplateTypes.InvitationWelcome)
-                message.Body = GetBodyFormattedInvitationWelcome(invitationTemplate, user, fieldsRequired);
-
-            if (templateId == (int)EmailTemplateTypes.InvitationStandar)
-                message.Body = GetBodyFormattedInvitationStandar(invitationTemplate, user);
+            message.Body = GetBodyFormatted(invitationTemplate, user, invitationFields);
 
             result = await _mailRepository.Send(message);
 
@@ -982,18 +962,22 @@ namespace customerportalapi.Services
             message.Subject = invitationErrorTemplate.subject;
             message.Body = invitationErrorTemplate.body;
             string list = string.Empty;
-            foreach (var porperty in properties)
+            foreach (var property in properties)
             {
-                var item = porperty.GetType();
-                MandatoryData data = (MandatoryData)porperty.GetValue(fields);
-                StateEnum state = StateEnum.Unchecked;
+                var item = property.GetType();
+                MandatoryData data = (MandatoryData)property.GetValue(fields);
+                string state = StateEnum.Unchecked.ToString().ToLower();
                 string value = string.Empty;
+                string system = string.Empty;
+                string entity = string.Empty;
                 if (data != null)
                 {
-                    state = data.State;
+                    state = data.State.ToString().ToLower();
                     value = data.Value ?? "";
+                    system = data.System.ToString();
+                    entity = data.Entity.ToString();
                 }
-                list += "<tr class='" + state.ToString().ToLower() + "'><td>" + porperty.Name +"</td><td>"+ value + "</td></tr>";
+                list += $"<tr class='{state}'><td>{system}</td><td>{entity}</td><td>{property.Name}</td><td>{value}</td></tr>";
             }
             message.Body = message.Body.Replace("{{columns}}", list);
 
@@ -1001,118 +985,163 @@ namespace customerportalapi.Services
             return result;
         }
 
-        private async Task<bool> GetMandatoryData(InvitationMandatoryData fieldsRequired, Invitation value, string accountType)
+        private InvitationMandatoryData InitInvitationData()
+        {
+            InvitationMandatoryData data = new InvitationMandatoryData
+            {
+                ContactUsername = GetMandatiryData(SystemTypes.CRM, EntityNames.contacts, null, StateEnum.Unchecked),
+                Contract = GetMandatiryData(SystemTypes.CRM, EntityNames.iav_contracts, null, StateEnum.Unchecked),
+                SmContractCode = GetMandatiryData(SystemTypes.CRM, EntityNames.iav_contracts, null, StateEnum.Unchecked),
+                SMContract = GetMandatiryData(SystemTypes.SM, EntityNames.WBSGetContract, null, StateEnum.Unchecked),
+                ActiveContract = GetMandatiryData(SystemTypes.SM, EntityNames.WBSGetContract, null, StateEnum.Unchecked),
+                UnitPassword = GetMandatiryData(SystemTypes.CRM, EntityNames.iav_contracts, null, StateEnum.Unchecked),
+                UnitName = GetMandatiryData(SystemTypes.CRM, EntityNames.iav_contracts, null, StateEnum.Unchecked),
+                UnitSizeCode = GetMandatiryData(SystemTypes.CRM, EntityNames.iav_contracts, null, StateEnum.Unchecked), // TODO: check EntityNames
+                ContractStoreId = GetMandatiryData(SystemTypes.CRM, EntityNames.iav_contracts, null, StateEnum.Unchecked),
+                StoreId = GetMandatiryData(SystemTypes.CRM, EntityNames.iav_stores, null, StateEnum.Unchecked),
+                OpeningDaysFirst = GetMandatiryData(SystemTypes.CRM, EntityNames.iav_stores, null, StateEnum.Unchecked),
+                OpeningDaysLast = GetMandatiryData(SystemTypes.CRM, EntityNames.iav_stores, null, StateEnum.Unchecked),
+                OpeningHoursFrom = GetMandatiryData(SystemTypes.CRM, EntityNames.iav_stores, null, StateEnum.Unchecked),
+                OpeningHoursTo = GetMandatiryData(SystemTypes.CRM, EntityNames.iav_stores, null, StateEnum.Unchecked),
+                StoreName = GetMandatiryData(SystemTypes.CRM, EntityNames.iav_stores, null, StateEnum.Unchecked),
+                StoreEmail = GetMandatiryData(SystemTypes.CRM, EntityNames.iav_stores, null, StateEnum.Unchecked),
+                StoreCity = GetMandatiryData(SystemTypes.CRM, EntityNames.iav_stores, null, StateEnum.Unchecked),
+                ContractOpportunity = GetMandatiryData(SystemTypes.CRM, EntityNames.iav_contracts, null, StateEnum.Unchecked),
+                OpportunityId = GetMandatiryData(SystemTypes.CRM, EntityNames.opportunities, null, StateEnum.Unchecked),
+                ExpectedMoveIn = GetMandatiryData(SystemTypes.CRM, EntityNames.opportunities, null, StateEnum.Unchecked),
+            };
+
+            return data;
+        }
+
+
+        private async Task<bool> FindInvitationMandatoryData(InvitationMandatoryData invitationData, Invitation value, string accountType)
         {
             // Contact
-            string dataValue = value.Dni + " - " + accountType;
+            string userIdentification = value.Dni + " - " + accountType;
             Profile contact = await _profileRepository.GetProfileAsync(value.Dni, accountType);
             if (contact == null)
             {
-                fieldsRequired.FirstName = GetMandatiryData(dataValue, StateEnum.Error);
-                await SendEmailInvitationError(fieldsRequired);
-                throw new ServiceException("Contact required: " + dataValue, HttpStatusCode.NotFound, FieldNames.Contact, ValidationMessages.Required);
+                invitationData.ContactUsername.State = StateEnum.Error;
+                await SendEmailInvitationError(invitationData);
+                throw new ServiceException("Contact required:  user: " + userIdentification, HttpStatusCode.NotFound, FieldNames.Contact, ValidationMessages.Required);
             }
-            fieldsRequired.FirstName = GetMandatiryData(contact.Name, StateEnum.Checked);
+            invitationData.ContactUsername.SetValueAndState(value.Fullname, StateEnum.Checked);
 
             //Contract
             List<Contract> contracts = await _contractRepository.GetContractsAsync(value.Dni, accountType);
             if (contracts.Count == 0)
             {
-                fieldsRequired.Contract = GetMandatiryData(dataValue, StateEnum.Error);
-                await SendEmailInvitationError(fieldsRequired);
-                throw new ServiceException("User without contract, user: " + value.Dni + " - " + accountType, HttpStatusCode.BadRequest, FieldNames.Contract, ValidationMessages.NotFound);
+                invitationData.Contract.State = StateEnum.Error;
+                await SendEmailInvitationError(invitationData);
+                throw new ServiceException("User without contract, user: " + userIdentification, HttpStatusCode.BadRequest, FieldNames.Contract, ValidationMessages.NotFound);
             }
-            fieldsRequired.Contract = GetMandatiryData(contracts.Count.ToString(), StateEnum.Checked);
-            fieldsRequired.ActiveContract = GetMandatiryData(null, StateEnum.Unchecked);
+            invitationData.Contract.SetValueAndState(contracts.Count.ToString(), StateEnum.Checked);
+            invitationData.ActiveContract = GetMandatiryData(SystemTypes.SM, EntityNames.WBSGetContract, null, StateEnum.Unchecked);
 
             foreach (Contract contract in contracts)
             {
-                fieldsRequired.SmContractCode = GetMandatiryData(ValidationMessages.Required, StateEnum.Error);
+                invitationData.SmContractCode.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
                 if (!string.IsNullOrEmpty(contract.SmContractCode))
                 {
-                    fieldsRequired.SmContractCode = GetMandatiryData(contract.SmContractCode, StateEnum.Checked);
+                    invitationData.SmContractCode.SetValueAndState(contract.SmContractCode, StateEnum.Checked);
 
                     SMContract contractSM = await _contractSMRepository.GetAccessCodeAsync(contract.SmContractCode);
+                    if (contractSM == null)
+                    {
+                        invitationData.SMContract.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
+                        await SendEmailInvitationError(invitationData);
+                        throw new ServiceException("User without SMcontract, SmContractCode: " + contract.SmContractCode, HttpStatusCode.BadRequest, FieldNames.SMContractCode, ValidationMessages.NotFound);
+                    }
+                    invitationData.SMContract.SetValueAndState(contractSM.Contractnumber, StateEnum.Checked);
 
                     // only active contracts, if the contract has "terminated", the field "Leaving" have information.
-                    if (String.IsNullOrEmpty(contractSM.Leaving) && fieldsRequired.ActiveContract.State == StateEnum.Unchecked)
+                    if (String.IsNullOrEmpty(contractSM.Leaving) && invitationData.ActiveContract.State == StateEnum.Unchecked)
                     {
-                        fieldsRequired.ActiveContract = GetMandatiryData(StateEnum.Checked.ToString(), StateEnum.Checked);
+                        invitationData.ActiveContract.SetValueAndState(StateEnum.Checked.ToString(), StateEnum.Checked);
 
                         //Unit
-                        fieldsRequired.UnitPassword = GetMandatiryData(ValidationMessages.Required, StateEnum.Error);
-                        if (!string.IsNullOrEmpty(contractSM.Password))
-                            fieldsRequired.UnitPassword = GetMandatiryData(contractSM.Password, StateEnum.Checked);
+                        invitationData.UnitPassword.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
+                        if (!string.IsNullOrEmpty(contractSM.Password)) 
+                            invitationData.UnitPassword.SetValueAndState(contractSM.Password, StateEnum.Checked);
 
-                        fieldsRequired.UnitName = GetMandatiryData(ValidationMessages.Required, StateEnum.Error);
+                        invitationData.UnitName.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
                         if (!string.IsNullOrEmpty(contract.Unit.UnitName))
-                            fieldsRequired.UnitName = GetMandatiryData(contract.Unit.UnitName, StateEnum.Checked);
+                            invitationData.UnitName.SetValueAndState(contract.Unit.UnitName, StateEnum.Checked);
 
-                        // TODO: (info based on size code – Table to built)
-                        fieldsRequired.UnitLocation = GetMandatiryData("UnitLocation", StateEnum.Checked);
 
                         // Store
-                        fieldsRequired.Store = GetMandatiryData(ValidationMessages.Required, StateEnum.Error);
+                        invitationData.ContractStoreId.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
                         if (contract.StoreData.StoreId != null)
                         {
-                            fieldsRequired.Store = GetMandatiryData(StateEnum.Checked.ToString(), StateEnum.Checked);
+
+                            invitationData.ContractStoreId.SetValueAndState(StateEnum.Checked.ToString(), StateEnum.Checked);
+
+                            // TODO: get sizeCode form Contract or Unit
+                            UnitLocationSearchFilter filter = new UnitLocationSearchFilter()
+                            {
+                                SiteCode = contract.StoreData.StoreId.ToString(),
+                                SizeCode = contract.Unit.UnitCategory
+                            };
+                            List<UnitLocation> sizeCode = _sizeCodeRepository.Find(filter);
+                            invitationData.UnitSizeCode.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
+                            if (!string.IsNullOrEmpty(sizeCode[0].Description))
+                                invitationData.UnitSizeCode.SetValueAndState(sizeCode[0].Description, StateEnum.Checked);
 
                             string storeId = contract.StoreData.StoreId.ToString();
                             Store store = await _storeRepository.GetStoreAsync(storeId);
 
-                            fieldsRequired.StoreId = GetMandatiryData(ValidationMessages.Required, StateEnum.Error);
+                            invitationData.StoreId.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
                             if (store.StoreId != null)
-                                fieldsRequired.StoreId = GetMandatiryData(store.StoreId.ToString(), StateEnum.Checked);
+                                invitationData.StoreId.SetValueAndState(store.StoreId.ToString(), StateEnum.Checked);
 
-                            fieldsRequired.OpeningDaysFirst = GetMandatiryData(ValidationMessages.Required, StateEnum.Error);
+                            invitationData.OpeningDaysFirst.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
                             if (!string.IsNullOrEmpty(store.OpeningDaysFirst))
-                                fieldsRequired.OpeningDaysFirst = GetMandatiryData(store.OpeningDaysFirst, StateEnum.Checked);
+                                invitationData.OpeningDaysFirst.SetValueAndState(store.OpeningDaysFirst, StateEnum.Checked);
 
-                            fieldsRequired.OpeningDaysLast = GetMandatiryData(ValidationMessages.Required, StateEnum.Error);
+                            invitationData.OpeningDaysLast.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
                             if (!string.IsNullOrEmpty(store.OpeningDaysLast))
-                                fieldsRequired.OpeningDaysLast = GetMandatiryData(store.OpeningDaysLast, StateEnum.Checked);
+                                invitationData.OpeningDaysLast.SetValueAndState(store.OpeningDaysLast, StateEnum.Checked);
 
-                            fieldsRequired.OpeningHoursFrom = GetMandatiryData(ValidationMessages.Required, StateEnum.Error);
+                            invitationData.OpeningHoursFrom.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
                             if (!string.IsNullOrEmpty(store.OpeningHoursFrom))
-                                fieldsRequired.OpeningHoursFrom = GetMandatiryData(store.OpeningHoursFrom, StateEnum.Checked);
+                                invitationData.OpeningHoursFrom.SetValueAndState(store.OpeningHoursFrom, StateEnum.Checked);
+                            
 
-                            fieldsRequired.OpeningHoursTo = GetMandatiryData(ValidationMessages.Required, StateEnum.Error);
+                            invitationData.OpeningHoursTo.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
                             if (!string.IsNullOrEmpty(store.OpeningHoursTo))
-                                fieldsRequired.OpeningHoursTo = GetMandatiryData(store.OpeningHoursTo, StateEnum.Checked);
+                                invitationData.OpeningHoursTo.SetValueAndState(store.OpeningHoursTo, StateEnum.Checked);
 
-                            fieldsRequired.StoreName = GetMandatiryData(ValidationMessages.Required, StateEnum.Error);
+                            invitationData.StoreName.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
                             if (!string.IsNullOrEmpty(store.StoreName))
-                                fieldsRequired.StoreName = GetMandatiryData(store.StoreName, StateEnum.Checked);
+                                invitationData.StoreName.SetValueAndState(store.StoreName, StateEnum.Checked);
+                            
+                            invitationData.StoreEmail.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
+                            
+                            string email = store.EmailAddress1 ?? store.EmailAddress2;
+                            if (!string.IsNullOrEmpty(email))
+                                invitationData.StoreEmail.SetValueAndState(email, StateEnum.Checked);
 
-                            fieldsRequired.StoreEmail = GetMandatiryData(ValidationMessages.Required, StateEnum.Error);
-                            if (!string.IsNullOrEmpty(store.EmailAddress1) || !string.IsNullOrEmpty(store.EmailAddress2))
-                            {
-                                string email = store.EmailAddress1 ?? store.EmailAddress2;
-                                fieldsRequired.StoreEmail = GetMandatiryData(email, StateEnum.Checked);
-                            }
-
-                            // TODO check
-                            fieldsRequired.StoreCity = GetMandatiryData(ValidationMessages.Required, StateEnum.Error);
+                            invitationData.StoreCity.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
                             if (!string.IsNullOrEmpty(store.City))
-                                fieldsRequired.StoreCity = GetMandatiryData(store.City, StateEnum.Checked);
+                                invitationData.StoreCity.SetValueAndState(store.City, StateEnum.Checked);
                         }
 
                         // OpportunityCRM
-                        fieldsRequired.Opportunity = GetMandatiryData(ValidationMessages.Required, StateEnum.Error);
+                        invitationData.ContractOpportunity.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
                         if (!string.IsNullOrEmpty(contract.OpportunityId))
                         {
-                            // throw new ServiceException("OpportunityId required, ContractNumber:" + contract.ContractNumber, HttpStatusCode.BadRequest, FieldNames.OpportunityId, ValidationMessages.Required);
-                            fieldsRequired.Opportunity = GetMandatiryData(StateEnum.Checked.ToString(), StateEnum.Checked);
+                            invitationData.ContractOpportunity.SetValueAndState(StateEnum.Checked.ToString(), StateEnum.Checked);
 
                             OpportunityCRM opportunity = await _opportunityRepository.GetOpportunity(contract.OpportunityId);
 
-                            fieldsRequired.OpportunityId = GetMandatiryData(ValidationMessages.Required, StateEnum.Error);
+                            invitationData.OpportunityId.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
                             if (!string.IsNullOrEmpty(opportunity.OpportunityId))
-                                fieldsRequired.OpportunityId = GetMandatiryData(opportunity.OpportunityId, StateEnum.Checked);
+                                invitationData.OpportunityId.SetValueAndState(opportunity.OpportunityId, StateEnum.Checked);
 
-                            fieldsRequired.ExpectedMoveIn = GetMandatiryData(ValidationMessages.Required, StateEnum.Error);
+                            invitationData.ExpectedMoveIn.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
                             if (!string.IsNullOrEmpty(opportunity.ExpectedMoveIn))
-                                fieldsRequired.ExpectedMoveIn = GetMandatiryData(DateTime.Parse(opportunity.ExpectedMoveIn).ToString("dddd, dd MMMM"), StateEnum.Checked);
+                                invitationData.ExpectedMoveIn.SetValueAndState(DateTime.Parse(opportunity.ExpectedMoveIn).ToString(), StateEnum.Checked);
 
                         }
                     }
@@ -1121,10 +1150,9 @@ namespace customerportalapi.Services
             }
 
             return true;
-           
         }
 
-        private string GetBodyFormattedInvitationWelcome(EmailTemplate invitationTemplate, User user, InvitationMandatoryData fields)
+        private string GetBodyFormatted(EmailTemplate invitationTemplate, User user, InvitationMandatoryData fields)
         {
             string body = invitationTemplate.body;
 
@@ -1132,24 +1160,54 @@ namespace customerportalapi.Services
             foreach (var property in properties)
             {
                 MandatoryData data = (MandatoryData)property.GetValue(fields);
-                string value = string.Empty;
                 if (data != null && !string.IsNullOrEmpty(data.Value))
                 {
                     string field = "{{" + property.Name + "}}";
-                    body = body.Replace(field, data.Value);
+
+                    switch (property.Name)
+                    {
+                        case "ExpectedMoveIn":
+                            DateTime expectedMoveIn = DateTime.Parse(data.Value);
+                            body = body.Replace(field, expectedMoveIn.ToString("dd/MM/yyyy"));
+                            expectedMoveIn = expectedMoveIn.Subtract(TimeSpan.FromDays(1));
+                            body = body.Replace("{{PreviousExpectedMoveIn}}", expectedMoveIn.ToString("dd/MM/yyyy"));
+                            break;
+                        case "ContactUsername":
+                            body = body.Replace(field, data.Value);
+                            body = body.Replace("{{UserPassword}}", user.Password);
+                            break;
+                        case "UnitName":
+                            body = body.Replace(field, data.Value);
+                            char[] unitName = data.Value.ToCharArray();
+
+                            int num;
+                            if (unitName[0].ToString() != null && int.TryParse(unitName[0].ToString(),out num)) {
+                                num++;
+                                if (num > 9) num = 0;
+                                unitName[0] = Char.Parse(num.ToString());
+                            }
+
+                            if (unitName[3].ToString() != null && int.TryParse(unitName[3].ToString(), out num))
+                            {
+                                num++;
+                                if (num > 9) num = 0;
+                                unitName[3] = Char.Parse(num.ToString());
+                            }
+
+                            body = body.Replace("{{LockCode}}", new string(unitName));
+                            break;
+                        default:
+                            body = body.Replace(field, data.Value);
+                            break;
+                    }
                 }
             }
-            body = body.Replace("{{UserPassword}}", user.Password);
+            body = body.Replace("{{BaseUrl}}", _config["BaseUrl"]);
+            body = body.Replace("{{InviteConfirmationUrl}}", _config["InviteConfirmation"] + user.Invitationtoken);
+            
             return body;
         }
 
-        private string GetBodyFormattedInvitationStandar(EmailTemplate invitationTemplate, User user)
-        {
-            string htmlbody = invitationTemplate.body.Replace("{", "{{").Replace("}", "}}").Replace("%{{", "{").Replace("}}%", "}");
-            string body = string.Format(htmlbody, user.Name, user.Username, user.Password, $"{_config["InviteConfirmation"]}{user.Invitationtoken}");
-
-            return body;
-        }
         private async Task<bool> CheckMandatoryData(InvitationMandatoryData fields)
         {
             string validations = null;
@@ -1173,12 +1231,14 @@ namespace customerportalapi.Services
             return true;
         }
 
-        private MandatoryData GetMandatiryData(string value, StateEnum state)
+        private MandatoryData GetMandatiryData(SystemTypes system, EntityNames entity, string value, StateEnum state)
         {
             MandatoryData data = new MandatoryData()
             {
                 Value = value,
-                State = state
+                State = state,
+                System = system,
+                Entity = entity
             };
 
             return data;            

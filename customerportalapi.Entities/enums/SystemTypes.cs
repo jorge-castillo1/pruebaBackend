@@ -8,6 +8,7 @@ namespace customerportalapi.Entities.enums
     {
         CRM,
         CustomerPortal,
-        SignatureAPI
+        SignatureAPI,
+        SM
     }
 }
