@@ -31,7 +31,7 @@ namespace customerportalapi.Services
         private readonly IContractSMRepository _contractSMRepository;
         private readonly IOpportunityCRMRepository _opportunityRepository;
         private readonly IStoreRepository _storeRepository;
-        private readonly ISizeCodeRepository _sizeCodeRepository;
+        private readonly IUnitLocationRepository _unitLocationRepository;
 
 
         public UserServices(
@@ -48,7 +48,7 @@ namespace customerportalapi.Services
             IContractSMRepository contractSMRepository,
             IOpportunityCRMRepository opportunityRepository,
             IStoreRepository storeRepository,
-            ISizeCodeRepository sizeCodeRepository
+            IUnitLocationRepository unitLocationRepository
         )
         {
             _userRepository = userRepository;
@@ -64,7 +64,7 @@ namespace customerportalapi.Services
             _contractSMRepository = contractSMRepository;
             _opportunityRepository = opportunityRepository;
             _storeRepository = storeRepository;
-            _sizeCodeRepository = sizeCodeRepository;
+            _unitLocationRepository = unitLocationRepository;
         }
 
 
@@ -1077,10 +1077,10 @@ namespace customerportalapi.Services
                                 SiteCode = contract.StoreData.StoreId.ToString(),
                                 SizeCode = contract.Unit.UnitCategory
                             };
-                            List<UnitLocation> sizeCode = _sizeCodeRepository.Find(filter);
+                            List<UnitLocation> unitLocation = _unitLocationRepository.Find(filter);
                             invitationData.UnitSizeCode.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
-                            if (!string.IsNullOrEmpty(sizeCode[0].Description))
-                                invitationData.UnitSizeCode.SetValueAndState(sizeCode[0].Description, StateEnum.Checked);
+                            if (!string.IsNullOrEmpty(unitLocation[0].Description))
+                                invitationData.UnitSizeCode.SetValueAndState(unitLocation[0].Description, StateEnum.Checked);
 
                             string storeId = contract.StoreData.StoreId.ToString();
                             Store store = await _storeRepository.GetStoreAsync(storeId);

@@ -9,11 +9,11 @@ using System.Threading.Tasks;
 
 namespace customerportalapi.Repositories
 {
-    public class SizeCodeRepository : ISizeCodeRepository
+    public class UnitLocationRepository : IUnitLocationRepository
     {
         private readonly IMongoCollectionWrapper<UnitLocation> _sizeCodes;
 
-        public SizeCodeRepository(IConfiguration config, IMongoCollectionWrapper<UnitLocation> sizeCodes)
+        public UnitLocationRepository(IConfiguration config, IMongoCollectionWrapper<UnitLocation> sizeCodes)
         {
             _sizeCodes = sizeCodes;
         }
@@ -32,7 +32,8 @@ namespace customerportalapi.Repositories
 
         public UnitLocation Update(UnitLocation location)
         {
-            var filter = Builders<UnitLocation>.Filter.Eq(s => s.Description, location.Description);
+            var filter = Builders<UnitLocation>.Filter.Eq(s => s.SiteCode, location.SiteCode);
+            filter &= Builders<UnitLocation>.Filter.Eq(s => s.SizeCode, location.SizeCode);
             var result = _sizeCodes.ReplaceOne(filter, location);
 
             return location;
@@ -47,7 +48,8 @@ namespace customerportalapi.Repositories
 
         public Task<bool> Delete(UnitLocation location)
         {
-            var filter = Builders<UnitLocation>.Filter.Eq("code", location.SizeCode);
+            var filter = Builders<UnitLocation>.Filter.Eq("SiteCode", location.SizeCode);
+            filter &= Builders<UnitLocation>.Filter.Eq("SizeCode", location.SizeCode);
             _sizeCodes.DeleteOneAsync(filter);
 
             return Task.FromResult(true);

@@ -150,7 +150,7 @@ namespace customerportalapi
             services.AddScoped<IEkomiWidgetRepository, EkomiWidgetRepository>();
             services.AddScoped<IOpportunityCRMRepository, OpportunityCRMRepository>();
             services.AddScoped<ILanguageRepository, LanguageRepository>();
-            services.AddScoped<ISizeCodeRepository, SizeCodeRepository>();
+            services.AddScoped<IUnitLocationRepository, UnitLocationRepository>();
 
             //Register Business Services
             services.AddTransient<IUserServices, UserServices>();

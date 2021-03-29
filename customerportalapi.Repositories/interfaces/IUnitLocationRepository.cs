@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace customerportalapi.Repositories.interfaces
 {
-    public interface ISizeCodeRepository
+    public interface IUnitLocationRepository
     {
         UnitLocation GetBySizeCode(string sizeCode);
         UnitLocation Update(UnitLocation sizeCode);
