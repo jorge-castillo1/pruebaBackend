@@ -951,7 +951,7 @@ namespace customerportalapi.Services
             if (string.IsNullOrEmpty(invitationErrorTemplate._id))
                 throw new ServiceException("Email template not found, templateCode: " + (int)EmailTemplateTypes.InvitationError, HttpStatusCode.NotFound, FieldNames.Email+FieldNames.Template, ValidationMessages.NotFound);
             
-            string mailTo = _config["MailStores"];
+            string mailTo = _config["MailIT"];
             if (string.IsNullOrEmpty(mailTo)) 
                 throw new ServiceException("Store mail not found", HttpStatusCode.NotFound, FieldNames.Email, ValidationMessages.NotFound);
 
@@ -1039,18 +1039,17 @@ namespace customerportalapi.Services
 
             foreach (Contract contract in contracts)
             {
-                invitationData.SmContractCode.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
-                if (!string.IsNullOrEmpty(contract.SmContractCode))
+                if (!string.IsNullOrEmpty(contract.SmContractCode) && invitationData.ActiveContract.State == StateEnum.Unchecked)
                 {
                     invitationData.SmContractCode.SetValueAndState(contract.SmContractCode, StateEnum.Checked);
 
                     SMContract contractSM = await _contractSMRepository.GetAccessCodeAsync(contract.SmContractCode);
                     invitationData.SMContract.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
-                    if (contractSM != null && string.IsNullOrEmpty(contractSM.Contractnumber))
+                    if (contractSM != null && !string.IsNullOrEmpty(contractSM.Contractnumber))
                         invitationData.SMContract.SetValueAndState(contractSM.Contractnumber, StateEnum.Checked);
 
                     // only active contracts, if the contract has "terminated", the field "Leaving" have information.
-                    if (contractSM != null && String.IsNullOrEmpty(contractSM.Leaving) && invitationData.ActiveContract.State == StateEnum.Unchecked)
+                    if (contractSM != null && string.IsNullOrEmpty(contractSM.Leaving))
                     {
                         invitationData.ActiveContract.SetValueAndState(StateEnum.Checked.ToString(), StateEnum.Checked);
 
@@ -1079,7 +1078,7 @@ namespace customerportalapi.Services
                             };
                             List<UnitLocation> unitLocation = _unitLocationRepository.Find(filter);
                             invitationData.UnitSizeCode.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
-                            if (!string.IsNullOrEmpty(unitLocation[0].Description))
+                            if (unitLocation.Count > 0 && !string.IsNullOrEmpty(unitLocation[0].Description))
                                 invitationData.UnitSizeCode.SetValueAndState(unitLocation[0].Description, StateEnum.Checked);
 
                             string storeId = contract.StoreData.StoreId.ToString();
@@ -1142,6 +1141,9 @@ namespace customerportalapi.Services
                 }
 
             }
+
+            if(invitationData.SmContractCode.State == StateEnum.Unchecked)
+                invitationData.SmContractCode.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
 
             return true;
         }

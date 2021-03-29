@@ -31,18 +31,19 @@ namespace customerportalapi.Repositories.Test
                         SiteCode = "Fake-SiteCode",
                         SizeCode = "Fake-SizeCode",
                         Description = "Fake Description"
-                    },
-                    new UnitLocation() {
-                        SiteCode = "Fake-SiteCode2",
-                        SizeCode = "Fake-SizeCode2",
-                        Description = "Fake Description2"
                     }
                 }
             );
 
-            _sizeCodes.Setup(x => x.InsertOne(It.IsAny<UnitLocation>())).Verifiable();
-            _sizeCodes.Setup(x => x.ReplaceOne(It.IsAny<FilterDefinition<UnitLocation>>(), It.IsAny<UnitLocation>())).Returns(new Mock<ReplaceOneResult>().Object).Verifiable();
-            _sizeCodes.Setup(x => x.DeleteOneAsync(It.IsAny<FilterDefinition<UnitLocation>>())).Returns(Task.FromResult(new Mock<DeleteResult>().Object)).Verifiable();
+            _sizeCodes.Setup(x => x.Find(It.IsAny<FilterDefinition<UnitLocation>>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<FindOptions>())).Returns(
+                new List<UnitLocation>() {
+                    new UnitLocation() {
+                        SiteCode = "Fake-SiteCode",
+                        SizeCode = "Fake-SizeCode",
+                        Description = "Fake Description"
+                    }
+                }
+            );
         }
 
         [TestMethod]

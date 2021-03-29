@@ -46,10 +46,10 @@ namespace customerportalapi.Services.Test.FakeData
                 {
                     new UnitLocation()
                     {
-                        Id = "605dd201d7edd1a9585777777",
-                        SiteCode = "Fake-SiteCode2",
-                        SizeCode = "Fake-SizeCode2",
-                        Description = "Fake-Description2"
+                        Id = "605dd201d7edd1a958574d43",
+                        SiteCode = "Fake-SiteCode",
+                        SizeCode = "Fake-SizeCode",
+                        Description = "Fake-Description"
                     }
                 }
             ).Verifiable();

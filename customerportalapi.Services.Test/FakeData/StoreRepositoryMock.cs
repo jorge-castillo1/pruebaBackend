@@ -25,8 +25,14 @@ namespace customerportalapi.Services.Test.FakeData
                     CompanySocialAddress = "Fake Street, 10",
                     Country = "FAKE",
                     City = "FAKE",
-                    CountryCode = "ES"
-                }
+                    CountryCode = "ES",
+                    OpeningDaysFirst = "01/02/2020",
+                    OpeningDaysLast = "01/02/2020",
+                    OpeningHoursFrom = "8",
+                    OpeningHoursTo = "20",
+                    EmailAddress1 = "fake1@email.com",
+                    EmailAddress2 = "fake2@email.com"
+            }
             )).Verifiable();
 
             return db;

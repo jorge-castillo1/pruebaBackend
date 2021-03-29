@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System.Threading.Tasks;
+using customerportalapi.Entities.enums;
 
 namespace customerportalapi.Services.Test
 {
@@ -260,6 +261,7 @@ namespace customerportalapi.Services.Test
             Assert.IsTrue(result);
             _userRepositoryInvalid.Verify(x => x.Create(It.IsAny<User>()));
             _mailRepository.Verify(x => x.Send(It.IsAny<Email>()));
+            _emailtemplateRepository.Verify(x => x.getTemplate((int)EmailTemplateTypes.InvitationWelcome, It.IsAny<string>()));
         }
 
         [TestMethod]
@@ -294,12 +296,14 @@ namespace customerportalapi.Services.Test
 
             //Act
             Mock<IUserRepository> _userRepositoryInvalid = UserRepositoryMock.Valid_InActiveUser_Repository();
+
             UserServices service = new UserServices(_userRepositoryInvalid.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object, _serviceLogin, _userAccountRepository.Object, _languageRepository.Object, _contractRepository.Object, _contractSMRepository.Object, _opportunityRepository.Object, _storeRepository.Object, _unitLocationRepository.Object);
             bool result = await service.InviteUserAsync(invitation);
 
             //Assert
             Assert.IsTrue(result);
             _userRepositoryInvalid.Verify(x => x.Update(It.IsAny<User>()));
+            _emailtemplateRepository.Verify(x => x.getTemplate((int)EmailTemplateTypes.InvitationStandard, It.IsAny<string>()));
             _mailRepository.Verify(x => x.Send(It.IsAny<Email>()));
         }
 
@@ -345,6 +349,30 @@ namespace customerportalapi.Services.Test
             //Assert
             Assert.IsTrue(result);
             _userRepositoryInvalid.Verify(x => x.GetCurrentUserByEmail(It.IsAny<string>()));
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ServiceException), "No se ha producido la excepci�n esperada.")]
+        public async Task AlInvitarUnUsuario_HacenFaltaDatos_paraCompletarLaInvitacion_EnviaEmailErroraITBlue_RetornaError()
+        {
+            //Arrange
+            Invitation invitation = new Invitation();
+            invitation.Dni = "FakeDni";
+            invitation.Email = "fakeuser@email.com";
+            invitation.CustomerType = "Residential";
+            invitation.Fullname = "Fake User";
+            invitation.Language = "French";
+
+            //Act
+            Mock<IUserRepository> _userRepository = UserRepositoryMock.InvalidUserRepository();
+            Mock<IContractRepository> _contractRepository = ContractRepositoryMock.InvalidContractRepository();
+            UserServices service = new UserServices(_userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object, _serviceLogin, _userAccountRepository.Object, _languageRepository.Object, _contractRepository.Object, _contractSMRepository.Object, _opportunityRepository.Object, _storeRepository.Object, _unitLocationRepository.Object);
+            bool result = await service.InviteUserAsync(invitation);
+
+            //Assert
+            Assert.IsTrue(result);
+            _emailtemplateRepository.Verify(x => x.getTemplate((int)EmailTemplateTypes.InvitationError, It.IsAny<string>()));
+            _mailRepository.Verify(x => x.Send(It.IsAny<Email>()));
         }
 
 
