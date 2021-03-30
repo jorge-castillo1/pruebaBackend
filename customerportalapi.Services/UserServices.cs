@@ -977,7 +977,7 @@ namespace customerportalapi.Services
                 }
                 list += $"<tr class='{state}'><td>{system}</td><td>{entity}</td><td>{property.Name}</td><td>{value}</td></tr>";
             }
-            message.Body = message.Body.Replace("{{columns}}", list);
+            message.Body = message.Body.Replace("{{rows}}", list);
 
             bool result = await _mailRepository.Send(message);
             return result;
