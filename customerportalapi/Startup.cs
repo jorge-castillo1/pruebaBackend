@@ -109,7 +109,7 @@ namespace customerportalapi
             services.AddScoped<IMongoCollectionWrapper<UnitLocation>>(serviceProvider =>
             {
                 IMongoDatabase database = GetDatabase();
-                return new MongoCollectionWrapper<UnitLocation>(database, "UnitLocations");
+                return new MongoCollectionWrapper<UnitLocation>(database, "unitlocations");
             });
 
             //Mail service
