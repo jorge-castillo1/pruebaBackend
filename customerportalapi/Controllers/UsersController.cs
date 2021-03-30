@@ -41,6 +41,7 @@ namespace customerportalapi.Controllers
             }
             catch (ServiceException se)
             {
+                _logger.LogError(se.ToString());
                 return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
             }
             catch (Exception ex)
@@ -69,6 +70,7 @@ namespace customerportalapi.Controllers
             }
             catch (ServiceException se)
             {
+                _logger.LogError(se.ToString());
                 return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
             }
             catch (Exception ex)
@@ -95,6 +97,7 @@ namespace customerportalapi.Controllers
             }
             catch (ServiceException se)
             {
+                _logger.LogError(se.ToString());
                 return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
             }
             catch (Exception ex)
@@ -122,6 +125,7 @@ namespace customerportalapi.Controllers
             }
             catch (ServiceException se)
             {
+                _logger.LogError(se.ToString());
                 return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
             }
             catch (Exception ex)
@@ -147,6 +151,7 @@ namespace customerportalapi.Controllers
             }
             catch (ServiceException se)
             {
+                _logger.LogError(se.ToString());
                 return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
             }
             catch (Exception ex)
@@ -172,6 +177,7 @@ namespace customerportalapi.Controllers
             }
             catch (ServiceException se)
             {
+                _logger.LogError(se.ToString());
                 return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
             }
             catch (Exception ex)
@@ -220,6 +226,7 @@ namespace customerportalapi.Controllers
             }
             catch (ServiceException se)
             {
+                _logger.LogError(se.ToString());
                 return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
             }
             catch (Exception ex)
@@ -247,6 +254,7 @@ namespace customerportalapi.Controllers
             }
             catch (ServiceException se)
             {
+                _logger.LogError(se.ToString());
                 return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
             }
             catch (Exception ex)
@@ -272,6 +280,7 @@ namespace customerportalapi.Controllers
             }
             catch (ServiceException se)
             {
+                _logger.LogError(se.ToString());
                 return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
             }
             catch (Exception ex)
@@ -297,6 +306,7 @@ namespace customerportalapi.Controllers
             }
             catch (ServiceException se)
             {
+                _logger.LogError(se.ToString());
                 return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
             }
             catch (Exception ex)
@@ -324,6 +334,7 @@ namespace customerportalapi.Controllers
             }
             catch (ServiceException se)
             {
+                _logger.LogError(se.ToString());
                 return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
             }
             catch (Exception ex)
@@ -373,6 +384,7 @@ namespace customerportalapi.Controllers
             }
             catch (ServiceException se)
             {
+                _logger.LogError(se.ToString());
                 return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
             }
             catch (Exception ex)
@@ -400,6 +412,7 @@ namespace customerportalapi.Controllers
             }
             catch (ServiceException se)
             {
+                _logger.LogError(se.ToString());
                 return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
             }
             catch (Exception ex)
