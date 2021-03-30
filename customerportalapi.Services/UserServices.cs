@@ -1073,7 +1073,7 @@ namespace customerportalapi.Services
                             // TODO: get sizeCode form Contract or Unit
                             UnitLocationSearchFilter filter = new UnitLocationSearchFilter()
                             {
-                                SiteCode = contract.StoreData.StoreId.ToString(),
+                                SiteCode = contract.StoreData.StoreCode.ToString(),
                                 SizeCode = contract.Unit.UnitCategory
                             };
                             List<UnitLocation> unitLocation = _unitLocationRepository.Find(filter);
@@ -1086,7 +1086,7 @@ namespace customerportalapi.Services
 
                             invitationData.StoreId.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
                             if (store.StoreId != null)
-                                invitationData.StoreId.SetValueAndState(store.StoreId.ToString(), StateEnum.Checked);
+                                invitationData.StoreId.SetValueAndState(store.StoreCode.ToString(), StateEnum.Checked);
 
                             invitationData.OpeningDaysFirst.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
                             if (!string.IsNullOrEmpty(store.OpeningDaysFirst))
