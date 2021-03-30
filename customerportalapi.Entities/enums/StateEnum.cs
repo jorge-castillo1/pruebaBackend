@@ -4,11 +4,11 @@ using System.Text;
 
 namespace customerportalapi.Entities.enums
 {
-    public enum SystemTypes
+    public enum StateEnum
     {
-        CRM,
-        CustomerPortal,
-        SignatureAPI,
-        SM
+        Unchecked,
+        Error,
+        Checked
     }
 }
+

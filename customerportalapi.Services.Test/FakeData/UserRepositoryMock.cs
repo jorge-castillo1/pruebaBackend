@@ -1,4 +1,5 @@
 ﻿using customerportalapi.Entities;
+using customerportalapi.Entities.enums;
 using customerportalapi.Repositories.interfaces;
 using Moq;
 using System.Threading.Tasks;
@@ -37,7 +38,8 @@ namespace customerportalapi.Services.Test.FakeData
                 LoginAttempts = 5,
                 LastLoginAttempts = System.DateTime.Now.ToUniversalTime().AddMinutes(-10),
                 AccessCodeAttempts = 5,
-                LastAccessCodeAttempts = System.DateTime.Now.ToUniversalTime().AddMinutes(-10)
+                LastAccessCodeAttempts = System.DateTime.Now.ToUniversalTime().AddMinutes(-10),
+                LastEmailSent = EmailTemplateTypes.InvitationWelcome.ToString()
             }).Verifiable();
 
             db.Setup(x => x.Create(It.IsAny<User>())).Returns(Task.FromResult(true)).Verifiable();
@@ -242,7 +244,8 @@ namespace customerportalapi.Services.Test.FakeData
                 Language = "en",
                 Profilepicture = "fake profile image",
                 Emailverified = false,
-                Usertype = 1
+                Usertype = 1,
+                LastLoginAttempts = System.DateTime.Now.ToUniversalTime()
             }).Verifiable();
 
             db.Setup(x => x.Update(It.IsAny<User>())).Returns(new User()

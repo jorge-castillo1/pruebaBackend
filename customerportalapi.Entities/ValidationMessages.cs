@@ -11,5 +11,9 @@ namespace customerportalapi.Entities
         public const string InUse = "In Use";
         public const string EmptyFields = "Empty fields";
         public const string LongerTo = "Longer to";
+        public const string Required = "Required";
+        public const string NotFound = "Not found";
+        public const string AlreadyInUse = "Already In Use";
+        public const string AlreadyInvited = "Already invited";
     }
 }

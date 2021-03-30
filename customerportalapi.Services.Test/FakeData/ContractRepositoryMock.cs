@@ -19,6 +19,7 @@ namespace customerportalapi.Services.Test.FakeData
                 {
                    ContractNumber = "1234567890",
                    ContractDate = "01/01/2020",
+                   SmContractCode ="123456786",
                    Store = "Fake Store",
                    StoreData = new Store
                    {
@@ -39,13 +40,15 @@ namespace customerportalapi.Services.Test.FakeData
                         UnitCategory = "SS",
                         UnitName = "6104",
                         Width = "2.92"
-                   }
+                   },
+                   OpportunityId = "OpportunityId"
                 },
                 new Contract
                 {
                    ContractNumber = "1234567891",
                    ContractDate = "01/01/2019",
                    Store = "Fake Store",
+                   SmContractCode ="123456787",
                    StoreData = new Store
                    {
                        StoreName = "Fake Store",
@@ -71,6 +74,7 @@ namespace customerportalapi.Services.Test.FakeData
                 {
                    ContractNumber = "1234567892",
                    ContractDate = "01/01/2020",
+                   SmContractCode ="123456788",
                    Store = "Fake Store 2",
                    StoreData = new Store
                    {
@@ -97,6 +101,7 @@ namespace customerportalapi.Services.Test.FakeData
                 {
                    ContractNumber = "1234567893",
                    ContractDate = "01/01/2020",
+                   SmContractCode ="123456789",
                    Store = "Fake Store 2",
                    StoreData = new Store
                    {
@@ -157,6 +162,24 @@ namespace customerportalapi.Services.Test.FakeData
                 }
 
             })).Verifiable();
+
+            db.Setup(x => x.GetContractsAsync(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(
+                new List<Contract>() {
+                    new Contract()
+                    {
+                        ContractDate = "01/01/2020",
+                        Store = "Fake Store",
+                        StoreData = new Store
+                        {
+                            StoreName = "Fake Store",
+                            Telephone = "Fake telephone",
+                            CoordinatesLatitude = "Fake CoordinatesLatitude",
+                            CoordinatesLongitude = "Fake CoordinatesLongitude"
+                        }
+                    }
+
+                }
+            )).Verifiable();
 
             return db;
         }

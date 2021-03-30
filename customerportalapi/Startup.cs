@@ -106,6 +106,11 @@ namespace customerportalapi
                 IMongoDatabase database = GetDatabase();
                 return new MongoCollectionWrapper<EkomiWidget>(database, "ekomiwidgets");
             });
+            services.AddScoped<IMongoCollectionWrapper<UnitLocation>>(serviceProvider =>
+            {
+                IMongoDatabase database = GetDatabase();
+                return new MongoCollectionWrapper<UnitLocation>(database, "UnitLocations");
+            });
 
             //Mail service
             services.AddScoped(serviceProvider =>
@@ -145,6 +150,7 @@ namespace customerportalapi
             services.AddScoped<IEkomiWidgetRepository, EkomiWidgetRepository>();
             services.AddScoped<IOpportunityCRMRepository, OpportunityCRMRepository>();
             services.AddScoped<ILanguageRepository, LanguageRepository>();
+            services.AddScoped<IUnitLocationRepository, UnitLocationRepository>();
 
             //Register Business Services
             services.AddTransient<IUserServices, UserServices>();

@@ -29,6 +29,16 @@ namespace customerportalapi.Entities
         public const string StoreId = "StoreId";
         public const string result = "result";
         public const string StateOrProvince = "StateOrProvince";
+        public const string Contract = "Contract";
+        public const string OpportunityId = "OpportunityId";
+        public const string ExpectedMoveIn = "ExpectedMoveIn";
+        public const string StoreName = "StoreName";
+        public const string OpeningDaysFirst = "OpeningDaysFirst";
+        public const string OpeningDaysLast = "OpeningDaysLast";
+        public const string OpeningHoursFrom = "OpeningHoursFrom";
+        public const string OpeningHoursTo = "OpeningHoursTo";
+        public const string Template = "Template";
+        public const string Contact = "Contact";
 
     }
 }
