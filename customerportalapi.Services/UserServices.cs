@@ -995,7 +995,7 @@ namespace customerportalapi.Services
                 UnitPassword = GetMandatiryData(SystemTypes.CRM, EntityNames.iav_contracts, null, StateEnum.Unchecked),
                 UnitName = GetMandatiryData(SystemTypes.CRM, EntityNames.iav_contracts, null, StateEnum.Unchecked),
                 UnitSizeCode = GetMandatiryData(SystemTypes.CRM, EntityNames.iav_contracts, null, StateEnum.Unchecked), // TODO: check EntityNames
-                ContractStoreId = GetMandatiryData(SystemTypes.CRM, EntityNames.iav_contracts, null, StateEnum.Unchecked),
+                ContractStoreCode = GetMandatiryData(SystemTypes.CRM, EntityNames.iav_contracts, null, StateEnum.Unchecked),
                 StoreId = GetMandatiryData(SystemTypes.CRM, EntityNames.iav_stores, null, StateEnum.Unchecked),
                 OpeningDaysFirst = GetMandatiryData(SystemTypes.CRM, EntityNames.iav_stores, null, StateEnum.Unchecked),
                 OpeningDaysLast = GetMandatiryData(SystemTypes.CRM, EntityNames.iav_stores, null, StateEnum.Unchecked),
@@ -1062,18 +1062,16 @@ namespace customerportalapi.Services
                         if (!string.IsNullOrEmpty(contract.Unit.UnitName))
                             invitationData.UnitName.SetValueAndState(contract.Unit.UnitName, StateEnum.Checked);
 
-
                         // Store
-                        invitationData.ContractStoreId.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
-                        if (contract.StoreData.StoreId != null)
+                        invitationData.ContractStoreCode.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
+                        if (contract.StoreData.StoreCode != null)
                         {
-
-                            invitationData.ContractStoreId.SetValueAndState(StateEnum.Checked.ToString(), StateEnum.Checked);
+                            invitationData.ContractStoreCode.SetValueAndState(contract.StoreData.StoreCode, StateEnum.Checked);
 
                             // TODO: get sizeCode form Contract or Unit
                             UnitLocationSearchFilter filter = new UnitLocationSearchFilter()
                             {
-                                SiteCode = contract.StoreData.StoreId.ToString(),
+                                SiteCode = contract.StoreData.StoreCode,
                                 SizeCode = contract.Unit.UnitCategory
                             };
                             List<UnitLocation> unitLocation = _unitLocationRepository.Find(filter);
@@ -1081,8 +1079,7 @@ namespace customerportalapi.Services
                             if (unitLocation.Count > 0 && !string.IsNullOrEmpty(unitLocation[0].Description))
                                 invitationData.UnitSizeCode.SetValueAndState(unitLocation[0].Description, StateEnum.Checked);
 
-                            string storeId = contract.StoreData.StoreId.ToString();
-                            Store store = await _storeRepository.GetStoreAsync(storeId);
+                            Store store = await _storeRepository.GetStoreAsync(contract.StoreData.StoreCode);
 
                             invitationData.StoreId.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
                             if (store.StoreId != null)
