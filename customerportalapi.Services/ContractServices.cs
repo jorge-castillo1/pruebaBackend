@@ -22,8 +22,8 @@ namespace customerportalapi.Services
         private readonly IDocumentRepository _documentRepository;
         private readonly IUserRepository _userRepository;
         private readonly IStoreRepository _storeRepository;
-
         private readonly IOpportunityCRMRepository _opportunityRepository;
+        private readonly IPaymentMethodRepository _paymentMethodRepository;
 
 
         public ContractServices(
@@ -35,7 +35,8 @@ namespace customerportalapi.Services
             IDocumentRepository documentRepository,
             IUserRepository userRepository,
             IStoreRepository storeRepository,
-            IOpportunityCRMRepository opportunityRepository
+            IOpportunityCRMRepository opportunityRepository,
+            IPaymentMethodRepository paymentMethodRepository
          )
         {
             _configuration = configuration;
@@ -47,6 +48,7 @@ namespace customerportalapi.Services
             _userRepository = userRepository;
             _storeRepository = storeRepository;
             _opportunityRepository = opportunityRepository;
+            _paymentMethodRepository = paymentMethodRepository;
         }
 
         public async Task<Contract> GetContractAsync(string contractNumber)
@@ -149,6 +151,15 @@ namespace customerportalapi.Services
                 response.contract.OpportunityId = opportunity.OpportunityId;
                 response.contract.ExpectedMoveIn = opportunity.ExpectedMoveIn;
             }
+
+            PaymentMethodCRM payMetCRM;
+            if (!string.IsNullOrEmpty(response.contract.PaymentMethodId))
+            {
+                payMetCRM = await _paymentMethodRepository.GetPaymentMethodbyId(response.contract.PaymentMethodId);
+                if (payMetCRM != null && !string.IsNullOrWhiteSpace(payMetCRM.PaymentName))
+                    response.contract.PaymentMethodName = payMetCRM.PaymentName;
+            }
+
             return response;
         }
 

@@ -186,7 +186,10 @@ namespace customerportalapi.Services
             account.BankAccount = processedpaymentdocument.BankAccountOrderNumber;
             AccountProfile updateAccount = await _profileRepository.UpdateAccountAsync(account);
 
-            contract.PaymentMethod = payMetCRM.PaymentMethodId;
+            // TODO: only for dev, remove next line
+            // contract.PaymentMethod = payMetCRM.Name;
+            contract.PaymentMethodName = payMetCRM.PaymentName;
+            contract.PaymentMethodId = payMetCRM.PaymentMethodId;
             Contract updateContract = await _contractRepository.UpdateContractAsync(contract);
 
             if (updateAccount.SmCustomerId == null)
