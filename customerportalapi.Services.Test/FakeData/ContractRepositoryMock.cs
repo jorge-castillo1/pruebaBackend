@@ -28,7 +28,9 @@ namespace customerportalapi.Services.Test.FakeData
                        CoordinatesLatitude = "Fake CoordinatesLatitude",
                        CoordinatesLongitude = "Fake CoordinatesLongitude",
                        StoreCode ="RI1BBFRI120920060001",
-                       StoreId = Guid.Parse("00000000-0000-0000-0000-000000000001")
+                       StoreId = Guid.Parse("00000000-0000-0000-0000-000000000001"),
+                        EmailAddress1 = "EmailAddress1",
+                        EmailAddress2 = "EmailAddress2"
                    },
                    Unit = new Unit
                    {
@@ -51,13 +53,15 @@ namespace customerportalapi.Services.Test.FakeData
                    SmContractCode ="123456787",
                    StoreData = new Store
                    {
-                       StoreName = "Fake Store",
-                       Telephone = "Fake telephone",
-                       CoordinatesLatitude = "Fake CoordinatesLatitude",
-                       CoordinatesLongitude = "Fake CoordinatesLongitude",
-                       StoreCode="RI1BBFRI120920060001",
-                       StoreId = Guid.Parse("00000000-0000-0000-0000-000000000001")
-                   },
+                        StoreName = "Fake Store",
+                        Telephone = "Fake telephone",
+                        CoordinatesLatitude = "Fake CoordinatesLatitude",
+                        CoordinatesLongitude = "Fake CoordinatesLongitude",
+                        StoreCode="RI1BBFRI120920060001",
+                        StoreId = Guid.Parse("00000000-0000-0000-0000-000000000001"),
+                        EmailAddress1 = "EmailAddress1",
+                        EmailAddress2 = "EmailAddress2"
+                    },
                    Unit = new Unit
                    {
                         Depth = "4.96",
@@ -78,12 +82,14 @@ namespace customerportalapi.Services.Test.FakeData
                    Store = "Fake Store 2",
                    StoreData = new Store
                    {
-                       StoreName = "Fake Store",
-                       Telephone = "Fake telephone",
-                       CoordinatesLatitude = "Fake CoordinatesLatitude",
-                       CoordinatesLongitude = "Fake CoordinatesLongitude",
-                       StoreCode="RI1BBFRI120920060000",
-                       StoreId = Guid.Parse("00000000-0000-0000-0000-000000000002")
+                        StoreName = "Fake Store",
+                        Telephone = "Fake telephone",
+                        CoordinatesLatitude = "Fake CoordinatesLatitude",
+                        CoordinatesLongitude = "Fake CoordinatesLongitude",
+                        StoreCode="RI1BBFRI120920060000",
+                        StoreId = Guid.Parse("00000000-0000-0000-0000-000000000002"),
+                        EmailAddress1 = "EmailAddress1",
+                        EmailAddress2 = "EmailAddress2"
                    },
                    Unit = new Unit
                    {
@@ -105,12 +111,14 @@ namespace customerportalapi.Services.Test.FakeData
                    Store = "Fake Store 2",
                    StoreData = new Store
                    {
-                       StoreName = "Fake Store",
-                       Telephone = "Fake telephone",
-                       CoordinatesLatitude = "Fake CoordinatesLatitude",
-                       CoordinatesLongitude = "Fake CoordinatesLongitude",
-                       StoreCode="RI1BBFRI120920060000",
-                       StoreId = Guid.Parse("00000000-0000-0000-0000-000000000002")
+                        StoreName = "Fake Store",
+                        Telephone = "Fake telephone",
+                        CoordinatesLatitude = "Fake CoordinatesLatitude",
+                        CoordinatesLongitude = "Fake CoordinatesLongitude",
+                        StoreCode="RI1BBFRI120920060000",
+                        StoreId = Guid.Parse("00000000-0000-0000-0000-000000000002"),
+                        EmailAddress1 = "EmailAddress1",
+                        EmailAddress2 = "EmailAddress2"
                    },
                    Unit = new Unit
                    {
@@ -138,7 +146,9 @@ namespace customerportalapi.Services.Test.FakeData
                     CoordinatesLatitude = "Fake CoordinatesLatitude",
                     CoordinatesLongitude = "Fake CoordinatesLongitude",
                     StoreCode = "RI1BBFRI120920060000",
-                    StoreId = Guid.Parse("00000000-0000-0000-0000-000000000002")
+                    StoreId = Guid.Parse("00000000-0000-0000-0000-000000000002"),
+                    EmailAddress1 = "EmailAddress1",
+                    EmailAddress2 = "EmailAddress2"
                 },
                 SmContractCode = "123456789"
             })).Verifiable();
@@ -198,8 +208,59 @@ namespace customerportalapi.Services.Test.FakeData
                     StoreName = "Fake Store",
                     Telephone = "Fake telephone",
                     CoordinatesLatitude = "Fake CoordinatesLatitude",
+                    CoordinatesLongitude = "Fake CoordinatesLongitude",
+                    EmailAddress1 = "EmailAddress1",
+                    EmailAddress2 = "EmailAddress2"
+                },
+                OpportunityId = "FakeOpportunityId"
+
+            })).Verifiable();
+
+            return db;
+        }
+
+        public static Mock<IContractRepository> ValidContractRepositoryWithPaymentMethod()
+        {
+            var db = new Mock<IContractRepository>();
+            db.Setup(x => x.GetContractAsync(It.IsAny<string>())).Returns(Task.FromResult(new Contract()
+            {
+                ContractNumber = "1234567890",
+                ContractDate = "01/01/2020",
+                SmContractCode = "R1234567890",
+                Store = "Fake Store",
+                StoreData = new Store
+                {
+                    StoreName = "Fake Store",
+                    Telephone = "Fake telephone",
+                    CoordinatesLatitude = "Fake CoordinatesLatitude",
                     CoordinatesLongitude = "Fake CoordinatesLongitude"
-                }
+                },
+                OpportunityId = "FakeOpportunityId",
+                PaymentMethodId = "FakePaymentMethodId"
+
+            })).Verifiable();
+
+            return db;
+        }
+
+        public static Mock<IContractRepository> ValidContractRepositoryWithoutStoreEmail()
+        {
+            var db = new Mock<IContractRepository>();
+            db.Setup(x => x.GetContractAsync(It.IsAny<string>())).Returns(Task.FromResult(new Contract()
+            {
+                ContractNumber = "1234567890",
+                ContractDate = "01/01/2020",
+                SmContractCode = "R1234567890",
+                Store = "Fake Store",
+                StoreData = new Store
+                {
+                    StoreName = "Fake Store",
+                    Telephone = "Fake telephone",
+                    CoordinatesLatitude = "Fake CoordinatesLatitude",
+                    CoordinatesLongitude = "Fake CoordinatesLongitude",
+                },
+                OpportunityId = "FakeOpportunityId",
+                PaymentMethodId = "FakePaymentMethodId"
 
             })).Verifiable();
 

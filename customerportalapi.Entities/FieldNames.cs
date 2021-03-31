@@ -39,6 +39,7 @@ namespace customerportalapi.Entities
         public const string OpeningHoursTo = "OpeningHoursTo";
         public const string Template = "Template";
         public const string Contact = "Contact";
+        public const string InvoiceNumber = "InvoiceNumber";
 
     }
 }

@@ -30,9 +30,9 @@
 
         public string PaymentMethod { get; set; }
 
-        public string PaymentMethodName { get; set; }
-
         public string PaymentMethodId { get; set; }
+
+        public string PaymentMethodDescription { get; set; }
 
         public string Customer { get; set; }
 
