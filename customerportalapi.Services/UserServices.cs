@@ -996,7 +996,7 @@ namespace customerportalapi.Services
                 UnitName = GetMandatiryData(SystemTypes.CRM, EntityNames.iav_contracts, null, StateEnum.Unchecked),
                 UnitSizeCode = GetMandatiryData(SystemTypes.CRM, EntityNames.iav_contracts, null, StateEnum.Unchecked), // TODO: check EntityNames
                 ContractStoreCode = GetMandatiryData(SystemTypes.CRM, EntityNames.iav_contracts, null, StateEnum.Unchecked),
-                StoreId = GetMandatiryData(SystemTypes.CRM, EntityNames.iav_stores, null, StateEnum.Unchecked),
+                StoreCode = GetMandatiryData(SystemTypes.CRM, EntityNames.iav_stores, null, StateEnum.Unchecked),
                 OpeningDaysFirst = GetMandatiryData(SystemTypes.CRM, EntityNames.iav_stores, null, StateEnum.Unchecked),
                 OpeningDaysLast = GetMandatiryData(SystemTypes.CRM, EntityNames.iav_stores, null, StateEnum.Unchecked),
                 OpeningHoursFrom = GetMandatiryData(SystemTypes.CRM, EntityNames.iav_stores, null, StateEnum.Unchecked),
@@ -1080,41 +1080,42 @@ namespace customerportalapi.Services
                                 invitationData.UnitSizeCode.SetValueAndState(unitLocation[0].Description, StateEnum.Checked);
 
                             Store store = await _storeRepository.GetStoreAsync(contract.StoreData.StoreCode);
+                            invitationData.StoreCode.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
+                            if(store != null)
+                            {
+                                if (!string.IsNullOrEmpty(store.StoreCode))
+                                    invitationData.StoreCode.SetValueAndState(store.StoreCode.ToString(), StateEnum.Checked);
 
-                            invitationData.StoreId.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
-                            if (store.StoreId != null)
-                                invitationData.StoreId.SetValueAndState(store.StoreCode.ToString(), StateEnum.Checked);
+                                invitationData.OpeningDaysFirst.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
+                                if (!string.IsNullOrEmpty(store.OpeningDaysFirst))
+                                    invitationData.OpeningDaysFirst.SetValueAndState(store.OpeningDaysFirst, StateEnum.Checked);
 
-                            invitationData.OpeningDaysFirst.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
-                            if (!string.IsNullOrEmpty(store.OpeningDaysFirst))
-                                invitationData.OpeningDaysFirst.SetValueAndState(store.OpeningDaysFirst, StateEnum.Checked);
+                                invitationData.OpeningDaysLast.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
+                                if (!string.IsNullOrEmpty(store.OpeningDaysLast))
+                                    invitationData.OpeningDaysLast.SetValueAndState(store.OpeningDaysLast, StateEnum.Checked);
 
-                            invitationData.OpeningDaysLast.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
-                            if (!string.IsNullOrEmpty(store.OpeningDaysLast))
-                                invitationData.OpeningDaysLast.SetValueAndState(store.OpeningDaysLast, StateEnum.Checked);
+                                invitationData.OpeningHoursFrom.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
+                                if (!string.IsNullOrEmpty(store.OpeningHoursFrom))
+                                    invitationData.OpeningHoursFrom.SetValueAndState(store.OpeningHoursFrom, StateEnum.Checked);
 
-                            invitationData.OpeningHoursFrom.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
-                            if (!string.IsNullOrEmpty(store.OpeningHoursFrom))
-                                invitationData.OpeningHoursFrom.SetValueAndState(store.OpeningHoursFrom, StateEnum.Checked);
+                                invitationData.OpeningHoursTo.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
+                                if (!string.IsNullOrEmpty(store.OpeningHoursTo))
+                                    invitationData.OpeningHoursTo.SetValueAndState(store.OpeningHoursTo, StateEnum.Checked);
+
+                                invitationData.StoreName.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
+                                if (!string.IsNullOrEmpty(store.StoreName))
+                                    invitationData.StoreName.SetValueAndState(store.StoreName, StateEnum.Checked);
                             
-
-                            invitationData.OpeningHoursTo.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
-                            if (!string.IsNullOrEmpty(store.OpeningHoursTo))
-                                invitationData.OpeningHoursTo.SetValueAndState(store.OpeningHoursTo, StateEnum.Checked);
-
-                            invitationData.StoreName.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
-                            if (!string.IsNullOrEmpty(store.StoreName))
-                                invitationData.StoreName.SetValueAndState(store.StoreName, StateEnum.Checked);
+                                invitationData.StoreEmail.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
                             
-                            invitationData.StoreEmail.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
-                            
-                            string email = store.EmailAddress1 ?? store.EmailAddress2;
-                            if (!string.IsNullOrEmpty(email))
-                                invitationData.StoreEmail.SetValueAndState(email, StateEnum.Checked);
+                                string email = store.EmailAddress1 ?? store.EmailAddress2;
+                                if (!string.IsNullOrEmpty(email))
+                                    invitationData.StoreEmail.SetValueAndState(email, StateEnum.Checked);
 
-                            invitationData.StoreCity.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
-                            if (!string.IsNullOrEmpty(store.City))
-                                invitationData.StoreCity.SetValueAndState(store.City, StateEnum.Checked);
+                                invitationData.StoreCity.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
+                                if (!string.IsNullOrEmpty(store.City))
+                                    invitationData.StoreCity.SetValueAndState(store.City, StateEnum.Checked);
+                            }
                         }
 
                         // OpportunityCRM
@@ -1125,13 +1126,16 @@ namespace customerportalapi.Services
 
                             OpportunityCRM opportunity = await _opportunityRepository.GetOpportunity(contract.OpportunityId);
 
-                            invitationData.OpportunityId.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
-                            if (!string.IsNullOrEmpty(opportunity.OpportunityId))
-                                invitationData.OpportunityId.SetValueAndState(opportunity.OpportunityId, StateEnum.Checked);
+                            if (opportunity != null)
+                            {
+                                invitationData.OpportunityId.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
+                                if (!string.IsNullOrEmpty(opportunity.OpportunityId))
+                                    invitationData.OpportunityId.SetValueAndState(opportunity.OpportunityId, StateEnum.Checked);
 
-                            invitationData.ExpectedMoveIn.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
-                            if (!string.IsNullOrEmpty(opportunity.ExpectedMoveIn))
-                                invitationData.ExpectedMoveIn.SetValueAndState(DateTime.Parse(opportunity.ExpectedMoveIn).ToString(), StateEnum.Checked);
+                                invitationData.ExpectedMoveIn.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
+                                if (!string.IsNullOrEmpty(opportunity.ExpectedMoveIn))
+                                    invitationData.ExpectedMoveIn.SetValueAndState(DateTime.Parse(opportunity.ExpectedMoveIn).ToString(), StateEnum.Checked);
+                            }
 
                         }
                     }

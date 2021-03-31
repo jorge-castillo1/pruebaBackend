@@ -14,9 +14,9 @@ namespace customerportalapi.Entities
         public MandatoryData ActiveContract { get; set; }
         public MandatoryData UnitPassword { get; set; }
         public MandatoryData UnitName { get; set; }
-        public MandatoryData UnitSizeCode { get; set; }
         public MandatoryData ContractStoreCode { get; set; }
-        public MandatoryData StoreId { get; set; }
+        public MandatoryData UnitSizeCode { get; set; }
+        public MandatoryData StoreCode { get; set; }
         public MandatoryData OpeningDaysFirst { get; set; }
         public MandatoryData OpeningDaysLast { get; set; }
         public MandatoryData OpeningHoursFrom { get; set; }
