@@ -6,6 +6,7 @@ using customerportalapi.Services.Exceptions;
 using customerportalapi.Services.interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,11 +41,15 @@ namespace customerportalapi.Controllers
             }
             catch (ServiceException se)
             {
+                string obj = JsonConvert.SerializeObject(value);
+                _logger.LogError(se, se.Message + ", params:" + obj);
+
                 return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.ToString());
+                string obj = JsonConvert.SerializeObject(value);
+                _logger.LogError(ex, ex.Message + ", params:" + obj);
                 throw;
             }
         }
@@ -63,11 +68,14 @@ namespace customerportalapi.Controllers
             }
             catch (ServiceException se)
             {
+                string obj = JsonConvert.SerializeObject(value);
+                _logger.LogError(se, se.Message + ", params:" + obj);
                 return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.ToString());
+                string obj = JsonConvert.SerializeObject(value);
+                _logger.LogError(ex, ex.Message + ", params:" + obj);
                 throw;
             }
         }
@@ -86,11 +94,14 @@ namespace customerportalapi.Controllers
             }
             catch (ServiceException se)
             {
+                string obj = JsonConvert.SerializeObject(value);
+                _logger.LogError(se, se.Message + ", params:" + obj);
                 return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.ToString());
+                string obj = JsonConvert.SerializeObject(value);
+                _logger.LogError(ex, ex.Message + ", params:" + obj);
                 throw;
             }
         }
@@ -107,11 +118,14 @@ namespace customerportalapi.Controllers
             }
             catch (ServiceException se)
             {
+                string obj = JsonConvert.SerializeObject(value);
+                _logger.LogError(se, se.Message + ", params:" + obj);
                 return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.ToString());
+                string obj = JsonConvert.SerializeObject(value);
+                _logger.LogError(ex, ex.Message + ", params:" + obj);
                 throw;
             }
         }
@@ -128,6 +142,7 @@ namespace customerportalapi.Controllers
             }
             catch (ServiceException se)
             {
+                _logger.LogError(se.ToString());
                 return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
             }
             catch (Exception ex)
@@ -140,20 +155,23 @@ namespace customerportalapi.Controllers
         [HttpPost]
         [Route("invoice")]
         [AuthorizeToken]
-        public async Task<ApiResponse> PayInvoice(PaymentMethodPayInvoice payInvoice)
+        public async Task<ApiResponse> PayInvoice(PaymentMethodPayInvoice value)
         {
             try
             {
-                PaymentMethodPayInvoiceResponse entity = await _services.PayInvoice(payInvoice);
+                PaymentMethodPayInvoiceResponse entity = await _services.PayInvoice(value);
                 return new ApiResponse(entity);
             }
             catch (ServiceException se)
             {
+                string obj = JsonConvert.SerializeObject(value);
+                _logger.LogError(se, se.Message + ", params:" + obj);
                 return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.ToString());
+                string obj = JsonConvert.SerializeObject(value);
+                _logger.LogError(ex, ex.Message + ", params:" + obj);
                 throw;
             }
         }
@@ -171,11 +189,14 @@ namespace customerportalapi.Controllers
             }
             catch (ServiceException se)
             {
+                string obj = JsonConvert.SerializeObject(value);
+                _logger.LogError(se, se.Message + ", params:" + obj);
                 return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.ToString());
+                string obj = JsonConvert.SerializeObject(value);
+                _logger.LogError(ex, ex.Message + ", params:" + obj);
                 throw;
             }
         }
@@ -192,11 +213,14 @@ namespace customerportalapi.Controllers
             }
             catch (ServiceException se)
             {
+                string obj = JsonConvert.SerializeObject(value);
+                _logger.LogError(se, se.Message + ", params:" + obj);
                 return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.ToString());
+                string obj = JsonConvert.SerializeObject(value);
+                _logger.LogError(ex, ex.Message + ", params:" + obj);
                 throw;
             }
         }
@@ -214,11 +238,14 @@ namespace customerportalapi.Controllers
             }
             catch (ServiceException se)
             {
+                string obj = JsonConvert.SerializeObject(value);
+                _logger.LogError(se, se.Message + ", params:" + obj);
                 return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.ToString());
+                string obj = JsonConvert.SerializeObject(value);
+                _logger.LogError(ex, ex.Message + ", params:" + obj);
                 throw;
             }
         }
@@ -235,11 +262,14 @@ namespace customerportalapi.Controllers
             }
             catch (ServiceException se)
             {
+                string obj = JsonConvert.SerializeObject(value);
+                _logger.LogError(se, se.Message + ", params:" + obj);
                 return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.ToString());
+                string obj = JsonConvert.SerializeObject(value);
+                _logger.LogError(ex, ex.Message + ", params:" + obj);
                 throw;
             }
         }

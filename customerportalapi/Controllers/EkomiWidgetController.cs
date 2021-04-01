@@ -7,6 +7,7 @@ using customerportalapi.Services.Interfaces;
 using customerportalapi.Security;
 using customerportalapi.Entities;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace customerportalapi.Controllers
 {
@@ -40,6 +41,7 @@ namespace customerportalapi.Controllers
             }
             catch (ServiceException se)
             {
+                _logger.LogError(se.ToString());
                 return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
             }
             catch (Exception ex)
@@ -64,11 +66,14 @@ namespace customerportalapi.Controllers
             }
             catch (ServiceException se)
             {
+                string obj = JsonConvert.SerializeObject(ekomiWidget);
+                _logger.LogError(se, se.Message + ", params:" + obj);
                 return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.ToString());
+                string obj = JsonConvert.SerializeObject(ekomiWidget);
+                _logger.LogError(ex, ex.Message + ", params:" + obj);
                 throw;
             }
         }
@@ -88,11 +93,14 @@ namespace customerportalapi.Controllers
             }
             catch (ServiceException se)
             {
+                string obj = JsonConvert.SerializeObject(ekomiWidgets);
+                _logger.LogError(se, se.Message + ", params:" + obj);
                 return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.ToString());
+                string obj = JsonConvert.SerializeObject(ekomiWidgets);
+                _logger.LogError(ex, ex.Message + ", params:" + obj);
                 throw;
             }
         }
@@ -112,11 +120,14 @@ namespace customerportalapi.Controllers
             }
             catch (ServiceException se)
             {
+                string obj = JsonConvert.SerializeObject(ekomiWidget);
+                _logger.LogError(se, se.Message + ", params:" + obj);
                 return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.ToString());
+                string obj = JsonConvert.SerializeObject(ekomiWidget);
+                _logger.LogError(ex, ex.Message + ", params:" + obj);
                 throw;
             }
         }
@@ -136,6 +147,7 @@ namespace customerportalapi.Controllers
             }
             catch (ServiceException se)
             {
+                _logger.LogError(se.ToString());
                 return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
             }
             catch (Exception ex)
@@ -160,6 +172,7 @@ namespace customerportalapi.Controllers
             }
             catch (ServiceException se)
             {
+                _logger.LogError(se.ToString());
                 return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
             }
             catch (Exception ex)

@@ -9,6 +9,7 @@ using customerportalapi.Entities;
 using customerportalapi.Services.interfaces;
 using customerportalapi.Services.Interfaces;
 using customerportalapi.Entities.enums;
+using Newtonsoft.Json;
 
 namespace customerportalapi.Controllers
 {
@@ -56,7 +57,8 @@ namespace customerportalapi.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.ToString());
+                string obj = JsonConvert.SerializeObject(value);
+                _logger.LogError(ex, ex.Message + ", params:" + obj);
                 throw;
             }
         }

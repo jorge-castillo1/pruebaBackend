@@ -7,6 +7,7 @@ using customerportalapi.Services.Exceptions;
 using customerportalapi.Services.interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace customerportalapi.Controllers
 {
@@ -125,12 +126,14 @@ namespace customerportalapi.Controllers
             }
             catch (ServiceException se)
             {
-                _logger.LogError(se.ToString());
+                string obj = JsonConvert.SerializeObject(value);
+                _logger.LogError(se, se.Message + ", params:" + obj);
                 return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.ToString());
+                string obj = JsonConvert.SerializeObject(value);
+                _logger.LogError(ex, ex.Message + ", params:" + obj);
                 throw;
             }
         }
@@ -334,12 +337,14 @@ namespace customerportalapi.Controllers
             }
             catch (ServiceException se)
             {
-                _logger.LogError(se.ToString());
+                string obj = JsonConvert.SerializeObject(value);
+                _logger.LogError(se, se.Message + ", params:" + obj);
                 return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.ToString());
+                string obj = JsonConvert.SerializeObject(value);
+                _logger.LogError(ex, ex.Message + ", params:" + obj);
                 throw;
             }
         }
@@ -361,7 +366,8 @@ namespace customerportalapi.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.ToString());
+                string obj = JsonConvert.SerializeObject(value);
+                _logger.LogError(ex, ex.Message + ", params:" + obj);
                 throw;
             }
         }
