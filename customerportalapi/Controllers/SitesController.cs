@@ -228,14 +228,20 @@ namespace customerportalapi.Controllers
             }
             catch(ServiceException ex)
             {
-                string obj = JsonConvert.SerializeObject(value);
-                _logger.LogError(ex, ex.Message + ", params:" + obj);
+                string obj = string.Empty;
+                if (value != null)
+                    obj = ", params:" + JsonConvert.SerializeObject(value);
+
+                _logger.LogError(ex, ex.Message + obj);
                 throw;
             }
             catch (Exception ex)
             {
-                string obj = JsonConvert.SerializeObject(value);
-                _logger.LogError(ex, ex.Message + ", params:" + obj);
+                string obj = string.Empty;
+                if (value != null)
+                    obj = ", params:" + JsonConvert.SerializeObject(value);
+
+                _logger.LogError(ex, ex.Message + obj);
                 throw;
             }
         }
@@ -279,14 +285,20 @@ namespace customerportalapi.Controllers
             }
             catch(ServiceException ex)
             {
-                string obj = JsonConvert.SerializeObject(value);
-                _logger.LogError(ex, ex.Message + ", params:" + obj);
+                string obj = string.Empty;
+                if (value != null)
+                    obj = ", params:" + JsonConvert.SerializeObject(value);
+
+                _logger.LogError(ex, ex.Message + obj);
                 throw;
             }
             catch (Exception ex)
             {
-                string obj = JsonConvert.SerializeObject(value);
-                _logger.LogError(ex, ex.Message + ", params:" + obj);
+                string obj = string.Empty;
+                if (value != null)
+                    obj = ", params:" + JsonConvert.SerializeObject(value);
+
+                _logger.LogError(ex, ex.Message + obj);
                 throw;
             }
         }
