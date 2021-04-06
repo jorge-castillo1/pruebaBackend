@@ -66,6 +66,7 @@ namespace customerportalapi.Controllers
             }
             catch (ServiceException se)
             {
+                _logger.LogError(se.ToString());
                 return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
             }
             catch (Exception ex)
@@ -91,6 +92,7 @@ namespace customerportalapi.Controllers
             }
             catch (ServiceException se)
             {
+                _logger.LogError(se.ToString());
                 if (se.Field == FieldNames.UserOrEmail && se.FieldMessage == ValidationMessages.NotExist || se.Field == FieldNames.User && se.FieldMessage == ValidationMessages.InvitationNotAccepted)
                 {
                     return new ApiResponse(true);
