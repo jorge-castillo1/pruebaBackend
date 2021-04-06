@@ -508,22 +508,14 @@ namespace customerportalapi.Services
             if (user.Id == null)
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
 
-            //3. If emailverified is false
-            if (!user.Emailverified)
-                return Task.FromResult(false);
-
-            //4. Confirm revocation access status to external system
+            //3. Confirm revocation access status to external system
             _profileRepository.RevokedWebPortalAccessAsync(user.Dni, value.CustomerType);
 
-            //5. Update invitation data
-            user.Emailverified = false;
-            user.Invitationtoken = null;
-            _userRepository.Update(user);
+            //4. Delete from IS
+            if(!string.IsNullOrEmpty(user.ExternalId))
+                _identityRepository.DeleteUser(user.ExternalId);
 
-            //6. Delete from IS
-            _identityRepository.DeleteUser(user.ExternalId);
-
-            //7. Delete from Database
+            //5. Delete from Database
             _userRepository.Delete(user);
 
             return Task.FromResult(true);
