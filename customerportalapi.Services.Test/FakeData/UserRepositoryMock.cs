@@ -116,6 +116,8 @@ namespace customerportalapi.Services.Test.FakeData
                 LastAccessCodeAttempts = System.DateTime.Now.ToUniversalTime()
             }).Verifiable();
 
+            db.Setup(x => x.Delete(It.IsAny<User>())).Returns(Task.FromResult(true)).Verifiable();
+
             return db;
         }
 
@@ -348,6 +350,84 @@ namespace customerportalapi.Services.Test.FakeData
             }).Verifiable();
 
             db.Setup(x => x.Create(It.IsAny<User>())).Returns(Task.FromResult(true)).Verifiable();
+
+            return db;
+        }
+
+        public static Mock<IUserRepository> ValidUserRepository_With_ExternalId()
+        {
+            var db = new Mock<IUserRepository>();
+            db.Setup(x => x.GetCurrentUserByUsername(It.IsAny<string>())).Returns(new User()
+            {
+                Id = "b02fc244-40e4-e511-80bf-00155d018a4f",
+                Dni = "12345678A",
+                Email = "fake email 1",
+                Name = "fake name",
+                Language = "en",
+                Profilepicture = "fake profile image",
+                Emailverified = true,
+                Usertype = 1,
+                Username = "fake username",
+                LoginAttempts = 0,
+                LastLoginAttempts = System.DateTime.Now.ToUniversalTime().AddMinutes(-10),
+                AccessCodeAttempts = 0,
+                LastAccessCodeAttempts = System.DateTime.Now.ToUniversalTime().AddMinutes(-30),
+                ExternalId = "ExternalId"
+            }).Verifiable();
+
+            db.Setup(x => x.GetCurrentUserByEmail(It.IsAny<string>())).Returns(new User()
+            {
+                Id = "b02fc244-40e4-e511-80bf-00155d018a4f",
+                Dni = "12345678A",
+                Email = "fake email 1",
+                Name = "fake name",
+                Language = "en",
+                Profilepicture = "fake profile image",
+                Emailverified = true,
+                Usertype = 1,
+                Username = "fake username",
+                LoginAttempts = 0,
+                LastLoginAttempts = System.DateTime.Now.ToUniversalTime().AddMinutes(-10),
+                AccessCodeAttempts = 0,
+                LastAccessCodeAttempts = System.DateTime.Now.ToUniversalTime().AddMinutes(-30),
+                ExternalId = "ExternalId"
+            }).Verifiable();
+
+            db.Setup(x => x.GetCurrentUserByDniAndType(It.IsAny<string>(), It.IsAny<int>())).Returns(new User()
+            {
+                Id = "b02fc244-40e4-e511-80bf-00155d018a4f",
+                Dni = "12345678A",
+                Email = "fake email 1",
+                Name = "fake name",
+                Language = "en",
+                Profilepicture = "fake profile image",
+                Emailverified = true,
+                Usertype = 1,
+                Username = "fake username",
+                LoginAttempts = 0,
+                LastLoginAttempts = System.DateTime.Now.ToUniversalTime().AddMinutes(-10),
+                AccessCodeAttempts = 0,
+                LastAccessCodeAttempts = System.DateTime.Now.ToUniversalTime().AddMinutes(-30),
+                ExternalId = "ExternalId"
+            }).Verifiable();
+
+            db.Setup(x => x.Update(It.IsAny<User>())).Returns(new User()
+            {
+                Id = "b02fc244-40e4-e511-80bf-00155d018a4f",
+                Dni = "12345678A",
+                Email = "fake email 1 modified",
+                Language = "en",
+                Profilepicture = "fake profile image modified",
+                Emailverified = true,
+                Usertype = 1,
+                LoginAttempts = 1,
+                LastLoginAttempts = System.DateTime.Now.ToUniversalTime(),
+                AccessCodeAttempts = 1,
+                LastAccessCodeAttempts = System.DateTime.Now.ToUniversalTime(),
+                ExternalId = "ExternalId"
+            }).Verifiable();
+
+            db.Setup(x => x.Delete(It.IsAny<User>())).Returns(Task.FromResult(true)).Verifiable();
 
             return db;
         }

@@ -461,27 +461,9 @@ namespace customerportalapi.Services.Test
             await service.UnInviteUserAsync(value);
         }
 
-        [TestMethod]
-        public async Task AlDesinvitarUnUsuarioExistente_NoActivo_DevuelveFalse()
-        {
-            //Arrange
-            Invitation value = new Invitation()
-            {
-                Dni = "12345678A",
-                CustomerType = AccountType.Residential
-            };
-
-            //Act
-            Mock<IUserRepository> userRepositoryInvalid = UserRepositoryMock.Valid_InActiveUser_Repository();
-            UserServices service = new UserServices(userRepositoryInvalid.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object, _serviceLogin, _userAccountRepository.Object, _languageRepository.Object, _contractRepository.Object, _contractSMRepository.Object, _opportunityRepository.Object, _storeRepository.Object, _unitLocationRepository.Object);
-            bool result = await service.UnInviteUserAsync(value);
-
-            //Assert
-            Assert.IsFalse(result);
-        }
 
         [TestMethod]
-        public async Task AlDesinvitarUnUsuarioExistente_Activo_ActualizaUsuario()
+        public async Task AlDesinvitarUnUsuarioExistente_ConExternalId_retorna_true()
         {
             //Arrange
             Invitation value = new Invitation()
@@ -492,6 +474,28 @@ namespace customerportalapi.Services.Test
 
             //Act
             Mock<IUserRepository> userRepository = UserRepositoryMock.ValidUserRepository();
+            UserServices service = new UserServices(_userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object, _serviceLogin, _userAccountRepository.Object, _languageRepository.Object, _contractRepository.Object, _contractSMRepository.Object, _opportunityRepository.Object, _storeRepository.Object, _unitLocationRepository.Object);
+            bool result = await service.UnInviteUserAsync(value);
+
+            //Assert
+            Assert.IsTrue(result);
+            _userRepository.Verify(x => x.GetCurrentUserByDniAndType(It.IsAny<string>(), It.IsAny<int>()));
+            _profileRepository.Verify(x => x.RevokedWebPortalAccessAsync(It.IsAny<string>(), It.IsAny<string>()));
+            _userRepository.Verify(x => x.Delete(It.IsAny<User>()));
+        }
+
+        [TestMethod]
+        public async Task AlDesinvitarUnUsuarioExistente_SinExternalid_retorna_true()
+        {
+            //Arrange
+            Invitation value = new Invitation()
+            {
+                Dni = "12345678A",
+                CustomerType = AccountType.Residential
+            };
+
+            //Act
+            Mock<IUserRepository> userRepository = UserRepositoryMock.ValidUserRepository_With_ExternalId();
             UserServices service = new UserServices(userRepository.Object, _profileRepository.Object, _mailRepository.Object, _emailtemplateRepository.Object, _identityRepository.Object, _config.Object, _serviceLogin, _userAccountRepository.Object, _languageRepository.Object, _contractRepository.Object, _contractSMRepository.Object, _opportunityRepository.Object, _storeRepository.Object, _unitLocationRepository.Object);
             bool result = await service.UnInviteUserAsync(value);
 
@@ -499,8 +503,8 @@ namespace customerportalapi.Services.Test
             Assert.IsTrue(result);
             userRepository.Verify(x => x.GetCurrentUserByDniAndType(It.IsAny<string>(), It.IsAny<int>()));
             _profileRepository.Verify(x => x.RevokedWebPortalAccessAsync(It.IsAny<string>(), It.IsAny<string>()));
-            userRepository.Verify(x => x.Update(It.IsAny<User>()));
             _identityRepository.Verify(x => x.DeleteUser(It.IsAny<string>()));
+            userRepository.Verify(x => x.Delete(It.IsAny<User>()));
         }
     }
 }
