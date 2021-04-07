@@ -41,7 +41,7 @@ namespace customerportalapi.Repositories
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                _logger.LogError(ex.ToString());
                 return new Profile();
             }
         }
@@ -150,7 +150,7 @@ namespace customerportalapi.Repositories
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                _logger.LogError(ex.ToString());
                 return new ProfilePermissions();
             }
         }
