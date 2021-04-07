@@ -15,7 +15,7 @@ namespace customerportalapi.Services.Test.FakeData
             db.Setup(x => x.GetAccessCodeAsync(It.IsAny<string>())).Returns(Task.FromResult(new SMContract()
             {
                 Password = "fake password",
-                Contractnumber = "fake contract number",
+                Contractnumber = "1234567893",
                 Customerid = "fake customer id"
             })).Verifiable();
 

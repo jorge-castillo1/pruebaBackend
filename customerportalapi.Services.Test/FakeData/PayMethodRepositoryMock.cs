@@ -17,8 +17,24 @@ namespace customerportalapi.Services.Test.FakeData
             {
                 Name = "Name",
                 StoreId = "fakestoreId",
-                SMId = "fakeSMId"
+                SMId = "fakeSMId",
+                DocumentId = "FakeDocumentId",
+                Description = "FakeDescription",
+                PaymentMethodId = "FakePaymentMethodId"
+
             })).Verifiable();
+
+            db.Setup(x => x.GetPaymentMethodById(It.IsAny<string>())).Returns(Task.FromResult(
+                new PaymentMethodCRM()
+                {
+                    Name = "Name",
+                    StoreId = "fakestoreId",
+                    SMId = "fakeSMId",
+                    DocumentId = "FakeDocumentId",
+                    Description = "FakeDescription",
+                    PaymentMethodId = "FakePaymentMethodId"
+                }
+            )).Verifiable();
 
             return db;
         }

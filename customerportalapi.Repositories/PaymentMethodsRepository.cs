@@ -63,5 +63,20 @@ namespace customerportalapi.Repositories
             return JsonConvert.DeserializeObject<PaymentMethodCRM>(result.GetValue("result").ToString());
         }
 
+        public async Task<PaymentMethodCRM> GetPaymentMethodById(string paymentMethodId)
+        {
+            var httpClient = _clientFactory.CreateClient("httpClient");
+            var uri = new Uri(_configuration["GatewayUrl"] + _configuration["PaymentMethodsCRM"] + "method/");
+            httpClient.BaseAddress = uri;
+
+            var response = await httpClient.GetAsync(paymentMethodId, HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode) return new PaymentMethodCRM();
+            var content = await response.Content.ReadAsStringAsync();
+            JObject result = JObject.Parse(content);
+
+            return JsonConvert.DeserializeObject<PaymentMethodCRM>(result.GetValue("result").ToString());
+        }
+
     }
 }
