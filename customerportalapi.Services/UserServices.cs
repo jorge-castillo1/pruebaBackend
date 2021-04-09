@@ -292,55 +292,45 @@ namespace customerportalapi.Services
             await CheckMandatoryData(invitationFields);
 
             //7. check if user exists
-            var userName = userType == 0 ? value.Dni : "B" + value.Dni;
-
-            var pwd = new Password(true, true, true, false, 6);
-            var password = pwd.Next();
-            int templateId;
-
-            if (user.Id == null)
-            {
-                //7.1 Create user in portal database
-                user = new User
-                {
-                    Username = userName,
-                    Dni = value.Dni,
-                    Email = value.Email,
-                    Name = value.Fullname,
-                    Password = password,
-                    Language = UserUtils.GetLanguage(value.Language),
-                    Usertype = UserUtils.GetUserType(value.CustomerType),
-                    Emailverified = false,
-                    Invitationtoken = Guid.NewGuid().ToString(),
-                    LastEmailSent = EmailTemplateTypes.InvitationWelcome.ToString(),
-                };
-
-                result = await _userRepository.Create(user);
-                templateId = (int)EmailTemplateTypes.InvitationWelcome;
-            }            
-            else
-            {
-                //7.2 Update invitation data
-                user.Email = value.Email;
-                user.Name = value.Fullname;
-                user.Password = password;
-                user.Language = UserUtils.GetLanguage(value.Language);
-                user.Usertype = UserUtils.GetUserType(value.CustomerType);
-                user.Invitationtoken = Guid.NewGuid().ToString();
-                user.LastEmailSent = EmailTemplateTypes.InvitationStandard.ToString();
-                _userRepository.Update(user);
-                templateId = (int)EmailTemplateTypes.InvitationStandard;
-            }
-
             //8. Get Email Invitation Template
+
+            int templateId;
+            templateId = (int)EmailTemplateTypes.InvitationStandard;
+            if (string.IsNullOrEmpty(user.Id))            
+                templateId = (int)EmailTemplateTypes.InvitationWelcome;
+            
             EmailTemplate invitationTemplate = _emailTemplateRepository.getTemplate(templateId, user.Language);
             if (invitationTemplate._id == null)
-            {
                 invitationTemplate = _emailTemplateRepository.getTemplate(templateId, LanguageTypes.en.ToString());
-            }
 
             if (string.IsNullOrEmpty(invitationTemplate._id))
                 throw new ServiceException("Email template not found, templateCode: " + templateId, HttpStatusCode.NotFound, FieldNames.Email + FieldNames.Template, ValidationMessages.NotFound);
+
+            var pwd = new Password(true, true, true, false, 6);
+            var password = pwd.Next();
+            user.Email = value.Email;
+            user.Name = value.Fullname;
+            user.Password = password;
+            user.Language = UserUtils.GetLanguage(value.Language);
+            user.Usertype = UserUtils.GetUserType(value.CustomerType);
+            user.Invitationtoken = Guid.NewGuid().ToString();
+
+            if (string.IsNullOrEmpty(user.Id))
+            {
+                //7.1 Create user in portal database
+                var userName = userType == 0 ? value.Dni : "B" + value.Dni;
+                user.Username = userName;
+                user.Dni = value.Dni;    
+                user.Emailverified = false;
+                user.LastEmailSent = EmailTemplateTypes.InvitationWelcome.ToString();
+                result = await _userRepository.Create(user);
+            }            
+            else
+            {
+                user.LastEmailSent = EmailTemplateTypes.InvitationStandard.ToString();
+                _userRepository.Update(user);
+            }
+
 
             //9. Send email invitation
             Email message = new Email();
