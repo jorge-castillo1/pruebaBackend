@@ -284,23 +284,34 @@ namespace customerportalapi.Services
             if (!string.IsNullOrEmpty(user.Id) && user.Emailverified)
                 throw new ServiceException("Invitation user fails. User was actived before", HttpStatusCode.NotFound, FieldNames.User, ValidationMessages.AlreadyInvited);
 
-            //5. Find Mandatory data    
+            //5. Get Email Invitation Template
+            int templateId;
+            templateId = (int)EmailTemplateTypes.InvitationStandard;
+            if (string.IsNullOrEmpty(user.Id))            
+                templateId = (int)EmailTemplateTypes.InvitationWelcome;
+            
+            EmailTemplate invitationTemplate = _emailTemplateRepository.getTemplate(templateId, user.Language);
+            if (invitationTemplate._id == null)
+                invitationTemplate = _emailTemplateRepository.getTemplate(templateId, LanguageTypes.en.ToString());
+
+            if (string.IsNullOrEmpty(invitationTemplate._id))
+                throw new ServiceException("Email template not found, templateCode: " + templateId, HttpStatusCode.NotFound, FieldNames.Email + FieldNames.Template, ValidationMessages.NotFound);
+
+            //6. Find Mandatory data    
             string accountType = (userType == (int)UserTypes.Business) ? AccountType.Business : AccountType.Residential;
             await FindInvitationMandatoryData(invitationFields, value, accountType);
 
-            //6. Check all mandatory data
+            //7. Check all mandatory data
             await CheckMandatoryData(invitationFields);
 
-            //7. check if user exists
             var userName = userType == 0 ? value.Dni : "B" + value.Dni;
-
             var pwd = new Password(true, true, true, false, 6);
             var password = pwd.Next();
-            int templateId;
 
+            //8
             if (user.Id == null)
             {
-                //7.1 Create user in portal database
+                //8.1 Create user in portal database
                 user = new User
                 {
                     Username = userName,
@@ -316,11 +327,10 @@ namespace customerportalapi.Services
                 };
 
                 result = await _userRepository.Create(user);
-                templateId = (int)EmailTemplateTypes.InvitationWelcome;
-            }            
+            }
             else
             {
-                //7.2 Update invitation data
+                //8.2 Update invitation data
                 user.Email = value.Email;
                 user.Name = value.Fullname;
                 user.Password = password;
@@ -329,18 +339,7 @@ namespace customerportalapi.Services
                 user.Invitationtoken = Guid.NewGuid().ToString();
                 user.LastEmailSent = EmailTemplateTypes.InvitationStandard.ToString();
                 _userRepository.Update(user);
-                templateId = (int)EmailTemplateTypes.InvitationStandard;
             }
-
-            //8. Get Email Invitation Template
-            EmailTemplate invitationTemplate = _emailTemplateRepository.getTemplate(templateId, user.Language);
-            if (invitationTemplate._id == null)
-            {
-                invitationTemplate = _emailTemplateRepository.getTemplate(templateId, LanguageTypes.en.ToString());
-            }
-
-            if (string.IsNullOrEmpty(invitationTemplate._id))
-                throw new ServiceException("Email template not found, templateCode: " + templateId, HttpStatusCode.NotFound, FieldNames.Email + FieldNames.Template, ValidationMessages.NotFound);
 
             //9. Send email invitation
             Email message = new Email();
