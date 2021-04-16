@@ -9,6 +9,7 @@ namespace customerportalapi.Entities.enums
         SEPA = 1,
         Contract = 0,
         Card = 2,
-        Invoice = 3
+        Invoice = 3,
+        ImageUnit = 4
     }
 }

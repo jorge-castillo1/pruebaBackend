@@ -182,7 +182,13 @@ namespace customerportalapi.Services
 
         public async Task<string> SaveContractAsync(Document document)
         {
-            return await _documentRepository.SaveDocumentAsync(document);
+            if(document != null && document.Metadata.DocumentType == (int)DocumentTypes.Contract)
+                return await _documentRepository.SaveDocumentAsync(document);
+
+            if (document != null && document.Metadata.DocumentType == (int)DocumentTypes.ImageUnit)
+                return await _documentRepository.SaveBlobAsync(document);
+
+            return null;
         }
 
         public async Task<string> GetContractTimeZoneAsync(string contractNumber)

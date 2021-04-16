@@ -56,6 +56,20 @@ namespace customerportalapi.Repositories
             return documentId;
         }
 
+        public async Task<string> SaveBlobAsync(Document document)
+        {
+            var httpClient = _clientFactory.CreateClient("httpClientDocument");
+
+            var url = new Uri(httpClient.BaseAddress + _configuration["BlobAPI"]);
+            var postContent = new StringContent(JsonConvert.SerializeObject(document), Encoding.UTF8, "application/json");
+            var response = await httpClient.PostAsync(url, postContent);
+            response.EnsureSuccessStatusCode();
+            var content = await response.Content.ReadAsStringAsync();
+            JObject result = JObject.Parse(content);
+            var documentId = result.GetValue("result").ToString();
+            return documentId;
+        }
+
         public async Task<string> GetDocumentAsync(string documentid)
         {
             string entity = null;
