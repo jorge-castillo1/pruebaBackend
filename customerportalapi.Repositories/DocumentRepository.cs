@@ -56,7 +56,7 @@ namespace customerportalapi.Repositories
             return documentId;
         }
 
-        public async Task<string> SaveBlobAsync(Document document)
+        public async Task<string> SaveDocumentBlobStorageAsync(Document document)
         {
             var httpClient = _clientFactory.CreateClient("httpClientDocument");
 

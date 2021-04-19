@@ -155,6 +155,31 @@ namespace customerportalapi.Controllers
         }
 
         /// <summary>
+        /// Save image unit category
+        /// </summary>
+        /// <param name="document"></param>
+        /// <returns></returns>
+        [HttpPost("units/category/image")]
+        public async Task<ApiResponse> UploadImageUnitCategoryAsync([FromBody] Document document)
+        {
+            try
+            {
+                var result = await _services.SaveImageUnitCategoryAsync(document);
+                return new ApiResponse(null, result);
+            }
+            catch (ServiceException se)
+            {
+                _logger.LogError(se.ToString());
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+
+        /// <summary>
         /// Get all available countries
         /// </summary>
         /// <returns>Country data model list</returns>

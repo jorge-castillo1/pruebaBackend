@@ -162,7 +162,7 @@ namespace customerportalapi.Services
             response.smcontract = await _contractSMRepository.GetAccessCodeAsync(smContractCode);
             response.contract.StoreCode = response.contract.StoreData.StoreCode;
             OpportunityCRM opportunity;
-            if (!String.IsNullOrEmpty(response.contract.OpportunityId))
+            if (!string.IsNullOrEmpty(response.contract.OpportunityId))
             {
                 opportunity = await _opportunityRepository.GetOpportunity(response.contract.OpportunityId);
                 response.contract.OpportunityId = opportunity.OpportunityId;
@@ -182,13 +182,7 @@ namespace customerportalapi.Services
 
         public async Task<string> SaveContractAsync(Document document)
         {
-            if(document != null && document.Metadata.DocumentType == (int)DocumentTypes.Contract)
-                return await _documentRepository.SaveDocumentAsync(document);
-
-            if (document != null && document.Metadata.DocumentType == (int)DocumentTypes.ImageUnit)
-                return await _documentRepository.SaveBlobAsync(document);
-
-            return null;
+            return await _documentRepository.SaveDocumentAsync(document);
         }
 
         public async Task<string> GetContractTimeZoneAsync(string contractNumber)

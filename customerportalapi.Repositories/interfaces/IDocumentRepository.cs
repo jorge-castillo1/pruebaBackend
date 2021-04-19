@@ -12,7 +12,7 @@ namespace customerportalapi.Repositories.interfaces
 
         Task<string> SaveDocumentAsync(Document document);
 
-        Task<string> SaveBlobAsync(Document document);
+        Task<string> SaveDocumentBlobStorageAsync(Document document);
 
         Task<string> GetDocumentAsync(string documentid);
     }

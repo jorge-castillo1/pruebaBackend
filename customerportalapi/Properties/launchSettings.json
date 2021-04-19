@@ -48,7 +48,8 @@
         "GATEWAYSIGNATUREURL": "https://localhost:44329/",
         "CustomerPortal_ApiKey": "F56A2E61-6D3C-4C3F-B1B5-16C335EADA96",
         "StoresAPI": "crmapi/Sites/",
-        "BlobAPI": "api/blob/"
+        "BlobAPI": "api/blob/",
+        "pathImageUnitCategory": "image/unit/category/"
       }
     },
     "customerportalapi": {
