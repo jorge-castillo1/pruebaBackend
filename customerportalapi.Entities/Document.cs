@@ -12,5 +12,6 @@ namespace customerportalapi.Entities
         public byte[] File { get; set; }
         public string FileExtension { get; set; }
         public DocumentMetadata Metadata { get; set; }
+        public string ContentType { get; set; }
     }
 }
