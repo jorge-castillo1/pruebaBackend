@@ -257,13 +257,8 @@ namespace customerportalapi.Services
 
         public async Task<string> SaveImageUnitCategoryAsync(Document document)
         {
-            if (document != null && document.Metadata.DocumentType == (int)DocumentTypes.ImageUnit)
-            {
-                document.FileName = _config["pathImageUnitCategory"] + document.FileName;
-                return await _documentRepository.SaveDocumentBlobStorageAsync(document);
-            }
-
-            return null;
+            document.FileName = _config["pathImageUnitCategory"] + document.FileName;
+            return await _documentRepository.SaveDocumentBlobStorageAsync(document);
         }
 
         public async Task<List<SiteInvoices>> GetLastInvoices(string username)
