@@ -62,6 +62,7 @@ namespace customerportalapi.Repositories
 
             var url = new Uri(httpClient.BaseAddress + _configuration["BlobAPI"]);
             var postContent = new StringContent(JsonConvert.SerializeObject(document), Encoding.UTF8, "application/json");
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(_configuration["CustomerPortal_ApiKey"]);
             var response = await httpClient.PostAsync(url, postContent);
             response.EnsureSuccessStatusCode();
             var content = await response.Content.ReadAsStringAsync();
