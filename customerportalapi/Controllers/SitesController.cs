@@ -180,6 +180,31 @@ namespace customerportalapi.Controllers
         }
 
         /// <summary>
+        /// Get Blob content
+        /// </summary>
+        /// <param name="names"></param>
+        /// <returns></returns>
+        [HttpGet("units/category/image/info")]
+        public async Task<ApiResponse> GetImageUnitCategoryAsync(string names)
+        {
+            try
+            {
+                var result = await _services.GetDocumentInfoBlobStorageAsync(names);
+                return new ApiResponse(null, result);
+            }
+            catch (ServiceException se)
+            {
+                _logger.LogError(se.ToString());
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+
+        /// <summary>
         /// Get all available countries
         /// </summary>
         /// <returns>Country data model list</returns>
@@ -327,9 +352,6 @@ namespace customerportalapi.Controllers
                 throw;
             }
         }
-
-
-
 
         /// <summary>
         /// Get Last user invoices

@@ -60,7 +60,7 @@ namespace customerportalapi.Repositories
         {
             var httpClient = _clientFactory.CreateClient("httpClientDocument");
 
-            var url = new Uri(httpClient.BaseAddress + _configuration["BlobAPI"]);
+            var url = new Uri(httpClient.BaseAddress + _configuration["BlobAPI"] + _configuration["BlobStorageUnitImageContainer"]);
             var postContent = new StringContent(JsonConvert.SerializeObject(document), Encoding.UTF8, "application/json");
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(_configuration["CustomerPortal_ApiKey"]);
             var response = await httpClient.PostAsync(url, postContent);
@@ -69,6 +69,23 @@ namespace customerportalapi.Repositories
             JObject result = JObject.Parse(content);
             var documentId = result.GetValue("result").ToString();
             return documentId;
+        }
+
+
+        public async Task<BlobResult> GetDocumentBlobStorageAsync(string path)
+        {
+
+            var httpClient = _clientFactory.CreateClient("httpClientDocument");
+
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(_configuration["CustomerPortal_ApiKey"]);
+
+            httpClient.BaseAddress = new Uri(httpClient.BaseAddress + _configuration["BlobAPI"]+ _configuration["BlobStorageUnitImageContainer"] + "/info");
+
+            var response = await httpClient.GetAsync("?path="+path, HttpCompletionOption.ResponseHeadersRead);
+
+            var content = await response.Content.ReadAsStringAsync();
+            JObject result = JObject.Parse(content);
+            return JsonConvert.DeserializeObject<BlobResult>(result.GetValue("result").ToString());
         }
 
         public async Task<string> GetDocumentAsync(string documentid)
