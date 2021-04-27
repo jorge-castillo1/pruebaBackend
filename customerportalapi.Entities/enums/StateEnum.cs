@@ -8,7 +8,8 @@ namespace customerportalapi.Entities.enums
     {
         Unchecked,
         Error,
-        Checked
+        Checked,
+        Warning
     }
 }
 
