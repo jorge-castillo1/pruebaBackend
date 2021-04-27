@@ -22,5 +22,20 @@ namespace customerportalapi.Entities
 
         [BsonElement]
         public string language { get; set; }
+
+        [BsonElement("paragraphs")]
+        public List<EmailParagraph> Paragraphs { get; set; }
     }
+
+    public class EmailParagraph
+    {
+        [BsonElement("name")]
+        public string Name { get; set; }
+
+        [BsonElement("defaultContent")]
+        public string DefaultContent { get; set; }
+
+        [BsonElement("customContent")]
+        public string CustomContent { get; set; }
+    }    
 }

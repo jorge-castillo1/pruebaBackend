@@ -289,8 +289,9 @@ namespace customerportalapi.Services
             templateId = (int)EmailTemplateTypes.InvitationStandard;
             if (string.IsNullOrEmpty(user.Id))            
                 templateId = (int)EmailTemplateTypes.InvitationWelcome;
-            
-            EmailTemplate invitationTemplate = _emailTemplateRepository.getTemplate(templateId, user.Language);
+
+            string language = UserUtils.GetLanguage(value.Language);
+            EmailTemplate invitationTemplate = _emailTemplateRepository.getTemplate(templateId, language);
             if (invitationTemplate._id == null)
                 invitationTemplate = _emailTemplateRepository.getTemplate(templateId, LanguageTypes.en.ToString());
 
@@ -326,7 +327,7 @@ namespace customerportalapi.Services
                     LastEmailSent = EmailTemplateTypes.InvitationWelcome.ToString(),
                 };
 
-                result = await _userRepository.Create(user);
+               result = await _userRepository.Create(user);
             }
             else
             {
@@ -983,7 +984,7 @@ namespace customerportalapi.Services
                 SmContractCode = GetMandatiryData(SystemTypes.CRM, EntityNames.iav_contracts, null, StateEnum.Unchecked),
                 SMContract = GetMandatiryData(SystemTypes.SM, EntityNames.WBSGetContract, null, StateEnum.Unchecked),
                 ActiveContract = GetMandatiryData(SystemTypes.SM, EntityNames.WBSGetContract, null, StateEnum.Unchecked),
-                UnitPassword = GetMandatiryData(SystemTypes.CRM, EntityNames.iav_contracts, null, StateEnum.Unchecked),
+                UnitPassword = GetMandatiryData(SystemTypes.CRM, EntityNames.WBSGetContract, null, StateEnum.Unchecked),
                 UnitName = GetMandatiryData(SystemTypes.CRM, EntityNames.iav_contracts, null, StateEnum.Unchecked),
                 UnitSizeCode = GetMandatiryData(SystemTypes.CRM, EntityNames.iav_contracts, null, StateEnum.Unchecked), // TODO: check EntityNames
                 ContractStoreCode = GetMandatiryData(SystemTypes.CRM, EntityNames.iav_contracts, null, StateEnum.Unchecked),
@@ -1045,7 +1046,7 @@ namespace customerportalapi.Services
                         invitationData.ActiveContract.SetValueAndState(StateEnum.Checked.ToString(), StateEnum.Checked);
 
                         //Unit
-                        invitationData.UnitPassword.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
+                        invitationData.UnitPassword.SetValueAndState(ValidationMessages.NoInformationAvailable, StateEnum.Warning);
                         if (!string.IsNullOrEmpty(contractSM.Password)) 
                             invitationData.UnitPassword.SetValueAndState(contractSM.Password, StateEnum.Checked);
 
@@ -1066,7 +1067,7 @@ namespace customerportalapi.Services
                                 SizeCode = contract.Unit.UnitCategory
                             };
                             List<UnitLocation> unitLocation = _unitLocationRepository.Find(filter);
-                            invitationData.UnitSizeCode.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
+                            invitationData.UnitSizeCode.SetValueAndState(ValidationMessages.NoInformationAvailable, StateEnum.Warning);
                             if (unitLocation.Count > 0 && !string.IsNullOrEmpty(unitLocation[0].Description))
                                 invitationData.UnitSizeCode.SetValueAndState(unitLocation[0].Description, StateEnum.Checked);
 
@@ -1160,10 +1161,12 @@ namespace customerportalapi.Services
                             expectedMoveIn = expectedMoveIn.Subtract(TimeSpan.FromDays(1));
                             body = body.Replace("{{PreviousExpectedMoveIn}}", expectedMoveIn.ToString("dd/MM/yyyy"));
                             break;
+
                         case "ContactUsername":
                             body = body.Replace(field, data.Value);
                             body = body.Replace("{{UserPassword}}", user.Password);
                             break;
+
                         case "UnitName":
                             body = body.Replace(field, data.Value);
                             char[] unitName = data.Value.ToCharArray();
@@ -1184,6 +1187,25 @@ namespace customerportalapi.Services
 
                             body = body.Replace("{{LockCode}}", new string(unitName));
                             break;
+
+                        case "UnitPassword":
+                        case "UnitSizeCode":
+                            var content = string.Empty;
+                            if (invitationTemplate != null && invitationTemplate.Paragraphs != null)
+                            {
+                                EmailParagraph paragraph = GetParagraphByName(invitationTemplate, property.Name);
+                                content = paragraph.CustomContent;
+                                if (data.State == StateEnum.Checked)
+                                {
+                                    content = paragraph.DefaultContent;
+                                    content = content.Replace(field, data.Value);
+                                }
+                            }
+
+                            body = body.Replace("{{Paragraph" + property.Name + "}}", content);
+
+                            break;
+
                         default:
                             body = body.Replace(field, data.Value);
                             break;
@@ -1204,7 +1226,7 @@ namespace customerportalapi.Services
             {
                 MandatoryData data = (MandatoryData)property.GetValue(fields);
                 string value = string.Empty;
-                if (data != null && data.State != StateEnum.Checked)
+                if (data != null && (data.State != StateEnum.Checked && data.State != StateEnum.Warning))
                 {
                     validations += property.Name + ", ";
                 }
@@ -1230,6 +1252,17 @@ namespace customerportalapi.Services
             };
 
             return data;            
+        }
+
+        private EmailParagraph GetParagraphByName(EmailTemplate template , string name)
+        {
+            name = name.ToLower();
+            if (template != null && template.Paragraphs.Count > 0)
+            {
+                return template.Paragraphs.Find((t) => t.Name == name);
+            }
+
+            return null;
         }
     }
 }
