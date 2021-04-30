@@ -35,6 +35,8 @@ namespace customerportalapi.Security
                 var request = context.HttpContext.Request;
 
                 // Get Authorization header value
+
+                var useAzureMethodAuthentication = request.Headers.FirstOrDefault(x => x.Key == "use-azure-method-authentication");
                 var authorization = request.Headers.FirstOrDefault(x => x.Key == HeaderNames.Authorization);
                 if (authorization.Key == null || !authorization.Value[0].Contains("Bearer "))
                 {
@@ -43,17 +45,22 @@ namespace customerportalapi.Security
                 }
 
                 var token = authorization.Value[0].Split(' ');
-                // Get claims from token
-                ClaimsPrincipal claims = JwtTokenHelper.GetPrincipal(token[1], _config);
+                //if (string.IsNullOrEmpty(useAzureMethodAuthentication.Value))
+                //{ 
+                    // Get claims from token
+                    ClaimsPrincipal claims = JwtTokenHelper.GetPrincipal(token[1], _config);
 
-                // Validate against generator system
-                TokenStatus status = _identityRepository.Validate(token[1]).Result;
-                if (status.Active){
-                    context.HttpContext.User = claims;
-                     Thread.CurrentPrincipal = context.HttpContext.User;
-                }
-                else
-                    throw new SecurityTokenExpiredException("Token expired");
+                    // Validate against generator system
+                    TokenStatus status = _identityRepository.Validate(token[1]).Result;
+                    if (status.Active){
+                    
+                        context.HttpContext.User = claims;
+                         Thread.CurrentPrincipal = context.HttpContext.User;
+                    }
+                    else
+                        throw new SecurityTokenExpiredException("Token expired");
+                    
+                //}
 
                 return;
             }

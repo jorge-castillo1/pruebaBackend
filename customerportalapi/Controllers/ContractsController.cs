@@ -5,6 +5,7 @@ using customerportalapi.Entities;
 using customerportalapi.Security;
 using customerportalapi.Services.Exceptions;
 using customerportalapi.Services.interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -132,6 +133,7 @@ namespace customerportalapi.Controllers
         /// </summary>
         /// <param name="document">Document content and metadata</param>
         /// <returns>Unique document identification number</returns>
+        [Authorize]
         [HttpPost()]
         public async Task<ApiResponse> UploadContractAsync([FromBody] Document document)
         {

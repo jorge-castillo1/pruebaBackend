@@ -25,6 +25,8 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using Serilog;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace customerportalapi
 {
@@ -323,6 +325,11 @@ namespace customerportalapi
                 // of course you also need to register that scheme, e.g. using
                 options.AddScheme<SchemeHandler>("scheme name", "scheme display name");
             });
+
+            services.AddAuthentication(sharedOptions =>
+            {
+                sharedOptions.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddAzureADBearer(options => Configuration.Bind("AzureAd", options));
         }
 
         /// <summary>
