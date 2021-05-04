@@ -91,9 +91,12 @@ namespace customerportalapi.Services
 
                 foreach (var contract in storegroup)
                 {
-                    SMContract contractSM = await _contractSMRepository.GetAccessCodeAsync(contract.SmContractCode);
+                    SMContract contractSM = null;
+                    if (contract != null  && !string.IsNullOrEmpty(contract.SmContractCode))
+                        contractSM = await _contractSMRepository.GetAccessCodeAsync(contract.SmContractCode);
+                        
                     // only active contracts, if the contract has "terminated", the field "Leaving" have information.
-                    if (String.IsNullOrEmpty(contractSM.Leaving))
+                    if (contractSM != null && string.IsNullOrEmpty(contractSM.Leaving))
                     {
                         //ToDo: remove this and clean contract entity
                         contract.StoreCode = contract.StoreData.StoreCode;
@@ -295,9 +298,12 @@ namespace customerportalapi.Services
                 List<Invoice> invoicesByCustomerIdOrdered = new List<Invoice>();
                 foreach (var contract in storegroup)
                 {
-                    SMContract contractSM = await _contractSMRepository.GetAccessCodeAsync(contract.SmContractCode);                    
-                    // only active contracts, if the contract has "terminated", the field "Leaving" have information
-                    if (String.IsNullOrEmpty(contractSM.Leaving))
+                    SMContract contractSM = null;
+                    if (contract != null && !string.IsNullOrEmpty(contract.SmContractCode))
+                        contractSM = await _contractSMRepository.GetAccessCodeAsync(contract.SmContractCode);
+
+                    // only active contracts, if the contract has "terminated", the field "Leaving" have information.
+                    if (contractSM != null && string.IsNullOrEmpty(contractSM.Leaving))
                     {
                         List<Invoice> invoicesFiltered = new List<Invoice>();
 
