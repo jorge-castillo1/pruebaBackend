@@ -55,7 +55,7 @@ namespace customerportalapi.Services
         {
             Contract contract = await _contractRepository.GetContractAsync(contractNumber);
             if (contract.ContractNumber == null)
-                throw new ServiceException("Contract does not exist.", HttpStatusCode.NotFound, "ContractNumber", "Not exist");
+                throw new ServiceException("Contract does not exist.", HttpStatusCode.NotFound, FieldNames.ContractNumber, ValidationMessages.NotExist);
 
             return contract;
         }
@@ -153,7 +153,7 @@ namespace customerportalapi.Services
         {
             ContractFull response = new ContractFull();
             response.contract = await _contractRepository.GetContractAsync(smContractCode);
-            if (response.contract.ContractNumber == null) throw new ServiceException("Contract does not exist.", HttpStatusCode.NotFound, "ContractNumber", "Not exist");
+            if (response.contract.ContractNumber == null) throw new ServiceException("Contract does not exist.", HttpStatusCode.NotFound, FieldNames.ContractNumber, ValidationMessages.NotExist);
 
             decimal price = response.contract.Price > 0 ? response.contract.Price : 0;
             decimal vat = response.contract.Vat != null && response.contract.Vat.Value > 0 ? response.contract.Vat.Value : 0;
