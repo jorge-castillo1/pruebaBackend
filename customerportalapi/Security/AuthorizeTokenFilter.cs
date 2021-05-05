@@ -8,6 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading;
@@ -44,23 +45,44 @@ namespace customerportalapi.Security
                     return;
                 }
 
-                var token = authorization.Value[0].Split(' ');
+                var h = new JwtSecurityTokenHandler();
+
+                var token = authorization.Value[0].Split(' ');                
                 //if (string.IsNullOrEmpty(useAzureMethodAuthentication.Value))
-                //{ 
+                //{
                     // Get claims from token
                     ClaimsPrincipal claims = JwtTokenHelper.GetPrincipal(token[1], _config);
 
                     // Validate against generator system
                     TokenStatus status = _identityRepository.Validate(token[1]).Result;
                     if (status.Active){
-                    
-                        context.HttpContext.User = claims;
-                         Thread.CurrentPrincipal = context.HttpContext.User;
+
+                    context.HttpContext.User = claims;
+                    Thread.CurrentPrincipal = context.HttpContext.User;
                     }
                     else
-                        throw new SecurityTokenExpiredException("Token expired");
-                    
-                //}
+                      throw new SecurityTokenExpiredException("Token expired");
+
+                /*}
+                else
+                {
+
+                    var tokenHandler = new JwtSecurityTokenHandler();
+                    try
+                    {
+                        tokenHandler.ValidateToken(token[1], new TokenValidationParameters
+                        {
+                            ValidateIssuerSigningKey = true,
+                            ValidateIssuer = true,
+                            ValidateAudience = true,
+                        }, out SecurityToken validatedToken);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, String.Format("{0}:{1}", ex.Message, ex.StackTrace));
+                        context.Result = new StatusCodeResult(500);   //Internal Server Error
+                    }
+                }*/
 
                 return;
             }

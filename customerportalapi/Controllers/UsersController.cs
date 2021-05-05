@@ -61,7 +61,7 @@ namespace customerportalapi.Controllers
         /// <returns>User profile data model</returns>
         // GET api/users/{dni}
         [HttpGet("{dni}/{accountType}")]
-        [Authorize]
+        
         [AuthorizeToken]
         public async Task<ApiResponse> GetUserByDniAndTypeAsync(string dni, string accountType)
         {

@@ -133,14 +133,34 @@ namespace customerportalapi.Controllers
         /// </summary>
         /// <param name="document">Document content and metadata</param>
         /// <returns>Unique document identification number</returns>
-        [Authorize]
         [HttpPost()]
+        [Authorize]
         public async Task<ApiResponse> UploadContractAsync([FromBody] Document document)
         {
             try
             {
                 var result = await _services.SaveContractAsync(document);
                 return new ApiResponse(null, result);      
+            }
+            catch (ServiceException se)
+            {
+                _logger.LogError(se.ToString());
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+
+        [HttpGet("demo")]
+        [Authorize]
+        public async Task<ApiResponse> demo()
+        {
+            try
+            {
+                return new ApiResponse(null, "ok");
             }
             catch (ServiceException se)
             {
