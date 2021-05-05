@@ -31,6 +31,7 @@ using Microsoft.AspNetCore.Authentication.AzureAD.UI;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.IdentityModel.Logging;
 
 namespace customerportalapi
 {
@@ -333,7 +334,6 @@ namespace customerportalapi
                 options.AddScheme<SchemeHandler>("scheme name", "scheme display name");
             });
 
-            
 
         }
 

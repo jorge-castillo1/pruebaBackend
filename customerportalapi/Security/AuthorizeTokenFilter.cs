@@ -56,17 +56,15 @@ namespace customerportalapi.Security
                     // Validate against generator system
                     TokenStatus status = _identityRepository.Validate(token[1]).Result;
                     if (status.Active){
-
-                    context.HttpContext.User = claims;
-                    Thread.CurrentPrincipal = context.HttpContext.User;
+                        context.HttpContext.User = claims;
+                        Thread.CurrentPrincipal = context.HttpContext.User;
                     }
                     else
                       throw new SecurityTokenExpiredException("Token expired");
-
                 /*}
                 else
                 {
-
+                    // TODO: validate token
                     var tokenHandler = new JwtSecurityTokenHandler();
                     try
                     {
@@ -75,6 +73,7 @@ namespace customerportalapi.Security
                             ValidateIssuerSigningKey = true,
                             ValidateIssuer = true,
                             ValidateAudience = true,
+                            RequireSignedTokens = true
                         }, out SecurityToken validatedToken);
                     }
                     catch (Exception ex)
