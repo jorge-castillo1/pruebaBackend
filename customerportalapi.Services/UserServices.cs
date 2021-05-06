@@ -1031,7 +1031,7 @@ namespace customerportalapi.Services
 
             foreach (Contract contract in contracts)
             {
-                if (!string.IsNullOrEmpty(contract.SmContractCode) && invitationData.ActiveContract.State == StateEnum.Unchecked)
+                if (contract != null && contract.Unit != null && !string.IsNullOrEmpty(contract.SmContractCode) && invitationData.ActiveContract.State == StateEnum.Unchecked)
                 {
                     invitationData.SmContractCode.SetValueAndState(contract.SmContractCode, StateEnum.Checked);
 

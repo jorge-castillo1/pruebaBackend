@@ -92,7 +92,7 @@ namespace customerportalapi.Services
                 foreach (var contract in storegroup)
                 {
                     SMContract contractSM = null;
-                    if (contract != null  && !string.IsNullOrEmpty(contract.SmContractCode))
+                    if (contract != null  && contract.Unit != null && !string.IsNullOrEmpty(contract.SmContractCode))
                         contractSM = await _contractSMRepository.GetAccessCodeAsync(contract.SmContractCode);
                         
                     // only active contracts, if the contract has "terminated", the field "Leaving" have information.
@@ -299,7 +299,7 @@ namespace customerportalapi.Services
                 foreach (var contract in storegroup)
                 {
                     SMContract contractSM = null;
-                    if (contract != null && !string.IsNullOrEmpty(contract.SmContractCode))
+                    if (contract != null && contract.Unit != null && !string.IsNullOrEmpty(contract.SmContractCode))
                         contractSM = await _contractSMRepository.GetAccessCodeAsync(contract.SmContractCode);
 
                     // only active contracts, if the contract has "terminated", the field "Leaving" have information.
