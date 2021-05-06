@@ -136,8 +136,8 @@ namespace customerportalapi.Controllers
         /// </summary>
         /// <param name="document">Document content and metadata</param>
         /// <returns>Unique document identification number</returns>
-        [HttpPost()]
-        [Authorize]
+        [HttpPost]
+        [Authorize(Roles = Role.StoreManager)]
         public async Task<ApiResponse> UploadContractAsync([FromBody] Document document)
         {
             try

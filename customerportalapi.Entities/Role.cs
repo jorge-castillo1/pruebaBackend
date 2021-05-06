@@ -4,5 +4,6 @@
     {
         public const string Admin = "adminContact";
         public const string User = "contact";
+        public const string StoreManager = "storeManager";
     }
 }
