@@ -118,6 +118,11 @@ namespace customerportalapi
                 IMongoDatabase database = GetDatabase();
                 return new MongoCollectionWrapper<UnitLocation>(database, "unitlocations");
             });
+            services.AddScoped<IMongoCollectionWrapper<Feature>>(serviceProvider =>
+            {
+                IMongoDatabase database = GetDatabase();
+                return new MongoCollectionWrapper<Feature>(database, "features");
+            });
 
             //Mail service
             services.AddScoped(serviceProvider =>
@@ -158,6 +163,7 @@ namespace customerportalapi
             services.AddScoped<IOpportunityCRMRepository, OpportunityCRMRepository>();
             services.AddScoped<ILanguageRepository, LanguageRepository>();
             services.AddScoped<IUnitLocationRepository, UnitLocationRepository>();
+            services.AddScoped<IFeatureRepository, FeatureRepository>();
 
             //Register Business Services
             services.AddTransient<IUserServices, UserServices>();

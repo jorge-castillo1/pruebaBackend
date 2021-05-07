@@ -32,6 +32,7 @@ namespace customerportalapi.Services
         private readonly IOpportunityCRMRepository _opportunityRepository;
         private readonly IStoreRepository _storeRepository;
         private readonly IUnitLocationRepository _unitLocationRepository;
+        private readonly IFeatureRepository _featureRepository;
 
 
         public UserServices(
@@ -48,7 +49,8 @@ namespace customerportalapi.Services
             IContractSMRepository contractSMRepository,
             IOpportunityCRMRepository opportunityRepository,
             IStoreRepository storeRepository,
-            IUnitLocationRepository unitLocationRepository
+            IUnitLocationRepository unitLocationRepository,
+            IFeatureRepository featureRepository
         )
         {
             _userRepository = userRepository;
@@ -65,6 +67,7 @@ namespace customerportalapi.Services
             _opportunityRepository = opportunityRepository;
             _storeRepository = storeRepository;
             _unitLocationRepository = unitLocationRepository;
+            _featureRepository = featureRepository;
         }
 
 
@@ -287,7 +290,8 @@ namespace customerportalapi.Services
             //5. Get Email Invitation Template
             int templateId;
             templateId = (int)EmailTemplateTypes.InvitationStandard;
-            if (string.IsNullOrEmpty(user.Id))            
+            bool useEmailWelcome = _featureRepository.CheckFeatureByNameAndEnvironment(FeatureNames.emailWelcomeInvitation, _config["Environment"]);
+            if (string.IsNullOrEmpty(user.Id) && useEmailWelcome)            
                 templateId = (int)EmailTemplateTypes.InvitationWelcome;
 
             string language = UserUtils.GetLanguage(value.Language);
