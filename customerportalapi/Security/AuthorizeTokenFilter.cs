@@ -38,51 +38,29 @@ namespace customerportalapi.Security
                 // Get Authorization header value
 
                 var useAzureMethodAuthentication = request.Headers.FirstOrDefault(x => x.Key == "use-azure-method-authentication");
+                if (!string.IsNullOrEmpty(useAzureMethodAuthentication.Value))
+                    throw new SecurityTokenExpiredException("Check middleware authentication method, this request currently don't use MS-ADAL");
+                
                 var authorization = request.Headers.FirstOrDefault(x => x.Key == HeaderNames.Authorization);
                 if (authorization.Key == null || !authorization.Value[0].Contains("Bearer "))
                 {
                     context.Result = new StatusCodeResult(499); //Token Required
                     return;
-                }
-
-                var h = new JwtSecurityTokenHandler();
-
+                }               
+                
                 var token = authorization.Value[0].Split(' ');                
-                //if (string.IsNullOrEmpty(useAzureMethodAuthentication.Value))
-                //{
-                    // Get claims from token
-                    ClaimsPrincipal claims = JwtTokenHelper.GetPrincipal(token[1], _config);
+                // Get claims from token
+                ClaimsPrincipal claims = JwtTokenHelper.GetPrincipal(token[1], _config);
 
-                    // Validate against generator system
-                    TokenStatus status = _identityRepository.Validate(token[1]).Result;
-                    if (status.Active){
-                        context.HttpContext.User = claims;
-                        Thread.CurrentPrincipal = context.HttpContext.User;
-                    }
-                    else
-                      throw new SecurityTokenExpiredException("Token expired");
-                /*}
+                // Validate against generator system
+                TokenStatus status = _identityRepository.Validate(token[1]).Result;
+                if (status.Active){
+                    context.HttpContext.User = claims;
+                    Thread.CurrentPrincipal = context.HttpContext.User;
+                }
                 else
-                {
-                    // TODO: validate token
-                    var tokenHandler = new JwtSecurityTokenHandler();
-                    try
-                    {
-                        tokenHandler.ValidateToken(token[1], new TokenValidationParameters
-                        {
-                            ValidateIssuerSigningKey = true,
-                            ValidateIssuer = true,
-                            ValidateAudience = true,
-                            RequireSignedTokens = true
-                        }, out SecurityToken validatedToken);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, String.Format("{0}:{1}", ex.Message, ex.StackTrace));
-                        context.Result = new StatusCodeResult(500);   //Internal Server Error
-                    }
-                }*/
-
+                    throw new SecurityTokenExpiredException("Token expired");
+                
                 return;
             }
             catch (SecurityTokenExpiredException ex)

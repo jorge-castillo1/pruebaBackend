@@ -156,25 +156,5 @@ namespace customerportalapi.Controllers
                 throw;
             }
         }
-
-        [HttpGet("demo")]
-        [Authorize(Roles ="demoRole")]
-        public async Task<ApiResponse> demo()
-        {
-            try
-            {
-                return new ApiResponse(null, "ok");
-            }
-            catch (ServiceException se)
-            {
-                _logger.LogError(se.ToString());
-                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex.ToString());
-                throw;
-            }
-        }
     }
 }
