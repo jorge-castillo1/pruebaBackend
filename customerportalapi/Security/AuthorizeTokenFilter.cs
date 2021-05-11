@@ -35,12 +35,7 @@ namespace customerportalapi.Security
             {
                 var request = context.HttpContext.Request;
 
-                // Get Authorization header value
-
-                var useAzureMethodAuthentication = request.Headers.FirstOrDefault(x => x.Key == "use-azure-method-authentication");
-                if (!string.IsNullOrEmpty(useAzureMethodAuthentication.Value))
-                    throw new SecurityTokenExpiredException("Check middleware authentication method, this request currently don't use MS-ADAL");
-                
+                // Get Authorization header value                
                 var authorization = request.Headers.FirstOrDefault(x => x.Key == HeaderNames.Authorization);
                 if (authorization.Key == null || !authorization.Value[0].Contains("Bearer "))
                 {
