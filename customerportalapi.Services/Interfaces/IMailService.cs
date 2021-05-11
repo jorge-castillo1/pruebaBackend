@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace customerportalapi.Services.Interfaces
 {
-    public interface IEmailService
+    public interface IMailService
     {
         Task<bool> Send(Email email);
     }

@@ -170,6 +170,7 @@ namespace customerportalapi
             services.AddTransient<IContractServices, ContractServices>();
             services.AddTransient<IEkomiWidgetService, EkomiWidgetService>();
             services.AddTransient<ILanguageServices, LanguageServices>();
+            services.AddTransient<IMailService, MailService>();
 
             services.AddHttpClient("httpClient", c =>
             {

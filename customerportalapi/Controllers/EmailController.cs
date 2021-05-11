@@ -19,16 +19,21 @@ namespace customerportalapi.Controllers
     [ApiController]
     public class EmailController
     {
-        private readonly IEmailService _services;
+        private readonly IMailService _services;
         private readonly ILogger<EmailController> _logger;
 
 
-        public EmailController(IEmailService services, ILogger<EmailController> logger)
+        public EmailController(IMailService services, ILogger<EmailController> logger)
         {
             _services = services;
             _logger = logger;
         }
 
+        /// <summary>
+        /// Send email 
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
         [HttpPost]
         [AuthorizeApiKey]
         public async Task<ApiResponse> Send([FromBody] Email email)
