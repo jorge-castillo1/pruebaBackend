@@ -162,7 +162,7 @@ namespace customerportalapi.Services
             response.smcontract = await _contractSMRepository.GetAccessCodeAsync(smContractCode);
             response.contract.StoreCode = response.contract.StoreData.StoreCode;
             OpportunityCRM opportunity;
-            if (!String.IsNullOrEmpty(response.contract.OpportunityId))
+            if (!string.IsNullOrEmpty(response.contract.OpportunityId))
             {
                 opportunity = await _opportunityRepository.GetOpportunity(response.contract.OpportunityId);
                 response.contract.OpportunityId = opportunity.OpportunityId;

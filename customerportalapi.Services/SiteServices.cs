@@ -25,9 +25,7 @@ namespace customerportalapi.Services
         private readonly IConfiguration _config;
         private readonly IMailRepository _mailRepository;
         private readonly IEmailTemplateRepository _emailTemplateRepository;
-
-
-
+        private readonly IDocumentRepository _documentRepository;
 
         public SiteServices(
             IUserRepository userRepository,
@@ -38,7 +36,8 @@ namespace customerportalapi.Services
             IContractSMRepository contractSMRepository,
             IConfiguration config,
             IMailRepository mailRepository,
-            IEmailTemplateRepository emailTemplateRepository
+            IEmailTemplateRepository emailTemplateRepository,
+            IDocumentRepository documentRepository
         )
         {
             _userRepository = userRepository;
@@ -50,6 +49,7 @@ namespace customerportalapi.Services
             _config = config;
             _mailRepository = mailRepository;
             _emailTemplateRepository = emailTemplateRepository;
+            _documentRepository = documentRepository;
         }
 
 
@@ -256,6 +256,31 @@ namespace customerportalapi.Services
         public async Task<Unit> GetUnitBySMIdAsync(string smid)
         {
             return await _storeRepository.GetUnitBySMIdAsync(smid);
+        }
+
+        public async Task<string> SaveImageUnitCategoryAsync(Document document)
+        {
+            return await _documentRepository.SaveDocumentBlobStorageAsync(document);
+        }
+        public async Task<List<BlobResult>> GetDocumentInfoBlobStorageAsync(string names)
+        {
+            List<BlobResult> res = new List<BlobResult>();
+            if (!string.IsNullOrEmpty(names))
+            {
+                var files = names.Split(",");
+
+                foreach (var file in files)
+                {
+                    var result = await _documentRepository.GetDocumentBlobStorageAsync(file);
+                    if (result != null && !string.IsNullOrEmpty(result.LocalPath))
+                    {
+                        result.Name = file;
+                        res.Add(result);
+                    }
+                }
+            }
+            
+            return res;
         }
 
         public async Task<List<SiteInvoices>> GetLastInvoices(string username)
