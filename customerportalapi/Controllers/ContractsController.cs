@@ -20,7 +20,6 @@ namespace customerportalapi.Controllers
 
 
         public ContractsController(IContractServices services, ILogger<ContractsController> logger)
-
         {
             _services = services;
             _logger = logger;
