@@ -787,7 +787,7 @@ namespace customerportalapi.Services
                 throw new ServiceException("Contract sm found", HttpStatusCode.BadRequest, FieldNames.SMContractCode);
 
             // 4. Set data
-            payInvoice.Amount = inv.Amount;
+            payInvoice.Amount = inv.OutStanding;
             payInvoice.IdCustomer = smContract.Customerid;
 
             // 5. Pay
