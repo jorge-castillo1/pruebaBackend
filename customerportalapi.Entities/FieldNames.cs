@@ -41,6 +41,7 @@ namespace customerportalapi.Entities
         public const string Contact = "Contact";
         public const string InvoiceNumber = "InvoiceNumber";
         public const string Unit = "Unit";
+        public const string ReceivedToken = "Received Token";
 
     }
 }

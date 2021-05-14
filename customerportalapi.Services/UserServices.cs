@@ -90,7 +90,8 @@ namespace customerportalapi.Services
 
             List<Language> languages = await _languageRepository.GetLanguagesAsync();
             Language langEntity = languages.Find(x => x.Name == entity.Language);
-            if (user.Language != langEntity.IsoCode.ToLower()) {
+            if (user.Language != langEntity.IsoCode.ToLower())
+            {
                 user.Language = langEntity.IsoCode.ToLower();
                 _userRepository.Update(user);
             }
@@ -197,11 +198,11 @@ namespace customerportalapi.Services
 
             if (profile.EmailAddress2Principal && string.IsNullOrEmpty(profile.EmailAddress2))
                 throw new ServiceException("Principal email can not be null.", HttpStatusCode.BadRequest, "Principal email", "Empty field");
-       
+
             //3. Verify that principal email not in use
-           
-            if (profile.EmailAddress1Principal && !string.IsNullOrEmpty(profile.EmailAddress1)) 
-            {   
+
+            if (profile.EmailAddress1Principal && !string.IsNullOrEmpty(profile.EmailAddress1))
+            {
                 if (this.VerifyDisponibilityEmail(profile.EmailAddress1, profile.DocumentNumber))
                     throw new ServiceException("Principal email are in use by another user.", HttpStatusCode.BadRequest, FieldNames.Principalemail, ValidationMessages.InUse);
             }
@@ -291,7 +292,7 @@ namespace customerportalapi.Services
             int templateId;
             templateId = (int)EmailTemplateTypes.InvitationStandard;
             bool useEmailWelcome = _featureRepository.CheckFeatureByNameAndEnvironment(FeatureNames.emailWelcomeInvitation, _config["Environment"]);
-            if (string.IsNullOrEmpty(user.Id) && useEmailWelcome)            
+            if (string.IsNullOrEmpty(user.Id) && useEmailWelcome)
                 templateId = (int)EmailTemplateTypes.InvitationWelcome;
 
             string language = UserUtils.GetLanguage(value.Language);
@@ -331,7 +332,7 @@ namespace customerportalapi.Services
                     LastEmailSent = EmailTemplateTypes.InvitationWelcome.ToString(),
                 };
 
-               result = await _userRepository.Create(user);
+                result = await _userRepository.Create(user);
             }
             else
             {
@@ -358,9 +359,9 @@ namespace customerportalapi.Services
         }
 
         public async Task<Token> ConfirmAndChangeCredentialsAsync(string receivedToken, ResetPassword value)
-            {
+        {
             // 1. Validate user
-            if (string.IsNullOrEmpty(receivedToken)) throw new ServiceException("User must have a received Token.", HttpStatusCode.BadRequest, "Received Token", "Empty field");
+            if (string.IsNullOrEmpty(receivedToken)) throw new ServiceException("User must have a received Token.", HttpStatusCode.BadRequest, FieldNames.ReceivedToken, ValidationMessages.EmptyFields);
 
             User user = _userRepository.GetUserByInvitationToken(receivedToken);
             if (user.Id == null) return new Token();
@@ -377,7 +378,7 @@ namespace customerportalapi.Services
             // 2. Change useranme
             if (value.Username != null && value.Username != "")
             {
-                if(value.Username.Contains('@'))
+                if (value.Username.Contains('@'))
                     throw new ServiceException("Username must not include @", HttpStatusCode.BadRequest, "Username", "Must not include @");
 
                 if (ValidateUsername(value.Username)) user.Username = value.Username;
@@ -429,7 +430,7 @@ namespace customerportalapi.Services
         {
             //1. Validate receivedToken not empty
             if (string.IsNullOrEmpty(receivedToken))
-                throw new ServiceException("User must have a receivedToken.", HttpStatusCode.BadRequest, "Received Token", "Empty field");
+                throw new ServiceException("User must have a receivedToken.", HttpStatusCode.BadRequest, FieldNames.ReceivedToken, ValidationMessages.EmptyFields);
 
             //2. Validate user by invitationToken or forgotPasswordToken
             bool invitationToken = false;
@@ -516,7 +517,7 @@ namespace customerportalapi.Services
             _profileRepository.RevokedWebPortalAccessAsync(user.Dni, value.CustomerType);
 
             //4. Delete from IS
-            if(!string.IsNullOrEmpty(user.ExternalId))
+            if (!string.IsNullOrEmpty(user.ExternalId))
                 _identityRepository.DeleteUser(user.ExternalId);
 
             //5. Delete from Database
@@ -649,7 +650,8 @@ namespace customerportalapi.Services
 
             if (editDataCustomerTemplate._id != null)
             {
-                if (user.Id != null) {
+                if (user.Id != null)
+                {
                     Email message = new Email();
                     message.To.Add(user.Email);
                     message.Subject = editDataCustomerTemplate.subject;
@@ -945,10 +947,10 @@ namespace customerportalapi.Services
 
             EmailTemplate invitationErrorTemplate = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.InvitationError, LanguageTypes.es.ToString());
             if (string.IsNullOrEmpty(invitationErrorTemplate._id))
-                throw new ServiceException("Email template not found, templateCode: " + (int)EmailTemplateTypes.InvitationError, HttpStatusCode.NotFound, FieldNames.Email+FieldNames.Template, ValidationMessages.NotFound);
-            
+                throw new ServiceException("Email template not found, templateCode: " + (int)EmailTemplateTypes.InvitationError, HttpStatusCode.NotFound, FieldNames.Email + FieldNames.Template, ValidationMessages.NotFound);
+
             string mailTo = _config["MailIT"];
-            if (string.IsNullOrEmpty(mailTo)) 
+            if (string.IsNullOrEmpty(mailTo))
                 throw new ServiceException("Store mail not found", HttpStatusCode.NotFound, FieldNames.Email, ValidationMessages.NotFound);
 
             Email message = new Email();
@@ -1051,7 +1053,7 @@ namespace customerportalapi.Services
 
                         //Unit
                         invitationData.UnitPassword.SetValueAndState(ValidationMessages.NoInformationAvailable, StateEnum.Warning);
-                        if (!string.IsNullOrEmpty(contractSM.Password)) 
+                        if (!string.IsNullOrEmpty(contractSM.Password))
                             invitationData.UnitPassword.SetValueAndState(contractSM.Password, StateEnum.Checked);
 
                         invitationData.UnitName.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
@@ -1077,7 +1079,7 @@ namespace customerportalapi.Services
 
                             Store store = await _storeRepository.GetStoreAsync(contract.StoreData.StoreCode);
                             invitationData.StoreCode.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
-                            if(store != null)
+                            if (store != null)
                             {
                                 if (!string.IsNullOrEmpty(store.StoreCode))
                                     invitationData.StoreCode.SetValueAndState(store.StoreCode.ToString(), StateEnum.Checked);
@@ -1101,9 +1103,9 @@ namespace customerportalapi.Services
                                 invitationData.StoreName.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
                                 if (!string.IsNullOrEmpty(store.StoreName))
                                     invitationData.StoreName.SetValueAndState(store.StoreName, StateEnum.Checked);
-                            
+
                                 invitationData.StoreEmail.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
-                            
+
                                 string email = store.EmailAddress1 ?? store.EmailAddress2;
                                 if (!string.IsNullOrEmpty(email))
                                     invitationData.StoreEmail.SetValueAndState(email, StateEnum.Checked);
@@ -1139,7 +1141,7 @@ namespace customerportalapi.Services
 
             }
 
-            if(invitationData.SmContractCode.State == StateEnum.Unchecked)
+            if (invitationData.SmContractCode.State == StateEnum.Unchecked)
                 invitationData.SmContractCode.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
 
             return true;
@@ -1176,7 +1178,8 @@ namespace customerportalapi.Services
                             char[] unitName = data.Value.ToCharArray();
 
                             int num;
-                            if (unitName[0].ToString() != null && int.TryParse(unitName[0].ToString(),out num)) {
+                            if (unitName[0].ToString() != null && int.TryParse(unitName[0].ToString(), out num))
+                            {
                                 num++;
                                 if (num > 9) num = 0;
                                 unitName[0] = Char.Parse(num.ToString());
@@ -1218,7 +1221,7 @@ namespace customerportalapi.Services
             }
             body = body.Replace("{{BaseUrl}}", _config["BaseUrl"]);
             body = body.Replace("{{InviteConfirmationUrl}}", _config["InviteConfirmation"] + user.Invitationtoken);
-            
+
             return body;
         }
 
@@ -1255,10 +1258,10 @@ namespace customerportalapi.Services
                 Entity = entity
             };
 
-            return data;            
+            return data;
         }
 
-        private EmailParagraph GetParagraphByName(EmailTemplate template , string name)
+        private EmailParagraph GetParagraphByName(EmailTemplate template, string name)
         {
             name = name.ToLower();
             if (template != null && template.Paragraphs.Count > 0)
@@ -1267,6 +1270,25 @@ namespace customerportalapi.Services
             }
 
             return null;
+        }
+
+        public async Task<Profile> GetUserByInvitationTokenAsync(string receivedToken)
+        {
+            // 1. Validate user
+            if (string.IsNullOrEmpty(receivedToken)) throw new ServiceException("User must have a received Token.", HttpStatusCode.BadRequest, FieldNames.ReceivedToken, ValidationMessages.EmptyFields);
+
+            var user = _userRepository.GetUserByInvitationToken(receivedToken);
+            if (user == null)
+                throw new ServiceException("User is not found.", HttpStatusCode.NotFound, FieldNames.User, ValidationMessages.NotExist);
+
+
+            Profile profile = new Profile()
+            {
+                Fullname = user.Name,
+                Language = user.Language
+
+            };
+            return profile;
         }
     }
 }
