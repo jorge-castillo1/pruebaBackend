@@ -34,5 +34,7 @@ namespace customerportalapi.Services.interfaces
         Task<bool> RemoveRole(string username, string role);
 
         bool ValidateUsername(string username);
+
+        Task<Profile> GetUserByInvitationTokenAsync(string receivedToken);
     }
 }
