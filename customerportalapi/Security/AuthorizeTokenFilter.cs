@@ -8,6 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading;
@@ -34,15 +35,15 @@ namespace customerportalapi.Security
             {
                 var request = context.HttpContext.Request;
 
-                // Get Authorization header value
+                // Get Authorization header value                
                 var authorization = request.Headers.FirstOrDefault(x => x.Key == HeaderNames.Authorization);
                 if (authorization.Key == null || !authorization.Value[0].Contains("Bearer "))
                 {
                     context.Result = new StatusCodeResult(499); //Token Required
                     return;
-                }
-
-                var token = authorization.Value[0].Split(' ');
+                }               
+                
+                var token = authorization.Value[0].Split(' ');                
                 // Get claims from token
                 ClaimsPrincipal claims = JwtTokenHelper.GetPrincipal(token[1], _config);
 
@@ -50,11 +51,11 @@ namespace customerportalapi.Security
                 TokenStatus status = _identityRepository.Validate(token[1]).Result;
                 if (status.Active){
                     context.HttpContext.User = claims;
-                     Thread.CurrentPrincipal = context.HttpContext.User;
+                    Thread.CurrentPrincipal = context.HttpContext.User;
                 }
                 else
                     throw new SecurityTokenExpiredException("Token expired");
-
+                
                 return;
             }
             catch (SecurityTokenExpiredException ex)

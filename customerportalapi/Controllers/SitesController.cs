@@ -5,6 +5,7 @@ using customerportalapi.Entities;
 using customerportalapi.Security;
 using customerportalapi.Services.Exceptions;
 using customerportalapi.Services.interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -13,7 +14,6 @@ namespace customerportalapi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [AuthorizeToken]
     public class SitesController : ControllerBase
     {
         private readonly ISiteServices _services;
@@ -34,8 +34,33 @@ namespace customerportalapi.Controllers
         /// <param name="username">Username</param>
         /// <returns>Site list</returns>
         [HttpGet("users/{username}")]
-        // [Authorize(Roles = Role.Admin)]
+        [AuthorizeToken]
         public async Task<ApiResponse> GetAsync(string username)
+        {
+            try
+            {
+                var entity = await _services.GetContractsAsync(username);
+                return new ApiResponse(entity);
+            }
+            catch (ServiceException se)
+            {
+                _logger.LogError(se.ToString());
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+        /// <summary>
+        /// Get sites list where current user has active contracts
+        /// </summary>
+        /// <param name="username">Username</param>
+        /// <returns>Site list</returns>
+        [HttpGet("users/{username}/msadal")]
+        [Authorize(Roles = Role.StoreManager)]
+        public async Task<ApiResponse> GetContractsAsync(string username)
         {
             try
             {
@@ -63,6 +88,7 @@ namespace customerportalapi.Controllers
         /// <param name="limit">page size</param>
         /// <returns></returns>
         [HttpGet("stores")]
+        [AuthorizeToken]
         public async Task<ApiResponse> GetAsync(string countryCode, string city, int skip, int? limit)
         {
             try
@@ -91,6 +117,7 @@ namespace customerportalapi.Controllers
         /// <param name="id">Unit identification Id</param>
         /// <returns>Unit data model</returns>
         [HttpGet("units/{id:guid}")]
+        [AuthorizeToken]
         public async Task<ApiResponse> GetUnitAsync(Guid id)
         {
             try
@@ -111,6 +138,7 @@ namespace customerportalapi.Controllers
         /// <param name="smid">ERP Unit identification Id </param>
         /// <returns>Unit data model</returns>
         [HttpGet("units/{smid}")]
+        [AuthorizeToken]
         public async Task<ApiResponse> GetUnitBySMIdAsync(string smid)
         {
             try
@@ -132,6 +160,7 @@ namespace customerportalapi.Controllers
         /// <param name="contractnumber">ERP contract identification number</param>
         /// <returns></returns>
         [HttpGet("units/{smid}/{contractnumber}")]
+        [AuthorizeToken]
         public async Task<ApiResponse> GetUnitContractAsync(string smid, string contractnumber)
         {
             try
@@ -209,6 +238,7 @@ namespace customerportalapi.Controllers
         /// </summary>
         /// <returns>Country data model list</returns>
         [HttpGet("countries")]
+        [AuthorizeToken]
         public async Task<ApiResponse> GetCountriesAsync()
         {
             try
@@ -229,6 +259,7 @@ namespace customerportalapi.Controllers
         /// <param name="countryCode">Country code</param>
         /// <returns>City data model list</returns>
         [HttpGet("cities")]
+        [AuthorizeToken]
         public async Task<ApiResponse> GetCitiesAsync(string countryCode)
         {
             try
@@ -249,6 +280,7 @@ namespace customerportalapi.Controllers
         /// <param name="storeCode">Store code</param>
         /// <returns>Store data model</returns>
         [HttpGet("stores/{storeCode}")]
+        [AuthorizeToken]
         public async Task<ApiResponse> GetStoreAsync(string storeCode)
         {
             try
@@ -269,6 +301,7 @@ namespace customerportalapi.Controllers
         /// <param name="value">Access code credentials</param>
         /// <returns>Site access code</returns>
         [HttpPost("access-code")]
+        [AuthorizeToken]
         public async Task<ApiResponse> GetAccessCodeAsync([FromBody] AccessCode value)
         {
             try
@@ -301,6 +334,7 @@ namespace customerportalapi.Controllers
         /// </summary>
         /// <returns>bool</returns>
         [HttpPost("access-code-available")]
+        [AuthorizeToken]
         public async Task<ApiResponse> IsAccessCodeAvailableAsync()
         {
             try
@@ -326,6 +360,7 @@ namespace customerportalapi.Controllers
         /// <param name="value">Update Access code credentials</param>
         /// <returns>Bool</returns>
         [HttpPatch("access-code")]
+        [AuthorizeToken]
         public async Task<ApiResponse> UpdateCodeAsync([FromBody] AccessCode value)
         {
             try
@@ -359,6 +394,7 @@ namespace customerportalapi.Controllers
         /// <param name="username">Username</param>
         /// <returns>Last n user invoices</returns>
         [HttpGet("invoices/{username}")]
+        [AuthorizeToken]
         public async Task<ApiResponse> GetInvoicesAsync(string username)
         {
             try

@@ -22,9 +22,16 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using Serilog;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.Net.Http;
+using Microsoft.AspNetCore.Authentication.AzureAD.UI;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.IdentityModel.Logging;
 
 namespace customerportalapi
 {
@@ -276,6 +283,9 @@ namespace customerportalapi
                 AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip,
             });
 
+            services.AddAuthentication(AzureADDefaults.JwtBearerAuthenticationScheme)
+                .AddAzureADBearer(options => Configuration.Bind("AzureAd", options));
+
             services.AddMvc()
                  .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
@@ -329,7 +339,11 @@ namespace customerportalapi
                 // of course you also need to register that scheme, e.g. using
                 options.AddScheme<SchemeHandler>("scheme name", "scheme display name");
             });
+
+
         }
+
+
 
         /// <summary>
         /// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -366,6 +380,7 @@ namespace customerportalapi
             app.UseCors("AllowAll");
             app.UseHttpsRedirection();
             app.UseApiResponseAndExceptionWrapper(new AutoWrapperOptions { IsDebug = env.IsDevelopment(), IsApiOnly = true, ShowStatusCode = true });
+			app.UseAuthentication();
             app.UseMvc();
 
             // Enable middleware to serve generated Swagger as a JSON endpoint.
@@ -377,6 +392,7 @@ namespace customerportalapi
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "CustomerPortalAPI V1");
             });
+
         }
 
         private IMongoDatabase GetDatabase()

@@ -5,6 +5,7 @@ using customerportalapi.Entities;
 using customerportalapi.Security;
 using customerportalapi.Services.Exceptions;
 using customerportalapi.Services.interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -12,7 +13,6 @@ namespace customerportalapi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [AuthorizeToken]
     public class ContractsController : ControllerBase
     {
         private readonly IContractServices _services;
@@ -31,6 +31,7 @@ namespace customerportalapi.Controllers
         /// <param name="contractNumber">Contract number</param>
         /// <returns>Contract data model</returns>
         [HttpGet("{contractNumber}")]
+        [AuthorizeToken]
         public async Task<ApiResponse> GetAsync(string contractNumber)
         {
             try
@@ -57,6 +58,7 @@ namespace customerportalapi.Controllers
         /// <param name="smContractCode">unique contract number from erp</param>
         /// <returns>base64 string document</returns>
         [HttpGet("{dni}/{smContractCode}/download")]
+        [AuthorizeToken]
         public async Task<ApiResponse> GetDownloadContractAsync(string dni, string smContractCode)
         {
             try
@@ -82,6 +84,7 @@ namespace customerportalapi.Controllers
         /// <param name="invoiceDownload">Invoice information metadata</param>
         /// <returns>base64 string document</returns>
         [HttpPost("invoices/download")]
+        [AuthorizeToken]
         public async Task<ApiResponse> GetDownloadInvoiceAsync([FromBody] InvoiceDownload invoiceDownload)
         {
             try
@@ -107,6 +110,7 @@ namespace customerportalapi.Controllers
         /// <param name="contractNumber">friendly user contract number</param>
         /// <returns>FullContract model data</returns>
         [HttpGet("full/{contractNumber}")]
+        [AuthorizeToken]
         public async Task<ApiResponse> GetFullContractAsync(string contractNumber)
         {
             try
@@ -131,7 +135,8 @@ namespace customerportalapi.Controllers
         /// </summary>
         /// <param name="document">Document content and metadata</param>
         /// <returns>Unique document identification number</returns>
-        [HttpPost()]
+        [HttpPost]
+        [Authorize(Roles = Role.StoreManager)]
         public async Task<ApiResponse> UploadContractAsync([FromBody] Document document)
         {
             try
