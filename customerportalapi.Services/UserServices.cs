@@ -122,6 +122,10 @@ namespace customerportalapi.Services
             //    CustomerType = accountType
             //}
 
+            //5. Update verification data
+            user.ForgotPasswordtoken = null;
+            _userRepository.Update(user);
+
             return entity;
         }
 
@@ -483,9 +487,6 @@ namespace customerportalapi.Services
                     await _identityRepository.UpdateUser(existingUser);
                 }
 
-                //4. Update verification data
-                user.ForgotPasswordtoken = null;
-                _userRepository.Update(user);
             }
             else
             {
