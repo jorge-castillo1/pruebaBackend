@@ -35,6 +35,9 @@ namespace customerportalapi.Services.interfaces
 
         bool ValidateUsername(string username);
 
+        bool ValidateEmail(string email);
+
         Task<Profile> GetUserByInvitationTokenAsync(string receivedToken);
+      
     }
 }

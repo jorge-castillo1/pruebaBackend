@@ -215,6 +215,27 @@ namespace customerportalapi.Controllers
             }
         }
 
+       
+        /// <summary>
+        /// validate user from Access Token
+        /// </summary>
+        /// <param name="email">Username</param>
+        /// <returns>Boolean with result</returns>
+        [HttpGet("{email}/validate")]
+        public ApiResponse EmailExists(string email)
+        {
+            try
+            { 
+                bool entity = _services.ValidateEmail(email);
+                return new ApiResponse(entity);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+
         // PUT api/users/uninvite/{dni}
         [HttpPut("uninvite/{dni}")]
         [AuthorizeApiKey]
