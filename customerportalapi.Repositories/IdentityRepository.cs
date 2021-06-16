@@ -1,14 +1,19 @@
-using customerportalapi.Repositories.interfaces;
 using customerportalapi.Entities;
+using customerportalapi.Repositories.interfaces;
 using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Protocols;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Threading.Tasks;
-using System.Security.Claims;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace customerportalapi.Repositories
 {
@@ -40,7 +45,7 @@ namespace customerportalapi.Repositories
                 response.EnsureSuccessStatusCode();
 
                 var content = await response.Content.ReadAsStringAsync();
-               return JsonConvert.DeserializeObject<Token>(content);
+                return JsonConvert.DeserializeObject<Token>(content);
             }
             catch (Exception ex)
             {
@@ -61,13 +66,43 @@ namespace customerportalapi.Repositories
                 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
                     "Basic",
                     Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes(
-                        String.Format("{0}:{1}",_configuration["Identity:Credentials:User"], _configuration["Identity:Credentials:Password"])))
+                        String.Format("{0}:{1}", _configuration["Identity:Credentials:User"], _configuration["Identity:Credentials:Password"])))
                 );
                 var response = await httpClient.PostAsync(url, form);
                 response.EnsureSuccessStatusCode();
 
                 var content = await response.Content.ReadAsStringAsync();
-               return JsonConvert.DeserializeObject<TokenStatus>(content);
+                return JsonConvert.DeserializeObject<TokenStatus>(content);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        public JwtSecurityToken ValidateAzuereAD(string token)
+        {
+            var jwt = (SecurityToken)new JwtSecurityToken();
+            try
+            {
+#if DEBUG
+                IdentityModelEventSource.ShowPII = true;
+#endif
+                var myAudience = _configuration["AzureAd:ClientId"];
+                var myIssuer = String.Format(CultureInfo.InvariantCulture, "{0}/{1}/", _configuration["AzureAd:Instance"], _configuration["AzureAd:TenantId"]);
+                var configManager = new ConfigurationManager<OpenIdConnectConfiguration>(_configuration["AzureAd:DiscoveryEndpoint"], new OpenIdConnectConfigurationRetriever());
+                var config = configManager.GetConfigurationAsync().Result;
+
+                var validationParameters = new TokenValidationParameters
+                {
+                    ValidAudience = myAudience,
+                    ValidIssuer = myIssuer,
+                    IssuerSigningKeys = config.SigningKeys,
+                    ValidateLifetime = false
+                };
+
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var result = tokenHandler.ValidateToken(token, validationParameters, out jwt);
+                return jwt as JwtSecurityToken;
             }
             catch (Exception ex)
             {
@@ -298,7 +333,7 @@ namespace customerportalapi.Repositories
                 UserGroupRemoveOperations operations = new UserGroupRemoveOperations();
                 UserGroupRemoveOperation removeoperation = new UserGroupRemoveOperation();
                 removeoperation.Operation = "remove";
-                removeoperation.Path = "members[value eq " + userIdentity.ID +"]";
+                removeoperation.Path = "members[value eq " + userIdentity.ID + "]";
                 operations.Operations.Add(removeoperation);
                 var request = new HttpRequestMessage(method, url)
                 {

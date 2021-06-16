@@ -392,7 +392,6 @@ namespace customerportalapi
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "CustomerPortalAPI V1");
             });
-
         }
 
         private IMongoDatabase GetDatabase()

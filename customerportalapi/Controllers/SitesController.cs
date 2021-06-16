@@ -1,14 +1,13 @@
-﻿using System;
-using System.Threading.Tasks;
-using AutoWrapper.Wrappers;
+﻿using AutoWrapper.Wrappers;
 using customerportalapi.Entities;
 using customerportalapi.Security;
 using customerportalapi.Services.Exceptions;
 using customerportalapi.Services.interfaces;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using System;
+using System.Threading.Tasks;
 
 namespace customerportalapi.Controllers
 {
@@ -53,13 +52,14 @@ namespace customerportalapi.Controllers
                 throw;
             }
         }
+
         /// <summary>
         /// Get sites list where current user has active contracts
         /// </summary>
         /// <param name="username">Username</param>
         /// <returns>Site list</returns>
         [HttpGet("users/{username}/msadal")]
-        [Authorize(Roles = Role.StoreManager)]
+        [AuthorizeAzureAD(new[] { Entities.enums.RoleGroupTypes.StoreManager })]
         public async Task<ApiResponse> GetContractsAsync(string username)
         {
             try
@@ -214,6 +214,7 @@ namespace customerportalapi.Controllers
         /// <param name="names"></param>
         /// <returns></returns>
         [HttpGet("units/category/image/info")]
+        [AuthorizeAzureAD(new[] { Entities.enums.RoleGroupTypes.StoreManager })]
         public async Task<ApiResponse> GetImageUnitCategoryAsync(string names)
         {
             try
@@ -309,7 +310,7 @@ namespace customerportalapi.Controllers
                 var entity = await _services.GetAccessCodeAsync(value.ContractId, value.Password);
                 return new ApiResponse(entity);
             }
-            catch(ServiceException ex)
+            catch (ServiceException ex)
             {
                 string obj = string.Empty;
                 if (value != null)
@@ -368,7 +369,7 @@ namespace customerportalapi.Controllers
                 var entity = await _services.UpdateAccessCodeAsync(value.ContractId, value.Password);
                 return new ApiResponse(entity);
             }
-            catch(ServiceException ex)
+            catch (ServiceException ex)
             {
                 string obj = string.Empty;
                 if (value != null)
