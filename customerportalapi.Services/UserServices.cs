@@ -1291,5 +1291,11 @@ namespace customerportalapi.Services
             };
             return profile;
         }
+
+        public bool ValidateEmail(string email)
+        {
+            User userByEmail = _userRepository.GetCurrentUserByEmail(email);
+            return (userByEmail.Id == null);
+        }
     }
 }
