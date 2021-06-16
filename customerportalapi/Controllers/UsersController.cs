@@ -1,14 +1,13 @@
-﻿using System;
-using System.Threading.Tasks;
-using AutoWrapper.Wrappers;
+﻿using AutoWrapper.Wrappers;
 using customerportalapi.Entities;
 using customerportalapi.Security;
 using customerportalapi.Services.Exceptions;
 using customerportalapi.Services.interfaces;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using System;
+using System.Threading.Tasks;
 
 namespace customerportalapi.Controllers
 {
@@ -60,7 +59,7 @@ namespace customerportalapi.Controllers
         /// <returns>User profile data model</returns>
         // GET api/users/{dni}
         [HttpGet("{dni}/{accountType}")]
-        [Authorize(Roles = Role.StoreManager)]
+        [AuthorizeAzureAD(new[] { Entities.enums.RoleGroupTypes.StoreManager })]
         public async Task<ApiResponse> GetUserByDniAndTypeAsync(string dni, string accountType)
         {
             try
