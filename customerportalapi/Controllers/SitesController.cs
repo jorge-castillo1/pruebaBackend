@@ -59,7 +59,7 @@ namespace customerportalapi.Controllers
         /// <param name="username">Username</param>
         /// <returns>Site list</returns>
         [HttpGet("users/{username}/msadal")]
-        [AuthorizeAzureAD(new[] { Entities.enums.RoleGroupTypes.StoreManager })]
+        //[AuthorizeAzureAD(new[] { Entities.enums.RoleGroupTypes.StoreManager })]
         public async Task<ApiResponse> GetContractsAsync(string username)
         {
             try
@@ -214,6 +214,7 @@ namespace customerportalapi.Controllers
         /// <param name="names"></param>
         /// <returns></returns>
         [HttpGet("units/category/image/info")]
+        //[AuthorizeAzureAD(new[] { Entities.enums.RoleGroupTypes.StoreManager })]
         public async Task<ApiResponse> GetImageUnitCategoryAsync(string names)
         {
             try

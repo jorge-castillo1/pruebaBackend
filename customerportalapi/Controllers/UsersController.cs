@@ -59,7 +59,7 @@ namespace customerportalapi.Controllers
         /// <returns>User profile data model</returns>
         // GET api/users/{dni}
         [HttpGet("{dni}/{accountType}")]
-        [AuthorizeAzureAD(new[] { Entities.enums.RoleGroupTypes.StoreManager })]
+        //[AuthorizeAzureAD(new[] { Entities.enums.RoleGroupTypes.StoreManager })]
         public async Task<ApiResponse> GetUserByDniAndTypeAsync(string dni, string accountType)
         {
             try

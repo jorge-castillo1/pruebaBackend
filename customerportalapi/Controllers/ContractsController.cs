@@ -135,7 +135,7 @@ namespace customerportalapi.Controllers
         /// <param name="document">Document content and metadata</param>
         /// <returns>Unique document identification number</returns>
         [HttpPost]
-        [AuthorizeAzureAD(new[] { Entities.enums.RoleGroupTypes.StoreManager })]
+        //[AuthorizeAzureAD(new[] { Entities.enums.RoleGroupTypes.StoreManager })]
         public async Task<ApiResponse> UploadContractAsync([FromBody] Document document)
         {
             try
