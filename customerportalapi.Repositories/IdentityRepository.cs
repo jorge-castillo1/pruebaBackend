@@ -84,9 +84,9 @@ namespace customerportalapi.Repositories
             var jwt = (SecurityToken)new JwtSecurityToken();
             try
             {
-#if DEBUG
+//#if DEBUG
                 IdentityModelEventSource.ShowPII = true;
-#endif
+//#endif
                 var myAudience = _configuration["AzureAd:ClientId"];
                 var myIssuer = String.Format(CultureInfo.InvariantCulture, "{0}/{1}/", _configuration["AzureAd:Instance"], _configuration["AzureAd:TenantId"]);
                 var configManager = new ConfigurationManager<OpenIdConnectConfiguration>(_configuration["AzureAd:DiscoveryEndpoint"], new OpenIdConnectConfigurationRetriever());
