@@ -50,5 +50,7 @@
 
         public string ExpectedMoveIn { get; set; }
 
+        public string StoreImage { get; set; }
+
     }
 }
