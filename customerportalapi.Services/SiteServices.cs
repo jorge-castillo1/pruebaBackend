@@ -74,7 +74,8 @@ namespace customerportalapi.Services
                 x.StoreData.CoordinatesLongitude,
                 x.StoreData.EmailAddress1,
                 x.StoreData.StoreCode,
-                x.StoreData.StoreId
+                x.StoreData.StoreId,
+                x.StoreData.StoreImage
             }))
             {
                 string storeId = storegroup.Key.StoreId.ToString();
@@ -106,6 +107,7 @@ namespace customerportalapi.Services
                         contract.TimeZone = contractSM.Timezone;
                         contract.StoreData = null;
                         site.Contracts.Add(contract);
+                        contract.StoreImage = storegroup.Key.StoreImage;
                     }
                 }
 
