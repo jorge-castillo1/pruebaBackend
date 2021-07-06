@@ -991,7 +991,8 @@ namespace customerportalapi.Services
                 SmContractCode = GetMandatiryData(SystemTypes.CRM, EntityNames.iav_contracts, null, StateEnum.Unchecked),
                 SMContract = GetMandatiryData(SystemTypes.SM, EntityNames.WBSGetContract, null, StateEnum.Unchecked),
                 ActiveContract = GetMandatiryData(SystemTypes.SM, EntityNames.WBSGetContract, null, StateEnum.Unchecked),
-                UnitPassword = GetMandatiryData(SystemTypes.CRM, EntityNames.WBSGetContract, null, StateEnum.Unchecked),
+                //Access Code eliminado temporalmente de Mandatory Data
+                //UnitPassword = GetMandatiryData(SystemTypes.CRM, EntityNames.WBSGetContract, null, StateEnum.Unchecked),
                 UnitName = GetMandatiryData(SystemTypes.CRM, EntityNames.iav_contracts, null, StateEnum.Unchecked),
                 UnitSizeCode = GetMandatiryData(SystemTypes.CRM, EntityNames.iav_contracts, null, StateEnum.Unchecked), // TODO: check EntityNames
                 ContractStoreCode = GetMandatiryData(SystemTypes.CRM, EntityNames.iav_contracts, null, StateEnum.Unchecked),
@@ -1053,9 +1054,10 @@ namespace customerportalapi.Services
                         invitationData.ActiveContract.SetValueAndState(StateEnum.Checked.ToString(), StateEnum.Checked);
 
                         //Unit
-                        invitationData.UnitPassword.SetValueAndState(ValidationMessages.NoInformationAvailable, StateEnum.Warning);
-                        if (!string.IsNullOrEmpty(contractSM.Password))
-                            invitationData.UnitPassword.SetValueAndState(contractSM.Password, StateEnum.Checked);
+                        //Access Code eliminado temporalmente de Mandatory Data
+                        //invitationData.UnitPassword.SetValueAndState(ValidationMessages.NoInformationAvailable, StateEnum.Warning);
+                        //if (!string.IsNullOrEmpty(contractSM.Password))
+                        //    invitationData.UnitPassword.SetValueAndState(contractSM.Password, StateEnum.Checked);
 
                         invitationData.UnitName.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
                         if (!string.IsNullOrEmpty(contract.Unit.UnitName))
@@ -1196,7 +1198,8 @@ namespace customerportalapi.Services
                             body = body.Replace("{{LockCode}}", new string(unitName));
                             break;
 
-                        case "UnitPassword":
+                        //Access Code eliminado temporalmente de Mandatory Data
+                        //case "UnitPassword":
                         case "UnitSizeCode":
                             var content = string.Empty;
                             if (invitationTemplate != null && invitationTemplate.Paragraphs != null)
