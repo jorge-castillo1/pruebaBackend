@@ -63,6 +63,8 @@ namespace customerportalapi.Entities
         public AccountCustomerType CustomerTypeInfo { get; set; }
 
         public string Username { get; set; }
+
+        public bool Blue_updatewebportal { get; set; }
     }
 
     public class AccountCustomerType
