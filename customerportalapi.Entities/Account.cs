@@ -106,5 +106,7 @@ namespace customerportalapi.Entities
         public string Token { get; set; }
         
         public string TokenUpdateDate { get; set; }
+
+        public bool blue_updatewebportal { get; set; }
     }
 }

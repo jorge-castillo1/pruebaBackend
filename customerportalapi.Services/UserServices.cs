@@ -264,7 +264,12 @@ namespace customerportalapi.Services
                 message.Body = string.Format(htmlbody, user.Name);
                 await _mailRepository.Send(message);
             }
+            
 
+            if (!entity.Blue_updatewebportal)
+            {
+                entity.Blue_updatewebportal = true;
+            }
             return entity;
         }
 
@@ -573,7 +578,9 @@ namespace customerportalapi.Services
                 UseThisAddress = value.UseThisAddress,
                 Token = value.Token,
                 TokenUpdateDate = value.TokenUpdateDate,
-                BankAccount = value.BankAccount
+                BankAccount = value.BankAccount,
+                blue_updatewebportal = true
+
             };
 
             foreach (var address in value.AddressList)
