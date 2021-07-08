@@ -1,4 +1,4 @@
-﻿using MongoDB.Bson;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using System;
 
@@ -65,9 +65,6 @@ namespace customerportalapi.Entities
 
         [BsonElement("lastemailsend")]
         public string LastEmailSent { get; set; }
-
-        [BsonElement("blue_updatewebportal")]
-        public bool Blue_updatewebportal { get; set; }
 
 
     }
