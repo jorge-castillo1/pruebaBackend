@@ -48,6 +48,7 @@ namespace customerportalapi.Repositories
 
         public async Task<Profile> UpdateProfileAsync(Profile profile)
         {
+            profile.Blue_updatewebportal = true;
             var httpClient = _clientFactory.CreateClient("httpClient");
             var method = new HttpMethod("PATCH");
             var request = new HttpRequestMessage(method, new Uri(_configuration["GatewayUrl"] + _configuration["ProfileAPI"]))
