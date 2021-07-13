@@ -265,11 +265,6 @@ namespace customerportalapi.Services
                 await _mailRepository.Send(message);
             }
             
-
-            if (!entity.Blue_updatewebportal)
-            {
-                entity.Blue_updatewebportal = true;
-            }
             return entity;
         }
 
