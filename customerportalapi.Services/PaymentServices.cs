@@ -97,7 +97,7 @@ namespace customerportalapi.Services
             searchProcess.ProcessStatus = (int)ProcessStatuses.Pending;
             List<Process> processes = _processRepository.Find(searchProcess);
             if (processes.Count > 0)
-                throw new ServiceException("User have same pending process for this contract number", HttpStatusCode.BadRequest, "ContractNumber", "Pending process");
+               throw new ServiceException("User have same pending process for this contract number", HttpStatusCode.BadRequest, "ContractNumber", "Pending process");
 
             //5. Get Aps
             ApsRequest request = new ApsRequest()
@@ -170,7 +170,7 @@ namespace customerportalapi.Services
             // await _accountSMRepository.AddBankAccountAsync(bankAccount);
 
             // Send email to the store
-            EmailTemplate template = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.UpdateBankAccount, LanguageTypes.en.ToString());
+            EmailTemplate template = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.UpdatePaymentMethod, LanguageTypes.en.ToString());
             string smContractCode = processedpaymentdocument.SmContractCode;
             Contract contract = await _contractRepository.GetContractAsync(smContractCode);
 
@@ -200,7 +200,7 @@ namespace customerportalapi.Services
                 if (!(_configuration["Environment"] == nameof(EnvironmentTypes.PRO))) storeMail = _configuration["MailStores"];
                 message.To.Add(storeMail);
                 message.Subject = string.Format(template.subject, user.Name, user.Dni);
-                message.Body = string.Format(template.body, user.Name, user.Dni, processedpaymentdocument.DocumentNumber);
+                message.Body = string.Format(template.body, user.Name, user.Dni, processedpaymentdocument.DocumentNumber, "transferencia bancaria");
                 await _mailRepository.Send(message);
             }
             return true;
@@ -709,6 +709,25 @@ namespace customerportalapi.Services
 
             contract.PaymentMethodId= payMetCRM.PaymentMethodId;
             Contract updateContract = await _contractRepository.UpdateContractAsync(contract);
+
+            // Send email to the store
+            EmailTemplate template = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.UpdatePaymentMethod, LanguageTypes.en.ToString());
+
+            store = stores.Find(x => x.StoreCode.Contains(contract.StoreData.StoreCode));
+            if (store.StoreId == null)
+                throw new ServiceException("Store not found", HttpStatusCode.BadRequest, "StoreId");
+
+            if (template._id != null)
+            {
+                Email message = new Email();
+                string storeMail = contract.StoreData.EmailAddress1;
+                if (storeMail == null) throw new ServiceException("Store mail not found", HttpStatusCode.NotFound);
+                if (!(_configuration["Environment"] == nameof(EnvironmentTypes.PRO))) storeMail = _configuration["MailStores"];
+                message.To.Add(storeMail);
+                message.Subject = string.Format(template.subject, user.Name, user.Dni);
+                message.Body = string.Format(template.body, user.Name, user.Dni, process.ContractNumber, "tarjeta de crédito");
+                await _mailRepository.Send(message);
+            }
 
             return true;
         }

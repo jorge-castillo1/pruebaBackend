@@ -8,7 +8,7 @@
         FormOpinion = 3,
         ForgotPassword = 4,
         RequestDigitalContract = 5,
-        UpdateBankAccount = 6,
+        UpdatePaymentMethod = 6,
         RequestDigitalInvoice = 7,
         FormContactCustomer = 8,
         FormCallCustomer = 9,
