@@ -201,6 +201,7 @@ namespace customerportalapi.Services
                 if (storeMail == null) throw new ServiceException("Store mail not found", HttpStatusCode.NotFound);
                 if (!(_configuration["Environment"] == nameof(EnvironmentTypes.PRO))) storeMail = _configuration["MailStores"];
                 message.To.Add(storeMail);
+                _logger.LogInformation(" StoreMail Information", storeMail);
                 message.Subject = string.Format(template.subject, user.Name, user.Dni);
                 message.Body = string.Format(template.body, user.Name, user.Dni, processedpaymentdocument.DocumentNumber, "transferencia bancaria");
                 _logger.LogInformation("Sending StoreMail Information", storeMail);
