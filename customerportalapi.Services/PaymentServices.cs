@@ -192,15 +192,18 @@ namespace customerportalapi.Services
             if (updateAccount.SmCustomerId == null)
                 throw new ServiceException("Error updating account", HttpStatusCode.BadRequest, "SmCustomerId");
 
+            _logger.LogInformation("Template StoreMail Information", template._id.ToString());
             if (template._id != null)
             {
                 Email message = new Email();
                 string storeMail = contract.StoreData.EmailAddress1;
+                _logger.LogInformation("Entering StoreMail Information", storeMail);
                 if (storeMail == null) throw new ServiceException("Store mail not found", HttpStatusCode.NotFound);
                 if (!(_configuration["Environment"] == nameof(EnvironmentTypes.PRO))) storeMail = _configuration["MailStores"];
                 message.To.Add(storeMail);
                 message.Subject = string.Format(template.subject, user.Name, user.Dni);
                 message.Body = string.Format(template.body, user.Name, user.Dni, processedpaymentdocument.DocumentNumber, "transferencia bancaria");
+                _logger.LogInformation("Sending StoreMail Information", storeMail);
                 await _mailRepository.Send(message);
             }
             return true;
@@ -716,16 +719,18 @@ namespace customerportalapi.Services
             store = stores.Find(x => x.StoreCode.Contains(contract.StoreData.StoreCode));
             if (store.StoreId == null)
                 throw new ServiceException("Store not found", HttpStatusCode.BadRequest, "StoreId");
-
+            _logger.LogInformation("Template StoreMail Information", template._id.ToString());
             if (template._id != null)
             {
                 Email message = new Email();
                 string storeMail = contract.StoreData.EmailAddress1;
+                _logger.LogInformation("Entering StoreMail Information", storeMail);
                 if (storeMail == null) throw new ServiceException("Store mail not found", HttpStatusCode.NotFound);
                 if (!(_configuration["Environment"] == nameof(EnvironmentTypes.PRO))) storeMail = _configuration["MailStores"];
                 message.To.Add(storeMail);
                 message.Subject = string.Format(template.subject, user.Name, user.Dni);
                 message.Body = string.Format(template.body, user.Name, user.Dni, process.ContractNumber, "tarjeta de crédito");
+                _logger.LogInformation("Sending StoreMail Information", storeMail);
                 await _mailRepository.Send(message);
             }
 
