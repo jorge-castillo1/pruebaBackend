@@ -6,7 +6,7 @@ namespace customerportalapi.Entities
 {
     public class EkomiWidgetSearchFilter
     {
-        public string SiteId { get; set; }
+        public string StoreCode { get; set; }
 
         public string EkomiLanguage { get; set; }
 

@@ -8,7 +8,7 @@ namespace customerportalapi.Services.Interfaces
 {
     public interface IEkomiWidgetService
     {
-        EkomiWidget GetEkomiWidget(string siteId, string ekomiLanguage);
+        EkomiWidget GetEkomiWidget(string storeCode);
 
         Task<bool> CreateEkomiWidget(EkomiWidget ekomiWidget);
 

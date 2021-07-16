@@ -8,7 +8,7 @@ namespace customerportalapi.Repositories.interfaces
 {
     public interface IEkomiWidgetRepository
     {
-        EkomiWidget Get(string siteId, string ekomiLanguage);
+        EkomiWidget Get(string storeCode);
 
         EkomiWidget GetById(string id);
 
