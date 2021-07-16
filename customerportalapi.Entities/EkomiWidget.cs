@@ -18,11 +18,8 @@ namespace customerportalapi.Entities
         [BsonElement("ekomiWidgetTokens")]
         public string EkomiWidgetTokens { get; set; }
 
-        [BsonElement("ekomiLanguage")]
-        public string EkomiLanguage { get; set; }
-
-        [BsonElement("siteId")]
-        public string SiteId { get; set; }
+        [BsonElement("storeCode")]
+        public string StoreCode { get; set; }
 
     }
 }

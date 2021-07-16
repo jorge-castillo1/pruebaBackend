@@ -19,32 +19,24 @@ namespace customerportalapi.Services
             _ekomiWidgetRepository = ekomiWidgetRepository;
         }
 
-        public EkomiWidget GetEkomiWidget(string siteId, string ekomiLanguage)
+        public EkomiWidget GetEkomiWidget(string storeCode)
         {
-            EkomiWidget ekomiWidget = _ekomiWidgetRepository.Get(siteId, ekomiLanguage);
-            if (ekomiWidget.Id == null) {
-                // Default language
-                ekomiWidget = _ekomiWidgetRepository.Get(siteId, "en");
-            }
-       
+            EkomiWidget ekomiWidget = _ekomiWidgetRepository.Get(storeCode);
             return ekomiWidget;
         }
 
         public Task<bool> CreateEkomiWidget(EkomiWidget ekomiWidget)
         {
-            if (string.IsNullOrEmpty(ekomiWidget.SiteId))
+            if (string.IsNullOrEmpty(ekomiWidget.StoreCode))
                 throw new ServiceException("SiteId required", HttpStatusCode.BadRequest, "SiteId", "SiteId required");
 
             if (string.IsNullOrEmpty(ekomiWidget.EkomiCustomerId))
                 throw new ServiceException("EkomicustomerId required", HttpStatusCode.BadRequest, "EkomicustomerId", "EkomicustomerId required");
 
-            if (string.IsNullOrEmpty(ekomiWidget.EkomiLanguage))
-                throw new ServiceException("EkomiLanguage required", HttpStatusCode.BadRequest, "EkomiLanguage", "EkomiLanguage required");
-
             if (string.IsNullOrEmpty(ekomiWidget.EkomiWidgetTokens))
                 throw new ServiceException("EkomiWidgetTokens required", HttpStatusCode.BadRequest, "EkomiWidgetTokens", "EkomiWidgetTokens required");
 
-            EkomiWidget findEkomiWidget = _ekomiWidgetRepository.Get(ekomiWidget.SiteId, ekomiWidget.EkomiLanguage);
+            EkomiWidget findEkomiWidget = _ekomiWidgetRepository.Get(ekomiWidget.StoreCode);
 
             if (findEkomiWidget.Id != null)
                 throw new ServiceException("EkomiWidget exist with same siteId and EkomiLanguage please update", HttpStatusCode.BadRequest, "SiteId - EkomiLanguage", "EkomiWidget exist with same siteId and EkomiLanguage please update");
@@ -58,7 +50,7 @@ namespace customerportalapi.Services
             EkomiWidget findEkomiWidget;
             foreach( EkomiWidget ekomiWidget in ekomiWidgets)
             {
-                findEkomiWidget  = _ekomiWidgetRepository.Get(ekomiWidget.SiteId, ekomiWidget.EkomiLanguage);
+                findEkomiWidget  = _ekomiWidgetRepository.Get(ekomiWidget.StoreCode);
                 if (findEkomiWidget.Id != null)
                     throw new ServiceException("EkomiWidget exist with same siteId and EkomiLanguage please update", HttpStatusCode.BadRequest, "SiteId - EkomiLanguage", "EkomiWidget exist with same siteId and EkomiLanguage please update");
             }
@@ -77,10 +69,9 @@ namespace customerportalapi.Services
             EkomiWidget ekomiWidgetToUpdate = new EkomiWidget()
             {
                 Id = findEkomiWidget.Id,
-                SiteId = ekomiWidget.SiteId,
+                StoreCode = ekomiWidget.StoreCode,
                 EkomiCustomerId = ekomiWidget.EkomiCustomerId,
                 EkomiWidgetTokens = ekomiWidget.EkomiWidgetTokens,
-                EkomiLanguage = ekomiWidget.EkomiLanguage
             };
 
             return _ekomiWidgetRepository.Update(ekomiWidgetToUpdate);

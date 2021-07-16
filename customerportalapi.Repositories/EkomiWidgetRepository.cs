@@ -18,11 +18,11 @@ namespace customerportalapi.Repositories
             _ekomiWidgets = ekomiWidgets;
         }
 
-        public EkomiWidget Get(string siteId, string ekomiLanguage)
+        public EkomiWidget Get(string storeCode)
         {
             EkomiWidget ekomiWidget = new EkomiWidget();
 
-            var ekomiWidgetsInfo = _ekomiWidgets.FindOne(t => t.SiteId == siteId && t.EkomiLanguage == ekomiLanguage);
+            var ekomiWidgetsInfo = _ekomiWidgets.FindOne(t => t.StoreCode == storeCode);
             foreach (var e in ekomiWidgetsInfo)
             {
                 ekomiWidget = e;
@@ -80,11 +80,9 @@ namespace customerportalapi.Repositories
         {
             FilterDefinition<EkomiWidget> filters = Builders<EkomiWidget>.Filter.Empty;
 
-            if (!string.IsNullOrEmpty(filter.SiteId))
-                filters = filters & Builders<EkomiWidget>.Filter.Eq(x => x.SiteId, filter.SiteId);
+            if (!string.IsNullOrEmpty(filter.StoreCode))
+                filters = filters & Builders<EkomiWidget>.Filter.Eq(x => x.StoreCode, filter.StoreCode);
 
-            if (!string.IsNullOrEmpty(filter.EkomiLanguage))
-                filters = filters & Builders<EkomiWidget>.Filter.Eq(x => x.EkomiLanguage, filter.EkomiLanguage);
 
             if (!string.IsNullOrEmpty(filter.EkomiWidgetTokens))
                 filters = filters & Builders<EkomiWidget>.Filter.Eq(x => x.EkomiWidgetTokens, filter.EkomiWidgetTokens);

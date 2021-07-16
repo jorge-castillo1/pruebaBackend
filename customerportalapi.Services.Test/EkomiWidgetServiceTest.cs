@@ -22,17 +22,17 @@ namespace customerportalapi.Services.Test
         [TestMethod]
         public void GetEkomiwidget_returns_ekomiWidget()
         {
-            string siteId = "fake siteId";
+            string StoreCode = "fake siteId";
             string language = "fake language";
 
             _ekomiWidgetRepository = EkomiWidgetRepositoryMock.EkomiWidgetRepository();
 
             EkomiWidgetService service = new EkomiWidgetService(_ekomiWidgetRepository.Object);
-            var result = service.GetEkomiWidget(siteId, language);
+            var result = service.GetEkomiWidget(StoreCode);
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(siteId, result.SiteId);
-            _ekomiWidgetRepository.Verify(x => x.Get(It.IsAny<string>(), It.IsAny<string>()));
+            Assert.AreEqual(StoreCode, result.StoreCode);
+            _ekomiWidgetRepository.Verify(x => x.Get(It.IsAny<string>()));
         }
 
         [TestMethod]
@@ -41,19 +41,18 @@ namespace customerportalapi.Services.Test
             EkomiWidget ekomiWidget = new EkomiWidget()
             {
                 EkomiCustomerId = "fake customerId",
-                EkomiLanguage = "fake Language11",
                 EkomiWidgetTokens = "fake ekomiwidgetTokens",
-                SiteId = "fake siteId0"
+                StoreCode = "fake siteId0"
             };
 
             var mockRepository = new Mock<IEkomiWidgetRepository>();
-            mockRepository.Setup(r => r.Get(It.IsAny<string>(), It.IsAny<string>())).Returns(new EkomiWidget()
+            mockRepository.Setup(r => r.Get(It.IsAny<string>())).Returns(new EkomiWidget()
             {
                 Id = null,
                 EkomiCustomerId = null,
-                EkomiLanguage = null,
+              
                 EkomiWidgetTokens = null,
-                SiteId = null
+                StoreCode = null
             }).Verifiable();
             mockRepository.Setup(x => x.Create(It.IsAny<EkomiWidget>())).Returns(Task.FromResult(true)).Verifiable();
 
@@ -72,20 +71,19 @@ namespace customerportalapi.Services.Test
                 new EkomiWidget()
                 {
                     EkomiCustomerId = "fake customerId",
-                    EkomiLanguage = "fake Language22",
+                   
                     EkomiWidgetTokens = "fake ekomiwidgetTokens",
-                    SiteId = "fake siteId1"
+                    StoreCode = "fake siteId1"
                 }
             };
 
             var mockRepository = new Mock<IEkomiWidgetRepository>();
-            mockRepository.Setup(r => r.Get(It.IsAny<string>(), It.IsAny<string>())).Returns(new EkomiWidget()
+            mockRepository.Setup(r => r.Get(It.IsAny<string>())).Returns(new EkomiWidget()
             {
                 Id = null,
                 EkomiCustomerId = null,
-                EkomiLanguage = null,
                 EkomiWidgetTokens = null,
-                SiteId = null
+                StoreCode = null
             }).Verifiable();
 
             mockRepository.Setup(x => x.CreateMultiple(It.IsAny<List<EkomiWidget>>())).Returns(Task.FromResult(true)).Verifiable();
@@ -104,9 +102,9 @@ namespace customerportalapi.Services.Test
             {
                 Id = "b02fc244-40e4-e511-80bf-00155d018a4g",
                 EkomiCustomerId = "fake customerId",
-                EkomiLanguage = "fake Language",
+               
                 EkomiWidgetTokens = "fake ekomiwidgetTokens",
-                SiteId = "fake siteId"
+                StoreCode = "fake siteId"
             };
 
 

@@ -13,22 +13,20 @@ namespace customerportalapi.Services.Test.FakeData
         public static Mock<IEkomiWidgetRepository> EkomiWidgetRepository()
         {
             var db = new Mock<IEkomiWidgetRepository>();
-            db.Setup(x => x.Get(It.IsAny<string>(), It.IsAny<string>())).Returns(new EkomiWidget()
+            db.Setup(x => x.Get(It.IsAny<string>())).Returns(new EkomiWidget()
             {
                 Id = "b02fc244-40e4-e511-80bf-00155d018a4g",
                 EkomiCustomerId = "fake customerId",
-                EkomiLanguage = "fake Language",
                 EkomiWidgetTokens = "fake ekomiwidgetTokens",
-                SiteId = "fake siteId"
+                StoreCode = "fake siteId"
             }).Verifiable();
 
             db.Setup(x => x.GetById(It.IsAny<string>())).Returns(new EkomiWidget()
             {
                 Id = "b02fc244-40e4-e511-80bf-00155d018a4g",
                 EkomiCustomerId = "fake customerId",
-                EkomiLanguage = "fake Language",
                 EkomiWidgetTokens = "fake ekomiwidgetTokens",
-                SiteId = "fake siteId"
+                StoreCode = "fake siteId"
             }).Verifiable();
 
             db.Setup(x => x.Create(It.IsAny<EkomiWidget>())).Returns(Task.FromResult(true)).Verifiable();
@@ -39,9 +37,8 @@ namespace customerportalapi.Services.Test.FakeData
             {
                 Id = "b02fc244-40e4-e511-80bf-00155d018a4g",
                 EkomiCustomerId = "fake customerId",
-                EkomiLanguage = "fake Language",
                 EkomiWidgetTokens = "fake ekomiwidgetTokens",
-                SiteId = "fake siteId"
+                StoreCode = "fake siteId"
             }).Verifiable();
 
             db.Setup(x => x.Delete(It.IsAny<string>())).Returns(Task.FromResult(true)).Verifiable();
@@ -52,9 +49,8 @@ namespace customerportalapi.Services.Test.FakeData
                     {   
                         Id = "b02fc244-40e4-e511-80bf-00155d018a4g",
                         EkomiCustomerId = "fake customerId",
-                        EkomiLanguage = "fake Language",
                         EkomiWidgetTokens = "fake ekomiwidgetTokens",
-                        SiteId = "fake siteId"
+                        StoreCode = "fake siteId"
                     }
                 }
             ).Verifiable();

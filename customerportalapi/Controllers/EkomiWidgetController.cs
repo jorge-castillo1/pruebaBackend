@@ -28,15 +28,15 @@ namespace customerportalapi.Controllers
         /// <summary>
         /// Get pending process from user, contract and process type
         /// </summary>
-        /// <param name="siteId">siteId</param>
+        /// <param name="storeCode">siteId</param>
         /// <param name="ekomiLanguage">EkomiLanguage</param>
         /// <returns>Ekomiwidget data</returns>
-        [HttpGet("{siteId}/{ekomiLanguage}")]
-        public ApiResponse GetEkomiWidget(string siteId, string ekomiLanguage)
+        [HttpGet("{storeCode}/{ekomiLanguage}")]
+        public ApiResponse GetEkomiWidget(string storeCode)
         {
             try
             {
-                var result = _service.GetEkomiWidget(siteId, ekomiLanguage);
+                var result = _service.GetEkomiWidget(storeCode);
                 return new ApiResponse(result);
             }
             catch (ServiceException se)
