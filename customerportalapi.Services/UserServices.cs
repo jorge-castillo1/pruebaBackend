@@ -181,11 +181,17 @@ namespace customerportalapi.Services
             if (profile.CustomerTypeInfo == null)
                 profile.CustomerTypeInfo = new AccountCustomerType();
 
-            if (string.IsNullOrEmpty(profile.CustomerTypeInfo.CustomerType))
-                profile.CustomerTypeInfo.CustomerType = AccountType.Residential;
+            User user = _userRepository.GetCurrentUserByEmail(profile.EmailAddress1);
 
-            int userType = UserUtils.GetUserType(profile.CustomerTypeInfo.CustomerType);
-            User user = _userRepository.GetCurrentUserByDniAndType(profile.DocumentNumber, userType);
+            if (user.Usertype == 1)
+            {
+                profile.CustomerTypeInfo.CustomerType = AccountType.Business;
+            }
+            else
+            {
+                profile.CustomerTypeInfo.CustomerType = AccountType.Residential;
+            }
+
             if (user.Id == null)
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
 

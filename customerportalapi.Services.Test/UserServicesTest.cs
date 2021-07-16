@@ -293,7 +293,7 @@ namespace customerportalapi.Services.Test
             Profile result = await service.UpdateProfileAsync(profile);
 
             //Assert
-            _userRepository.Verify(x => x.GetCurrentUserByDniAndType(It.IsAny<string>(), It.IsAny<int>()));
+            _userRepository.Verify(x => x.GetCurrentUserByEmail(It.IsAny<string>()));
             _userRepository.Verify(x => x.Update(It.IsAny<User>()));
             _profileRepository.Verify(x => x.UpdateProfileAsync(It.IsAny<Profile>()));
 
