@@ -181,7 +181,7 @@ namespace customerportalapi.Services
             if (profile.CustomerTypeInfo == null)
                 profile.CustomerTypeInfo = new AccountCustomerType();
 
-            User user = _userRepository.GetCurrentUserByEmail(profile.EmailAddress1);
+            User user = _userRepository.GetCurrentUserByUsername(profile.Username);
 
             if (user.Usertype == 1)
             {
