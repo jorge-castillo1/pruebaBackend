@@ -64,7 +64,7 @@ namespace customerportalapi.Entities
 
         public string Username { get; set; }
 
-        public bool Blue_updatewebportal { get; set; }
+        public bool? Blue_updatewebportal { get; set; } = false;
     }
 
     public class AccountCustomerType
