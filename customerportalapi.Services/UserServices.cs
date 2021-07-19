@@ -228,6 +228,7 @@ namespace customerportalapi.Services
             string phoneToUpdate = string.Empty;
             if (profile.MobilePhone1Principal && !string.IsNullOrEmpty(profile.MobilePhone1))
                 phoneToUpdate = profile.MobilePhone1;
+
             else if (profile.MobilePhonePrincipal && !string.IsNullOrEmpty(profile.MobilePhone))
                 phoneToUpdate = profile.MobilePhone;
 
