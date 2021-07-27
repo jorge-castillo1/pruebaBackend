@@ -223,43 +223,6 @@ namespace customerportalapi.Services.Test
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ServiceException), "No se ha producido la excepci�n esperada.")]
-        public async Task AlActualizarUnUsuarioExistente_ConEmailPrincipal2Invalido_SeProducenErrores()
-        {
-            //Arrange
-            Profile profile = new Profile();
-            profile.DocumentNumber = "12345678A";
-            profile.Language = "new language";
-            profile.EmailAddress1 = "fake email 1";
-            profile.EmailAddress1Principal = false;
-            profile.EmailAddress2 = string.Empty;
-            profile.EmailAddress2Principal = true;
-            profile.Avatar = "new profile image";
-
-            //Act
-            UserServices service = new UserServices(
-                _userRepository.Object,
-                _profileRepository.Object,
-                _mailRepository.Object,
-                _emailtemplateRepository.Object,
-                _identityRepository.Object,
-                _config.Object,
-                _serviceLogin,
-                _userAccountRepository.Object,
-                _languageRepository.Object,
-                _contractRepository.Object,
-                _contractSMRepository.Object,
-                _opportunityRepository.Object,
-                _storeRepository.Object,
-                _unitLocationRepository.Object,
-                _featureRepository.Object
-                );
-            Profile result = await service.UpdateProfileAsync(profile);
-
-            //Assert
-        }
-
-        [TestMethod]
         public async Task AlActualizarUnUsuarioExistente_NoSeProducenErrores()
         {
             //Arrange

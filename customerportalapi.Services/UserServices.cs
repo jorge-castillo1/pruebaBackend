@@ -206,31 +206,29 @@ namespace customerportalapi.Services
             if (profile.EmailAddress1Principal && string.IsNullOrEmpty(profile.EmailAddress1))
                 throw new ServiceException("Principal email can not be null.", HttpStatusCode.BadRequest, "Principal email", "Empty field");
 
-            if (profile.EmailAddress2Principal && string.IsNullOrEmpty(profile.EmailAddress2))
-                throw new ServiceException("Principal email can not be null.", HttpStatusCode.BadRequest, "Principal email", "Empty field");
 
             //3. Verify that principal email not in use
-
+            if (!profile.EmailAddress1Principal && !string.IsNullOrEmpty(profile.EmailAddress1))
+            {
+                profile.EmailAddress1Principal = true;
+            }
             if (profile.EmailAddress1Principal && !string.IsNullOrEmpty(profile.EmailAddress1))
             {
                 if (this.VerifyDisponibilityEmail(profile.EmailAddress1, profile.DocumentNumber))
-                    throw new ServiceException("Principal email are in use by another user.", HttpStatusCode.BadRequest, FieldNames.Principalemail, ValidationMessages.InUse);
+                    throw new ServiceException("Principal email is in use by another user.", HttpStatusCode.BadRequest, FieldNames.Principalemail, ValidationMessages.InUse);
             }
             if (profile.EmailAddress2Principal && !string.IsNullOrEmpty(profile.EmailAddress2))
             {
                 if (this.VerifyDisponibilityEmail(profile.EmailAddress2, profile.DocumentNumber))
-                    throw new ServiceException("Principal email are in use by another user.", HttpStatusCode.BadRequest, FieldNames.Principalemail, ValidationMessages.InUse);
+                    throw new ServiceException("Email is in use by another user.", HttpStatusCode.BadRequest, FieldNames.Principalemail, ValidationMessages.InUse);
             }
 
-            var emailToUpdate = profile.EmailAddress1Principal ? profile.EmailAddress1 : profile.EmailAddress2;
+            var emailToUpdate = profile.EmailAddress1Principal ? profile.EmailAddress1 : "Main Email must have a value";
 
             //4. Set Phone Principal according to data
             string phoneToUpdate = string.Empty;
             if (profile.MobilePhone1Principal && !string.IsNullOrEmpty(profile.MobilePhone1))
                 phoneToUpdate = profile.MobilePhone1;
-
-            else if (profile.MobilePhonePrincipal && !string.IsNullOrEmpty(profile.MobilePhone))
-                phoneToUpdate = profile.MobilePhone;
 
             //5. Compare language, email and image for backend changes
             if (user.Language != profile.Language ||
@@ -573,8 +571,8 @@ namespace customerportalapi.Services
             {
                 SmCustomerId = value.SmCustomerId,
                 CompanyName = value.CompanyName,
-                Phone1 = value.Phone1,
-                MobilePhone1 = value.Mobile1,
+                Phone1 = value.Mobile1,
+                MobilePhone1 = value.Phone1,
                 EmailAddress1 = value.Email1,
                 EmailAddress2 = value.Email2,
                 UseThisAddress = value.UseThisAddress,
