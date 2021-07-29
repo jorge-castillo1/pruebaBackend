@@ -105,14 +105,19 @@ namespace customerportalapi.Services
             else if (entity.EmailAddress2 == user.Email)
                 entity.EmailAddress2Principal = true;
 
-            //4. Set Phone Principal according to external data. No two principal phones allowed
-            entity.MobilePhone1Principal = false;
-            entity.MobilePhonePrincipal = false;
+            ////4. Set Phone Principal according to external data. No two principal phones allowed
+            //entity.MobilePhone1Principal = false;
+            //entity.MobilePhonePrincipal = false;
 
-            if (entity.MobilePhone1 == user.Phone && !string.IsNullOrEmpty(user.Phone))
-                entity.MobilePhone1Principal = true;
-            else if (entity.MobilePhone == user.Phone && !string.IsNullOrEmpty(user.Phone))
-                entity.MobilePhonePrincipal = true;
+            //if (entity.MobilePhone1 == user.Phone && !string.IsNullOrEmpty(user.Phone))
+            //    entity.MobilePhone1Principal = true;
+            //else if (entity.MobilePhone == user.Phone && !string.IsNullOrEmpty(user.Phone))
+            //    entity.MobilePhonePrincipal = true;
+
+
+            if (string.IsNullOrEmpty(user.Phone) || user.Phone != entity.MobilePhone)
+                user.Phone =  entity.MobilePhone;
+
 
             entity.Language = user.Language;
             entity.Avatar = user.Profilepicture;
@@ -157,13 +162,13 @@ namespace customerportalapi.Services
                 entity.EmailAddress2Principal = true;
 
             //4. Set Phone Principal according to external data. No two principal phones allowed
-            entity.MobilePhone1Principal = false;
-            entity.MobilePhonePrincipal = false;
+            //entity.MobilePhone1Principal = false;
+            //entity.MobilePhonePrincipal = false;
 
-            if (entity.MobilePhone1 == user.Phone && !string.IsNullOrEmpty(user.Phone))
-                entity.MobilePhone1Principal = true;
-            else if (entity.MobilePhone == user.Phone && !string.IsNullOrEmpty(user.Phone))
-                entity.MobilePhonePrincipal = true;
+            //if (entity.MobilePhone1 == user.Phone && !string.IsNullOrEmpty(user.Phone))
+            //    entity.MobilePhone1Principal = true;
+            //else if (entity.MobilePhone == user.Phone && !string.IsNullOrEmpty(user.Phone))
+            //    entity.MobilePhonePrincipal = true;
 
             entity.Language = user.Language;
             entity.Avatar = user.Profilepicture;
@@ -227,8 +232,8 @@ namespace customerportalapi.Services
 
             //4. Set Phone Principal according to data
             string phoneToUpdate = string.Empty;
-            if (profile.MobilePhone1Principal && !string.IsNullOrEmpty(profile.MobilePhone1))
-                phoneToUpdate = profile.MobilePhone1;
+            if (!string.IsNullOrEmpty(profile.MobilePhone))
+                phoneToUpdate = profile.MobilePhone;
 
             //5. Compare language, email and image for backend changes
             if (user.Language != profile.Language ||
@@ -253,10 +258,10 @@ namespace customerportalapi.Services
             else
                 entity.EmailAddress2Principal = true;
 
-            if (entity.MobilePhone1 == user.Phone && !string.IsNullOrEmpty(user.Phone))
-                entity.MobilePhone1Principal = true;
-            else if (entity.MobilePhone == user.Phone && !string.IsNullOrEmpty(user.Phone))
-                entity.MobilePhonePrincipal = true;
+            //if (entity.MobilePhone1 == user.Phone && !string.IsNullOrEmpty(user.Phone))
+            //    entity.MobilePhone1Principal = true;
+            //else if (entity.MobilePhone == user.Phone && !string.IsNullOrEmpty(user.Phone))
+            //    entity.MobilePhonePrincipal = true;
 
             EmailTemplate editDataCustomerTemplate = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.EditDataCustomer, user.Language);
 
@@ -571,8 +576,8 @@ namespace customerportalapi.Services
             {
                 SmCustomerId = value.SmCustomerId,
                 CompanyName = value.CompanyName,
-                Phone1 = value.Mobile1,
-                MobilePhone1 = value.Phone1,
+                MobilePhone1 = value.Mobile1,
+                Phone1 = value.Phone1,
                 EmailAddress1 = value.Email1,
                 EmailAddress2 = value.Email2,
                 UseThisAddress = value.UseThisAddress,

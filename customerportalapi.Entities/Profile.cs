@@ -28,11 +28,11 @@ namespace customerportalapi.Entities
 
         public string MobilePhone { get; set; }
 
-        public bool MobilePhonePrincipal { get; set; }
+        //public bool MobilePhonePrincipal { get; set; }
 
         public string MobilePhone1 { get; set; }
 
-        public bool MobilePhone1Principal { get; set; }
+        //public bool MobilePhone1Principal { get; set; }
 
         //public string MobilePhone2 { get; set; }
 
