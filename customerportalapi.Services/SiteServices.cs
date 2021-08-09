@@ -93,9 +93,9 @@ namespace customerportalapi.Services
                 foreach (var contract in storegroup)
                 {
                     SMContract contractSM = null;
-                    if (contract != null  && contract.Unit != null && !string.IsNullOrEmpty(contract.SmContractCode))
+                    if (contract != null && contract.Unit != null && !string.IsNullOrEmpty(contract.SmContractCode))
                         contractSM = await _contractSMRepository.GetAccessCodeAsync(contract.SmContractCode);
-                        
+
                     // only active contracts, if the contract has "terminated", the field "Leaving" have information.
                     if (contractSM != null && string.IsNullOrEmpty(contractSM.Leaving))
                     {
@@ -199,7 +199,8 @@ namespace customerportalapi.Services
                 return false;
         }
 
-        public async Task<AccessCode> GetAccessCodeAsync(string contractId, string password) {
+        public async Task<AccessCode> GetAccessCodeAsync(string contractId, string password)
+        {
 
             var user = Thread.CurrentPrincipal;
             User loginUser = _userRepository.GetCurrentUserByUsername(user.Identity.Name);
@@ -281,11 +282,11 @@ namespace customerportalapi.Services
                     }
                 }
             }
-            
+
             return res;
         }
 
-        public async Task<List<SiteInvoices>> GetLastInvoices(string username)
+        public async Task<List<SiteInvoices>> GetLastInvoices(string username, string contractNumber = null)
         {
             int limitInvoices = 3;
             List<SiteInvoices> siteInvoices = new List<SiteInvoices>();
@@ -299,8 +300,11 @@ namespace customerportalapi.Services
             string accountType = (user.Usertype == (int)UserTypes.Business) ? AccountType.Business : AccountType.Residential;
             List<Contract> contracts = await _contractRepository.GetContractsAsync(user.Dni, accountType);
 
+            if (!string.IsNullOrEmpty(contractNumber))
+                contracts = contracts.Where(c => c.ContractNumber == contractNumber).ToList();
+
             //3. From contracts get customer invoices
-            if (contracts.Count == 0)
+            if (contracts == null || contracts.Count == 0)
                 return siteInvoices;
 
             //4. Group contract by Store
@@ -372,13 +376,14 @@ namespace customerportalapi.Services
             return siteInvoices;
         }
 
-        public async Task<bool> UpdateAccessCodeAsync(string contractId, string password) {
+        public async Task<bool> UpdateAccessCodeAsync(string contractId, string password)
+        {
             var user = Thread.CurrentPrincipal;
             User currentUser = _userRepository.GetCurrentUserByUsername(user.Identity.Name);
             // 1. GetContract to get subcontract
             SMContract smContract = await _contractSMRepository.GetAccessCodeAsync(contractId);
 
-             if (smContract.Contractnumber == null)
+            if (smContract.Contractnumber == null)
                 throw new ServiceException("Contract does not exist.", HttpStatusCode.NotFound, "contractId", "Not exist");
 
             // 2. Get subcontract SM
@@ -391,7 +396,8 @@ namespace customerportalapi.Services
                 throw new ServiceException("Security access code error", HttpStatusCode.BadRequest);
 
             // 3. Update  password in SM
-            UpdateAccessCode updateAccessCode = new UpdateAccessCode {
+            UpdateAccessCode updateAccessCode = new UpdateAccessCode
+            {
                 SubContractId = subContract.SubContractId,
                 UnitId = smContract.Unitid,
                 Code = password
@@ -417,7 +423,8 @@ namespace customerportalapi.Services
             return updateAccCode;
         }
 
-        private string GetUnitName(string unitDescription){
+        private string GetUnitName(string unitDescription)
+        {
             string unitName = !string.IsNullOrEmpty(unitDescription) ? unitDescription.Split(':')[0] : null;
 
             return unitName;
@@ -425,7 +432,7 @@ namespace customerportalapi.Services
 
         private void GetInvoicesWhitOutStanding(string unitName, List<Invoice> invoicesByCustomerId, List<Invoice> invoicesFiltered)
         {
-            
+
             foreach (Invoice invoice in invoicesByCustomerId)
             {
                 string InvoiceUnitName = GetUnitName(invoice.UnitDescription);
