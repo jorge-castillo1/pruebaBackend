@@ -19,7 +19,7 @@ namespace customerportalapi.Services.interfaces
         Task<Unit> GetUnitBySMIdAsync(string smid);
         Task<string> SaveImageUnitCategoryAsync(Document document);
         Task<List<BlobResult>> GetDocumentInfoBlobStorageAsync(string name);
-        Task<List<SiteInvoices>> GetLastInvoices(string username);
+        Task<List<SiteInvoices>> GetLastInvoices(string username, string contractNumber = null);
         Task<bool> UpdateAccessCodeAsync(string contractId, string black);
     }
 }

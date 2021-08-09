@@ -393,14 +393,15 @@ namespace customerportalapi.Controllers
         /// Get Last user invoices
         /// </summary>
         /// <param name="username">Username</param>
+        /// <param name="contractNumber">Contract Number (Optional)</param>
         /// <returns>Last n user invoices</returns>
-        [HttpGet("invoices/{username}")]
-        [AuthorizeToken]
-        public async Task<ApiResponse> GetInvoicesAsync(string username)
+        [HttpGet("invoices/{username}/{contractNumber?}")]
+
+        public async Task<ApiResponse> GetInvoicesAsync(string username, string contractNumber = null)
         {
             try
             {
-                var entity = await _services.GetLastInvoices(username);
+                var entity = await _services.GetLastInvoices(username, contractNumber);
                 return new ApiResponse(entity);
             }
             catch (ServiceException ex)

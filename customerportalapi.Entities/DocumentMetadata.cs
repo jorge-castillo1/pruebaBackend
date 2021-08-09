@@ -18,5 +18,6 @@ namespace customerportalapi.Entities
         public string RelativeUrl { get; set; }
         public string BankAccountOrderNumber { get; set; }
         public string BankAccountName { get; set; }
+        public string InvoiceNumber { get; set; }
     }
 }
