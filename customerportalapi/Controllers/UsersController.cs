@@ -120,6 +120,10 @@ namespace customerportalapi.Controllers
             try
             {
                 var entity = await _services.InviteUserAsync(value);
+
+                _logger.LogInformation("LOG INVITATION ENTITY");
+                _logger.LogInformation(entity.ToString());
+
                 return new ApiResponse(entity);
             }
             catch (ServiceException se)
