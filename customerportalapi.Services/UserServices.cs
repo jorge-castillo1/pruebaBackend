@@ -290,42 +290,56 @@ namespace customerportalapi.Services
             
             //1. Validate email not empty
             if (string.IsNullOrEmpty(value.Email))
+            {
                 _logger.LogInformation("/1. Validate email not empty - null");
                 _logger.LogInformation(value.Email.ToString());
 
-            throw new ServiceException("User must have a valid email address.", HttpStatusCode.BadRequest, FieldNames.Email, ValidationMessages.EmptyFields);
+                throw new ServiceException("User must have a valid email address.", HttpStatusCode.BadRequest, FieldNames.Email, ValidationMessages.EmptyFields);
+
+            }
 
             //2. Validate dni not empty
-          
             if (string.IsNullOrEmpty(value.Dni))
+            {
                 _logger.LogInformation("2. Validate dni not empty - null");
                 _logger.LogInformation(value.Dni.ToString());
-            throw new ServiceException("User must have a valid document number.", HttpStatusCode.BadRequest, FieldNames.Dni, ValidationMessages.EmptyFields);
+                throw new ServiceException("User must have a valid document number.", HttpStatusCode.BadRequest, FieldNames.Dni, ValidationMessages.EmptyFields);
 
+            }
             //3. Find some user with this email and without confirm email
-           
+
             User user = _userRepository.GetCurrentUserByEmail(value.Email);
             if (!string.IsNullOrEmpty(user.Id) && user.Emailverified)
+            {
                 _logger.LogInformation("3. Find some user with this email and without confirm email - null");
 
-            throw new ServiceException("Invitation user fails. Email in use by another user", HttpStatusCode.NotFound, FieldNames.Email, ValidationMessages.AlreadyInUse);
+                throw new ServiceException("Invitation user fails. Email in use by another user", HttpStatusCode.NotFound, FieldNames.Email, ValidationMessages.AlreadyInUse);
+
+            }
 
             //4. If emailverified is true throw error
             var userType = UserUtils.GetUserType(value.CustomerType);
             user = _userRepository.GetCurrentUserByDniAndType(value.Dni, userType);
             if (!string.IsNullOrEmpty(user.Id) && user.Emailverified)
+            {
                 _logger.LogInformation("4. If emailverified is true throw error. User activated before -null");
 
-            throw new ServiceException("Invitation user fails. User was actived before", HttpStatusCode.NotFound, FieldNames.User, ValidationMessages.AlreadyInvited);
+                throw new ServiceException("Invitation user fails. User was actived before", HttpStatusCode.NotFound, FieldNames.User, ValidationMessages.AlreadyInvited);
+
+            }
 
             //5. Get Email Invitation Template
             int templateId;
             templateId = (int)EmailTemplateTypes.InvitationStandard;
             bool useEmailWelcome = _featureRepository.CheckFeatureByNameAndEnvironment(FeatureNames.emailWelcomeInvitation, _config["Environment"]);
             if (string.IsNullOrEmpty(user.Id) && useEmailWelcome)
-                _logger.LogInformation("5. Get Email Invitation Template - null"); 
+            {
+                _logger.LogInformation("5. Get Email Invitation Template - null");
 
-            templateId = (int)EmailTemplateTypes.InvitationWelcome;
+                templateId = (int)EmailTemplateTypes.InvitationWelcome;
+            }
+
+            _logger.LogInformation("INVITATION TEMPLATE ID: ", templateId.ToString());
 
             _logger.LogInformation("INVITATION TEMPLATE ID: ", templateId.ToString());
 
