@@ -334,14 +334,12 @@ namespace customerportalapi.Services
             bool useEmailWelcome = _featureRepository.CheckFeatureByNameAndEnvironment(FeatureNames.emailWelcomeInvitation, _config["Environment"]);
             if (string.IsNullOrEmpty(user.Id) && useEmailWelcome)
             {
-                _logger.LogInformation("5. Get Email Invitation Template - null");
-
+          
                 templateId = (int)EmailTemplateTypes.InvitationWelcome;
             }
 
-            _logger.LogInformation("INVITATION TEMPLATE ID: ", templateId.ToString());
-
-            _logger.LogInformation("INVITATION TEMPLATE ID: ", templateId.ToString());
+            _logger.LogInformation("INVITATION TEMPLATE ID: ");
+            _logger.LogInformation(templateId.ToString());
 
             string language = UserUtils.GetLanguage(value.Language);
             EmailTemplate invitationTemplate = _emailTemplateRepository.getTemplate(templateId, language);
@@ -398,7 +396,7 @@ namespace customerportalapi.Services
                 user.Invitationtoken = Guid.NewGuid().ToString();
                 user.LastEmailSent = EmailTemplateTypes.InvitationStandard.ToString();
 
-                _logger.LogInformation("USER UPDATED : ", user.ToString());
+                _logger.LogInformation("USER UPDATED");
 
                 _userRepository.Update(user);
             }
@@ -409,7 +407,9 @@ namespace customerportalapi.Services
             message.Subject = invitationTemplate.subject;
             message.Body = GetBodyFormatted(invitationTemplate, user, invitationFields);
 
-            _logger.LogInformation("EMAIL : ", message.ToString());
+            _logger.LogInformation("EMAIL : ");
+            _logger.LogInformation(user.Email.ToString());
+            _logger.LogInformation(message.Subject.ToString());
 
             result = await _mailRepository.Send(message);
 
