@@ -291,30 +291,20 @@ namespace customerportalapi.Services
             //1. Validate email not empty
             if (string.IsNullOrEmpty(value.Email))
             {
-                _logger.LogInformation("/1. Validate email not empty - null");
-                _logger.LogInformation(value.Email.ToString());
-
-                throw new ServiceException("User must have a valid email address.", HttpStatusCode.BadRequest, FieldNames.Email, ValidationMessages.EmptyFields);
-
+               throw new ServiceException("User must have a valid email address.", HttpStatusCode.BadRequest, FieldNames.Email, ValidationMessages.EmptyFields);
             }
 
             //2. Validate dni not empty
             if (string.IsNullOrEmpty(value.Dni))
             {
-                _logger.LogInformation("2. Validate dni not empty - null");
-                _logger.LogInformation(value.Dni.ToString());
                 throw new ServiceException("User must have a valid document number.", HttpStatusCode.BadRequest, FieldNames.Dni, ValidationMessages.EmptyFields);
-
             }
             //3. Find some user with this email and without confirm email
 
             User user = _userRepository.GetCurrentUserByEmail(value.Email);
             if (!string.IsNullOrEmpty(user.Id) && user.Emailverified)
             {
-                _logger.LogInformation("3. Find some user with this email and without confirm email - null");
-
-                throw new ServiceException("Invitation user fails. Email in use by another user", HttpStatusCode.NotFound, FieldNames.Email, ValidationMessages.AlreadyInUse);
-
+               throw new ServiceException("Invitation user fails. Email in use by another user", HttpStatusCode.NotFound, FieldNames.Email, ValidationMessages.AlreadyInUse);
             }
 
             //4. If emailverified is true throw error
@@ -322,10 +312,7 @@ namespace customerportalapi.Services
             user = _userRepository.GetCurrentUserByDniAndType(value.Dni, userType);
             if (!string.IsNullOrEmpty(user.Id) && user.Emailverified)
             {
-                _logger.LogInformation("4. If emailverified is true throw error. User activated before -null");
-
-                throw new ServiceException("Invitation user fails. User was actived before", HttpStatusCode.NotFound, FieldNames.User, ValidationMessages.AlreadyInvited);
-
+               throw new ServiceException("Invitation user fails. User was actived before", HttpStatusCode.NotFound, FieldNames.User, ValidationMessages.AlreadyInvited);
             }
 
             //5. Get Email Invitation Template
@@ -338,9 +325,6 @@ namespace customerportalapi.Services
                 templateId = (int)EmailTemplateTypes.InvitationWelcome;
             }
 
-            _logger.LogInformation("INVITATION TEMPLATE ID: ");
-            _logger.LogInformation(templateId.ToString());
-
             string language = UserUtils.GetLanguage(value.Language);
             EmailTemplate invitationTemplate = _emailTemplateRepository.getTemplate(templateId, language);
             if (invitationTemplate._id == null)
@@ -352,13 +336,10 @@ namespace customerportalapi.Services
             //6. Find Mandatory data    
             string accountType = (userType == (int)UserTypes.Business) ? AccountType.Business : AccountType.Residential;
             await FindInvitationMandatoryData(invitationFields, value, accountType);
-            _logger.LogInformation("FOUND MANDATORY DATA");
-
-
+          
             //7. Check all mandatory data
             await CheckMandatoryData(invitationFields);
-            _logger.LogInformation("CHECKED MANDATORY DATA");
-
+           
             var userName = userType == 0 ? value.Dni : "B" + value.Dni;
             var pwd = new Password(true, true, true, false, 6);
             var password = pwd.Next();
@@ -381,8 +362,6 @@ namespace customerportalapi.Services
                     LastEmailSent = EmailTemplateTypes.InvitationWelcome.ToString(),
                 };
 
-                _logger.LogInformation("NEW USER CREATED : ", user.ToString());
-
                 result = await _userRepository.Create(user);
             }
             else
@@ -396,8 +375,6 @@ namespace customerportalapi.Services
                 user.Invitationtoken = Guid.NewGuid().ToString();
                 user.LastEmailSent = EmailTemplateTypes.InvitationStandard.ToString();
 
-                _logger.LogInformation("USER UPDATED");
-
                 _userRepository.Update(user);
             }
 
@@ -406,16 +383,7 @@ namespace customerportalapi.Services
             message.To.Add(user.Email);
             message.Subject = invitationTemplate.subject;
             message.Body = GetBodyFormatted(invitationTemplate, user, invitationFields);
-
-            _logger.LogInformation("EMAIL : ");
-            _logger.LogInformation(user.Email.ToString());
-            _logger.LogInformation(message.Subject.ToString());
-
             result = await _mailRepository.Send(message);
-
-            _logger.LogInformation("Email sent");
-
-
 
             return result;
         }

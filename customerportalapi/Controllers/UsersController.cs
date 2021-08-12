@@ -114,16 +114,12 @@ namespace customerportalapi.Controllers
         /// <remarks>Use API KEY for this api</remarks>
         // POST api/users/invite
         [HttpPost("invite")]
-        [AuthorizeApiKey]
+        //[AuthorizeApiKey]
         public async Task<ApiResponse> Invite([FromBody] Invitation value)
         {
             try
             {
                 var entity = await _services.InviteUserAsync(value);
-
-                _logger.LogInformation("LOG INVITATION ENTITY");
-                _logger.LogInformation(entity.ToString());
-
                 return new ApiResponse(entity);
             }
             catch (ServiceException se)
