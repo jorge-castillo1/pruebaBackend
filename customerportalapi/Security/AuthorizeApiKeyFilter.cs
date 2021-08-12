@@ -35,13 +35,19 @@ namespace customerportalapi.Security
                     context.Result = new StatusCodeResult(499); //Token Required
                     return;
                 }
+                _logger.LogInformation("AUTHORIZATION VALUE");
+                _logger.LogInformation(authorization.Value.ToString());
+                _logger.LogInformation("AUTHORIZATION KEY");
+                _logger.LogInformation(authorization.Key.ToString());
+                _logger.LogInformation("API KEY");
+                _logger.LogInformation(_config["CustomerPortal_ApiKey"]);
 
                 if (authorization.Value != _config["CustomerPortal_ApiKey"])
                 {
                     context.Result = new StatusCodeResult((int)HttpStatusCode.Unauthorized);
                     return;
                 }
-
+                
                 return;
             }
             catch (Exception ex)
