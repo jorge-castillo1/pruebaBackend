@@ -114,7 +114,6 @@ namespace customerportalapi.Controllers
         /// <remarks>Use API KEY for this api</remarks>
         // POST api/users/invite
         [HttpPost("invite")]
-        //[AuthorizeApiKey]
         public async Task<ApiResponse> Invite([FromBody] Invitation value)
         {
             try
