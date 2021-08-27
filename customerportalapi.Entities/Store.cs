@@ -50,5 +50,7 @@ namespace customerportalapi.Entities
         
         public string StoreImage { get; set; }
 
+        public string DocumentRepositoryUrl { get; set; }
+
     }
 }

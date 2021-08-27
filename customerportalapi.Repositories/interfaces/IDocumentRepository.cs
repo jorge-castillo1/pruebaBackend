@@ -15,6 +15,8 @@ namespace customerportalapi.Repositories.interfaces
         Task<string> SaveDocumentBlobStorageAsync(Document document);
 
         Task<string> GetDocumentAsync(string documentid);
+
+        Task<Document> GetFullDocumentAsync(string documentid);
         Task<BlobResult> GetDocumentBlobStorageAsync(string name);
     }
 }
