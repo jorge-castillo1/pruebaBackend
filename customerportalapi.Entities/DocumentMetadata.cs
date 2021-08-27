@@ -16,6 +16,7 @@ namespace customerportalapi.Entities
         public string CreatedBy { get; set; }
         public DateTime CreationDate { get; set; }
         public string RelativeUrl { get; set; }
+        public string NewContractUrl { get; set; }
         public string BankAccountOrderNumber { get; set; }
         public string BankAccountName { get; set; }
         public string InvoiceNumber { get; set; }

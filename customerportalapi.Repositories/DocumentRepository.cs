@@ -107,5 +107,17 @@ namespace customerportalapi.Repositories
             var contractFile = result.GetValue("result").ToString();
             return contractFile;
         }
-    }
+
+        public async Task<Document> GetFullDocumentAsync(string documentid)
+        {
+            var httpClient = _clientFactory.CreateClient("httpClientDocument");
+            httpClient.BaseAddress = new Uri(_configuration["GatewayDocumentsUrl"] + _configuration["DocumentsAPI"]);
+
+            var response = await httpClient.GetAsync(documentid, HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
+            var content = await response.Content.ReadAsStringAsync();
+            JObject result = JObject.Parse(content);
+            return JsonConvert.DeserializeObject<Document>(result.GetValue("result").ToString());
+        }
+    } 
 }
