@@ -1,19 +1,16 @@
-﻿using customerportalapi.Repositories.interfaces;
-using customerportalapi.Entities;
+﻿using customerportalapi.Entities;
+using customerportalapi.Entities.enums;
+using customerportalapi.Repositories.interfaces;
+using customerportalapi.Services.Exceptions;
 using customerportalapi.Services.interfaces;
+using Microsoft.Extensions.Configuration;
+using PasswordGenerator;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using customerportalapi.Entities.enums;
-using Microsoft.Extensions.Configuration;
-using customerportalapi.Services.Exceptions;
 using System.Net;
-using System.Threading;
-using PasswordGenerator;
-using System.Linq;
 using System.Reflection;
-using System.IO;
-using Microsoft.Extensions.Logging;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace customerportalapi.Services
 {
@@ -34,7 +31,6 @@ namespace customerportalapi.Services
         private readonly IStoreRepository _storeRepository;
         private readonly IUnitLocationRepository _unitLocationRepository;
         private readonly IFeatureRepository _featureRepository;
-        private readonly ILogger<UserServices> _logger;
 
 
         public UserServices(
@@ -52,9 +48,8 @@ namespace customerportalapi.Services
             IOpportunityCRMRepository opportunityRepository,
             IStoreRepository storeRepository,
             IUnitLocationRepository unitLocationRepository,
-            IFeatureRepository featureRepository,
-            ILogger<UserServices> logger
-        )
+            IFeatureRepository featureRepository
+            )
         {
             _userRepository = userRepository;
             _profileRepository = profileRepository;
@@ -71,7 +66,6 @@ namespace customerportalapi.Services
             _storeRepository = storeRepository;
             _unitLocationRepository = unitLocationRepository;
             _featureRepository = featureRepository;
-            _logger = logger;
         }
 
 
@@ -101,31 +95,41 @@ namespace customerportalapi.Services
             }
 
             //3. Set Email Principal according to external data. No two principal emails allowed
-            entity.EmailAddress1Principal = false;
-            entity.EmailAddress2Principal = false;
+            
+            if (string.IsNullOrEmpty(user.Email) || user.Email != entity.EmailAddress1)
+            {
+                if (VerifyDisponibilityEmail(entity.EmailAddress1, entity.DocumentNumber)) 
+                {
+                    EmailTemplate template = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.EmailAlreadyExists, LanguageTypes.es.ToString());
+                    if (string.IsNullOrEmpty(template._id))
+                        throw new ServiceException("Email template not found, templateCode: " + (int)EmailTemplateTypes.EmailAlreadyExists, HttpStatusCode.NotFound, FieldNames.Email + FieldNames.Template, ValidationMessages.NotFound);
 
-            if (entity.EmailAddress1 == user.Email)
-                entity.EmailAddress1Principal = true;
-            else if (entity.EmailAddress2 == user.Email)
-                entity.EmailAddress2Principal = true;
+                    string mailTo = _config["MailIT"];
+                    if (string.IsNullOrEmpty(mailTo))
+                        throw new ServiceException("Store mail not found", HttpStatusCode.NotFound, FieldNames.Email, ValidationMessages.NotFound);
 
-            ////4. Set Phone Principal according to external data. No two principal phones allowed
-            //entity.MobilePhone1Principal = false;
-            //entity.MobilePhonePrincipal = false;
+                    Email message = new Email();
+                    message.To.Add(mailTo);
+                    message.Subject = template.subject;
+                    message.Body = string.Format(string.Format(template.body, user.Name, user.Dni));
 
-            //if (entity.MobilePhone1 == user.Phone && !string.IsNullOrEmpty(user.Phone))
-            //    entity.MobilePhone1Principal = true;
-            //else if (entity.MobilePhone == user.Phone && !string.IsNullOrEmpty(user.Phone))
-            //    entity.MobilePhonePrincipal = true;
-
+                    await _mailRepository.Send(message);
+                } else
+                {
+                    user.Email = entity.EmailAddress1;
+                }
+            }
 
             if (string.IsNullOrEmpty(user.Phone) || user.Phone != entity.MobilePhone)
-                user.Phone =  entity.MobilePhone;
+                user.Phone = entity.MobilePhone;
 
+            if (string.IsNullOrEmpty(user.Name )|| user.Name != entity.Name)
+                user.Name = entity.Name;
 
             entity.Language = user.Language;
             entity.Avatar = user.Profilepicture;
             entity.Username = username;
+
             //entity.CustomerTypeInfo = new AccountCustomerType()
             //{
             //    CustomerType = accountType
@@ -278,7 +282,7 @@ namespace customerportalapi.Services
                 message.Body = string.Format(htmlbody, user.Name);
                 await _mailRepository.Send(message);
             }
-            
+
             return entity;
         }
 
@@ -287,11 +291,11 @@ namespace customerportalapi.Services
             bool result = false;
             InvitationMandatoryData invitationFields = InitInvitationData();
 
-            
+
             //1. Validate email not empty
             if (string.IsNullOrEmpty(value.Email))
             {
-               throw new ServiceException("User must have a valid email address.", HttpStatusCode.BadRequest, FieldNames.Email, ValidationMessages.EmptyFields);
+                throw new ServiceException("User must have a valid email address.", HttpStatusCode.BadRequest, FieldNames.Email, ValidationMessages.EmptyFields);
             }
 
             //2. Validate dni not empty
@@ -304,6 +308,22 @@ namespace customerportalapi.Services
             User user = _userRepository.GetCurrentUserByEmail(value.Email);
             if (!string.IsNullOrEmpty(user.Id) && user.Emailverified)
             {
+
+                EmailTemplate template = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.InvitationEmailAlreadyExists, LanguageTypes.es.ToString());
+                if (string.IsNullOrEmpty(template._id))
+                    throw new ServiceException("Email template not found, templateCode: " + (int)EmailTemplateTypes.InvitationEmailAlreadyExists, HttpStatusCode.NotFound, FieldNames.Email + FieldNames.Template, ValidationMessages.NotFound);
+
+                string mailTo = _config["MailIT"];
+                if (string.IsNullOrEmpty(mailTo))
+                    throw new ServiceException("Store mail not found", HttpStatusCode.NotFound, FieldNames.Email, ValidationMessages.NotFound);
+
+                Email message2 = new Email();
+                message2.To.Add(mailTo);
+                message2.Subject = template.subject;
+                message2.Body = string.Format(template.body, user.Name, user.Dni, user.Email);
+                
+                await _mailRepository.Send(message2);
+
                throw new ServiceException("Invitation user fails. Email in use by another user", HttpStatusCode.NotFound, FieldNames.Email, ValidationMessages.AlreadyInUse);
             }
 
@@ -312,7 +332,7 @@ namespace customerportalapi.Services
             user = _userRepository.GetCurrentUserByDniAndType(value.Dni, userType);
             if (!string.IsNullOrEmpty(user.Id) && user.Emailverified)
             {
-               throw new ServiceException("Invitation user fails. User was actived before", HttpStatusCode.NotFound, FieldNames.User, ValidationMessages.AlreadyInvited);
+                throw new ServiceException("Invitation user fails. User was actived before", HttpStatusCode.NotFound, FieldNames.User, ValidationMessages.AlreadyInvited);
             }
 
             //5. Get Email Invitation Template
@@ -321,7 +341,7 @@ namespace customerportalapi.Services
             bool useEmailWelcome = _featureRepository.CheckFeatureByNameAndEnvironment(FeatureNames.emailWelcomeInvitation, _config["Environment"]);
             if (string.IsNullOrEmpty(user.Id) && useEmailWelcome)
             {
-          
+
                 templateId = (int)EmailTemplateTypes.InvitationWelcome;
             }
 
@@ -336,10 +356,10 @@ namespace customerportalapi.Services
             //6. Find Mandatory data    
             string accountType = (userType == (int)UserTypes.Business) ? AccountType.Business : AccountType.Residential;
             await FindInvitationMandatoryData(invitationFields, value, accountType);
-          
+
             //7. Check all mandatory data
             await CheckMandatoryData(invitationFields);
-           
+
             var userName = userType == 0 ? value.Dni : "B" + value.Dni;
             var pwd = new Password(true, true, true, false, 6);
             var password = pwd.Next();

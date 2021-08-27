@@ -16,5 +16,7 @@
         EditAccessCode = 11,
         InvitationError = 12,
         InvitationStandard= 13,
+        InvitationEmailAlreadyExists = 14,
+        EmailAlreadyExists = 15,
     }
 }
