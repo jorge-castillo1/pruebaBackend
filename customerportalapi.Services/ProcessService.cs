@@ -96,7 +96,7 @@ namespace customerportalapi.Services
 
         public Process UpdateSignatureProcess(SignatureStatus value)
         {
-            if (value.Status != "document_completed" && value.Status != "document_canceled")
+            if (value.Status != "document_completed" && value.Status != "document_canceled" && value.Status != "audit_trail_completed")
                 throw new ServiceException("Document status not valid", HttpStatusCode.BadRequest);
 
             ProcessSearchFilter filter = new ProcessSearchFilter
