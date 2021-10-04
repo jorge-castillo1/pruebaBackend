@@ -328,5 +328,26 @@ namespace customerportalapi.Controllers
             }
         }
 
+        //GET api/payment/availablepaymentmethods/{smContractCode}
+        [HttpGet("availablepaymentmethods/{smContractCode}")]
+        public async Task<ApiResponse> GetAvailablePaymentMethods(string smContractCode)
+        {
+            try
+            {
+                List<PaymentMethods> entity = await _services.GetAvailablePaymentMethods(smContractCode);
+                return new ApiResponse(entity);
+            }
+            catch (ServiceException se)
+            {
+                _logger.LogError(se.ToString());
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+
     }
 }

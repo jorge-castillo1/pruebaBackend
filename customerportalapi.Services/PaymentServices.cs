@@ -1466,6 +1466,35 @@ namespace customerportalapi.Services
 
         }
 
-    }
+        public async Task<List<PaymentMethods>> GetAvailablePaymentMethods(string smContractCode)
+        {
+            // 1. Get Contract
+            Contract contract = await _contractRepository.GetContractAsync(smContractCode);
+            if (contract.ContractNumber == null)
+                throw new ServiceException("Contract does not exist.", HttpStatusCode.NotFound, FieldNames.ContractNumber, ValidationMessages.NotExist);
 
+
+            // 2. Get CRM PayMethods
+            List<Store> stores = await _storeRepository.GetStoresAsync();
+            Store store = stores.Find(x => x.StoreCode.Equals(contract.StoreData.StoreCode));
+            if (store.StoreId == null)
+                throw new ServiceException("Store not found", HttpStatusCode.BadRequest, FieldNames.StoreId);
+
+            PaymentMethodsList payMet = await _paymentMethodRepository.GetAllPaymentMethods(store.StoreId.ToString());
+            if (payMet.PaymentMethods == null)
+                throw new ServiceException("Error payment method crm", HttpStatusCode.BadRequest, FieldNames.SMId);
+
+            List<PaymentMethods> availablePayMet = new List<PaymentMethods>();
+            
+            foreach (PaymentMethods payMethod in payMet.PaymentMethods)
+            {
+                string name = payMethod.Name;
+                if (name == "Recibo domiciliado" || name == "Tarjeta Virtual")
+                {
+                    availablePayMet.Add(payMethod);
+                }
+            }
+            return availablePayMet;
+        }
+    }
 }

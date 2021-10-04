@@ -14,5 +14,7 @@ namespace customerportalapi.Repositories.interfaces
 
         Task<PaymentMethodCRM> GetPaymentMethodById(string paymentMethodId);
 
+        Task<PaymentMethodsList> GetAllPaymentMethods(string storeId); 
+
     }
 }
