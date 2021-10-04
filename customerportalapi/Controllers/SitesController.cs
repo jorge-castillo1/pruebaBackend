@@ -219,7 +219,7 @@ namespace customerportalapi.Controllers
         {
             try
             {
-                var result = await _services.GetDocumentInfoBlobStorageAsync(names);
+                var result = await _services.GetDocumentInfoBlobStorageUnitCategoryImageAsync(names);
                 return new ApiResponse(null, result);
             }
             catch (ServiceException se)
@@ -396,7 +396,6 @@ namespace customerportalapi.Controllers
         /// <param name="contractNumber">Contract Number (Optional)</param>
         /// <returns>Last n user invoices</returns>
         [HttpGet("invoices/{username}/{contractNumber?}")]
-
         public async Task<ApiResponse> GetInvoicesAsync(string username, string contractNumber = null)
         {
             try
@@ -408,6 +407,82 @@ namespace customerportalapi.Controllers
             {
                 _logger.LogError(ex.ToString());
                 throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Get Blob content by store code
+        /// </summary>
+        /// <param name="storeCode"></param>
+        /// <returns></returns>
+        [HttpGet("stores/facade/image/info")]        
+        public async Task<ApiResponse> GetImageStoreFacadeAsync(string storeCode)
+        {
+            try
+            {
+                var result = await _services.GetDocumentInfoStoreFacadeAsync(storeCode);
+                return new ApiResponse(null, result);
+            }
+            catch (ServiceException se)
+            {
+                _logger.LogError(se.ToString());
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Save image unit category
+        /// </summary>
+        /// <param name="document"></param>
+        /// <param name="storeCode"></param>
+        /// <returns></returns>
+        [HttpPost("stores/facade/image")]
+        public async Task<ApiResponse> UploadImageStoreFacadeAsync([FromBody] Document document, string storeCode)
+        {
+            try
+            {
+                var result = await _services.SaveImageStoreFacadeAsync(document, storeCode);
+                return new ApiResponse(null, result);
+            }
+            catch (ServiceException se)
+            {
+                _logger.LogError(se.ToString());
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Delete image store facade
+        /// </summary>
+        /// <param name="storeCode">Store Code</param>
+        /// <returns></returns>
+        [HttpDelete("stores/facade/image")]
+        public async Task<ApiResponse> DeleteImageStoreFacadeAsync(string storeCode)
+        {
+            try
+            {
+                var result = await _services.DeleteImageStoreFacadeAsync(storeCode);
+                return new ApiResponse(null, result);
+            }
+            catch (ServiceException se)
+            {
+                _logger.LogError(se.ToString());
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
             }
             catch (Exception ex)
             {

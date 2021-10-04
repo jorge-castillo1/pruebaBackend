@@ -31,6 +31,7 @@
         "MailFrom": "no-reply@bluespace.eu",
         "UnitsAPI": "crmapi/Units/",
         "BlobStorageUnitImageContainer": "unit-images",
+        "BlobStorageStoreFacadeImageContainer": "stores-images",
         "GatewayUrl": "https://localhost:44343/",
         "ConnectionStrings__customerportaldb": "mongodb://localhost:27017",
         "InvoiceByCustomerIdSMAPI": "smapi/Invoice/customer/",

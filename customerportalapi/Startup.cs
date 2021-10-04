@@ -71,7 +71,7 @@ namespace customerportalapi
         /// </summary>
         /// <param name="services"></param>
         public void ConfigureServices(IServiceCollection services)
-        {          
+        {
             //Mongo Database services
             services.AddScoped<IMongoCollectionWrapper<User>>(serviceProvider =>
             {
@@ -123,6 +123,11 @@ namespace customerportalapi
                 IMongoDatabase database = GetDatabase();
                 return new MongoCollectionWrapper<Feature>(database, "features");
             });
+            services.AddScoped<IMongoCollectionWrapper<StoreImage>>(serviceProvider =>
+            {
+                IMongoDatabase database = GetDatabase();
+                return new MongoCollectionWrapper<StoreImage>(database, "storesimages");
+            });
 
             //Mail service
             services.AddScoped(serviceProvider =>
@@ -164,6 +169,7 @@ namespace customerportalapi
             services.AddScoped<ILanguageRepository, LanguageRepository>();
             services.AddScoped<IUnitLocationRepository, UnitLocationRepository>();
             services.AddScoped<IFeatureRepository, FeatureRepository>();
+            services.AddScoped<IStoreImageRepository, StoreImageRepository>();
 
             //Register Business Services
             services.AddTransient<IUserServices, UserServices>();
@@ -177,6 +183,7 @@ namespace customerportalapi
             services.AddTransient<IContractServices, ContractServices>();
             services.AddTransient<IEkomiWidgetService, EkomiWidgetService>();
             services.AddTransient<ILanguageServices, LanguageServices>();
+            services.AddTransient<IStoreImageServices, StoreImageServices>();
 
             services.AddHttpClient("httpClient", c =>
             {
@@ -380,7 +387,7 @@ namespace customerportalapi
             app.UseCors("AllowAll");
             app.UseHttpsRedirection();
             app.UseApiResponseAndExceptionWrapper(new AutoWrapperOptions { IsDebug = env.IsDevelopment(), IsApiOnly = true, ShowStatusCode = true });
-			app.UseAuthentication();
+            app.UseAuthentication();
             app.UseMvc();
 
             // Enable middleware to serve generated Swagger as a JSON endpoint.

@@ -7,6 +7,7 @@ using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Text;
 
 namespace customerportalapi.Repositories
 {
@@ -76,6 +77,22 @@ namespace customerportalapi.Repositories
             JObject result = JObject.Parse(content);
 
             return JsonConvert.DeserializeObject<Unit>(result.GetValue("result").ToString());
+        }
+
+        public async Task<Store> UpdateSiteImage(StoreImageUrl storeImageUrl)
+        {
+            var httpClient = _clientFactory.CreateClient("httpClient");
+            var method = new HttpMethod("PATCH");
+            var request = new HttpRequestMessage(method, new Uri(_configuration["GatewayUrl"] + _configuration["StoresAPI"]))
+            {
+                Content = new StringContent(JsonConvert.SerializeObject(storeImageUrl), Encoding.UTF8, "application/json")
+            };
+            var response = await httpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+            var content = await response.Content.ReadAsStringAsync();
+            JObject result = JObject.Parse(content);
+
+            return JsonConvert.DeserializeObject<Store>(result.GetValue("result").ToString());
         }
     }
 }
