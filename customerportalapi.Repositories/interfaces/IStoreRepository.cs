@@ -11,5 +11,6 @@ namespace customerportalapi.Repositories.interfaces
         Task<Store> GetStoreAsync(string storeId);
         Task<Unit> GetUnitAsync(Guid id);
         Task<Unit> GetUnitBySMIdAsync(string smid);
+        Task<Store> UpdateSiteImage(StoreImageUrl storeImageUrl);
     }
 }

@@ -7,6 +7,7 @@ using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading;
@@ -26,6 +27,7 @@ namespace customerportalapi.Services
         private readonly IMailRepository _mailRepository;
         private readonly IEmailTemplateRepository _emailTemplateRepository;
         private readonly IDocumentRepository _documentRepository;
+        private readonly IStoreImageRepository _storeImageRepository;
 
         public SiteServices(
             IUserRepository userRepository,
@@ -37,7 +39,8 @@ namespace customerportalapi.Services
             IConfiguration config,
             IMailRepository mailRepository,
             IEmailTemplateRepository emailTemplateRepository,
-            IDocumentRepository documentRepository
+            IDocumentRepository documentRepository,
+            IStoreImageRepository storeImageRepository
         )
         {
             _userRepository = userRepository;
@@ -50,6 +53,7 @@ namespace customerportalapi.Services
             _mailRepository = mailRepository;
             _emailTemplateRepository = emailTemplateRepository;
             _documentRepository = documentRepository;
+            _storeImageRepository = storeImageRepository;
         }
 
 
@@ -263,9 +267,105 @@ namespace customerportalapi.Services
 
         public async Task<string> SaveImageUnitCategoryAsync(Document document)
         {
-            return await _documentRepository.SaveDocumentBlobStorageAsync(document);
+            return await _documentRepository.SaveDocumentBlobStorageUnitImageContainerAsync(document);
         }
-        public async Task<List<BlobResult>> GetDocumentInfoBlobStorageAsync(string names)
+
+        public async Task<bool> SaveImageStoreFacadeAsync(Document document, string storeCode)
+        {
+            //Buscar en BD si existe la imagen
+            var storeImageList = _storeImageRepository.Find(new StoreImageSearchFilter() { StoreCode = storeCode });
+
+            if (storeImageList == null || !storeImageList.Any())
+            {
+                // si no existe se crea un documento con un nombre generado x guid nuevo
+                var guid = Guid.NewGuid().ToString();
+                document.FileName = Path.ChangeExtension(guid, document.FileExtension);
+
+                var storeImage = new StoreImage
+                {
+                    Id = null,
+                    StoreCode = storeCode,
+                    ContainerId = document.FileName
+                };
+
+                // se graba el documento en BD
+                bool resultDB = await _storeImageRepository.Create(storeImage);
+                // se sube el documento con el nuevo nombre
+                string documentUrl = await _documentRepository.SaveDocumentBlobStorageStoreFacadeImageContainerAsync(document);
+
+                //Llamada al CRM 
+
+                StoreImageUrl storeImageUrl = new StoreImageUrl
+                {
+                    StoreCode = storeImage.StoreCode,
+                    DocumentUrl = documentUrl
+                };
+
+                Store updatedStore = await _storeRepository.UpdateSiteImage(storeImageUrl);
+               
+                return resultDB &&
+                    !string.IsNullOrEmpty(documentUrl) &&
+                    !string.IsNullOrEmpty(updatedStore.StoreCode);
+            }
+            else
+            {
+                var storeImage = storeImageList.FirstOrDefault();
+
+                // se obtiene el guid a partir del nombre del documento
+                string file = Path.GetFileNameWithoutExtension(storeImage.ContainerId);
+                // se le agrega la posible nueva extensión
+                document.FileName = Path.ChangeExtension(file, document.FileExtension);
+
+                // se graba en BD el documento con el nuevo nombre
+                storeImage.ContainerId = document.FileName;
+                var resultDB = _storeImageRepository.Update(storeImage);
+
+                // se borra el antiguo y se sube el nuevo documento
+                string resultDelete = await _documentRepository.DeleteDocumentBlobStorageStoreFacadeImageContainerAsync(storeImage.ContainerId);
+                string documentUrl = await _documentRepository.SaveDocumentBlobStorageStoreFacadeImageContainerAsync(document);
+
+                //Llamada al CRM 
+                StoreImageUrl storeImageUrl = new StoreImageUrl
+                {
+                    StoreCode = storeImage.StoreCode,
+                    DocumentUrl = documentUrl
+                };
+
+                Store updatedStore = await _storeRepository.UpdateSiteImage(storeImageUrl);
+
+                return resultDB != null &&
+                    !string.IsNullOrEmpty(resultDB.Id) &&
+                    !string.IsNullOrEmpty(documentUrl) && 
+                    !string.IsNullOrEmpty(updatedStore.StoreCode);
+            }
+        }
+
+        public async Task<bool> DeleteImageStoreFacadeAsync(string storeCode)
+        {
+            var storeImageList = _storeImageRepository.Find(new StoreImageSearchFilter() { StoreCode = storeCode });
+            if (storeImageList != null && storeImageList.Any())
+            {
+                var storeImage = storeImageList.FirstOrDefault();
+
+                string resultDelete = await _documentRepository.DeleteDocumentBlobStorageStoreFacadeImageContainerAsync(storeImage.ContainerId);
+                bool resultDB = await _storeImageRepository.DeleteByStoreCode(storeCode);
+
+                StoreImageUrl storeImageUrl = new StoreImageUrl
+                {
+                    StoreCode = storeCode,
+                    DocumentUrl = null
+                };
+
+                Store updatedStore = await _storeRepository.UpdateSiteImage(storeImageUrl);
+                return !string.IsNullOrEmpty(resultDelete) &&
+                  resultDB &&
+                  !string.IsNullOrEmpty(updatedStore.StoreCode);
+            }
+
+            return true;
+        }
+
+        public async Task<List<BlobResult>> GetDocumentInfoBlobStorageUnitCategoryImageAsync(string names)
         {
             List<BlobResult> res = new List<BlobResult>();
             if (!string.IsNullOrEmpty(names))
@@ -274,12 +374,30 @@ namespace customerportalapi.Services
 
                 foreach (var file in files)
                 {
-                    var result = await _documentRepository.GetDocumentBlobStorageAsync(file);
+                    var result = await _documentRepository.GetDocumentBlobStorageUnitImageAsync(file);
                     if (result != null && !string.IsNullOrEmpty(result.LocalPath))
                     {
                         result.Name = file;
                         res.Add(result);
                     }
+                }
+            }
+
+            return res;
+        }
+
+        public async Task<List<BlobResult>> GetDocumentInfoStoreFacadeAsync(string storeCode)
+        {
+            List<BlobResult> res = new List<BlobResult>();
+
+            var storeImage = _storeImageRepository.Get(storeCode);
+            if (storeImage != null && !string.IsNullOrEmpty(storeImage.ContainerId))
+            {
+                var result = await _documentRepository.GetDocumentBlobStorageStoreFacadeImageAsync(storeImage.ContainerId);
+                if (result != null && !string.IsNullOrEmpty(result.LocalPath))
+                {
+                    result.Name = storeImage.ContainerId;
+                    res.Add(result);
                 }
             }
 
@@ -466,5 +584,6 @@ namespace customerportalapi.Services
                 pos++;
             }
         }
+
     }
 }
