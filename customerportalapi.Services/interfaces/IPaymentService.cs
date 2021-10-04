@@ -31,5 +31,8 @@ namespace customerportalapi.Services.interfaces
         Task<string> UpdateCardLoad(PaymentMethodUpdateCardData updateCardData);
         
         Task<bool> UpdateCardResponseAsync(PaymentMethodUpdateCardResponse updateCardResponse);
+
+        Task<List<PaymentMethods>> GetAvailablePaymentMethods(string smContractCode);
+
     }
 }
