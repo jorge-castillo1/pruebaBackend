@@ -52,5 +52,6 @@
 
         public string StoreImage { get; set; }
 
+        public string ContractUrl { get; set; }
     }
 }
