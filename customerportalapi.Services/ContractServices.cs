@@ -186,12 +186,11 @@ namespace customerportalapi.Services
            
             if (document.Metadata.DocumentId == savedDocId)
             {
-                Document doc = await _documentRepository.GetFullDocumentAsync(savedDocId);
-                Contract contract = await _contractRepository.GetContractAsync(doc.Metadata.ContractNumber);
+                Contract contract = await _contractRepository.GetContractAsync(document.Metadata.ContractNumber);
                 
-                if(contract.ContractUrl != doc.Metadata.RelativeUrl)
+                if(contract.ContractUrl != document.Metadata.RelativeUrl)
                 {
-                    contract.ContractUrl = doc.Metadata.RelativeUrl;
+                    contract.ContractUrl = document.Metadata.RelativeUrl;
                     await _contractRepository.UpdateContractAsync(contract);
                 }
             }
