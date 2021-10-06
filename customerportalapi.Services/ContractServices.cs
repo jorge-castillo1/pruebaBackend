@@ -183,12 +183,12 @@ namespace customerportalapi.Services
         public async Task<string> SaveContractAsync(Document document)
         {
             var savedDocId = await _documentRepository.SaveDocumentAsync(document);
-           
+
             if (document.Metadata.DocumentId == savedDocId)
             {
-                Contract contract = await _contractRepository.GetContractAsync(document.Metadata.ContractNumber);
-                
-                if(contract.ContractUrl != document.Metadata.RelativeUrl)
+                Contract contract = await _contractRepository.GetContractAsync(document.Metadata.SmContractCode);
+
+                if (contract.ContractUrl != document.Metadata.RelativeUrl || contract.ContractUrl == null)
                 {
                     contract.ContractUrl = document.Metadata.RelativeUrl;
                     await _contractRepository.UpdateContractAsync(contract);
