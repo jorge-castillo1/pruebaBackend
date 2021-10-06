@@ -190,9 +190,9 @@ namespace customerportalapi.Services
                 document.Metadata.NewContractUrl = doc.Metadata.RelativeUrl;
                 Contract contract = await _contractRepository.GetContractAsync(document.Metadata.ContractNumber);
                 
-                if(contract.StoreData.DocumentRepositoryUrl != document.Metadata.NewContractUrl)
+                if(contract.ContractUrl != document.Metadata.NewContractUrl)
                 {
-                    contract.StoreData.DocumentRepositoryUrl = document.Metadata.NewContractUrl;
+                    contract.ContractUrl = document.Metadata.NewContractUrl;
                     await _contractRepository.UpdateContractAsync(contract);
                 }
             }
