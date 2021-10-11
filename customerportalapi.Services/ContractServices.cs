@@ -180,7 +180,27 @@ namespace customerportalapi.Services
             return response;
         }
 
-        public async Task<string> SaveContractAsync(Document document)
+        public async Task<bool> DocumentExists(string smContractCode)
+        {
+            bool docExists = false;
+            DocumentMetadataSearchFilter filter = new DocumentMetadataSearchFilter();
+            filter.SmContractCode = smContractCode;
+            List <DocumentMetadata> docs = await _documentRepository.Search(filter);
+
+            foreach (var doc in docs)
+            {
+                if (doc.DocumentType == 0) {
+                    docExists = true;
+                } else
+                {
+                    docExists = false;
+                }
+            }
+          
+            return docExists;
+        }
+
+            public async Task<string> SaveContractAsync(Document document)
         {
             var savedDocId = await _documentRepository.SaveDocumentAsync(document);
 
