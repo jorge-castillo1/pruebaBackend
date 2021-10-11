@@ -154,5 +154,32 @@ namespace customerportalapi.Controllers
                 throw;
             }
         }
+
+        /// <summary>
+        /// Obtain if document exists in sharepoint from contract number
+        /// </summary>
+        /// <param name="smContractCode">friendly user contract number</param>
+        /// <returns>boolean</returns>
+        [HttpGet("document/{smContractCode}/exists")]
+        //[AuthorizeToken]
+        public async Task<ApiResponse> DocumentExists(string smContractCode)
+        {
+            try
+            {
+                var entity = await _services.DocumentExists(smContractCode);
+                return new ApiResponse(entity);
+            }
+            catch (ServiceException se)
+            {
+                _logger.LogError(se.ToString());
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+
     }
 }
