@@ -88,7 +88,7 @@ namespace customerportalapi.Controllers
         /// <param name="limit">page size</param>
         /// <returns></returns>
         [HttpGet("stores")]
-        [AuthorizeToken]
+        //[AuthorizeToken]
         public async Task<ApiResponse> GetAsync(string countryCode, string city, int skip, int? limit)
         {
             try
@@ -239,7 +239,7 @@ namespace customerportalapi.Controllers
         /// </summary>
         /// <returns>Country data model list</returns>
         [HttpGet("countries")]
-        [AuthorizeToken]
+        //[AuthorizeToken]
         public async Task<ApiResponse> GetCountriesAsync()
         {
             try
