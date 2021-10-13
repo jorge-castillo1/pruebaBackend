@@ -260,7 +260,7 @@ namespace customerportalapi.Controllers
         /// <param name="countryCode">Country code</param>
         /// <returns>City data model list</returns>
         [HttpGet("cities")]
-        [AuthorizeToken]
+        //[AuthorizeToken]
         public async Task<ApiResponse> GetCitiesAsync(string countryCode)
         {
             try
