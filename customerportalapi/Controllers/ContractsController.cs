@@ -141,7 +141,7 @@ namespace customerportalapi.Controllers
             try
             {
                 var result = await _services.SaveContractAsync(document);
-                return new ApiResponse(null, result);      
+                return new ApiResponse(null, result);
             }
             catch (ServiceException se)
             {
@@ -181,5 +181,31 @@ namespace customerportalapi.Controllers
             }
         }
 
+
+        /// <summary>
+        /// Obtain if invoice exists in sharepoint from contract number
+        /// </summary>
+        /// <param name="invoiceRequest">friendly user contract number</param>
+        /// <returns>boolean</returns>
+        [HttpPost("invoice/exists")]
+        //[AuthorizeToken]
+        public async Task<ApiResponse> InvoiceExists([FromBody] InvoiceRequest invoiceRequest)
+        {
+            try
+            {
+                var entity = await _services.InvoiceExists(invoiceRequest.InvoiceNumber);
+                return new ApiResponse(entity);
+            }
+            catch (ServiceException se)
+            {
+                _logger.LogError(se.ToString());
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
     }
 }

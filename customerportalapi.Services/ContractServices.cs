@@ -200,7 +200,29 @@ namespace customerportalapi.Services
             return docExists;
         }
 
-            public async Task<string> SaveContractAsync(Document document)
+        public async Task<bool> InvoiceExists(string invoiceNumber)
+        {
+            bool docExists = false;
+            DocumentMetadataSearchFilter filter = new DocumentMetadataSearchFilter();
+            filter.InvoiceNumber = invoiceNumber;
+            List<DocumentMetadata> docs = await _documentRepository.Search(filter);
+
+            foreach (var doc in docs)
+            {
+                if (doc.DocumentType == 3)
+                {
+                    docExists = true;
+                }
+                else
+                {
+                    docExists = false;
+                }
+            }
+
+            return docExists;
+        }
+
+        public async Task<string> SaveContractAsync(Document document)
         {
             var savedDocId = await _documentRepository.SaveDocumentAsync(document);
 
