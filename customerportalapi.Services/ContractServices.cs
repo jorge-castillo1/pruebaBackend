@@ -9,7 +9,6 @@ using customerportalapi.Services.interfaces;
 using System.Net;
 using customerportalapi.Services.Exceptions;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 
 namespace customerportalapi.Services
 {
@@ -25,7 +24,6 @@ namespace customerportalapi.Services
         private readonly IStoreRepository _storeRepository;
         private readonly IOpportunityCRMRepository _opportunityRepository;
         private readonly IPaymentMethodRepository _paymentMethodRepository;
-        private readonly ILogger<ContractServices> _logger;
 
 
         public ContractServices(
@@ -38,9 +36,8 @@ namespace customerportalapi.Services
             IUserRepository userRepository,
             IStoreRepository storeRepository,
             IOpportunityCRMRepository opportunityRepository,
-            IPaymentMethodRepository paymentMethodRepository,
-            ILogger<ContractServices> logger
-         )
+            IPaymentMethodRepository paymentMethodRepository
+        )
         {
             _configuration = configuration;
             _contractRepository = contractRepository;
@@ -52,7 +49,6 @@ namespace customerportalapi.Services
             _storeRepository = storeRepository;
             _opportunityRepository = opportunityRepository;
             _paymentMethodRepository = paymentMethodRepository;
-            _logger = logger;
         }
 
         public async Task<Contract> GetContractAsync(string contractNumber)
@@ -186,41 +182,20 @@ namespace customerportalapi.Services
 
         public async Task<bool> DocumentExists(string smContractCode)
         {
-            bool docExists = false;
-                DocumentMetadataSearchFilter filter = new DocumentMetadataSearchFilter();
+            DocumentMetadataSearchFilter filter = new DocumentMetadataSearchFilter();
             filter.SmContractCode = smContractCode;
             List <DocumentMetadata> docs = await _documentRepository.Search(filter);
-            _logger.LogInformation("smContractCode");
-            _logger.LogInformation(smContractCode);
-            _logger.LogInformation("docs");
-            _logger.LogInformation(docs.ToString());
-            foreach (var doc in docs)
-            {
-                _logger.LogInformation("doc");
-                _logger.LogInformation(doc.ToString());
-                _logger.LogInformation(doc.DocumentType.ToString());
-                _logger.LogInformation("doc type condition");
-                _logger.LogInformation((doc.DocumentType == 0).ToString());
-                
-                docExists = doc.DocumentType == 0;
-            }
-          
-            return docExists;
+           
+            return docs.Find(x => x.DocumentType == 0) != null;
         }
 
         public async Task<bool> InvoiceExists(string invoiceNumber)
         {
-            bool docExists = false;
             DocumentMetadataSearchFilter filter = new DocumentMetadataSearchFilter();
             filter.InvoiceNumber = invoiceNumber;
             List<DocumentMetadata> docs = await _documentRepository.Search(filter);
 
-            foreach (var doc in docs)
-            {
-                    docExists = doc.DocumentType == 3;
-            }
-
-            return docExists;
+            return docs.Find(x => x.DocumentType == 3) != null;
         }
 
         public async Task<string> SaveContractAsync(Document document)
