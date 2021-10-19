@@ -199,13 +199,10 @@ namespace customerportalapi.Services
                 _logger.LogInformation("doc");
                 _logger.LogInformation(doc.ToString());
                 _logger.LogInformation(doc.DocumentType.ToString());
-                if (doc.DocumentType == 0) {
-
-                    docExists = true;
-                } else
-                {
-                    docExists = false;
-                }
+                _logger.LogInformation("doc type condition");
+                _logger.LogInformation((doc.DocumentType == 0).ToString());
+                
+                docExists = doc.DocumentType == 0;
             }
           
             return docExists;
@@ -220,14 +217,7 @@ namespace customerportalapi.Services
 
             foreach (var doc in docs)
             {
-                if (doc.DocumentType == 3)
-                {
-                    docExists = true;
-                }
-                else
-                {
-                    docExists = false;
-                }
+                    docExists = doc.DocumentType == 3;
             }
 
             return docExists;
