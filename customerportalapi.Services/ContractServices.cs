@@ -9,6 +9,7 @@ using customerportalapi.Services.interfaces;
 using System.Net;
 using customerportalapi.Services.Exceptions;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace customerportalapi.Services
 {
@@ -24,6 +25,7 @@ namespace customerportalapi.Services
         private readonly IStoreRepository _storeRepository;
         private readonly IOpportunityCRMRepository _opportunityRepository;
         private readonly IPaymentMethodRepository _paymentMethodRepository;
+        private readonly ILogger<ContractServices> _logger;
 
 
         public ContractServices(
@@ -36,7 +38,8 @@ namespace customerportalapi.Services
             IUserRepository userRepository,
             IStoreRepository storeRepository,
             IOpportunityCRMRepository opportunityRepository,
-            IPaymentMethodRepository paymentMethodRepository
+            IPaymentMethodRepository paymentMethodRepository,
+            ILogger<ContractServices> logger
          )
         {
             _configuration = configuration;
@@ -49,6 +52,7 @@ namespace customerportalapi.Services
             _storeRepository = storeRepository;
             _opportunityRepository = opportunityRepository;
             _paymentMethodRepository = paymentMethodRepository;
+            _logger = logger;
         }
 
         public async Task<Contract> GetContractAsync(string contractNumber)
@@ -183,13 +187,17 @@ namespace customerportalapi.Services
         public async Task<bool> DocumentExists(string smContractCode)
         {
             bool docExists = false;
-            DocumentMetadataSearchFilter filter = new DocumentMetadataSearchFilter();
+                DocumentMetadataSearchFilter filter = new DocumentMetadataSearchFilter();
             filter.SmContractCode = smContractCode;
             List <DocumentMetadata> docs = await _documentRepository.Search(filter);
-
+            _logger.LogInformation("smContractCode");
+            _logger.LogInformation(smContractCode);
+            _logger.LogInformation("docs");
+            _logger.LogInformation(docs.ToString());
             foreach (var doc in docs)
             {
                 if (doc.DocumentType == 0) {
+
                     docExists = true;
                 } else
                 {
