@@ -196,6 +196,9 @@ namespace customerportalapi.Services
             _logger.LogInformation(docs.ToString());
             foreach (var doc in docs)
             {
+                _logger.LogInformation("doc");
+                _logger.LogInformation(doc.ToString());
+                _logger.LogInformation(doc.DocumentType.ToString());
                 if (doc.DocumentType == 0) {
 
                     docExists = true;
