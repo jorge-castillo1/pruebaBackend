@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using customerportalapi.Entities;
 
-namespace customerportalapi.Services.interfaces
+namespace customerportalapi.Services.Interfaces
 {
     public interface IContractServices
     {

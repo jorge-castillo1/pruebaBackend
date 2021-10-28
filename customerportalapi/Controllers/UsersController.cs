@@ -2,7 +2,7 @@
 using customerportalapi.Entities;
 using customerportalapi.Security;
 using customerportalapi.Services.Exceptions;
-using customerportalapi.Services.interfaces;
+using customerportalapi.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -107,7 +107,7 @@ namespace customerportalapi.Controllers
         }
 
         /// <summary>
-        /// Invite users to customer portal
+        /// Invite users to customer portal and send welcome email
         /// </summary>
         /// <param name="value">Invitation data model</param>
         /// <returns>Boolean</returns>

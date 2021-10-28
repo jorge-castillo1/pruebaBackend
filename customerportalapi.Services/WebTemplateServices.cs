@@ -3,7 +3,7 @@ using customerportalapi.Entities;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using customerportalapi.Entities.enums;
-using customerportalapi.Services.interfaces;
+using customerportalapi.Services.Interfaces;
 
 namespace customerportalapi.Services
 {

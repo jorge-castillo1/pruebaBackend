@@ -8,6 +8,8 @@ using customerportalapi.Services;
 using customerportalapi.Services.interfaces;
 using customerportalapi.Services.Interfaces;
 using MailKit.Net.Smtp;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.AzureAD.UI;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -22,16 +24,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
-using System.Net.Http.Headers;
-using Serilog;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Net.Http;
-using Microsoft.AspNetCore.Authentication.AzureAD.UI;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
-using Microsoft.IdentityModel.Logging;
+using System.Net.Http.Headers;
 
 namespace customerportalapi
 {
@@ -184,6 +178,7 @@ namespace customerportalapi
             services.AddTransient<IEkomiWidgetService, EkomiWidgetService>();
             services.AddTransient<ILanguageServices, LanguageServices>();
             services.AddTransient<IStoreImageServices, StoreImageServices>();
+            services.AddTransient<IMailService, MailService>();
 
             services.AddHttpClient("httpClient", c =>
             {

@@ -1,17 +1,14 @@
-using System;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Linq;
 using customerportalapi.Entities;
+using customerportalapi.Entities.enums;
 using customerportalapi.Repositories.interfaces;
-using customerportalapi.Services.interfaces;
-using Microsoft.Extensions.Caching.Distributed;
+using customerportalapi.Services.Exceptions;
+using customerportalapi.Services.Interfaces;
+using Microsoft.Extensions.Configuration;
+using PasswordGenerator;
+using System;
 using System.Net;
 using System.Net.Http;
-using customerportalapi.Services.Exceptions;
-using PasswordGenerator;
-using customerportalapi.Entities.enums;
-using Microsoft.Extensions.Configuration;
+using System.Threading.Tasks;
 
 namespace customerportalapi.Services
 {
@@ -39,7 +36,8 @@ namespace customerportalapi.Services
             if (credentials.Username != null)
             {
                 loginUser = _userRepository.GetCurrentUserByUsername(credentials.Username);
-            } else if (credentials.Email != null && loginUser == null)
+            }
+            else if (credentials.Email != null && loginUser == null)
             {
                 loginUser = _userRepository.GetCurrentUserByEmail(credentials.Email);
             }
@@ -92,7 +90,8 @@ namespace customerportalapi.Services
 
         public async Task<Token> ChangePassword(ResetPassword credentials)
         {
-            try {
+            try
+            {
                 //1. Get User From backend
                 User currentUser = null;
 
@@ -140,11 +139,11 @@ namespace customerportalapi.Services
                     throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "UserName or Email", "Not exist");
                 }
 
-            } catch(HttpRequestException ex) {
-                throw new ServiceException("Password not valid", HttpStatusCode.BadRequest);
-
             }
-
+            catch
+            {
+                throw new ServiceException("Password not valid", HttpStatusCode.BadRequest);
+            }
         }
 
         public async Task<bool> SendNewCredentialsAsync(Login credentials)
@@ -153,7 +152,7 @@ namespace customerportalapi.Services
 
             //1. Get user from bbdd
             User user = null;
-            
+
             //1.1 Find by Username or Email
             if (credentials.Username != null)
             {
@@ -169,7 +168,7 @@ namespace customerportalapi.Services
 
             //2. If emailverified is false, first invitation was not accepted yet
             if (!user.Emailverified)
-                throw new ServiceException("User must accept invitation before use forgot password function", HttpStatusCode.NotFound, FieldNames.User, ValidationMessages.InvitationNotAccepted) ;
+                throw new ServiceException("User must accept invitation before use forgot password function", HttpStatusCode.NotFound, FieldNames.User, ValidationMessages.InvitationNotAccepted);
 
             var pwd = new Password(true, true, true, false, 6);
             var password = pwd.Next();
@@ -178,7 +177,7 @@ namespace customerportalapi.Services
             user.Password = password;
             user.ForgotPasswordtoken = Guid.NewGuid().ToString();
             _userRepository.Update(user);
-            
+
             //5. Get Email ForgotPassword Template
             EmailTemplate forgotPasswordTemplate = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.ForgotPassword, user.Language);
             if (forgotPasswordTemplate._id == null)
