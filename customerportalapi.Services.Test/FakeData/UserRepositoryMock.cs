@@ -39,7 +39,7 @@ namespace customerportalapi.Services.Test.FakeData
                 LastLoginAttempts = System.DateTime.Now.ToUniversalTime().AddMinutes(-10),
                 AccessCodeAttempts = 5,
                 LastAccessCodeAttempts = System.DateTime.Now.ToUniversalTime().AddMinutes(-10),
-                LastEmailSent = EmailTemplateTypes.WelcomeEmailStandard.ToString()
+                LastEmailSent = EmailTemplateTypes.WelcomeEmailExtended.ToString()
             }).Verifiable();
 
             db.Setup(x => x.Create(It.IsAny<User>())).Returns(Task.FromResult(true)).Verifiable();

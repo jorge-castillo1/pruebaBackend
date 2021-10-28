@@ -21,6 +21,12 @@ namespace customerportalapi.Entities
         public string Width { get; set; }
 
         public string Depth { get; set; }
+
+        public string Colour { get; set; }
+        public string Corridor { get; set; }
+        public string Exceptions { get; set; }
+        public string Floor { get; set; }
+        public string Zone { get; set; }
     }
-    
+
 }

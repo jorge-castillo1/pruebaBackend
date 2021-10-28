@@ -1,4 +1,5 @@
-﻿using System;
+﻿using customerportalapi.Entities.enums;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -15,5 +16,10 @@ namespace customerportalapi.Entities
         public string Language { get; set; }
 
         public string CustomerType { get; set; }
+
+        /// <summary>
+        /// enum InviteInvocationType
+        /// </summary>
+        public int InvokedBy { get; set; }
     }
 }
