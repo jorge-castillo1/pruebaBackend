@@ -22,30 +22,4 @@ namespace customerportalapi.Entities.enums
         [Description("WP_Admin")]
         Admin = 4,
     }
-
-    public static class RoleGroupTypesExtensions
-    {
-        /// <summary>
-        /// USAGE EXAMPLE: "var desc = RoleGroupTypesExtensions.GetDescription(RoleGroupTypes.StoreManagers);"
-        /// </summary>
-        public static string GetDescription<T>(this T enumerationValue) where T : struct
-        {
-            Type type = enumerationValue.GetType();
-            if (!type.IsEnum)
-            {
-                throw new ArgumentException("EnumerationValue must be of Enum type", "enumerationValue");
-            }
-            MemberInfo[] memberInfo = type.GetMember(enumerationValue.ToString());
-            if (memberInfo != null && memberInfo.Length > 0)
-            {
-                object[] attrs = memberInfo[0].GetCustomAttributes(typeof(DescriptionAttribute), false);
-
-                if (attrs != null && attrs.Length > 0)
-                {
-                    return ((DescriptionAttribute)attrs[0]).Description;
-                }
-            }
-            return enumerationValue.ToString();
-        }
-    }
 }

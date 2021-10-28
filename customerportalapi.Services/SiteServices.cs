@@ -79,7 +79,8 @@ namespace customerportalapi.Services
                 x.StoreData.EmailAddress1,
                 x.StoreData.StoreCode,
                 x.StoreData.StoreId,
-                x.StoreData.StoreImage
+                x.StoreData.StoreImage,
+                x.StoreData.MailType
             }))
             {
                 string storeId = storegroup.Key.StoreId.ToString();
@@ -91,7 +92,8 @@ namespace customerportalapi.Services
                     CoordinatesLongitude = storegroup.Key.CoordinatesLongitude,
                     EmailAddress1 = storegroup.Key.EmailAddress1,
                     StoreCode = storegroup.Key.StoreCode,
-                    StoreId = storeId
+                    StoreId = storeId,
+                    MailType = storegroup.Key.MailType
                 };
 
                 foreach (var contract in storegroup)
@@ -194,10 +196,10 @@ namespace customerportalapi.Services
             User loginUser = _userRepository.GetCurrentUserByUsername(user.Identity.Name);
 
             //Check bad access code attempts and validate timestamp to allow try again
-            if (DateTime.Now.ToUniversalTime().AddMinutes(Int32.Parse(_config["AccessCodeUnblockedTime"]) * -1) > loginUser.LastAccessCodeAttempts)
+            if (DateTime.Now.ToUniversalTime().AddMinutes(int.Parse(_config["AccessCodeUnblockedTime"]) * -1) > loginUser.LastAccessCodeAttempts)
                 return true;
 
-            if (loginUser.AccessCodeAttempts < Int32.Parse(_config["AccessCodeMaxAttempts"]))
+            if (loginUser.AccessCodeAttempts < int.Parse(_config["AccessCodeMaxAttempts"]))
                 return true;
             else
                 return false;

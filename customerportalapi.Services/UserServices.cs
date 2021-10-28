@@ -1,5 +1,6 @@
 ﻿using customerportalapi.Entities;
 using customerportalapi.Entities.enums;
+using customerportalapi.Entities.Extensions;
 using customerportalapi.Repositories.interfaces;
 using customerportalapi.Services.Exceptions;
 using customerportalapi.Services.Interfaces;
@@ -340,15 +341,31 @@ namespace customerportalapi.Services
 
             //6. Check all mandatory data            
             await CheckMandatoryData(invitationFields);
-            var userName = userType == 0 ? invitationValues.Dni : "B" + invitationValues.Dni;
 
+            //7. Verify "move in date" in range to send remember welcome email (2 days)
+            if (invitationValues.InvokedBy == (int)InviteInvocationType.CronJob)
+            {
+                var moveIn = Convert.ToDateTime(invitationFields.ExpectedMoveIn.Value);
+
+                var dateMoveInStart = DateTime.Today.AddDays(2);
+                var dateMoveInEnd = DateTime.Today.AddDays(3).AddSeconds(-1);
+                
+                if (!moveIn.InRange(dateMoveInStart, dateMoveInEnd))
+                {                    
+                    return false;                    
+                }
+            }
+
+            var userName = userType == 0 ? invitationValues.Dni : "B" + invitationValues.Dni;
             var pwd = new Password(true, true, true, false, 6);
             var password = pwd.Next();
+            var isNewUser = false;
 
-            //7
+            //8. Verify user exsist
             if (user.Id == null)
             {
-                //7.1 Create user in portal database
+                isNewUser = true;
+                //8.1 Create user in portal database
                 user = new User
                 {
                     Username = userName,
@@ -360,41 +377,41 @@ namespace customerportalapi.Services
                     Usertype = UserInvitationUtils.GetUserType(invitationValues.CustomerType),
                     Emailverified = false,
                     Invitationtoken = Guid.NewGuid().ToString(),
-                    LastEmailSent = EmailTemplateTypes.WelcomeEmailStandard.ToString(),
+                    LastEmailSent = EmailTemplateTypes.WelcomeEmailExtended.ToString(),
                 };
 
                 resultCreateUser = await _userRepository.Create(user);
             }
             else
             {
-                //7.2 Update invitation data
+                //8.2 Update invitation data
                 user.Email = invitationValues.Email;
                 user.Name = invitationValues.Fullname;
                 user.Password = password;
                 user.Language = UserInvitationUtils.GetLanguage(invitationValues.Language);
                 user.Usertype = UserInvitationUtils.GetUserType(invitationValues.CustomerType);
                 user.Invitationtoken = Guid.NewGuid().ToString();
-                user.LastEmailSent = EmailTemplateTypes.WelcomeEmailSimple.ToString();
+                user.LastEmailSent = EmailTemplateTypes.WelcomeEmailShort.ToString();
 
                 _userRepository.Update(user);
             }
 
-            //8. Send Welcome Email
-            resultWelcomeEmailSent = SendWelcomeEmail(invitationValues, user, invitationFields).Result;
+            //9. Send Welcome Email
+            resultWelcomeEmailSent = SendWelcomeEmail(invitationValues, user, invitationFields, isNewUser).Result;
 
             return resultWelcomeEmailSent && resultCreateUser;
         }
 
         public async Task<InvitationMandatoryData> FindInvitationMandatoryData(Invitation invitationValues)
-        {            
+        {
             var userType = UserInvitationUtils.GetUserType(invitationValues.CustomerType);
             InvitationMandatoryData invitationFields = UserInvitationUtils.InitInvitationData();
             string accountType = (userType == (int)UserTypes.Business) ? AccountType.Business : AccountType.Residential;
             await FindInvitationMandatoryData(invitationFields, invitationValues, accountType);
             return invitationFields;
         }
-        
-        private async Task<bool> SendWelcomeEmail(Invitation invitationValues, User user, InvitationMandatoryData invitationFields)
+
+        private async Task<bool> SendWelcomeEmail(Invitation invitationValues, User user, InvitationMandatoryData invitationFields, bool isNewUser)
         {
             /*if (user == null)
             {
@@ -412,11 +429,11 @@ namespace customerportalapi.Services
                 await FindInvitationMandatoryData(invitationFields, invitationValues, accountType);
             }*/
 
-            int templateId = (int)EmailTemplateTypes.WelcomeEmailSimple;
+            int templateId = (int)EmailTemplateTypes.WelcomeEmailShort;
             bool useEmailWelcome = _featureRepository.CheckFeatureByNameAndEnvironment(FeatureNames.EmailWelcomeInvitation, _config["Environment"]);
-            if (string.IsNullOrEmpty(user.Id) && useEmailWelcome)
+            if (isNewUser && useEmailWelcome)
             {
-                templateId = (int)EmailTemplateTypes.WelcomeEmailStandard;
+                templateId = (int)EmailTemplateTypes.WelcomeEmailExtended;
             }
 
             EmailTemplate invitationTemplate = _emailTemplateRepository.getTemplate(templateId, UserInvitationUtils.GetLanguage(invitationValues.Language));
@@ -1043,8 +1060,8 @@ namespace customerportalapi.Services
                 {
                     state = data.State.ToString().ToLower();
                     value = data.Value ?? "";
-                    system = data.System.ToString();
-                    entity = data.Entity.ToString();
+                    system = data.System.ToString() == "empty" ? "-" : data.System.ToString();
+                    entity = data.Entity.ToString() == "empty" ? "-" : data.Entity.ToString();
                 }
                 list += $"<tr class='{state}'><td>{system}</td><td>{entity}</td><td>{property.Name}</td><td>{value}</td></tr>";
             }
@@ -1056,6 +1073,8 @@ namespace customerportalapi.Services
 
         private async Task<bool> FindInvitationMandatoryData(InvitationMandatoryData invitationData, Invitation value, string accountType)
         {
+            invitationData.InvokedBy.SetValueAndState(value.InvokedBy.ToString(), StateEnum.Checked);
+
             // Contact
             string userIdentification = value.Dni + " - " + accountType;
             Profile contact = await _profileRepository.GetProfileAsync(value.Dni, accountType);
@@ -1093,16 +1112,6 @@ namespace customerportalapi.Services
                     if (contractSM != null && string.IsNullOrEmpty(contractSM.Leaving))
                     {
                         invitationData.ActiveContract.SetValueAndState(StateEnum.Checked.ToString(), StateEnum.Checked);
-
-                        //Unit
-                        //Access Code eliminado temporalmente de Mandatory Data
-                        //invitationData.UnitPassword.SetValueAndState(ValidationMessages.NoInformationAvailable, StateEnum.Warning);
-                        //if (!string.IsNullOrEmpty(contractSM.Password))
-                        //    invitationData.UnitPassword.SetValueAndState(contractSM.Password, StateEnum.Checked);
-
-                        invitationData.UnitName.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
-                        if (!string.IsNullOrEmpty(contract.Unit.UnitName))
-                            invitationData.UnitName.SetValueAndState(contract.Unit.UnitName, StateEnum.Checked);
 
                         // Store
                         invitationData.ContractStoreCode.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
@@ -1157,6 +1166,43 @@ namespace customerportalapi.Services
                                 invitationData.StoreCity.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
                                 if (!string.IsNullOrEmpty(store.City))
                                     invitationData.StoreCity.SetValueAndState(store.City, StateEnum.Checked);
+
+                                // MailType for WelcomeEmail                                
+                                if (!string.IsNullOrEmpty(store.MailType))
+                                    invitationData.SiteMailType.SetValueAndState(store.MailType, StateEnum.Checked);
+                            }
+                        }
+
+                        // Unit
+
+                        //Access Code eliminado temporalmente de Mandatory Data
+                        //invitationData.UnitPassword.SetValueAndState(ValidationMessages.NoInformationAvailable, StateEnum.Warning);
+                        //if (!string.IsNullOrEmpty(contractSM.Password))
+                        //    invitationData.UnitPassword.SetValueAndState(contractSM.Password, StateEnum.Checked);
+
+                        if (contract.Unit != null)
+                        {
+                            invitationData.UnitName.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
+                            if (!string.IsNullOrEmpty(contract.Unit.UnitName))
+                                invitationData.UnitName.SetValueAndState(contract.Unit.UnitName, StateEnum.Checked);
+
+                            var intSiteMailType = (int)StoreMailTypes.WithoutSignageOrNull;
+                            if (!string.IsNullOrEmpty(invitationData.SiteMailType.Value))
+                                intSiteMailType = Convert.ToInt32(invitationData.SiteMailType.Value.Trim());
+
+                            switch (intSiteMailType)
+                            {
+                                case (int)StoreMailTypes.NewSignage:
+                                    NewSignage(invitationData, contract);
+                                    break;
+
+                                case (int)StoreMailTypes.OldSignage:
+                                    OldSignage(invitationData, contract);
+                                    break;
+
+                                case (int)StoreMailTypes.WithoutSignageOrNull:
+                                default:
+                                    break;
                             }
                         }
 
@@ -1176,7 +1222,10 @@ namespace customerportalapi.Services
 
                                 invitationData.ExpectedMoveIn.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
                                 if (!string.IsNullOrEmpty(opportunity.ExpectedMoveIn))
-                                    invitationData.ExpectedMoveIn.SetValueAndState(DateTime.Parse(opportunity.ExpectedMoveIn).ToString(), StateEnum.Checked);
+                                {
+                                    DateTime moveIn = DateTime.Parse(opportunity.ExpectedMoveIn);
+                                    invitationData.ExpectedMoveIn.SetValueAndState(moveIn.ToString(), StateEnum.Checked);                                    
+                                }
                             }
 
                         }
@@ -1189,6 +1238,36 @@ namespace customerportalapi.Services
                 invitationData.SmContractCode.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
 
             return true;
+        }
+
+        private static void NewSignage(InvitationMandatoryData invitationData, Contract contract)
+        {
+            invitationData.UnitColour.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
+            if (!string.IsNullOrEmpty(contract.Unit.Colour))
+                invitationData.UnitColour.SetValueAndState(contract.Unit.Colour, StateEnum.Checked);
+
+            invitationData.UnitCorridor.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
+            if (!string.IsNullOrEmpty(contract.Unit.Corridor))
+                invitationData.UnitCorridor.SetValueAndState(contract.Unit.Corridor, StateEnum.Checked);
+
+            invitationData.UnitExceptions.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
+            if (!string.IsNullOrEmpty(contract.Unit.Exceptions))
+                invitationData.UnitExceptions.SetValueAndState(contract.Unit.Exceptions, StateEnum.Checked);
+
+            invitationData.UnitFloor.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
+            if (!string.IsNullOrEmpty(contract.Unit.Floor))
+                invitationData.UnitFloor.SetValueAndState(contract.Unit.Floor, StateEnum.Checked);
+
+            invitationData.UnitZone.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
+            if (!string.IsNullOrEmpty(contract.Unit.Zone))
+                invitationData.UnitZone.SetValueAndState(contract.Unit.Zone, StateEnum.Checked);
+        }
+
+        private static void OldSignage(InvitationMandatoryData invitationData, Contract contract)
+        {
+            invitationData.UnitExceptions.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
+            if (!string.IsNullOrEmpty(contract.Unit.Exceptions))
+                invitationData.UnitExceptions.SetValueAndState(contract.Unit.Exceptions, StateEnum.Checked);
         }
 
         private async Task<bool> CheckMandatoryData(InvitationMandatoryData fields)

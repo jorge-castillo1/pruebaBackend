@@ -4,12 +4,10 @@ using System.Text;
 
 namespace customerportalapi.Entities.enums
 {
-    public enum SystemTypes
+    public enum InviteInvocationType
     {
-        CRM,
-        CustomerPortal,
-        SignatureAPI,
-        SM,
-        empty
+        CRM = 0, // default
+        audit_trail_complete = 1,
+        CronJob = 2        
     }
 }

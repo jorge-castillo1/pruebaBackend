@@ -29,7 +29,7 @@ namespace customerportalapi.Repositories.Test
             _emailtemplates.Setup(x => x.FindOne(It.IsAny<Expression<Func<EmailTemplate, bool>>>(), It.IsAny<FindOptions>())).Returns(
                 new List<EmailTemplate>() {
                 new EmailTemplate() {
-                    code = (int)EmailTemplateTypes.WelcomeEmailStandard,
+                    code = (int)EmailTemplateTypes.WelcomeEmailExtended,
                     subject = "Fake subject",
                     body = "Fake html body",
                     language = "Fake language"
@@ -44,10 +44,10 @@ namespace customerportalapi.Repositories.Test
 
             //Act
             EmailTemplateRepository _emailTemplateRepository = new EmailTemplateRepository(_configurations, _emailtemplates.Object);
-            template = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.WelcomeEmailStandard, "Fake Language");
+            template = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.WelcomeEmailExtended, "Fake Language");
 
             //Assert
-            Assert.AreEqual((int)EmailTemplateTypes.WelcomeEmailStandard, template.code);
+            Assert.AreEqual((int)EmailTemplateTypes.WelcomeEmailExtended, template.code);
             Assert.AreEqual("Fake language", template.language);
         }
 

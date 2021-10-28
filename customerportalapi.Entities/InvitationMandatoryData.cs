@@ -30,6 +30,14 @@ namespace customerportalapi.Entities
         public MandatoryData OpportunityId { get; set; }
         public MandatoryData ExpectedMoveIn { get; set; }
 
+        public MandatoryData SiteMailType { get; set; }
+        public MandatoryData UnitColour { get; set; }
+        public MandatoryData UnitCorridor { get; set; }
+        public MandatoryData UnitExceptions { get; set; }
+        public MandatoryData UnitFloor { get; set; }
+        public MandatoryData UnitZone { get; set; }
+
+        public MandatoryData InvokedBy { get; set; }
     }
 
     public class MandatoryData

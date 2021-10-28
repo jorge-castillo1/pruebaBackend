@@ -52,5 +52,6 @@ namespace customerportalapi.Entities
 
         public string DocumentRepositoryUrl { get; set; }
 
+        public string MailType { get; set; }
     }
 }

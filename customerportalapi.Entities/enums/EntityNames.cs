@@ -10,6 +10,8 @@ namespace customerportalapi.Entities.enums
         contacts,
         iav_contracts,
         opportunities,
-        WBSGetContract
+        WBSGetContract,
+        products,
+        empty
     }
 }

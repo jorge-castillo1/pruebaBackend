@@ -75,6 +75,15 @@ namespace customerportalapi.Services
                 ContractOpportunity = GetMandatoryData(SystemTypes.CRM, EntityNames.iav_contracts, null, StateEnum.Unchecked),
                 OpportunityId = GetMandatoryData(SystemTypes.CRM, EntityNames.opportunities, null, StateEnum.Unchecked),
                 ExpectedMoveIn = GetMandatoryData(SystemTypes.CRM, EntityNames.opportunities, null, StateEnum.Unchecked),
+
+                SiteMailType = GetMandatoryData(SystemTypes.CRM, EntityNames.iav_stores, null, StateEnum.Checked),
+                UnitColour = GetMandatoryData(SystemTypes.CRM, EntityNames.products, null, StateEnum.Checked),
+                UnitCorridor = GetMandatoryData(SystemTypes.CRM, EntityNames.products, null, StateEnum.Checked),
+                UnitExceptions = GetMandatoryData(SystemTypes.CRM, EntityNames.products, null, StateEnum.Checked),
+                UnitFloor = GetMandatoryData(SystemTypes.CRM, EntityNames.products, null, StateEnum.Checked),
+                UnitZone = GetMandatoryData(SystemTypes.CRM, EntityNames.products, null, StateEnum.Checked),
+
+                InvokedBy = GetMandatoryData(SystemTypes.empty, EntityNames.empty, null, StateEnum.Unchecked),
             };
 
             return data;
@@ -158,7 +167,49 @@ namespace customerportalapi.Services
                             }
 
                             body = body.Replace("{{Paragraph" + property.Name + "}}", content);
+                            break;
 
+                        case "InvokedBy":
+                            if (data.Value == ((int)InviteInvocationType.CronJob).ToString())
+                            {
+                                // only remove magic words
+                                body = body.Replace("{{RememberSTART}}", string.Empty)
+                                    .Replace("{{RememberEND}}", string.Empty);
+                            }
+                            else
+                            {
+                                // Remove all characters between the starting string and the ending string
+                                body = RemoveString(body, "{{RememberSTART}}", "{{RememberEND}}");
+                            }
+                            break;
+
+                        case "SiteMailType":
+                            var intSiteMailType = (int)StoreMailTypes.WithoutSignageOrNull;
+                            if (!string.IsNullOrEmpty(data.Value))
+                                intSiteMailType = Convert.ToInt32(data.Value);
+                            switch (intSiteMailType)
+                            {
+                                case (int)StoreMailTypes.NewSignage:
+                                    body = body.Replace("{{Planta}}", fields.UnitFloor.Value)
+                                            .Replace("{{Zona}}", fields.UnitZone.Value)
+                                            .Replace("{{ColorZona}}", fields.UnitColour.Value)
+                                            .Replace("{{Pasillo}}", fields.UnitCorridor.Value)
+                                            .Replace("{{Excepciones}}", fields.UnitExceptions.Value)
+                                            .Replace("{{LocationSTART}}", string.Empty)
+                                            .Replace("{{LocationEND}}", string.Empty);
+                                    break;
+
+                                case (int)StoreMailTypes.OldSignage:
+                                    body = body.Replace("{{Excepciones}}", fields.UnitExceptions.Value);
+                                    body = RemoveString(body, "{{LocationSTART}}", "{{LocationEND}}");
+                            break;
+
+                                case (int)StoreMailTypes.WithoutSignageOrNull:
+                        default:
+                                    body = body.Replace("{{Excepciones}}", string.Empty);
+                                    body = RemoveString(body, "{{LocationSTART}}", "{{LocationEND}}");
+                                    break;
+                            }
                             break;
 
                         default:
@@ -173,6 +224,20 @@ namespace customerportalapi.Services
             return body;
         }
 
+        private static void OldSignageFormat(ref string body, string unitExceptions)
+        {
+            body = body.Replace("{{Excepciones}}", unitExceptions);
+        }
+
+        private static void NewSignageFormat(ref string body, string unitColour, string unitCorridor, string unitExceptions, string unitFloor, string unitZone)
+        {
+            body = body
+                .Replace("{{Planta}}", unitFloor)
+                .Replace("{{Zona}}", unitZone)
+                .Replace("{{Color de la zona}}", unitColour)
+                .Replace("{{Excepciones}}", unitExceptions);
+        }
+
         private static EmailParagraph GetParagraphByName(EmailTemplate template, string name)
         {
             name = name.ToLower();
@@ -182,6 +247,28 @@ namespace customerportalapi.Services
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Remove all characters between the starting string and the ending string (both included)
+        /// </summary>
+        /// <param name="source">String</param>
+        /// <param name="start">Starting string</param>
+        /// <param name="end">Ending string</param>
+        /// <returns>Returns the string without the characters between "start" and "end"</returns>
+        public static string RemoveString(string source, string start, string end)
+        {
+            string result = "";
+            if (source.Contains(start) && source.Contains(end))
+            {
+                int startIndex = source.IndexOf(start);
+                int endIndex = source.IndexOf(end, startIndex) + end.Length;
+                //result = source.Substring(startIndex, endIndex - startIndex);
+                result = source.Remove(startIndex, endIndex - startIndex);
+                return result;
+            }
+
+            return result;
         }
     }
 }

@@ -19,5 +19,7 @@ namespace customerportalapi.Entities
         public string StoreId { get; set; }
 
         public List<Contract> Contracts { get; } = new List<Contract>();
+
+        public string MailType { get; set; }
     }
 }
