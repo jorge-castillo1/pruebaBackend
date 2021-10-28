@@ -1,7 +1,7 @@
 ﻿using customerportalapi.Entities;
 using System.Threading.Tasks;
 
-namespace customerportalapi.Services.interfaces
+namespace customerportalapi.Services.Interfaces
 {
     public interface IAuthService
     {

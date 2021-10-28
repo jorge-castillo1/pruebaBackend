@@ -2,7 +2,7 @@
 {
     public enum EmailTemplateTypes
     {
-        InvitationWelcome = 0,
+        WelcomeEmailStandard = 0,
         FormContact = 1,
         FormCall = 2,
         FormOpinion = 3,
@@ -15,8 +15,8 @@
         EditDataCustomer = 10,
         EditAccessCode = 11,
         InvitationError = 12,
-        InvitationStandard= 13,
-        InvitationEmailAlreadyExists = 14,
-        EmailAlreadyExists = 15,
+        WelcomeEmailSimple = 13,
+        ErrorInvitationEmailAlreadyExists = 14,
+        ErrorChangeEmailAlreadyExists = 15,
     }
 }

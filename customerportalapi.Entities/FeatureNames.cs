@@ -6,6 +6,6 @@ namespace customerportalapi.Entities.enums
 {
     public class FeatureNames
     {
-        public const string emailWelcomeInvitation = "emailWelcomeInvitation";
+        public const string EmailWelcomeInvitation = "emailWelcomeInvitation";
     }
 }

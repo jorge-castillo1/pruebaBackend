@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using customerportalapi.Entities.enums;
 
-namespace customerportalapi.Services.interfaces
+namespace customerportalapi.Services.Interfaces
 {
     public interface IWebTemplateServices
     {

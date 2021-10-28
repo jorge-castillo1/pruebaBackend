@@ -2,7 +2,7 @@
 using customerportalapi.Entities.enums;
 using customerportalapi.Repositories.interfaces;
 using customerportalapi.Services.Exceptions;
-using customerportalapi.Services.interfaces;
+using customerportalapi.Services.Interfaces;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
 using System;

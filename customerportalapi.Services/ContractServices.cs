@@ -1,14 +1,12 @@
-﻿using System;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Linq;
-using customerportalapi.Entities;
+﻿using customerportalapi.Entities;
 using customerportalapi.Entities.enums;
 using customerportalapi.Repositories.interfaces;
-using customerportalapi.Services.interfaces;
-using System.Net;
 using customerportalapi.Services.Exceptions;
+using customerportalapi.Services.Interfaces;
 using Microsoft.Extensions.Configuration;
+using System.Collections.Generic;
+using System.Net;
+using System.Threading.Tasks;
 
 namespace customerportalapi.Services
 {

@@ -1,17 +1,19 @@
 ﻿using customerportalapi.Entities;
 using System.Threading.Tasks;
 
-namespace customerportalapi.Services.interfaces
+namespace customerportalapi.Services.Interfaces
 {
     public interface IUserServices
     {
         Task<Profile> GetProfileAsync(string username);
 
         Task<Profile> GetProfileByDniAndTypeAsync(string dni, string accountType);
-        
+
         Task<Profile> UpdateProfileAsync(Profile profile);
 
         Task<bool> InviteUserAsync(Invitation value);
+
+        Task<InvitationMandatoryData> FindInvitationMandatoryData(Invitation invitationValues);
 
         Task<Token> ConfirmUserAsync(string invitationToken);
 
@@ -28,7 +30,7 @@ namespace customerportalapi.Services.interfaces
         Task<bool> ContactAsync(FormContact value);
 
         Profile GetUserByUsername(string username);
-        
+
         Task<bool> ChangeRole(string username, string role);
 
         Task<bool> RemoveRole(string username, string role);
@@ -38,6 +40,6 @@ namespace customerportalapi.Services.interfaces
         bool ValidateEmail(string email);
 
         Task<Profile> GetUserByInvitationTokenAsync(string receivedToken);
-      
+
     }
 }

@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using customerportalapi.Entities;
-using customerportalapi.Services.interfaces;
 using customerportalapi.Services.Interfaces;
 using customerportalapi.Entities.enums;
 using Newtonsoft.Json;
@@ -46,7 +45,7 @@ namespace customerportalapi.Controllers
                     {
                         await _paymentService.UpdatePaymentProcess(value);
                     }
-                
+
                     if (process.ProcessType == (int)ProcessTypes.PaymentMethodChangeCardSignature && process.ProcessStatus == (int)ProcessStatuses.Accepted)
                     {
                         await _paymentService.UpdatePaymentCardProcess(value, process);

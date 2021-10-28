@@ -4,7 +4,7 @@ using AutoWrapper.Wrappers;
 using customerportalapi.Entities;
 using customerportalapi.Security;
 using customerportalapi.Services.Exceptions;
-using customerportalapi.Services.interfaces;
+using customerportalapi.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 

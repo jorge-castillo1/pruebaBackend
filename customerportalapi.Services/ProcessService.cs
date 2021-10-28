@@ -40,7 +40,7 @@ namespace customerportalapi.Services
             last.Add(ordered[0]);
             string lastSmContractCode = ordered[0].SmContractCode;
             int lastProcesstype = ordered[0].ProcessType;
-            foreach(var process in ordered)
+            foreach (var process in ordered)
             {
                 if (process.SmContractCode != lastSmContractCode)
                 {
@@ -62,9 +62,9 @@ namespace customerportalapi.Services
 
             if (process.ProcessType == (int)ProcessTypes.PaymentMethodChangeBank)
             {
-                foreach(ProcessDocument processdocument in process.Documents)
+                foreach (ProcessDocument processdocument in process.Documents)
                     _signatureRepository.CancelSignature(processdocument.DocumentId);
-            } 
+            }
             else if (process.ProcessType == (int)ProcessTypes.PaymentMethodChangeCard)
             {
                 ProcessCard card = process.Card;
@@ -74,8 +74,8 @@ namespace customerportalapi.Services
                     Channel = "WEBPORTAL",
                     Confirmed = false
                 };
-               _paymentRepository.ConfirmChangePaymentMethodCard(confirmation);
-               _paymentRepository.UpdateConfirmChangePaymentMethodCard(confirmation);
+                _paymentRepository.ConfirmChangePaymentMethodCard(confirmation);
+                _paymentRepository.UpdateConfirmChangePaymentMethodCard(confirmation);
             }
             else if (process.ProcessType == (int)ProcessTypes.PaymentMethodChangeCardSignature)
             {
@@ -86,9 +86,9 @@ namespace customerportalapi.Services
                     Channel = "WEBPORTAL",
                     Confirmed = false
                 };
-               _paymentRepository.ConfirmChangePaymentMethodCard(confirmation);
-               _paymentRepository.UpdateConfirmChangePaymentMethodCard(confirmation);
-                foreach(ProcessDocument processdocument in process.Documents)
+                _paymentRepository.ConfirmChangePaymentMethodCard(confirmation);
+                _paymentRepository.UpdateConfirmChangePaymentMethodCard(confirmation);
+                foreach (ProcessDocument processdocument in process.Documents)
                     _signatureRepository.CancelSignature(processdocument.DocumentId);
             }
             return true;
@@ -126,7 +126,7 @@ namespace customerportalapi.Services
             //When one document are cancelled, all process will be cancelled
             if (processCompleted) process.ProcessStatus = (int)ProcessStatuses.Accepted;
             else if (processCanceled) process.ProcessStatus = (int)ProcessStatuses.Canceled;
-              
+
             _processRepository.Update(process);
 
             return process;
@@ -159,5 +159,5 @@ namespace customerportalapi.Services
             return processes.Count;
         }
 
-        }
+    }
 }

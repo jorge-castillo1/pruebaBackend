@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using AutoWrapper.Wrappers;
 using customerportalapi.Entities.enums;
 using customerportalapi.Security;
-using customerportalapi.Services.interfaces;
+using customerportalapi.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
