@@ -17,7 +17,7 @@ namespace customerportalapi.Services.Test.FakeData
             db.Setup(x => x.Search(It.IsAny<DocumentMetadataSearchFilter>())).Returns(Task.FromResult(new List<DocumentMetadata>() {
                 new DocumentMetadata()
             })).Verifiable();
-            db.Setup(x => x.SaveDocumentAsync(It.IsAny<Document>())).Returns(Task.FromResult(new DocumentMetadata())).Verifiable();
+            db.Setup(x => x.SaveDocumentAsync(It.IsAny<Document>())).Returns(Task.FromResult(Guid.NewGuid().ToString())).Verifiable();
             db.Setup(x => x.GetDocumentAsync(It.IsAny<string>())).Returns(Task.FromResult("base64document")).Verifiable();
 
             return db;
@@ -27,7 +27,7 @@ namespace customerportalapi.Services.Test.FakeData
         {
             var db = new Mock<IDocumentRepository>();
             db.Setup(x => x.Search(It.IsAny<DocumentMetadataSearchFilter>())).Returns(Task.FromResult(new List<DocumentMetadata>())).Verifiable();
-            db.Setup(x => x.SaveDocumentAsync(It.IsAny<Document>())).Returns(Task.FromResult(new DocumentMetadata())).Verifiable();
+            db.Setup(x => x.SaveDocumentAsync(It.IsAny<Document>())).Returns(Task.FromResult(Guid.NewGuid().ToString())).Verifiable();
             db.Setup(x => x.GetDocumentAsync(It.IsAny<string>())).Returns(Task.FromResult("base64document")).Verifiable();
 
             return db;
@@ -71,7 +71,7 @@ namespace customerportalapi.Services.Test.FakeData
                     }
                 }
                 )).Verifiable();
-            db.Setup(x => x.SaveDocumentAsync(It.IsAny<Document>())).Returns(Task.FromResult(new DocumentMetadata())).Verifiable();
+            db.Setup(x => x.SaveDocumentAsync(It.IsAny<Document>())).Returns(Task.FromResult(Guid.NewGuid().ToString())).Verifiable();
             db.Setup(x => x.GetDocumentAsync(It.IsAny<string>())).Returns(Task.FromResult("base64document")).Verifiable();
 
             return db;
@@ -115,7 +115,7 @@ namespace customerportalapi.Services.Test.FakeData
                     }
                 }
                 )).Verifiable();
-            db.Setup(x => x.SaveDocumentAsync(It.IsAny<Document>())).Returns(Task.FromResult(new DocumentMetadata())).Verifiable();
+            db.Setup(x => x.SaveDocumentAsync(It.IsAny<Document>())).Returns(Task.FromResult(Guid.NewGuid().ToString())).Verifiable();
             db.Setup(x => x.GetDocumentAsync(It.IsAny<string>())).Returns(Task.FromResult("base64document")).Verifiable();
 
             return db;
