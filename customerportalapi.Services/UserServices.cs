@@ -431,7 +431,7 @@ namespace customerportalapi.Services
 
             int templateId = (int)EmailTemplateTypes.WelcomeEmailShort;
             bool useEmailWelcome = _featureRepository.CheckFeatureByNameAndEnvironment(FeatureNames.EmailWelcomeInvitation, _config["Environment"]);
-            if (isNewUser || useEmailWelcome)
+            if (isNewUser && useEmailWelcome)
             {
                 templateId = (int)EmailTemplateTypes.WelcomeEmailExtended;
             }
