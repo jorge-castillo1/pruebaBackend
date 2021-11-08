@@ -445,7 +445,7 @@ namespace customerportalapi.Services
 
             var message = new Email { Subject = invitationTemplate.subject };
             message.To.Add(user.Email);
-            message.Body = UserInvitationUtils.GetBodyFormatted(invitationTemplate, user, invitationFields, _config["BaseUrl"], _config["InviteConfirmation"]);
+            message.Body = UserInvitationUtils.GetBodyFormatted(invitationTemplate, user, invitationFields, _config["InviteConfirmation"], _config["InviteConfirmation"]);
 
             return await _mailRepository.Send(message);
         }
