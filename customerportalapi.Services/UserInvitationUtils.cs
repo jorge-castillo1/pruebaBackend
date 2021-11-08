@@ -76,7 +76,7 @@ namespace customerportalapi.Services
                 OpportunityId = GetMandatoryData(SystemTypes.CRM, EntityNames.opportunities, null, StateEnum.Unchecked),
                 ExpectedMoveIn = GetMandatoryData(SystemTypes.CRM, EntityNames.opportunities, null, StateEnum.Unchecked),
 
-                SiteMailType = GetMandatoryData(SystemTypes.CRM, EntityNames.iav_stores, null, StateEnum.Checked),
+                SiteMailType = GetMandatoryData(SystemTypes.CRM, EntityNames.iav_stores, ((int)StoreMailTypes.WithoutSignageOrNull).ToString(), StateEnum.Checked),
                 UnitColour = GetMandatoryData(SystemTypes.CRM, EntityNames.products, null, StateEnum.Checked),
                 UnitCorridor = GetMandatoryData(SystemTypes.CRM, EntityNames.products, null, StateEnum.Checked),
                 UnitExceptions = GetMandatoryData(SystemTypes.CRM, EntityNames.products, null, StateEnum.Checked),
@@ -202,10 +202,10 @@ namespace customerportalapi.Services
                                 case (int)StoreMailTypes.OldSignage:
                                     body = body.Replace("{{Excepciones}}", fields.UnitExceptions.Value);
                                     body = RemoveString(body, "{{LocationSTART}}", "{{LocationEND}}");
-                            break;
+                                    break;
 
                                 case (int)StoreMailTypes.WithoutSignageOrNull:
-                        default:
+                                default:
                                     body = body.Replace("{{Excepciones}}", string.Empty);
                                     body = RemoveString(body, "{{LocationSTART}}", "{{LocationEND}}");
                                     break;
@@ -258,7 +258,7 @@ namespace customerportalapi.Services
         /// <returns>Returns the string without the characters between "start" and "end"</returns>
         public static string RemoveString(string source, string start, string end)
         {
-            string result = "";
+            string result = source;
             if (source.Contains(start) && source.Contains(end))
             {
                 int startIndex = source.IndexOf(start);
