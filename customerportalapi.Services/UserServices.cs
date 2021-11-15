@@ -343,7 +343,7 @@ namespace customerportalapi.Services
             await CheckMandatoryData(invitationFields);
 
             //7. Verify "move in date" in range to send remember welcome email (2 days)
-            if (invitationValues.InvokedBy == (int)InviteInvocationType.CronJob)
+            /*if (invitationValues.InvokedBy == (int)InviteInvocationType.CronJob)
             {
                 var moveIn = Convert.ToDateTime(invitationFields.ExpectedMoveIn.Value);
 
@@ -354,7 +354,7 @@ namespace customerportalapi.Services
                 {                    
                     return false;                    
                 }
-            }
+            }*/
 
             var userName = userType == 0 ? invitationValues.Dni : "B" + invitationValues.Dni;
             var pwd = new Password(true, true, true, false, 6);
