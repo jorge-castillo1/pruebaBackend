@@ -1176,9 +1176,9 @@ namespace customerportalapi.Services
                         // Unit
 
                         //Access Code eliminado temporalmente de Mandatory Data
-                        //invitationData.UnitPassword.SetValueAndState(ValidationMessages.NoInformationAvailable, StateEnum.Warning);
-                        //if (!string.IsNullOrEmpty(contractSM.Password))
-                        //    invitationData.UnitPassword.SetValueAndState(contractSM.Password, StateEnum.Checked);
+                        invitationData.UnitPassword.SetValueAndState(ValidationMessages.NoInformationAvailable, StateEnum.Warning);
+                        if (!string.IsNullOrEmpty(contractSM.Password))
+                            invitationData.UnitPassword.SetValueAndState(contractSM.Password, StateEnum.Checked);
 
                         if (contract.Unit != null)
                         {
@@ -1224,7 +1224,7 @@ namespace customerportalapi.Services
                                 if (!string.IsNullOrEmpty(opportunity.ExpectedMoveIn))
                                 {
                                     DateTime moveIn = DateTime.Parse(opportunity.ExpectedMoveIn);
-                                    invitationData.ExpectedMoveIn.SetValueAndState(moveIn.ToString(), StateEnum.Checked);                                    
+                                    invitationData.ExpectedMoveIn.SetValueAndState(moveIn.ToString(), StateEnum.Checked);
                                 }
                             }
 

@@ -12,12 +12,16 @@ namespace customerportalapi.Services
             switch (invitationLanguage.ToLower())
             {
                 case "spanish":
+                case "es":
                     return LanguageTypes.es.ToString();
                 case "english":
+                case "en":
                     return LanguageTypes.en.ToString();
                 case "portuguese":
+                case "pt":
                     return LanguageTypes.pt.ToString();
                 case "french":
+                case "fr":
                     return LanguageTypes.fr.ToString();
                 default:
                     return LanguageTypes.en.ToString();
@@ -59,8 +63,8 @@ namespace customerportalapi.Services
                 SmContractCode = GetMandatoryData(SystemTypes.CRM, EntityNames.iav_contracts, null, StateEnum.Unchecked),
                 SMContract = GetMandatoryData(SystemTypes.SM, EntityNames.WBSGetContract, null, StateEnum.Unchecked),
                 ActiveContract = GetMandatoryData(SystemTypes.SM, EntityNames.WBSGetContract, null, StateEnum.Unchecked),
-                //Access Code eliminado temporalmente de Mandatory Data
-                //UnitPassword = GetMandatiryData(SystemTypes.CRM, EntityNames.WBSGetContract, null, StateEnum.Unchecked),
+
+                UnitPassword = GetMandatoryData(SystemTypes.CRM, EntityNames.WBSGetContract, null, StateEnum.Unchecked),
                 UnitName = GetMandatoryData(SystemTypes.CRM, EntityNames.iav_contracts, null, StateEnum.Unchecked),
                 UnitSizeCode = GetMandatoryData(SystemTypes.CRM, EntityNames.iav_contracts, null, StateEnum.Unchecked), // TODO: check EntityNames
                 ContractStoreCode = GetMandatoryData(SystemTypes.CRM, EntityNames.iav_contracts, null, StateEnum.Unchecked),
@@ -127,6 +131,9 @@ namespace customerportalapi.Services
                         case "ContactUsername":
                             body = body.Replace(field, data.Value);
                             body = body.Replace("{{UserPassword}}", user.Password);
+
+
+                            body = body.Replace("{{UserName}}", string.IsNullOrEmpty(user.Username) ? string.Empty : user.Username);
                             break;
 
                         case "UnitName":
@@ -151,8 +158,11 @@ namespace customerportalapi.Services
                             body = body.Replace("{{LockCode}}", new string(unitName));
                             break;
 
-                        //Access Code eliminado temporalmente de Mandatory Data
-                        //case "UnitPassword":
+                        case "UnitPassword":
+                            // Access code password to the unit
+                            body = body.Replace("{{Paragraph" + property.Name + "}}", data.Value);
+                            break;
+
                         case "UnitSizeCode":
                             var content = string.Empty;
                             if (invitationTemplate != null && invitationTemplate.Paragraphs != null)
