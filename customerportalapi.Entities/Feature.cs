@@ -17,6 +17,9 @@ namespace customerportalapi.Entities
 
         [BsonElement("environments")]
         public List<FeatureEnvironment> Environments { get; set; }
+
+        [BsonElement("countryavailable")]
+        public List<string> CountryAvailable { get; set; }
     }
 
     public class FeatureEnvironment

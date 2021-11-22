@@ -9,6 +9,6 @@ namespace customerportalapi.Repositories.interfaces
     public interface IFeatureRepository
     {
         Task<bool> Create(Feature feature);
-        bool CheckFeatureByNameAndEnvironment(string name, string environment);
+        bool CheckFeatureByNameAndEnvironment(string name, string environment, string countryCustomer);
     }
 }

@@ -429,8 +429,22 @@ namespace customerportalapi.Services
                 await FindInvitationMandatoryData(invitationFields, invitationValues, accountType);
             }*/
 
+            User customer = _userRepository.GetCurrentUserByUsername(user.Username);
+            if (customer.Id == null)
+                throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
+
+            //Invoke repository
+            string accountType = UserInvitationUtils.GetAccountType(user.Usertype);
+            AccountProfile entity = await _profileRepository.GetAccountAsync(user.Dni, accountType);
+            UserAccount userAccount = _userAccountRepository.GetAccount(user.Username);
+            if (userAccount.Profilepicture != null)
+                entity.Profilepicture = userAccount.Profilepicture;
+
+            if (entity == null)
+                throw new ServiceException("Account is not found.", HttpStatusCode.NotFound, "Account", "Not exist");
+
             int templateId = (int)EmailTemplateTypes.WelcomeEmailShort;
-            bool useEmailWelcome = _featureRepository.CheckFeatureByNameAndEnvironment(FeatureNames.EmailWelcomeInvitation, _config["Environment"]);
+            bool useEmailWelcome = _featureRepository.CheckFeatureByNameAndEnvironment(FeatureNames.EmailWelcomeInvitation, _config["Environment"], entity.Address1Country);
             if (isNewUser && useEmailWelcome)
             {
                 templateId = (int)EmailTemplateTypes.WelcomeEmailExtended;
