@@ -45,8 +45,7 @@ namespace customerportalapi.Repositories
                 {
                     if (features.CountryAvailable != null)
                     {
-                        List<string> countries = features.CountryAvailable;
-                        if (countries.Contains(currentCountry))
+                        if (features.CountryAvailable.ConvertAll(x => x.ToLower().Trim()).Contains(currentCountry.ToLower().Trim()))
                             result = true;
                     }
                     else
@@ -55,9 +54,7 @@ namespace customerportalapi.Repositories
                         result = true;
                     }
                 }
-
             }
-
 
             return result;
         }
