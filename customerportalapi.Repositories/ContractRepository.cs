@@ -84,7 +84,7 @@ namespace customerportalapi.Repositories
 
             string endPoint = "fullcontracts";
             if (limit.HasValue && limit >= 1)
-                endPoint = $"fullcontracts?$limit={limit.Value}";
+                endPoint = $"fullcontracts?limit={limit.Value}";
 
             var response = await httpClient.GetAsync(endPoint, HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
