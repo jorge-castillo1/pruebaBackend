@@ -4,7 +4,11 @@ using customerportalapi.Repositories.interfaces;
 using customerportalapi.Services.Exceptions;
 using customerportalapi.Services.Interfaces;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -22,6 +26,8 @@ namespace customerportalapi.Services
         private readonly IStoreRepository _storeRepository;
         private readonly IOpportunityCRMRepository _opportunityRepository;
         private readonly IPaymentMethodRepository _paymentMethodRepository;
+        private readonly IConfiguration _config;
+        private readonly ILogger<ContractServices> _logger;
 
 
         public ContractServices(
@@ -34,7 +40,9 @@ namespace customerportalapi.Services
             IUserRepository userRepository,
             IStoreRepository storeRepository,
             IOpportunityCRMRepository opportunityRepository,
-            IPaymentMethodRepository paymentMethodRepository
+            IPaymentMethodRepository paymentMethodRepository,
+
+            ILogger<ContractServices> logger
         )
         {
             _configuration = configuration;
@@ -47,6 +55,7 @@ namespace customerportalapi.Services
             _storeRepository = storeRepository;
             _opportunityRepository = opportunityRepository;
             _paymentMethodRepository = paymentMethodRepository;
+            _logger = logger;
         }
 
         public async Task<Contract> GetContractAsync(string contractNumber)
@@ -57,7 +66,6 @@ namespace customerportalapi.Services
 
             return contract;
         }
-
 
         public async Task<string> GetDownloadContractAsync(string dni, string smContractCode)
         {
@@ -217,6 +225,102 @@ namespace customerportalapi.Services
         {
             var smcontract = await _contractSMRepository.GetAccessCodeAsync(contractNumber);
             return smcontract.Timezone;
+        }
+
+        public async Task<UpdateContractsUrlResponse> UpdateContractUrlAsync(int? skip, int? limit)
+        {
+            UpdateContractsUrlResponse response = new UpdateContractsUrlResponse()
+            {
+                skip = skip,
+                limit = limit
+            };
+
+            List<FullContract> contracts = await _contractRepository.GetContractsWithoutUrlAsync();
+
+            response.TotalContracts = contracts.Count;
+            _logger.LogInformation($"ContractServices.UpdateContractUrlAsync. Total of contracts without URL: {response.TotalContracts }.");
+
+            if (contracts != null && limit >= 1)
+            {
+                if (skip.HasValue && limit.HasValue)
+                    contracts = contracts.Skip(skip.Value).Take(limit.Value).ToList();
+                else if (skip.HasValue && !limit.HasValue)
+                    contracts = contracts.Skip(skip.Value).ToList();
+                else if (!skip.HasValue && limit.HasValue)
+                    contracts = contracts.Take(limit.Value).ToList();
+
+                response.NumContracts = contracts.Count();
+                _logger.LogInformation($"ContractServices.UpdateContractUrlAsync. Count of contracts to process: {response.NumContracts}.");
+
+                response.ContractsUrl = new List<ContractUrlResponse>();
+
+                foreach (var fullcontract in contracts)
+                {
+                    ContractUrlResponse contractURL = new ContractUrlResponse();
+                    var newContract = MapperFullContract(fullcontract);
+
+                    contractURL.StoreName = fullcontract.iav_storeid.StoreName;
+                    contractURL.CustomerType = fullcontract.iav_customerid.blue_customertypestring;
+                    contractURL.Dni = fullcontract.iav_customerid.iav_dni;
+                    contractURL.ContractId = fullcontract.iav_contractid;
+                    contractURL.SMContractCode = fullcontract.iav_smcontractcode;
+                    contractURL.Environment = _configuration["Environment"].ToLower();
+
+                    if (!string.IsNullOrEmpty(contractURL.StoreName) && !string.IsNullOrEmpty(contractURL.CustomerType) && !string.IsNullOrEmpty(contractURL.Dni))
+                    {
+                        switch (contractURL.Environment)
+                        {
+                            case "pro":
+                                newContract.ContractUrl = $@"https://bluespaceselfstorage.sharepoint.com/sites/stores/{contractURL.StoreName}/Documentos compartidos/{contractURL.CustomerType}/{contractURL.Dni}";
+                                break;
+                            case "pre":
+                            case "dev":
+                            default:
+                                newContract.ContractUrl = $@"https://bluespaceselfstorage.sharepoint.com/sites/Stores-PRE/{contractURL.StoreName}/Documentos compartidos/{contractURL.CustomerType}/{contractURL.Dni}";
+                                break;
+
+                        }
+                        contractURL.ContractUrl = newContract.ContractUrl;
+
+                        try
+                        {
+                            response.ContractsUrl.Add(contractURL);
+                            await _contractRepository.UpdateContractAsync(newContract);
+                        }
+                        catch (Exception ex)
+                        {
+                            response.Error = $"ContractServices.UpdateContractUrlAsync. Contract: {JsonConvert.SerializeObject(newContract)}";
+                            _logger.LogError(ex, $"ContractServices.UpdateContractUrlAsync. Contract: {response.Error}");
+                        }
+                    }
+                }
+            }
+            return response;
+        }
+
+        private Contract MapperFullContract(FullContract contract)
+        {
+            Contract newContract = new Contract()
+            {
+                ContractId = contract.iav_contractid,
+                ContractNumber = contract.iav_name,
+                SmContractCode = contract.iav_smcontractcode,
+                Store = contract._iav_storeid_value,
+                Price = (decimal)contract.iav_price,
+                Vat = (decimal?)contract.iav_vat,
+                ReservationFee = contract.iav_reservationfee.ToString(),
+                ContractDate = contract.iav_contractdate.ToString(),
+                FirstPaymentDate = contract.iav_firstpaymentdate.ToString(),
+                FirstPayment = contract.iav_firstpaymentmoney.ToString(),
+                PaymentMethod = contract._iav_paymentmethodid_value,
+                PaymentMethodId = contract._iav_paymentmethodid_value,
+                ContractUrl = contract.new_contacturl,
+                Customer = contract._iav_customerid_value,
+                Unit = contract.iav_unitid,
+                StoreData = contract.iav_storeid,
+                OpportunityId = contract._iav_opportunityid_value
+            };
+            return newContract;
         }
     }
 }

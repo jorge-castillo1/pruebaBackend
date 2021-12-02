@@ -75,6 +75,21 @@ namespace customerportalapi.Repositories
 
         }
 
+        public async Task<List<FullContract>> GetContractsWithoutUrlAsync()
+        {
+            var entitylist = new List<FullContract>();
 
+            var httpClient = _clientFactory.CreateClient("httpClient");
+            httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["ContractsAPI"]);
+
+            var response = await httpClient.GetAsync("fullcontracts", HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode) return entitylist;
+            var content = await response.Content.ReadAsStringAsync();
+            JObject result = JObject.Parse(content);
+            var contractList = JsonConvert.DeserializeObject<List<FullContract>>(result.GetValue("result").ToString());
+
+            return contractList;
+        }
     }
 }

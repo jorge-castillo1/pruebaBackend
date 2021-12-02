@@ -413,33 +413,9 @@ namespace customerportalapi.Services
 
         private async Task<bool> SendWelcomeEmail(Invitation invitationValues, User user, InvitationMandatoryData invitationFields, bool isNewUser)
         {
-            /*if (user == null)
-            {
-                user = _userRepository.GetCurrentUserByDniAndType(invitationValues.Dni, UserInvitationUtils.GetUserType(invitationValues.CustomerType));
-                if (!string.IsNullOrEmpty(user.Id) && user.Emailverified)
-                {
-                    throw new ServiceException("Invitation user fails. User was actived before", HttpStatusCode.NotFound, FieldNames.User, ValidationMessages.AlreadyInvited);
-                }
-            }
-
-            if (invitationFields == null)
-            {
-                invitationFields = UserInvitationUtils.InitInvitationData();
-                string accountType = (user.Usertype == (int)UserTypes.Business) ? AccountType.Business : AccountType.Residential;
-                await FindInvitationMandatoryData(invitationFields, invitationValues, accountType);
-            }*/
-
-            User customer = _userRepository.GetCurrentUserByUsername(user.Username);
-            if (customer.Id == null)
-                throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
-
             //Invoke repository
             string accountType = UserInvitationUtils.GetAccountType(user.Usertype);
             AccountProfile entity = await _profileRepository.GetAccountAsync(user.Dni, accountType);
-            UserAccount userAccount = _userAccountRepository.GetAccount(user.Username);
-            if (userAccount.Profilepicture != null)
-                entity.Profilepicture = userAccount.Profilepicture;
-
             if (entity == null)
                 throw new ServiceException("Account is not found.", HttpStatusCode.NotFound, "Account", "Not exist");
 

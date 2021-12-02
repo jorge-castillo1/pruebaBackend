@@ -9,7 +9,7 @@ namespace customerportalapi.Services
     {
         public static string GetLanguage(string invitationLanguage)
         {
-            switch (invitationLanguage.ToLower())
+            switch (invitationLanguage.ToLower().Trim())
             {
                 case "spanish":
                 case "es":
