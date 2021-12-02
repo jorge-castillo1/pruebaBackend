@@ -31,11 +31,11 @@ namespace customerportalapi.Services
 
 
         public ContractServices(
-            IConfiguration configuration, 
-            IContractRepository contractRepository, 
-            IContractSMRepository contractSMRepository, 
-            IMailRepository mailRepository, 
-            IEmailTemplateRepository emailTemplateRepository, 
+            IConfiguration configuration,
+            IContractRepository contractRepository,
+            IContractSMRepository contractSMRepository,
+            IMailRepository mailRepository,
+            IEmailTemplateRepository emailTemplateRepository,
             IDocumentRepository documentRepository,
             IUserRepository userRepository,
             IStoreRepository storeRepository,
@@ -73,7 +73,7 @@ namespace customerportalapi.Services
             {
                 SmContractCode = smContractCode,
                 AccountDni = dni,
-                DocumentType = (int) DocumentTypes.Contract
+                DocumentType = (int)DocumentTypes.Contract
             };
             List<DocumentMetadata> list = await _documentRepository.Search(filter);
 
@@ -81,7 +81,7 @@ namespace customerportalapi.Services
             else if (list.Count == 0)
             {
                 var contract = await GetContractAsync(smContractCode);
-                
+
                 EmailTemplate requestDigitalContractTemplate = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.RequestDigitalContract, LanguageTypes.en.ToString());
 
                 if (string.IsNullOrEmpty(requestDigitalContractTemplate._id))
@@ -92,10 +92,10 @@ namespace customerportalapi.Services
 
                 Email message = new Email();
                 string mailTo = contract.StoreData.EmailAddress1;
-                if (mailTo == null) 
+                if (mailTo == null)
                     throw new ServiceException("Store mail not found", HttpStatusCode.NotFound);
 
-                if (! (_configuration["Environment"] == nameof(EnvironmentTypes.PRO))) mailTo = _configuration["MailStores"];
+                if (!(_configuration["Environment"] == nameof(EnvironmentTypes.PRO))) mailTo = _configuration["MailStores"];
                 message.To.Add(mailTo);
                 message.Subject = string.Format(requestDigitalContractTemplate.subject, contract.Customer, dni);
                 // TODO: When we will implement client new template
@@ -115,7 +115,7 @@ namespace customerportalapi.Services
             DocumentMetadataSearchFilter filter = new DocumentMetadataSearchFilter()
             {
                 InvoiceNumber = invoiceDownload.InvoiceNumber,
-                DocumentType = (int) DocumentTypes.Invoice
+                DocumentType = (int)DocumentTypes.Invoice
             };
             List<DocumentMetadata> list = await _documentRepository.Search(filter);
 
@@ -133,20 +133,20 @@ namespace customerportalapi.Services
                     string errorMessage = (int)EmailTemplateTypes.RequestDigitalInvoice + " : " + EmailTemplateTypes.RequestDigitalInvoice.ToString() + " : " + LanguageTypes.en.ToString();
                     throw new ServiceException("Email Template not exist, " + errorMessage, HttpStatusCode.NotFound, FieldNames.Email + FieldNames.Template, ValidationMessages.NotExist);
                 }
-                
+
                 Email message = new Email();
                 string mailTo = store.EmailAddress1;
-                if (mailTo == null) 
+                if (mailTo == null)
                     throw new ServiceException("Store mail not found", HttpStatusCode.NotFound);
 
-                if (! (_configuration["Environment"] == nameof(EnvironmentTypes.PRO))) mailTo = _configuration["MailStores"];
+                if (!(_configuration["Environment"] == nameof(EnvironmentTypes.PRO))) mailTo = _configuration["MailStores"];
                 message.To.Add(mailTo);
                 message.Subject = string.Format(requestDigitalInvoiceTemplate.subject, user.Name, user.Dni, invoiceDownload.InvoiceNumber);
                 // TODO: When we will implement client new template
                 // string htmlbody = requestDigitalInvoiceTemplate.body.Replace("{", "{{").Replace("}", "}}").Replace("%{{", "{").Replace("}}%", "}");
                 message.Body = string.Format(requestDigitalInvoiceTemplate.body, user.Name, user.Dni, invoiceDownload.InvoiceNumber);
                 await _mailRepository.Send(message);
-                
+
                 throw new ServiceException("Invoice file does not exist, InvoiceNumber: " + invoiceDownload.InvoiceNumber, HttpStatusCode.NotFound, FieldNames.InvoiceNumber, ValidationMessages.NotExist);
             }
 
@@ -190,8 +190,8 @@ namespace customerportalapi.Services
         {
             DocumentMetadataSearchFilter filter = new DocumentMetadataSearchFilter();
             filter.SmContractCode = smContractCode;
-            List <DocumentMetadata> docs = await _documentRepository.Search(filter);
-           
+            List<DocumentMetadata> docs = await _documentRepository.Search(filter);
+
             return docs.Find(x => x.DocumentType == 0) != null;
         }
 
@@ -235,7 +235,7 @@ namespace customerportalapi.Services
                 limit = limit
             };
 
-            List<FullContract> contracts = await _contractRepository.GetContractsWithoutUrlAsync();
+            List<FullContract> contracts = await _contractRepository.GetContractsWithoutUrlAsync(limit);
 
             response.TotalContracts = contracts.Count;
             _logger.LogInformation($"ContractServices.UpdateContractUrlAsync. Total of contracts without URL: {response.TotalContracts }.");

@@ -13,6 +13,6 @@ namespace customerportalapi.Repositories.interfaces
         Task<Contract> GetContractAsync(string smContractCode);
 
         Task<Contract> UpdateContractAsync(Contract cont);
-        Task<List<FullContract>> GetContractsWithoutUrlAsync();
+        Task<List<FullContract>> GetContractsWithoutUrlAsync(int? limit);
     }
 }

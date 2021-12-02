@@ -75,14 +75,18 @@ namespace customerportalapi.Repositories
 
         }
 
-        public async Task<List<FullContract>> GetContractsWithoutUrlAsync()
+        public async Task<List<FullContract>> GetContractsWithoutUrlAsync(int? limit)
         {
             var entitylist = new List<FullContract>();
 
             var httpClient = _clientFactory.CreateClient("httpClient");
             httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["ContractsAPI"]);
 
-            var response = await httpClient.GetAsync("fullcontracts", HttpCompletionOption.ResponseHeadersRead);
+            string endPoint = "fullcontracts";
+            if (limit.HasValue && limit >= 1)
+                endPoint = $"fullcontracts/{limit.Value}";
+
+            var response = await httpClient.GetAsync(endPoint, HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
             if (!response.IsSuccessStatusCode) return entitylist;
             var content = await response.Content.ReadAsStringAsync();
