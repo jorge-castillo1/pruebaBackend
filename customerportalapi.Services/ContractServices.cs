@@ -8,8 +8,10 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace customerportalapi.Services
@@ -259,7 +261,7 @@ namespace customerportalapi.Services
                     ContractUrlResponse contractURL = new ContractUrlResponse();
                     var newContract = MapperFullContract(fullcontract);
 
-                    contractURL.StoreName = fullcontract.iav_storeid.StoreName;
+                    contractURL.StoreName = RemoveDiacritics(fullcontract.iav_storeid.StoreName);
                     contractURL.CustomerType = fullcontract.iav_customerid.blue_customertypestring;
                     contractURL.Dni = fullcontract.iav_customerid.iav_dni;
                     contractURL.ContractId = fullcontract.iav_contractid;
@@ -296,6 +298,15 @@ namespace customerportalapi.Services
                 }
             }
             return response;
+        }
+
+        private string RemoveDiacritics(string text)
+        {
+            return string.Concat(
+                text.Normalize(NormalizationForm.FormD)
+                .Where(ch => CharUnicodeInfo.GetUnicodeCategory(ch) !=
+                                              UnicodeCategory.NonSpacingMark)
+              ).Normalize(NormalizationForm.FormC).Replace(" ","").ToLower();
         }
 
         private Contract MapperFullContract(FullContract contract)
