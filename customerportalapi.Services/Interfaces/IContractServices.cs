@@ -14,6 +14,6 @@ namespace customerportalapi.Services.Interfaces
         Task<string> GetContractTimeZoneAsync(string contractNumber);
         Task<bool> DocumentExists(string smContractCode);
         Task<bool> InvoiceExists(string invoiceNumber);
-
+        Task<UpdateContractsUrlResponse> UpdateContractUrlAsync(int? skip, int? limit);
     }
 }

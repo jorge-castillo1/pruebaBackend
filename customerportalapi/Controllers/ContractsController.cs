@@ -207,5 +207,29 @@ namespace customerportalapi.Controllers
                 throw;
             }
         }
+
+        /// <summary>
+        /// Update Contracts Urls in CRM
+        /// </summary>
+        /// <returns>bolean</returns>
+        [HttpGet("UpdateContractsUrl")]
+        public async Task<ApiResponse> UpdateContractUrlAsync(int? skip, int? limit)
+        {
+            try
+            {
+                var entity = await _services.UpdateContractUrlAsync(skip, limit);
+                return new ApiResponse(entity);
+            }
+            catch (ServiceException se)
+            {
+                _logger.LogError(se.ToString());
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
     }
 }

@@ -132,11 +132,12 @@ namespace customerportalapi.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogInformation("api/users/invite");
                 string obj = string.Empty;
                 if (value != null)
                     obj = ", params:" + JsonConvert.SerializeObject(value);
 
-                _logger.LogError(ex, ex.Message + obj);
+                _logger.LogError(ex, $"POST .../api/users/invite. {ex.Message}. Invitation: {obj}");
                 throw;
             }
         }
@@ -213,7 +214,7 @@ namespace customerportalapi.Controllers
             }
         }
 
-       
+
         /// <summary>
         /// validate user from Access Token
         /// </summary>
@@ -223,7 +224,7 @@ namespace customerportalapi.Controllers
         public ApiResponse EmailExists(string email)
         {
             try
-            { 
+            {
                 bool entity = _services.ValidateEmail(email);
                 return new ApiResponse(entity);
             }
@@ -238,7 +239,7 @@ namespace customerportalapi.Controllers
         [HttpPut("uninvite/{dni}")]
         [AuthorizeApiKey]
         [Obsolete]
-        [ApiExplorerSettings(IgnoreApi =true)]
+        [ApiExplorerSettings(IgnoreApi = true)]
         public async Task<ApiResponse> UnInviteDni(string dni)
         {
             try

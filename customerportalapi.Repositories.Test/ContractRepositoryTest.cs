@@ -5,6 +5,7 @@ using Moq;
 using System.Net.Http;
 using Moq.Contrib.HttpClient;
 using System.Collections.Generic;
+using System.IO;
 
 namespace customerportalapi.Repositories.Test
 {
@@ -76,6 +77,33 @@ namespace customerportalapi.Repositories.Test
             //Assert
             Assert.IsNotNull(result);
             Assert.IsTrue(result.Count == 2);
+        }
+
+
+        [TestMethod]
+        public void AlHacerUnaLlamadaGetExternaDeDatos_NoDevuelveErrores()
+        {
+            //Arrange
+            Mock.Get(_clientFactory).Setup(x => x.CreateClient("httpClient"))
+                .Returns(() =>
+                {
+                    return _handler.CreateClient();
+                });
+
+            var pathToJson = Path.GetFullPath(@"..\..\..\FakeData\fullcontract.json");
+            var response = new HttpResponseMessage
+            {
+                Content = new StringContent(TestsHelper.LoadJson(pathToJson))
+            };
+            _handler.SetupAnyRequest()
+                .ReturnsAsync(response);
+
+            //Act
+            ContractRepository repository = new ContractRepository(_configurations, _clientFactory);
+            List<FullContract> result = repository.GetContractsWithoutUrlAsync().Result;
+
+            //Assert
+            Assert.IsNotNull(result);            
         }
 
     }
