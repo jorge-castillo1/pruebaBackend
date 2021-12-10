@@ -1,17 +1,16 @@
-﻿using System.Linq;
-using customerportalapi.Entities;
+﻿using customerportalapi.Entities;
 using customerportalapi.Entities.enums;
 using customerportalapi.Repositories.interfaces;
 using customerportalapi.Services.Exceptions;
 using customerportalapi.Services.Interfaces;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 
 namespace customerportalapi.Services
 {
@@ -328,6 +327,8 @@ namespace customerportalapi.Services
             process.Documents = null;
 
             await _processRepository.Create(process);
+            _logger.LogInformation("INFO");
+            _logger.LogInformation(stringHtml);
 
             return stringHtml;
         }
@@ -1497,7 +1498,7 @@ namespace customerportalapi.Services
                 throw new ServiceException("Error payment method crm", HttpStatusCode.BadRequest, FieldNames.SMId);
 
             List<PaymentMethods> availablePayMet = new List<PaymentMethods>();
-            
+
             foreach (PaymentMethods payMethod in payMet.PaymentMethods)
             {
                 string name = payMethod.Name;

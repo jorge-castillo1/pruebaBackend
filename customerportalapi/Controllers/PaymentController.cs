@@ -270,7 +270,7 @@ namespace customerportalapi.Controllers
         //POST api/payment/update-card/load
         [HttpPost]
         [Route("update-card/load")]
-        [AuthorizeToken]
+        //[AuthorizeToken]
         public async Task<ApiResponse> UpdateCardLoad([FromBody] PaymentMethodUpdateCardData value)
         {
             try
