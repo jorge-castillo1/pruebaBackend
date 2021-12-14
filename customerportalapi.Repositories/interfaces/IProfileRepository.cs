@@ -20,5 +20,8 @@ namespace customerportalapi.Repositories.interfaces
         Task<Profile> RevokedWebPortalAccessAsync(string dni, string accountType);
 
         Task<ProfilePermissions> GetProfilePermissionsAsync(string dni, string accountType);
+
+        Task<AccountProfile> GetContactByMail(string mail);
+
     }
 }

@@ -122,7 +122,11 @@ namespace customerportalapi
                 IMongoDatabase database = GetDatabase();
                 return new MongoCollectionWrapper<StoreImage>(database, "storesimages");
             });
-
+            services.AddScoped<IMongoCollectionWrapper<NewUser>>(serviceProvider =>
+            {
+                IMongoDatabase database = GetDatabase();
+                return new MongoCollectionWrapper<NewUser>(database, "newusers");
+            });
             //Mail service
             services.AddScoped(serviceProvider =>
             {
@@ -164,8 +168,11 @@ namespace customerportalapi
             services.AddScoped<IUnitLocationRepository, UnitLocationRepository>();
             services.AddScoped<IFeatureRepository, FeatureRepository>();
             services.AddScoped<IStoreImageRepository, StoreImageRepository>();
+            services.AddScoped<INewUserRepository, NewUserRepository>();
+            services.AddScoped<IGoogleCaptchaRepository, GoogleCaptchaRepository>();
 
-            //Register Business Services
+
+        //Register Business Services
             services.AddTransient<IUserServices, UserServices>();
             services.AddTransient<ISiteServices, SiteServices>();
             services.AddTransient<IWebTemplateServices, WebTemplateServices>();
@@ -279,6 +286,24 @@ namespace customerportalapi
                     Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes(
                         $"{Configuration["PaymentCredentials:User"]}:{Configuration["PaymentCredentials:Password"]}"))
                 );
+            }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            {
+                AllowAutoRedirect = false,
+                AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip,
+            });
+
+            services.AddHttpClient("httpClientCaptcha", c =>
+            {
+                c.BaseAddress = new Uri(Configuration["GoogleCaptchaServiceUrl"]);
+                c.Timeout = new TimeSpan(0, 2, 0); //2 minutes
+                                                   //c.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                c.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue
+                {
+                    NoCache = true,
+                    NoStore = true,
+                    MaxAge = new TimeSpan(0),
+                    MustRevalidate = true
+                };
             }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
             {
                 AllowAutoRedirect = false,

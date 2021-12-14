@@ -1,6 +1,5 @@
 ﻿using customerportalapi.Entities;
 using customerportalapi.Entities.enums;
-using customerportalapi.Entities.Extensions;
 using customerportalapi.Repositories.interfaces;
 using customerportalapi.Services.Exceptions;
 using customerportalapi.Services.Interfaces;
@@ -32,6 +31,8 @@ namespace customerportalapi.Services
         private readonly IStoreRepository _storeRepository;
         private readonly IUnitLocationRepository _unitLocationRepository;
         private readonly IFeatureRepository _featureRepository;
+        private readonly INewUserRepository _newUserRepository;
+        private readonly IGoogleCaptchaRepository _googleCaptchaRepository;
 
 
         public UserServices(
@@ -49,7 +50,8 @@ namespace customerportalapi.Services
             IOpportunityCRMRepository opportunityRepository,
             IStoreRepository storeRepository,
             IUnitLocationRepository unitLocationRepository,
-            IFeatureRepository featureRepository
+            IFeatureRepository featureRepository,
+            INewUserRepository newUserRepository
             )
         {
             _userRepository = userRepository;
@@ -67,6 +69,7 @@ namespace customerportalapi.Services
             _storeRepository = storeRepository;
             _unitLocationRepository = unitLocationRepository;
             _featureRepository = featureRepository;
+            _newUserRepository = newUserRepository;
         }
 
 
@@ -1306,5 +1309,55 @@ namespace customerportalapi.Services
             User userByEmail = _userRepository.GetCurrentUserByEmail(email);
             return (userByEmail.Id == null);
         }
+
+        public async Task<bool> SaveNewUser(NewUser newUser)
+        {
+            AccountProfile entity = await _profileRepository.GetContactByMail(newUser.Email);
+            bool result = false;
+            bool isNewUser = false;
+            DateTime date = DateTime.Now;
+            newUser.Day = date;
+            if (entity != null)
+            {
+                List<Contract> contracts = await _contractRepository.GetContractsAsync(entity.DocumentNumber, entity.CustomerType);
+
+                if (contracts != null)
+                {
+                    isNewUser = _newUserRepository.SaveNewUser(newUser).Result;
+
+                    if (isNewUser)
+                    {
+
+                        string mailTo = _config["MailWP"];
+                        if (string.IsNullOrEmpty(mailTo))
+                            throw new ServiceException("Store mail not found", HttpStatusCode.NotFound, FieldNames.Email, ValidationMessages.NotFound);
+
+                        Email message = new Email();
+                        message.To.Add(mailTo);
+                        if (_config["Environment"] == nameof(EnvironmentTypes.DEV))
+                        {
+                            message.Cc.Add(_config["MailIT"]);
+                        }
+                        message.Subject = "Solicitud nuevo usuario web portal";
+                        message.Body = "Nueva petición de usuario Web Portal a dia: " + DateTime.Now +
+                        "<br><strong>Nombre</strong>: " + newUser.Name + ", con <strong>Email</strong>: " + newUser.Email + " y <strong>Teléfono de contacto</strong>: " + newUser.Phone;
+
+                        await _mailRepository.Send(message);
+
+                    }
+
+                    result = true;
+                }
+            }
+
+            return result && isNewUser;
+        }
+
+        public async Task<bool> ValidateCaptcha(string token)
+        {
+            return await _googleCaptchaRepository.IsTokenValid(token);
+
+        }
+
     }
 }

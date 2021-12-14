@@ -486,5 +486,58 @@ namespace customerportalapi.Controllers
                 throw;
             }
         }
+
+        /// <summary>
+        /// Save new users inside the database
+        /// </summary>
+        /// <returns>Boolean</returns>
+        // POST api/users/newUser
+        [HttpPost("newuser")]
+        public async Task<ApiResponse> SaveNewUser([FromBody] NewUser newUser)
+        {
+            try
+            {
+                var entity = await _services.SaveNewUser(newUser);
+                return new ApiResponse(entity);
+            }
+            catch (ServiceException se)
+            {
+
+                _logger.LogError(se, se.Message);
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Save new users inside the database
+        /// </summary>
+        /// <returns>Boolean</returns>
+        // POST api/users/validatecaptcha
+        [HttpPost("validatecaptcha")]
+        public async Task<ApiResponse> ValidateCaptcha([FromBody] string token)
+        {
+            try
+            {
+                var entity = await _services.ValidateCaptcha(token);
+                return new ApiResponse(entity);
+            }
+            catch (ServiceException se)
+            {
+
+                _logger.LogError(se, se.Message);
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                throw;
+            }
+        }
+
     }
 }

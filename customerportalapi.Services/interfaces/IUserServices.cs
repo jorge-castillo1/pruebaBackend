@@ -41,5 +41,10 @@ namespace customerportalapi.Services.Interfaces
 
         Task<Profile> GetUserByInvitationTokenAsync(string receivedToken);
 
+        Task<bool> SaveNewUser(NewUser newUser);
+
+        Task<bool> ValidateCaptcha(string token);
+
+
     }
 }

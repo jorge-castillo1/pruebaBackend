@@ -29,6 +29,7 @@ namespace customerportalapi.Services.Test
         private Mock<IStoreRepository> _storeRepository;
         private Mock<IUnitLocationRepository> _unitLocationRepository;
         private Mock<IFeatureRepository> _featureRepository;
+        private Mock<INewUserRepository> _newUserRepository;
 
 
 
@@ -50,6 +51,7 @@ namespace customerportalapi.Services.Test
             _storeRepository = StoreRepositoryMock.StoreRepository();
             _unitLocationRepository = UnitLocationRepositoryMock.UnitLocationRepository();
             _featureRepository = FeatureRepositoryMock.FeatureRepository();
+            _newUserRepository = NewUserRepositoryMock.ValidNewUserRepository();
 
         }
 
@@ -77,7 +79,8 @@ namespace customerportalapi.Services.Test
                 _opportunityRepository.Object,
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
-                _featureRepository.Object
+                _featureRepository.Object,
+                _newUserRepository.Object
             );
             await service.GetProfileAsync(username);
             //Assert
@@ -105,7 +108,8 @@ namespace customerportalapi.Services.Test
                 _opportunityRepository.Object,
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
-                _featureRepository.Object
+                _featureRepository.Object,
+                _newUserRepository.Object
                 );
             Profile usuario = await service.GetProfileAsync(username);
 
@@ -141,7 +145,8 @@ namespace customerportalapi.Services.Test
                 _opportunityRepository.Object,
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
-                _featureRepository.Object
+                _featureRepository.Object,
+                _newUserRepository.Object
                 );
             await service.UpdateProfileAsync(profile);
 
@@ -178,7 +183,8 @@ namespace customerportalapi.Services.Test
                 _opportunityRepository.Object,
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
-                _featureRepository.Object
+                _featureRepository.Object,
+                _newUserRepository.Object
                 );
             Profile result = await service.UpdateProfileAsync(profile);
 
@@ -215,7 +221,8 @@ namespace customerportalapi.Services.Test
                 _opportunityRepository.Object,
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
-                _featureRepository.Object
+                _featureRepository.Object,
+                _newUserRepository.Object
                 );
             Profile result = await service.UpdateProfileAsync(profile);
 
@@ -251,7 +258,8 @@ namespace customerportalapi.Services.Test
                 _opportunityRepository.Object,
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
-                _featureRepository.Object
+                _featureRepository.Object,
+                _newUserRepository.Object
                 );
             Profile result = await service.UpdateProfileAsync(profile);
 
@@ -296,7 +304,8 @@ namespace customerportalapi.Services.Test
                 _opportunityRepository.Object,
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
-                _featureRepository.Object
+                _featureRepository.Object,
+                _newUserRepository.Object
                 );
             await service.InviteUserAsync(invitation);
 
@@ -330,7 +339,8 @@ namespace customerportalapi.Services.Test
                 _opportunityRepository.Object,
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
-                _featureRepository.Object
+                _featureRepository.Object,
+                _newUserRepository.Object
                 );
             await service.InviteUserAsync(invitation);
         }
@@ -363,7 +373,8 @@ namespace customerportalapi.Services.Test
                 _opportunityRepository.Object,
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
-                _featureRepository.Object
+                _featureRepository.Object,
+                _newUserRepository.Object
                 );
             bool result = await service.InviteUserAsync(invitation);
 
@@ -402,7 +413,8 @@ namespace customerportalapi.Services.Test
                 _opportunityRepository.Object,
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
-                _featureRepository.Object
+                _featureRepository.Object,
+                _newUserRepository.Object
                 );
             bool result = await service.InviteUserAsync(invitation);
 
@@ -438,7 +450,8 @@ namespace customerportalapi.Services.Test
                 _opportunityRepository.Object,
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
-                _featureRepository.Object
+                _featureRepository.Object,
+                _newUserRepository.Object
                 );
             bool result = await service.InviteUserAsync(invitation);
 
@@ -477,7 +490,8 @@ namespace customerportalapi.Services.Test
                 _opportunityRepository.Object,
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
-                _featureRepository.Object
+                _featureRepository.Object,
+                _newUserRepository.Object
                 );
             bool result = await service.InviteUserAsync(invitation);
 
@@ -516,7 +530,8 @@ namespace customerportalapi.Services.Test
                 _opportunityRepository.Object,
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
-                _featureRepository.Object
+                _featureRepository.Object,
+                _newUserRepository.Object
                 );
             bool result = await service.InviteUserAsync(invitation);
 
@@ -555,7 +570,8 @@ namespace customerportalapi.Services.Test
                 _opportunityRepository.Object,
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
-                _featureRepository.Object
+                _featureRepository.Object,
+                _newUserRepository.Object
                 );
             bool result = await service.InviteUserAsync(invitation);
 
@@ -589,7 +605,8 @@ namespace customerportalapi.Services.Test
                 _opportunityRepository.Object,
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
-                _featureRepository.Object
+                _featureRepository.Object,
+                _newUserRepository.Object
                 );
             await service.ConfirmUserAsync(invitationToken);
         }
@@ -617,7 +634,8 @@ namespace customerportalapi.Services.Test
                 _opportunityRepository.Object,
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
-                _featureRepository.Object
+                _featureRepository.Object,
+                _newUserRepository.Object
                 );
             Token tokenResult = await service.ConfirmUserAsync(invitationToken);
 
@@ -648,7 +666,8 @@ namespace customerportalapi.Services.Test
                 _opportunityRepository.Object,
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
-                _featureRepository.Object
+                _featureRepository.Object,
+                _newUserRepository.Object
                 );
             Token tokenResult = await service.ConfirmUserAsync(invitationToken);
 
@@ -690,7 +709,8 @@ namespace customerportalapi.Services.Test
                 _opportunityRepository.Object,
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
-                _featureRepository.Object
+                _featureRepository.Object,
+                _newUserRepository.Object
                 );
             await service.UnInviteUserAsync(value);
 
@@ -726,7 +746,8 @@ namespace customerportalapi.Services.Test
                 _opportunityRepository.Object,
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
-                _featureRepository.Object
+                _featureRepository.Object,
+                _newUserRepository.Object
                 );
             await service.UnInviteUserAsync(value);
         }
@@ -759,7 +780,8 @@ namespace customerportalapi.Services.Test
                 _opportunityRepository.Object,
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
-                _featureRepository.Object
+                _featureRepository.Object,
+                _newUserRepository.Object
                 );
             bool result = await service.UnInviteUserAsync(value);
 
@@ -798,7 +820,8 @@ namespace customerportalapi.Services.Test
                 _opportunityRepository.Object,
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
-                _featureRepository.Object
+                _featureRepository.Object,
+                _newUserRepository.Object
                 );
             bool result = await service.UnInviteUserAsync(value);
 
