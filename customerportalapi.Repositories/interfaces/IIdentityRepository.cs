@@ -22,5 +22,6 @@ namespace customerportalapi.Repositories.interfaces
 
         Task<Token> RefreshToken(string token);
         Task<bool> Logout(string token);
+
     }
 }

@@ -50,6 +50,8 @@
         "DocumentsAPI": "api/documents/",
         "LanguagesAPI": "crmapi/Languages/",
         "GATEWAYSIGNATUREURL": "https://localhost:44329/",
+        "GOOGLECAPTCHASERVICEURL": "https://www.google.com/recaptcha/api/siteverify",
+        "GOOGLECAPTCHASERVICESECRET": "6Lccnp8dAAAAAGAGGPOyRCi8J-_8mBFGsqPLDwt7",
         "CustomerPortal_ApiKey": "F56A2E61-6D3C-4C3F-B1B5-16C335EADA96",
         "BlobAPI": "api/blob/",
         "StoresAPI": "crmapi/Sites/"
