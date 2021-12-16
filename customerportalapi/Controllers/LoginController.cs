@@ -105,30 +105,5 @@ namespace customerportalapi.Controllers
                 throw;
             }
         }
-
-        /// <summary>
-        /// Authenticate user against authenticator system
-        /// </summary>
-        /// <param name="value">Login credentials</param>
-        /// <returns>Access Token if succesfully logged</returns>
-        // POST api/login
-        [HttpPost]
-        public async Task<ApiResponse> PostNewUser([FromBody] Login value)
-        {
-            try
-            {
-                var entity = await _service.GetToken(value);
-                return new ApiResponse(entity);
-            }
-            catch (ServiceException se)
-            {
-                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex.ToString());
-                throw;
-            }
-        }
     }
 }
