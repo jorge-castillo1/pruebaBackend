@@ -17,7 +17,7 @@ namespace customerportalapi.Entities
         public string Email { get; set; }
 
         [BsonElement("phone")]
-        public int Phone { get; set; }
+        public string Phone { get; set; }
 
         [BsonElement("date")]
         public BsonDateTime Day { get; set; }
