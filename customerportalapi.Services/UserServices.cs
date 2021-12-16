@@ -1334,7 +1334,7 @@ namespace customerportalapi.Services
 
                         Email message = new Email();
                         message.To.Add(mailTo);
-                        if (_config["Environment"] == nameof(EnvironmentTypes.DEV))
+                        if (_config["Environment"] == nameof(EnvironmentTypes.DEV) || _config["Environment"] == nameof(EnvironmentTypes.PRE))
                         {
                             message.Cc.Add(_config["MailIT"]);
                         }
