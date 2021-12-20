@@ -172,7 +172,7 @@ namespace customerportalapi
             services.AddScoped<IGoogleCaptchaRepository, GoogleCaptchaRepository>();
 
 
-        //Register Business Services
+            //Register Business Services
             services.AddTransient<IUserServices, UserServices>();
             services.AddTransient<ISiteServices, SiteServices>();
             services.AddTransient<IWebTemplateServices, WebTemplateServices>();
@@ -266,31 +266,65 @@ namespace customerportalapi
                 AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip,
                 //Credentials = GetCredentials()
             });
-            services.AddHttpClient("httpClientPayment", c =>
+            var entorno = Configuration["Environment"];
+            if (entorno.Equals("PRE"))
             {
-                c.BaseAddress = new Uri(Configuration["GatewayPaymentUrl"]);
-                c.Timeout = new TimeSpan(0, 2, 0);  //2 minutes
-                c.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/x-www-form-urlencoded"));
-                c.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue
+                services.AddHttpClient("httpClientPayment", c =>
                 {
-                    NoCache = true,
-                    NoStore = true,
-                    MaxAge = new TimeSpan(0),
-                    MustRevalidate = true
-                };
-                var a = Configuration["PaymentCredentials:User"];
-                var b = Configuration["PaymentCredentials:Password"];
+                    c.BaseAddress = new Uri(Configuration["GatewayPaymentUrl"]);
+                    c.Timeout = new TimeSpan(0, 2, 0);  //2 minutes
+                    c.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/x-www-form-urlencoded"));
+                    c.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue
+                    {
+                        NoCache = true,
+                        NoStore = true,
+                        MaxAge = new TimeSpan(0),
+                        MustRevalidate = true
+                    };
+                    var a = Configuration["PaymentCredentials:User"];
+                    var b = Configuration["PaymentCredentials:Password"];
 
-                c.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
-                    "Basic",
-                    Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes(
-                        $"{Configuration["PaymentCredentials:User"]}:{Configuration["PaymentCredentials:Password"]}"))
-                );
-            }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+                    c.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                        "Basic",
+                        Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes(
+                            $"{Configuration["PaymentCredentials:User"]}:{Configuration["PaymentCredentials:Password"]}"))
+                    );
+                }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+                {
+                    AllowAutoRedirect = false,
+                    AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip,
+                    SslProtocols = System.Security.Authentication.SslProtocols.None
+                });
+            }
+            else
             {
-                AllowAutoRedirect = false,
-                AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip,
-            });
+                services.AddHttpClient("httpClientPayment", c =>
+                {
+                    c.BaseAddress = new Uri(Configuration["GatewayPaymentUrl"]);
+                    c.Timeout = new TimeSpan(0, 2, 0);  //2 minutes
+                    c.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/x-www-form-urlencoded"));
+                    c.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue
+                    {
+                        NoCache = true,
+                        NoStore = true,
+                        MaxAge = new TimeSpan(0),
+                        MustRevalidate = true
+                    };
+                    var a = Configuration["PaymentCredentials:User"];
+                    var b = Configuration["PaymentCredentials:Password"];
+
+                    c.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                        "Basic",
+                        Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes(
+                            $"{Configuration["PaymentCredentials:User"]}:{Configuration["PaymentCredentials:Password"]}"))
+                    );
+                }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+                {
+                    AllowAutoRedirect = false,
+                    AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip,
+                });
+
+            }
 
             services.AddHttpClient("httpClientCaptcha", c =>
             {
