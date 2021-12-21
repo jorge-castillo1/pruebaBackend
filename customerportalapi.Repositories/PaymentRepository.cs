@@ -186,7 +186,6 @@ namespace customerportalapi.Repositories
         public async Task<string> UpdateCardLoad(PaymentMethodUpdateCardData updateCardData)
         {
             string entity = "";
-
             string phoneNumber = updateCardData.PhonePrefix + "|" + updateCardData.PhoneNumber;
             var httpClient = _clientFactory.CreateClient("httpClientPayment");
             httpClient.BaseAddress = new Uri(_configuration["GatewayPaymentUrl"] + _configuration["UpdateCardEndpoint"]);
@@ -208,11 +207,19 @@ namespace customerportalapi.Repositories
             keyValues.Add(new KeyValuePair<string, string>("HPP_BILLING_COUNTRY", updateCardData.CountryISOCodeNumeric));
             HttpContent content = new FormUrlEncodedContent(keyValues);
 
+            _logger.LogInformation($"PaymentRepository.UpdateCardLoad() URL POST: {httpClient.BaseAddress}.");
+            _logger.LogInformation($"PaymentRepository.UpdateCardLoad() Request Body Content: {Newtonsoft.Json.JsonConvert.SerializeObject(keyValues)}.");
+
             var response = await httpClient.PostAsync(httpClient.BaseAddress, content);
+            
+            _logger.LogInformation($"PaymentRepository.UpdateCardLoad() Request Body Content: {Newtonsoft.Json.JsonConvert.SerializeObject(response)}.");
+
             response.EnsureSuccessStatusCode();
             if (!response.IsSuccessStatusCode) return entity;
 
             var value = await response.Content.ReadAsStringAsync();
+            _logger.LogInformation($"PaymentRepository.UpdateCardLoad() Request Body Content: {value}.");
+
             return value;
         }
 
