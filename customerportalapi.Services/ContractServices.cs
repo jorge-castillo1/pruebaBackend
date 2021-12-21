@@ -238,10 +238,6 @@ namespace customerportalapi.Services
             };
 
             List<FullContract> contracts = await _contractRepository.GetContractsWithoutUrlAsync(limit);
-
-            response.TotalContracts = contracts.Count;
-            _logger.LogInformation($"ContractServices.UpdateContractUrlAsync. Total of contracts without URL: {response.TotalContracts }.");
-
             if (contracts != null && limit >= 1)
             {
                 if (skip.HasValue && limit.HasValue)
@@ -258,35 +254,25 @@ namespace customerportalapi.Services
 
                 foreach (var fullcontract in contracts)
                 {
-                    ContractUrlResponse contractURL = new ContractUrlResponse();
+                    ContractUrlResponse contractURLresponse = new ContractUrlResponse();
                     var newContract = MapperFullContract(fullcontract);
 
-                    contractURL.StoreName = RemoveDiacritics(fullcontract.iav_storeid.StoreName);
-                    contractURL.CustomerType = fullcontract.iav_customerid.blue_customertypestring;
-                    contractURL.Dni = fullcontract.iav_customerid.iav_dni;
-                    contractURL.ContractId = fullcontract.iav_contractid;
-                    contractURL.SMContractCode = fullcontract.iav_smcontractcode;
-                    contractURL.Environment = _configuration["Environment"].ToLower();
+                    contractURLresponse.ContractNumber = fullcontract.iav_name;
+                    contractURLresponse.StoreName = RemoveDiacritics(fullcontract.iav_storeid.StoreName);
+                    contractURLresponse.CustomerType = fullcontract.iav_customerid.blue_customertypestring;
+                    contractURLresponse.Dni = fullcontract.iav_customerid.iav_dni;
+                    contractURLresponse.ContractId = fullcontract.iav_contractid;
+                    contractURLresponse.SMContractCode = fullcontract.iav_smcontractcode;
+                    contractURLresponse.DocumentRepositoryUrl = fullcontract.iav_storeid.DocumentRepositoryUrl;
+                    contractURLresponse.Environment = _configuration["Environment"].ToLower();
 
-                    if (!string.IsNullOrEmpty(contractURL.StoreName) && !string.IsNullOrEmpty(contractURL.CustomerType) && !string.IsNullOrEmpty(contractURL.Dni))
+                    if (!string.IsNullOrEmpty(contractURLresponse.DocumentRepositoryUrl) && !string.IsNullOrEmpty(contractURLresponse.CustomerType) && !string.IsNullOrEmpty(contractURLresponse.Dni))
                     {
-                        switch (contractURL.Environment)
-                        {
-                            case "pro":
-                                newContract.ContractUrl = $@"https://bluespaceselfstorage.sharepoint.com/sites/stores/{contractURL.StoreName}/Documentos compartidos/{contractURL.CustomerType}/{contractURL.Dni}";
-                                break;
-                            case "pre":
-                            case "dev":
-                            default:
-                                newContract.ContractUrl = $@"https://bluespaceselfstorage.sharepoint.com/sites/Stores-PRE/{contractURL.StoreName}/Documentos compartidos/{contractURL.CustomerType}/{contractURL.Dni}";
-                                break;
-
-                        }
-                        contractURL.ContractUrl = newContract.ContractUrl;
+                        contractURLresponse.ContractUrl = newContract.ContractUrl = $@"{contractURLresponse.DocumentRepositoryUrl}/Documentos compartidos/{contractURLresponse.CustomerType}/{contractURLresponse.Dni}";
 
                         try
                         {
-                            response.ContractsUrl.Add(contractURL);
+                            response.ContractsUrl.Add(contractURLresponse);
                             await _contractRepository.UpdateContractAsync(newContract);
                         }
                         catch (Exception ex)
@@ -306,7 +292,7 @@ namespace customerportalapi.Services
                 text.Normalize(NormalizationForm.FormD)
                 .Where(ch => CharUnicodeInfo.GetUnicodeCategory(ch) !=
                                               UnicodeCategory.NonSpacingMark)
-              ).Normalize(NormalizationForm.FormC).Replace(" ","").ToLower();
+              ).Normalize(NormalizationForm.FormC).Replace(" ", "").ToLower();
         }
 
         private Contract MapperFullContract(FullContract contract)

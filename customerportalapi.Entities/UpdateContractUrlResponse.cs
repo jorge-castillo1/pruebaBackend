@@ -10,7 +10,6 @@ namespace customerportalapi.Entities
         public int NumContracts { get; set; }
 
         public List<ContractUrlResponse> ContractsUrl { get; set; }
-        public int TotalContracts { get; set; }
         public string Error { get; set; }
     }
 
@@ -20,8 +19,11 @@ namespace customerportalapi.Entities
         public string Dni { get; set; }
         public string CustomerType { get; set; }
         public string ContractId { get; set; }
+        public string ContractNumber { get; set; }
         public string SMContractCode { get; set; }
         public string ContractUrl { get; set; }
+        public string DocumentRepositoryUrl { get; set; }
         public string Environment { get; set; }
+
     }
 }
