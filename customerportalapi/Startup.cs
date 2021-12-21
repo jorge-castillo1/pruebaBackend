@@ -267,64 +267,32 @@ namespace customerportalapi
                 //Credentials = GetCredentials()
             });
             var entorno = Configuration["Environment"];
-            if (entorno.Equals("PRE"))
+
+            services.AddHttpClient("httpClientPayment", c =>
             {
-                services.AddHttpClient("httpClientPayment", c =>
-                {
-                    c.BaseAddress = new Uri(Configuration["GatewayPaymentUrl"]);
-                    c.Timeout = new TimeSpan(0, 2, 0);  //2 minutes
+                c.BaseAddress = new Uri(Configuration["GatewayPaymentUrl"]);
+                c.Timeout = new TimeSpan(0, 2, 0);  //2 minutes
                     c.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/x-www-form-urlencoded"));
-                    c.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue
-                    {
-                        NoCache = true,
-                        NoStore = true,
-                        MaxAge = new TimeSpan(0),
-                        MustRevalidate = true
-                    };
-                    var a = Configuration["PaymentCredentials:User"];
-                    var b = Configuration["PaymentCredentials:Password"];
-
-                    c.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
-                        "Basic",
-                        Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes(
-                            $"{Configuration["PaymentCredentials:User"]}:{Configuration["PaymentCredentials:Password"]}"))
-                    );
-                }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+                c.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue
                 {
-                    AllowAutoRedirect = false,
-                    AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip,
-                    SslProtocols = System.Security.Authentication.SslProtocols.None
-                });
-            }
-            else
+                    NoCache = true,
+                    NoStore = true,
+                    MaxAge = new TimeSpan(0),
+                    MustRevalidate = true
+                };
+                var a = Configuration["PaymentCredentials:User"];
+                var b = Configuration["PaymentCredentials:Password"];
+
+                c.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                    "Basic",
+                    Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes(
+                        $"{Configuration["PaymentCredentials:User"]}:{Configuration["PaymentCredentials:Password"]}"))
+                );
+            }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
             {
-                services.AddHttpClient("httpClientPayment", c =>
-                {
-                    c.BaseAddress = new Uri(Configuration["GatewayPaymentUrl"]);
-                    c.Timeout = new TimeSpan(0, 2, 0);  //2 minutes
-                    c.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/x-www-form-urlencoded"));
-                    c.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue
-                    {
-                        NoCache = true,
-                        NoStore = true,
-                        MaxAge = new TimeSpan(0),
-                        MustRevalidate = true
-                    };
-                    var a = Configuration["PaymentCredentials:User"];
-                    var b = Configuration["PaymentCredentials:Password"];
-
-                    c.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
-                        "Basic",
-                        Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes(
-                            $"{Configuration["PaymentCredentials:User"]}:{Configuration["PaymentCredentials:Password"]}"))
-                    );
-                }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
-                {
-                    AllowAutoRedirect = false,
-                    AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip,
-                });
-
-            }
+                AllowAutoRedirect = false,
+                AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip,
+            });
 
             services.AddHttpClient("httpClientCaptcha", c =>
             {
