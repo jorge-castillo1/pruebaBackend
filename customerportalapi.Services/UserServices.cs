@@ -1312,17 +1312,21 @@ namespace customerportalapi.Services
 
         public async Task<bool> SaveNewUser(NewUser newUser)
         {
-            AccountProfile entity = await _profileRepository.GetContactByMail(newUser.Email);
-            bool result = false;
-            bool isNewUser = false;
-            DateTime date = DateTime.Now;
-            newUser.Day = date;
-            if (entity != null)
-            {
-                List<Contract> contracts = await _contractRepository.GetContractsAsync(entity.DocumentNumber, entity.CustomerType);
+            //Checks in CRM if there's an active contract for the DocumentNumber
 
-                if (contracts != null)
-                {
+            //AccountProfile entity = await _profileRepository.GetContactByMail(newUser.Email);
+            //bool result = false;
+            bool isNewUser = false;
+            //DateTime date = DateTime.Now;
+            //newUser.Day = date;
+            //if (entity != null)
+            //{
+
+
+                //List<Contract> contracts = await _contractRepository.GetContractsAsync(entity.DocumentNumber, entity.CustomerType);
+
+                //if (contracts != null)
+                //{
                     isNewUser = _newUserRepository.SaveNewUser(newUser).Result;
 
                     if (isNewUser)
@@ -1346,11 +1350,11 @@ namespace customerportalapi.Services
 
                     }
 
-                    result = true;
-                }
-            }
+                    //result = true;
+            //    }
+            //}
 
-            return result && isNewUser;
+            return isNewUser;
         }
 
         public async Task<bool> ValidateCaptcha(string token)
