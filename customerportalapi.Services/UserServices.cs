@@ -1169,10 +1169,17 @@ namespace customerportalapi.Services
                         // Unit
 
                         //Access Code eliminado temporalmente de Mandatory Data
-                        invitationData.UnitPassword.SetValueAndState(ValidationMessages.NoInformationAvailable, StateEnum.Warning);
-                        if (!string.IsNullOrEmpty(contractSM.Password))
-                            invitationData.UnitPassword.SetValueAndState(contractSM.Password, StateEnum.Checked);
-
+                        if (value.Language == "French")
+                        {
+                            invitationData.UnitPassword.SetValueAndState(ValidationMessages.NoInformationAvailable_FR, StateEnum.Warning);
+                        }
+                        else
+                        {
+                            invitationData.UnitPassword.SetValueAndState(ValidationMessages.NoInformationAvailable, StateEnum.Warning);
+                        }
+                            if (!string.IsNullOrEmpty(contractSM.Password))
+                                invitationData.UnitPassword.SetValueAndState(contractSM.Password, StateEnum.Checked);
+                        
                         if (contract.Unit != null)
                         {
                             invitationData.UnitName.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
