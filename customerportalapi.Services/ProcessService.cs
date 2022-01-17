@@ -8,6 +8,7 @@ using customerportalapi.Entities;
 using customerportalapi.Entities.enums;
 using customerportalapi.Services.Exceptions;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace customerportalapi.Services
 {
@@ -16,11 +17,14 @@ namespace customerportalapi.Services
         private readonly IProcessRepository _processRepository;
         private readonly ISignatureRepository _signatureRepository;
         private readonly IPaymentRepository _paymentRepository;
-        public ProcessService(IProcessRepository processRepository, ISignatureRepository signatureRepository, IPaymentRepository paymentRepository)
+        private readonly ILogger<ProcessService> _logger;
+
+        public ProcessService(IProcessRepository processRepository, ISignatureRepository signatureRepository, IPaymentRepository paymentRepository, ILogger<ProcessService> logger)
         {
             _processRepository = processRepository;
             _signatureRepository = signatureRepository;
             _paymentRepository = paymentRepository;
+            _logger = logger;
         }
 
         public List<Process> GetLastProcesses(string user, string smContractCode, int? processtype)
@@ -97,7 +101,10 @@ namespace customerportalapi.Services
         public Process UpdateSignatureProcess(SignatureStatus value)
         {
             if (value.Status != "document_completed" && value.Status != "document_canceled" && value.Status != "audit_trail_completed")
+            {
+                _logger.LogError($"ProcessService.UpdateSignatureProcess(). Document status not valid (valid: document_completed, document_canceled or audit_trail_completed).{Environment.NewLine} value: {Newtonsoft.Json.JsonConvert.SerializeObject(value)}.");
                 throw new ServiceException("Document status not valid", HttpStatusCode.BadRequest);
+            }
 
             ProcessSearchFilter filter = new ProcessSearchFilter
             {
@@ -127,7 +134,10 @@ namespace customerportalapi.Services
             if (processCompleted) process.ProcessStatus = (int)ProcessStatuses.Accepted;
             else if (processCanceled) process.ProcessStatus = (int)ProcessStatuses.Canceled;
 
+            _logger.LogInformation($"ProcessService.UpdateSignatureProcess(). Update database repository. process: {Newtonsoft.Json.JsonConvert.SerializeObject(process)}.");
             _processRepository.Update(process);
+
+            _logger.LogInformation($"ProcessService.UpdateSignatureProcess(). return process: {Newtonsoft.Json.JsonConvert.SerializeObject(process)}.");
 
             return process;
         }

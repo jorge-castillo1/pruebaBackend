@@ -100,7 +100,7 @@ namespace customerportalapi.Repositories.Test
 
             //Act
             ContractRepository repository = new ContractRepository(_configurations, _clientFactory);
-            List<FullContract> result = repository.GetContractsWithoutUrlAsync(50).Result;
+            List<FullContract> result = repository.GetFullContractsWithoutUrlAsync(50).Result;
 
             //Assert
             Assert.IsNotNull(result);            

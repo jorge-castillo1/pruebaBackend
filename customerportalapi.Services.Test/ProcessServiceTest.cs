@@ -3,6 +3,7 @@ using customerportalapi.Entities.enums;
 using customerportalapi.Repositories.interfaces;
 using customerportalapi.Services.Exceptions;
 using customerportalapi.Services.Test.FakeData;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
@@ -15,9 +16,10 @@ namespace customerportalapi.Services.Test
     [TestClass]
     public class ProcessServiceTest
     {
-        private Mock<IProcessRepository> _processRepository;
-        private Mock<ISignatureRepository> _signatureRepository;
-        private Mock<IPaymentRepository> _paymentRepository;
+        Mock<IProcessRepository> _processRepository;
+        Mock<ISignatureRepository> _signatureRepository;
+        Mock<IPaymentRepository> _paymentRepository;
+        Mock<ILogger<ProcessService>> _logger;
 
         [TestInitialize]
         public void Setup()
@@ -25,6 +27,7 @@ namespace customerportalapi.Services.Test
             _processRepository = ProcessRepositoryMock.ProcessRepository();
             _signatureRepository = SignatureRepositoryMock.SignatureRepository();
             _paymentRepository = PaymentRepositoryMock.PaymentRepository();
+            _logger = new Mock<ILogger<ProcessService>>();
         }
 
         [TestMethod]
@@ -36,7 +39,7 @@ namespace customerportalapi.Services.Test
             int processtype = 1;
 
             _processRepository = ProcessRepositoryMock.MoreThanOneResultProcessRepository();
-            ProcessService service = new ProcessService(_processRepository.Object, _signatureRepository.Object, _paymentRepository.Object);
+            ProcessService service = new ProcessService(_processRepository.Object, _signatureRepository.Object, _paymentRepository.Object, _logger.Object);
             var result = service.GetLastProcesses(user, contractnumber, processtype);
 
             Assert.IsNotNull(result);
@@ -54,7 +57,7 @@ namespace customerportalapi.Services.Test
             value.Status = "document_canceled";
 
             _processRepository = ProcessRepositoryMock.OneResultProcessRepository();
-            ProcessService service = new ProcessService(_processRepository.Object, _signatureRepository.Object, _paymentRepository.Object);
+            ProcessService service = new ProcessService(_processRepository.Object, _signatureRepository.Object, _paymentRepository.Object, _logger.Object);
             var result = service.UpdateSignatureProcess(value);
 
             Assert.IsNotNull(result);
@@ -72,7 +75,7 @@ namespace customerportalapi.Services.Test
             value.Status = "document_completed";
 
             _processRepository = ProcessRepositoryMock.NoResultsProcessRepository();
-            ProcessService service = new ProcessService(_processRepository.Object, _signatureRepository.Object, _paymentRepository.Object);
+            ProcessService service = new ProcessService(_processRepository.Object, _signatureRepository.Object, _paymentRepository.Object, _logger.Object);
             Process process = service.UpdateSignatureProcess(value);
             Assert.IsNull(process);
         }
@@ -88,7 +91,7 @@ namespace customerportalapi.Services.Test
             value.Status = "document_completed";
 
             _processRepository = ProcessRepositoryMock.MoreThanOneResultProcessRepository();
-            ProcessService service = new ProcessService(_processRepository.Object, _signatureRepository.Object, _paymentRepository.Object);
+            ProcessService service = new ProcessService(_processRepository.Object, _signatureRepository.Object, _paymentRepository.Object, _logger.Object);
             service.UpdateSignatureProcess(value);
         }
 
@@ -103,7 +106,7 @@ namespace customerportalapi.Services.Test
             value.Status = "fake_document_state";
 
             _processRepository = ProcessRepositoryMock.OneResultProcessRepository();
-            ProcessService service = new ProcessService(_processRepository.Object, _signatureRepository.Object, _paymentRepository.Object);
+            ProcessService service = new ProcessService(_processRepository.Object, _signatureRepository.Object, _paymentRepository.Object, _logger.Object);
             service.UpdateSignatureProcess(value);
         }
     }
