@@ -30,7 +30,7 @@ namespace customerportalapi.Services.Test
         private Mock<IUnitLocationRepository> _unitLocationRepository;
         private Mock<IFeatureRepository> _featureRepository;
         private Mock<INewUserRepository> _newUserRepository;
-
+        private Mock<IGoogleCaptchaRepository> _googleCaptchaRepository;
 
 
         [TestInitialize]
@@ -52,7 +52,7 @@ namespace customerportalapi.Services.Test
             _unitLocationRepository = UnitLocationRepositoryMock.UnitLocationRepository();
             _featureRepository = FeatureRepositoryMock.FeatureRepository();
             _newUserRepository = NewUserRepositoryMock.ValidNewUserRepository();
-
+            _googleCaptchaRepository = GoogleCaptchaRepositoryMock.GoogleCaptchaRepository();
         }
 
 
@@ -80,7 +80,8 @@ namespace customerportalapi.Services.Test
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
                 _featureRepository.Object,
-                _newUserRepository.Object
+                _newUserRepository.Object,
+                _googleCaptchaRepository.Object
             );
             await service.GetProfileAsync(username);
             //Assert
@@ -109,7 +110,8 @@ namespace customerportalapi.Services.Test
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
                 _featureRepository.Object,
-                _newUserRepository.Object
+                _newUserRepository.Object,
+                _googleCaptchaRepository.Object
                 );
             Profile usuario = await service.GetProfileAsync(username);
 
@@ -146,7 +148,8 @@ namespace customerportalapi.Services.Test
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
                 _featureRepository.Object,
-                _newUserRepository.Object
+                _newUserRepository.Object,
+                _googleCaptchaRepository.Object
                 );
             await service.UpdateProfileAsync(profile);
 
@@ -184,7 +187,8 @@ namespace customerportalapi.Services.Test
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
                 _featureRepository.Object,
-                _newUserRepository.Object
+                _newUserRepository.Object,
+                _googleCaptchaRepository.Object
                 );
             Profile result = await service.UpdateProfileAsync(profile);
 
@@ -222,7 +226,8 @@ namespace customerportalapi.Services.Test
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
                 _featureRepository.Object,
-                _newUserRepository.Object
+                _newUserRepository.Object,
+                _googleCaptchaRepository.Object
                 );
             Profile result = await service.UpdateProfileAsync(profile);
 
@@ -259,7 +264,8 @@ namespace customerportalapi.Services.Test
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
                 _featureRepository.Object,
-                _newUserRepository.Object
+                _newUserRepository.Object,
+                _googleCaptchaRepository.Object
                 );
             Profile result = await service.UpdateProfileAsync(profile);
 
@@ -305,7 +311,8 @@ namespace customerportalapi.Services.Test
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
                 _featureRepository.Object,
-                _newUserRepository.Object
+                _newUserRepository.Object,
+                _googleCaptchaRepository.Object
                 );
             await service.InviteUserAsync(invitation);
 
@@ -340,7 +347,8 @@ namespace customerportalapi.Services.Test
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
                 _featureRepository.Object,
-                _newUserRepository.Object
+                _newUserRepository.Object,
+                _googleCaptchaRepository.Object
                 );
             await service.InviteUserAsync(invitation);
         }
@@ -374,7 +382,8 @@ namespace customerportalapi.Services.Test
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
                 _featureRepository.Object,
-                _newUserRepository.Object
+                _newUserRepository.Object,
+                _googleCaptchaRepository.Object
                 );
             bool result = await service.InviteUserAsync(invitation);
 
@@ -414,7 +423,8 @@ namespace customerportalapi.Services.Test
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
                 _featureRepository.Object,
-                _newUserRepository.Object
+                _newUserRepository.Object,
+                _googleCaptchaRepository.Object
                 );
             bool result = await service.InviteUserAsync(invitation);
 
@@ -451,7 +461,8 @@ namespace customerportalapi.Services.Test
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
                 _featureRepository.Object,
-                _newUserRepository.Object
+                _newUserRepository.Object,
+                _googleCaptchaRepository.Object
                 );
             bool result = await service.InviteUserAsync(invitation);
 
@@ -491,7 +502,8 @@ namespace customerportalapi.Services.Test
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
                 _featureRepository.Object,
-                _newUserRepository.Object
+                _newUserRepository.Object,
+                _googleCaptchaRepository.Object
                 );
             bool result = await service.InviteUserAsync(invitation);
 
@@ -531,7 +543,8 @@ namespace customerportalapi.Services.Test
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
                 _featureRepository.Object,
-                _newUserRepository.Object
+                _newUserRepository.Object,
+                _googleCaptchaRepository.Object
                 );
             bool result = await service.InviteUserAsync(invitation);
 
@@ -571,7 +584,8 @@ namespace customerportalapi.Services.Test
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
                 _featureRepository.Object,
-                _newUserRepository.Object
+                _newUserRepository.Object,
+                _googleCaptchaRepository.Object
                 );
             bool result = await service.InviteUserAsync(invitation);
 
@@ -606,7 +620,8 @@ namespace customerportalapi.Services.Test
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
                 _featureRepository.Object,
-                _newUserRepository.Object
+                _newUserRepository.Object,
+                _googleCaptchaRepository.Object
                 );
             await service.ConfirmUserAsync(invitationToken);
         }
@@ -635,7 +650,8 @@ namespace customerportalapi.Services.Test
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
                 _featureRepository.Object,
-                _newUserRepository.Object
+                _newUserRepository.Object,
+                _googleCaptchaRepository.Object
                 );
             Token tokenResult = await service.ConfirmUserAsync(invitationToken);
 
@@ -667,7 +683,8 @@ namespace customerportalapi.Services.Test
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
                 _featureRepository.Object,
-                _newUserRepository.Object
+                _newUserRepository.Object,
+                _googleCaptchaRepository.Object
                 );
             Token tokenResult = await service.ConfirmUserAsync(invitationToken);
 
@@ -710,7 +727,8 @@ namespace customerportalapi.Services.Test
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
                 _featureRepository.Object,
-                _newUserRepository.Object
+                _newUserRepository.Object,
+                _googleCaptchaRepository.Object
                 );
             await service.UnInviteUserAsync(value);
 
@@ -747,7 +765,8 @@ namespace customerportalapi.Services.Test
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
                 _featureRepository.Object,
-                _newUserRepository.Object
+                _newUserRepository.Object,
+                _googleCaptchaRepository.Object
                 );
             await service.UnInviteUserAsync(value);
         }
@@ -781,7 +800,8 @@ namespace customerportalapi.Services.Test
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
                 _featureRepository.Object,
-                _newUserRepository.Object
+                _newUserRepository.Object,
+                _googleCaptchaRepository.Object
                 );
             bool result = await service.UnInviteUserAsync(value);
 
@@ -821,7 +841,8 @@ namespace customerportalapi.Services.Test
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
                 _featureRepository.Object,
-                _newUserRepository.Object
+                _newUserRepository.Object,
+                _googleCaptchaRepository.Object
                 );
             bool result = await service.UnInviteUserAsync(value);
 

@@ -10,7 +10,7 @@ namespace customerportalapi.Repositories.interfaces
     {
         Task<List<DocumentMetadata>> Search(DocumentMetadataSearchFilter filter);
 
-        Task<string> SaveDocumentAsync(Document document);
+        Task<DocumentMetadata> SaveDocumentAsync(Document document);
 
         Task<string> SaveDocumentBlobStorageUnitImageContainerAsync(Document document);
 

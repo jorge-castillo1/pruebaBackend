@@ -42,18 +42,19 @@ namespace customerportalapi.Repositories
             return JsonConvert.DeserializeObject<List<DocumentMetadata>>(result.GetValue("result").ToString());
         }
 
-        public async Task<string> SaveDocumentAsync(Document document)
+        public async Task<DocumentMetadata> SaveDocumentAsync(Document document)
         {
             var httpClient = _clientFactory.CreateClient("httpClientDocument");
 
-            var url = new Uri(httpClient.BaseAddress + _configuration["DocumentsAPI"]);
+            var url = new Uri($"{httpClient.BaseAddress}{_configuration["DocumentsAPI"]}");
             var postContent = new StringContent(JsonConvert.SerializeObject(document), Encoding.UTF8, "application/json");
             var response = await httpClient.PostAsync(url, postContent);
             response.EnsureSuccessStatusCode();
             var content = await response.Content.ReadAsStringAsync();
             JObject result = JObject.Parse(content);
-            var documentId = result.GetValue("result").ToString();
-            return documentId;
+            //var documentId = result.GetValue("result").ToString();
+            //return documentId;
+            return JsonConvert.DeserializeObject<DocumentMetadata>(result.GetValue("result").ToString());
         }
 
         public async Task<string> SaveDocumentBlobStorageUnitImageContainerAsync(Document document)

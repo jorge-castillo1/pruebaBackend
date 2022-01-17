@@ -37,21 +37,28 @@ namespace customerportalapi.Controllers
         {
             try
             {
+                _logger.LogInformation($"EventsController.SignatureStatus(value). value: {JsonConvert.SerializeObject(value)}.");
+
                 Process process = _service.UpdateSignatureProcess(value);
+
+                _logger.LogInformation($"EventsController.SignatureStatus(value). UpdateSignatureProcess. Returned process: {JsonConvert.SerializeObject(process)}.");
 
                 if (process != null)
                 {
                     if (process.ProcessType == (int)ProcessTypes.PaymentMethodChangeBank && process.ProcessStatus == (int)ProcessStatuses.Accepted)
                     {
+                        _logger.LogInformation($"EventsController.SignatureStatus(value). ProcessType == PaymentMethodChangeBank && ProcessStatuses == Accepted: UpdatePaymentProcess(value).");
                         await _paymentService.UpdatePaymentProcess(value);
                     }
 
                     if (process.ProcessType == (int)ProcessTypes.PaymentMethodChangeCardSignature && process.ProcessStatus == (int)ProcessStatuses.Accepted)
                     {
+                        _logger.LogInformation($"EventsController.SignatureStatus(value). ProcessType == PaymentMethodChangeCardSignature && ProcessStatuses == Accepted: UpdatePaymentCardProcess(value, process).");
                         await _paymentService.UpdatePaymentCardProcess(value, process);
                     }
                 }
 
+                _logger.LogInformation($"EventsController.SignatureStatus(value). Return OkResult()");
                 return new OkResult();
             }
             catch (Exception ex)
@@ -60,7 +67,7 @@ namespace customerportalapi.Controllers
                 if (value != null)
                     obj = ", params:" + JsonConvert.SerializeObject(value);
 
-                _logger.LogError(ex, ex.Message + obj);
+                _logger.LogError(ex, $"EventsController.SignatureStatus(value). {ex.Message}.{Environment.NewLine}value: {obj}.");
                 throw;
             }
         }

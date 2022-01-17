@@ -51,7 +51,8 @@ namespace customerportalapi.Services
             IStoreRepository storeRepository,
             IUnitLocationRepository unitLocationRepository,
             IFeatureRepository featureRepository,
-            INewUserRepository newUserRepository
+            INewUserRepository newUserRepository,
+            IGoogleCaptchaRepository googleCaptchaRepository
             )
         {
             _userRepository = userRepository;
@@ -70,6 +71,7 @@ namespace customerportalapi.Services
             _unitLocationRepository = unitLocationRepository;
             _featureRepository = featureRepository;
             _newUserRepository = newUserRepository;
+            _googleCaptchaRepository = googleCaptchaRepository;
         }
 
 
@@ -1177,9 +1179,9 @@ namespace customerportalapi.Services
                         {
                             invitationData.UnitPassword.SetValueAndState(ValidationMessages.NoInformationAvailable, StateEnum.Warning);
                         }
-                            if (!string.IsNullOrEmpty(contractSM.Password))
-                                invitationData.UnitPassword.SetValueAndState(contractSM.Password, StateEnum.Checked);
-                        
+                        if (!string.IsNullOrEmpty(contractSM.Password))
+                            invitationData.UnitPassword.SetValueAndState(contractSM.Password, StateEnum.Checked);
+
                         if (contract.Unit != null)
                         {
                             invitationData.UnitName.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
@@ -1330,34 +1332,34 @@ namespace customerportalapi.Services
             //{
 
 
-                //List<Contract> contracts = await _contractRepository.GetContractsAsync(entity.DocumentNumber, entity.CustomerType);
+            //List<Contract> contracts = await _contractRepository.GetContractsAsync(entity.DocumentNumber, entity.CustomerType);
 
-                //if (contracts != null)
-                //{
-                    isNewUser = _newUserRepository.SaveNewUser(newUser).Result;
+            //if (contracts != null)
+            //{
+            isNewUser = _newUserRepository.SaveNewUser(newUser).Result;
 
-                    if (isNewUser)
-                    {
+            if (isNewUser)
+            {
 
-                        string mailTo = _config["MailWP"];
-                        if (string.IsNullOrEmpty(mailTo))
-                            throw new ServiceException("Store mail not found", HttpStatusCode.NotFound, FieldNames.Email, ValidationMessages.NotFound);
+                string mailTo = _config["MailWP"];
+                if (string.IsNullOrEmpty(mailTo))
+                    throw new ServiceException("Store mail not found", HttpStatusCode.NotFound, FieldNames.Email, ValidationMessages.NotFound);
 
-                        Email message = new Email();
-                        message.To.Add(mailTo);
-                        if (_config["Environment"] == nameof(EnvironmentTypes.DEV) || _config["Environment"] == nameof(EnvironmentTypes.PRE))
-                        {
-                            message.Cc.Add(_config["MailIT"]);
-                        }
-                        message.Subject = "Solicitud nuevo usuario web portal";
-                        message.Body = "Nueva petición de usuario Web Portal a dia: " + DateTime.Now +
-                        "<br><strong>Nombre</strong>: " + newUser.Name + ", con <strong>Email</strong>: " + newUser.Email + " y <strong>Teléfono de contacto</strong>: " + newUser.Phone;
+                Email message = new Email();
+                message.To.Add(mailTo);
+                if (_config["Environment"] == nameof(EnvironmentTypes.DEV) || _config["Environment"] == nameof(EnvironmentTypes.PRE))
+                {
+                    message.Cc.Add(_config["MailIT"]);
+                }
+                message.Subject = "Solicitud nuevo usuario web portal";
+                message.Body = "Nueva petición de usuario Web Portal a dia: " + DateTime.Now +
+                "<br><strong>Nombre</strong>: " + newUser.Name + ", con <strong>Email</strong>: " + newUser.Email + " y <strong>Teléfono de contacto</strong>: " + newUser.Phone;
 
-                        await _mailRepository.Send(message);
+                await _mailRepository.Send(message);
 
-                    }
+            }
 
-                    //result = true;
+            //result = true;
             //    }
             //}
 

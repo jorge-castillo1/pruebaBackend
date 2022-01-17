@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using customerportalapi.Entities.Mappers;
 
 namespace customerportalapi.Services
 {
@@ -138,6 +139,7 @@ namespace customerportalapi.Services
 
         public async Task<bool> UpdatePaymentProcess(SignatureStatus value)
         {
+            _logger.LogInformation($"PaymentServices.SignatureStatus(SignatureStatus). value:{JsonConvert.SerializeObject(value)}.");
             // Add Bank account to SM
             //
 
@@ -151,7 +153,7 @@ namespace customerportalapi.Services
             filter.Filters.SignatureId = value.SignatureId;
             List<SignatureProcess> signatures = await _signatureRepository.SearchSignaturesAsync(filter);
             if (signatures.Count != 1)
-                throw new ServiceException("Error searching signature for this process", HttpStatusCode.BadRequest, "SignatureId", "Not exist");
+                throw new ServiceException($"Error searching signature for this process. SignatureId:{value.SignatureId}.", HttpStatusCode.BadRequest, "SignatureId", "Not exist");
 
             ProcessedDocument processedpaymentdocument = null;
             var docIndex = 0;
@@ -172,16 +174,19 @@ namespace customerportalapi.Services
             // Send email to the store
             EmailTemplate template = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.UpdatePaymentMethod, LanguageTypes.en.ToString());
             string smContractCode = processedpaymentdocument.SmContractCode;
-            Contract contract = await _contractRepository.GetContractAsync(smContractCode);
+
+            //Contract contract = await _contractRepository.GetContractAsync(smContractCode);
+            FullContract fullcontract = (await _contractRepository.GetFullContractsBySMCodeAsync(smContractCode)).FirstOrDefault();
+            var contract = FullContractToContract.Mapper(fullcontract);
 
             List<Store> stores = await _storeRepository.GetStoresAsync();
             Store store = stores.Find(x => x.StoreCode.Contains(contract.StoreData.StoreCode));
             if (store.StoreId == null)
-                throw new ServiceException("Store not found", HttpStatusCode.BadRequest, "StoreId");
+                throw new ServiceException($"Store not found. StoreCode:{contract?.StoreData?.StoreCode}. StoreId.", HttpStatusCode.BadRequest, "StoreId");
 
             PaymentMethodCRM payMetCRM = await _paymentMethodRepository.GetPaymentMethodByBankAccount(store.StoreId.ToString());
             if (payMetCRM.SMId == null)
-                throw new ServiceException("Error payment method crm", HttpStatusCode.BadRequest, "SMId");
+                throw new ServiceException($"Error get payment method crm. StoreName:{store.StoreName}, StoreId:{store.StoreId}. SMId.", HttpStatusCode.BadRequest, "SMId");
 
             account.BankAccount = processedpaymentdocument.BankAccountOrderNumber;
             AccountProfile updateAccount = await _profileRepository.UpdateAccountAsync(account);
@@ -190,9 +195,9 @@ namespace customerportalapi.Services
             Contract updateContract = await _contractRepository.UpdateContractAsync(contract);
 
             if (updateAccount.SmCustomerId == null)
-                throw new ServiceException("Error updating account", HttpStatusCode.BadRequest, "SmCustomerId");
+                throw new ServiceException("Error updating account. SmCustomerId.", HttpStatusCode.BadRequest, "SmCustomerId");
 
-            _logger.LogInformation("Template StoreMail Information", template._id.ToString());
+            _logger.LogInformation($"PaymentServices.UpdatePaymentProcess(). Template StoreMail Information id:{template._id}.");
             if (template._id != null)
             {
                 Email message = new Email();
@@ -718,7 +723,9 @@ namespace customerportalapi.Services
 
             // Update contract
             string smContractCode = process.SmContractCode;
-            Contract contract = await _contractRepository.GetContractAsync(smContractCode);
+            //Contract contract = await _contractRepository.GetContractAsync(smContractCode);            
+            FullContract fullcontract = (await _contractRepository.GetFullContractsBySMCodeAsync(smContractCode)).FirstOrDefault();
+            var contract = FullContractToContract.Mapper(fullcontract);
 
             contract.PaymentMethodId = payMetCRM.PaymentMethodId;
             Contract updateContract = await _contractRepository.UpdateContractAsync(contract);
@@ -1497,7 +1504,7 @@ namespace customerportalapi.Services
                 throw new ServiceException("Error payment method crm", HttpStatusCode.BadRequest, FieldNames.SMId);
 
             List<PaymentMethods> availablePayMet = new List<PaymentMethods>();
-            
+
             foreach (PaymentMethods payMethod in payMet.PaymentMethods)
             {
                 string name = payMethod.Name;
