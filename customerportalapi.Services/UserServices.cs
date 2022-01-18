@@ -1101,6 +1101,10 @@ namespace customerportalapi.Services
                     if (contractSM != null && !string.IsNullOrEmpty(contractSM.Contractnumber))
                         invitationData.SMContract.SetValueAndState(contractSM.Contractnumber, StateEnum.Checked);
 
+                    //Leaving
+                    if (!string.IsNullOrEmpty(contractSM.Leaving))
+                        invitationData.Leaving.SetValueAndState(contractSM.Leaving.ToString(), StateEnum.Checked);
+
                     // only active contracts, if the contract has "terminated", the field "Leaving" have information.
                     if (contractSM != null && string.IsNullOrEmpty(contractSM.Leaving))
                     {
@@ -1118,11 +1122,7 @@ namespace customerportalapi.Services
                                 SiteCode = contract.StoreData.StoreCode,
                                 SizeCode = contract.Unit.UnitCategory
                             };
-                            List<UnitLocation> unitLocation = _unitLocationRepository.Find(filter);
-                            invitationData.UnitSizeCode.SetValueAndState(ValidationMessages.NoInformationAvailable, StateEnum.Warning);
-                            if (unitLocation.Count > 0 && !string.IsNullOrEmpty(unitLocation[0].Description))
-                                invitationData.UnitSizeCode.SetValueAndState(unitLocation[0].Description, StateEnum.Checked);
-
+                      
                             Store store = await _storeRepository.GetStoreAsync(contract.StoreData.StoreCode);
                             invitationData.StoreCode.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
                             if (store != null)
@@ -1164,6 +1164,11 @@ namespace customerportalapi.Services
                                 if (!string.IsNullOrEmpty(store.MailType))
                                     invitationData.SiteMailType.SetValueAndState(store.MailType, StateEnum.Checked);
                             }
+
+                            List<UnitLocation> unitLocation = _unitLocationRepository.Find(filter);
+                            invitationData.UnitSizeCode.SetValueAndState(ValidationMessages.NoInformationAvailable, StateEnum.Warning);
+                            if (unitLocation.Count > 0 && !string.IsNullOrEmpty(unitLocation[0].Description))
+                                invitationData.UnitSizeCode.SetValueAndState(unitLocation[0].Description, StateEnum.Checked);
                         }
 
                         // Unit
@@ -1202,6 +1207,7 @@ namespace customerportalapi.Services
 
                                 case (int)StoreMailTypes.WithoutSignageOrNull:
                                 default:
+                                    WithoutSignage(invitationData);
                                     break;
                             }
                         }
@@ -1268,6 +1274,15 @@ namespace customerportalapi.Services
             invitationData.UnitExceptions.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
             if (!string.IsNullOrEmpty(contract.Unit.Exceptions))
                 invitationData.UnitExceptions.SetValueAndState(contract.Unit.Exceptions, StateEnum.Checked);
+        }
+
+        private static void WithoutSignage(InvitationMandatoryData invitationData)
+        {
+            invitationData.UnitColour.SetValueAndState(string.Empty, StateEnum.Unchecked);
+            invitationData.UnitCorridor.SetValueAndState(string.Empty, StateEnum.Unchecked);
+            invitationData.UnitExceptions.SetValueAndState(string.Empty, StateEnum.Unchecked);
+            invitationData.UnitFloor.SetValueAndState(string.Empty, StateEnum.Unchecked);
+            invitationData.UnitZone.SetValueAndState(string.Empty, StateEnum.Unchecked);
         }
 
         private async Task<bool> CheckMandatoryData(InvitationMandatoryData fields)
