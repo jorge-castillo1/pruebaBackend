@@ -1,5 +1,6 @@
 ﻿using customerportalapi.Entities;
 using customerportalapi.Entities.enums;
+using customerportalapi.Entities.Mappers;
 using customerportalapi.Repositories.interfaces;
 using customerportalapi.Services.Exceptions;
 using customerportalapi.Services.Interfaces;
@@ -208,17 +209,17 @@ namespace customerportalapi.Services
 
         public async Task<string> SaveContractAsync(Document document)
         {
-            var savedDocId = await _documentRepository.SaveDocumentAsync(document);
+            var savedDocId = string.Empty;
 
-            if (document.Metadata.DocumentId == savedDocId)
+            var metadataInfo = await _documentRepository.SaveDocumentAsync(document);
+            if (metadataInfo != null)
             {
-                Contract contract = await _contractRepository.GetContractAsync(document.Metadata.SmContractCode);
+                savedDocId = metadataInfo.DocumentId;
+                //Contract contract = await _contractRepository.GetContractAsync(document.Metadata.SmContractCode);
+                FullContract fullcontract = (await _contractRepository.GetFullContractsBySMCodeAsync(document.Metadata.SmContractCode)).FirstOrDefault();
+                var contract = FullContractToContract.Mapper(fullcontract);
 
-                if (contract.ContractUrl != document.Metadata.RelativeUrl || contract.ContractUrl == null)
-                {
-                    contract.ContractUrl = document.Metadata.RelativeUrl;
-                    await _contractRepository.UpdateContractAsync(contract);
-                }
+                await _contractRepository.UpdateContractAsync(contract);
             }
             return savedDocId;
         }
@@ -237,7 +238,7 @@ namespace customerportalapi.Services
                 limit = limit
             };
 
-            List<FullContract> contracts = await _contractRepository.GetContractsWithoutUrlAsync(limit);
+            List<FullContract> contracts = await _contractRepository.GetFullContractsWithoutUrlAsync(limit);
             if (contracts != null && limit >= 1)
             {
                 if (skip.HasValue && limit.HasValue)
@@ -255,7 +256,7 @@ namespace customerportalapi.Services
                 foreach (var fullcontract in contracts)
                 {
                     ContractUrlResponse contractURLresponse = new ContractUrlResponse();
-                    var newContract = MapperFullContract(fullcontract);
+                    var newContract = FullContractToContract.Mapper(fullcontract);
 
                     contractURLresponse.ContractNumber = fullcontract.iav_name;
                     contractURLresponse.StoreName = RemoveDiacritics(fullcontract.iav_storeid.StoreName);
@@ -266,9 +267,9 @@ namespace customerportalapi.Services
                     contractURLresponse.DocumentRepositoryUrl = fullcontract.iav_storeid.DocumentRepositoryUrl;
                     contractURLresponse.Environment = _configuration["Environment"].ToLower();
 
-                    if (!string.IsNullOrEmpty(contractURLresponse.DocumentRepositoryUrl) && !string.IsNullOrEmpty(contractURLresponse.CustomerType) && !string.IsNullOrEmpty(contractURLresponse.Dni))
+                    if (!string.IsNullOrEmpty(newContract.ContractUrl))
                     {
-                        contractURLresponse.ContractUrl = newContract.ContractUrl = $@"{contractURLresponse.DocumentRepositoryUrl}/Documentos compartidos/{contractURLresponse.CustomerType}/{contractURLresponse.Dni}";
+                        contractURLresponse.ContractUrl = newContract.ContractUrl;
 
                         try
                         {
@@ -295,29 +296,6 @@ namespace customerportalapi.Services
               ).Normalize(NormalizationForm.FormC).Replace(" ", "").ToLower();
         }
 
-        private Contract MapperFullContract(FullContract contract)
-        {
-            Contract newContract = new Contract()
-            {
-                ContractId = contract.iav_contractid,
-                ContractNumber = contract.iav_name,
-                SmContractCode = contract.iav_smcontractcode,
-                Store = contract._iav_storeid_value,
-                Price = (decimal)contract.iav_price,
-                Vat = (decimal?)contract.iav_vat,
-                ReservationFee = contract.iav_reservationfee.ToString(),
-                ContractDate = contract.iav_contractdate.ToString(),
-                FirstPaymentDate = contract.iav_firstpaymentdate.ToString(),
-                FirstPayment = contract.iav_firstpaymentmoney.ToString(),
-                PaymentMethod = contract._iav_paymentmethodid_value,
-                PaymentMethodId = contract._iav_paymentmethodid_value,
-                ContractUrl = contract.new_contacturl,
-                Customer = contract._iav_customerid_value,
-                Unit = contract.iav_unitid,
-                StoreData = contract.iav_storeid,
-                OpportunityId = contract._iav_opportunityid_value
-            };
-            return newContract;
-        }
+        
     }
 }

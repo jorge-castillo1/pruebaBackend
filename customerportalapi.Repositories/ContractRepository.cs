@@ -72,10 +72,9 @@ namespace customerportalapi.Repositories
             JObject result = JObject.Parse(content);
 
             return JsonConvert.DeserializeObject<Contract>(result.GetValue("result").ToString());
-
         }
 
-        public async Task<List<FullContract>> GetContractsWithoutUrlAsync(int? limit)
+        public async Task<List<FullContract>> GetFullContractsWithoutUrlAsync(int? limit)
         {
             var entitylist = new List<FullContract>();
 
@@ -85,6 +84,25 @@ namespace customerportalapi.Repositories
             string endPoint = "fullcontracts";
             if (limit.HasValue && limit >= 1)
                 endPoint = $"fullcontracts?limit={limit.Value}";
+
+            var response = await httpClient.GetAsync(endPoint, HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode) return entitylist;
+            var content = await response.Content.ReadAsStringAsync();
+            JObject result = JObject.Parse(content);
+            var contractList = JsonConvert.DeserializeObject<List<FullContract>>(result.GetValue("result").ToString());
+
+            return contractList;
+        }
+
+        public async Task<List<FullContract>> GetFullContractsBySMCodeAsync(string code)
+        {
+            var entitylist = new List<FullContract>();
+
+            var httpClient = _clientFactory.CreateClient("httpClient");
+            httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["ContractsAPI"]);
+
+            var endPoint = $"fullcontracts?smcode={code}";
 
             var response = await httpClient.GetAsync(endPoint, HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
