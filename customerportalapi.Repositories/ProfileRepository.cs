@@ -26,7 +26,7 @@ namespace customerportalapi.Repositories
 
         public async Task<Profile> GetProfileAsync(string dni, string accountType)
         {
-            var httpClient = _clientFactory.CreateClient("httpClient");
+            var httpClient = _clientFactory.CreateClient("httpClientCRM");
             httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["ProfileAPI"]);
             _logger.LogWarning("Base Address: " + httpClient.BaseAddress.AbsolutePath);
 
@@ -49,7 +49,7 @@ namespace customerportalapi.Repositories
         public async Task<Profile> UpdateProfileAsync(Profile profile)
         {
             profile.Blue_updatewebportal = true;
-            var httpClient = _clientFactory.CreateClient("httpClient");
+            var httpClient = _clientFactory.CreateClient("httpClientCRM");
             var method = new HttpMethod("PATCH");
             var request = new HttpRequestMessage(method, new Uri(_configuration["GatewayUrl"] + _configuration["ProfileAPI"]))
             {
@@ -66,7 +66,7 @@ namespace customerportalapi.Repositories
 
         public async Task<AccountProfile> GetAccountAsync(string dni, string accountType)
         {
-            var httpClient = _clientFactory.CreateClient("httpClient");
+            var httpClient = _clientFactory.CreateClient("httpClientCRM");
             httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["AccountsAPI"]);
 
             var response = await httpClient.GetAsync(dni + "/" + accountType, HttpCompletionOption.ResponseHeadersRead);
@@ -79,7 +79,7 @@ namespace customerportalapi.Repositories
 
         public async Task<AccountProfile> GetAccountByDocumentNumberAsync(string documentNumber)
         {
-            var httpClient = _clientFactory.CreateClient("httpClient");
+            var httpClient = _clientFactory.CreateClient("httpClientCRM");
             httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["AccountsAPI"]);
 
             var response = await httpClient.GetAsync(documentNumber + "/Base", HttpCompletionOption.ResponseHeadersRead);
@@ -92,7 +92,7 @@ namespace customerportalapi.Repositories
 
         public async Task<AccountProfile> UpdateAccountAsync(AccountProfile account)
         {
-            var httpClient = _clientFactory.CreateClient("httpClient");
+            var httpClient = _clientFactory.CreateClient("httpClientCRM");
             var method = new HttpMethod("PATCH");
             var request = new HttpRequestMessage(method, new Uri(_configuration["GatewayUrl"] + _configuration["AccountsAPI"]))
             {
@@ -109,7 +109,7 @@ namespace customerportalapi.Repositories
 
         public async Task<Profile> ConfirmedWebPortalAccessAsync(string dni, string accountType)
         {
-            var httpClient = _clientFactory.CreateClient("httpClient");
+            var httpClient = _clientFactory.CreateClient("httpClientCRM");
             var method = new HttpMethod("PATCH");
             var request = new HttpRequestMessage(method, new Uri(_configuration["GatewayUrl"] + _configuration["ProfileAPI"] + $"{dni}/{accountType}/invited"));
 
@@ -123,7 +123,7 @@ namespace customerportalapi.Repositories
 
         public async Task<Profile> RevokedWebPortalAccessAsync(string dni, string accountType)
         {
-            var httpClient = _clientFactory.CreateClient("httpClient");
+            var httpClient = _clientFactory.CreateClient("httpClientCRM");
             var method = new HttpMethod("PATCH");
             var request = new HttpRequestMessage(method, new Uri(_configuration["GatewayUrl"] + _configuration["ProfileAPI"] + $"{dni}/{accountType}/uninvited"));
 
@@ -137,7 +137,7 @@ namespace customerportalapi.Repositories
 
         public async Task<ProfilePermissions> GetProfilePermissionsAsync(string dni, string accountType)
         {
-            var httpClient = _clientFactory.CreateClient("httpClient");
+            var httpClient = _clientFactory.CreateClient("httpClientCRM");
             httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["ProfileAPI"]);
             _logger.LogWarning("Base Address: " + httpClient.BaseAddress.AbsolutePath);
 
@@ -157,7 +157,7 @@ namespace customerportalapi.Repositories
         }
         public async Task<AccountProfile> GetContactByMail(string email)
         {
-            var httpClient = _clientFactory.CreateClient("httpClient");
+            var httpClient = _clientFactory.CreateClient("httpClientCRM");
             httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["AccountsAPI"]);
 
             var response = await httpClient.GetAsync("email/" + email, HttpCompletionOption.ResponseHeadersRead);

@@ -23,7 +23,7 @@ namespace customerportalapi.Repositories
 
         public async Task<bool> AddBankAccountAsync(SMBankAccount account)
         {
-            var httpClient = _clientFactory.CreateClient("httpClient");
+            var httpClient = _clientFactory.CreateClient("httpClientCRM");
             var url = new Uri(_configuration["GatewaySmUrl"] + _configuration["SMAccountAPI"]);
 
             var postContent = new StringContent(JsonConvert.SerializeObject(account), Encoding.UTF8, "application/json");

@@ -23,7 +23,7 @@ namespace customerportalapi.Repositories
 
         public async Task<List<Country>> GetCountriesAsync()
         {
-            var httpClient = _clientFactory.CreateClient("httpClient");
+            var httpClient = _clientFactory.CreateClient("httpClientCRM");
             var uri = new Uri(_configuration["GatewayUrl"] + _configuration["CountriesAPI"]);
             httpClient.BaseAddress = uri;
 

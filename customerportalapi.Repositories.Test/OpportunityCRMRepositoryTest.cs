@@ -33,7 +33,7 @@ namespace customerportalapi.Repositories.Test
         public void AlHacerUnaLlamadaGetExternaDeDatos_NoDevuelveErrores()
         {
             //Arrange
-            Mock.Get(_clientFactory).Setup(x => x.CreateClient("httpClient"))
+            Mock.Get(_clientFactory).Setup(x => x.CreateClient("httpClientCRM"))
                 .Returns(() =>
                 {
                     return _handler.CreateClient();

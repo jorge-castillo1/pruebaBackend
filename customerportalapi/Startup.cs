@@ -187,7 +187,7 @@ namespace customerportalapi
             services.AddTransient<IStoreImageServices, StoreImageServices>();
             services.AddTransient<IMailService, MailService>();
 
-            services.AddHttpClient("httpClient", c =>
+            services.AddHttpClient("httpClientCRM", c =>
             {
                 c.BaseAddress = new Uri(Configuration["GatewayUrl"]);
                 c.Timeout = new TimeSpan(0, 2, 0);  //2 minutes
@@ -266,13 +266,13 @@ namespace customerportalapi
                 AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip,
                 //Credentials = GetCredentials()
             });
-            var entorno = Configuration["Environment"];
 
+            //PRECOGNIS
             services.AddHttpClient("httpClientPayment", c =>
             {
                 c.BaseAddress = new Uri(Configuration["GatewayPaymentUrl"]);
                 c.Timeout = new TimeSpan(0, 2, 0);  //2 minutes
-                    c.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/x-www-form-urlencoded"));
+                c.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/x-www-form-urlencoded"));
                 c.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue
                 {
                     NoCache = true,

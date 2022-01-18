@@ -23,7 +23,7 @@ namespace customerportalapi.Repositories
 
         public async Task<OpportunityCRM> GetOpportunity(string opportunityId)
         {
-            var httpClient = _clientFactory.CreateClient("httpClient");
+            var httpClient = _clientFactory.CreateClient("httpClientCRM");
             var uri = new Uri(_configuration["GatewayUrl"] + _configuration["OpportunityCRM"]);
             httpClient.BaseAddress = uri;
 
