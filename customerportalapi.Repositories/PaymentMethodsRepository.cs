@@ -23,7 +23,7 @@ namespace customerportalapi.Repositories
 
         public async Task<PaymentMethodCRM> GetPaymentMethod(string storeId)
         {
-            var httpClient = _clientFactory.CreateClient("httpClient");
+            var httpClient = _clientFactory.CreateClient("httpClientCRM");
             var uri = new Uri(_configuration["GatewayUrl"] + _configuration["PaymentMethodsCRM"]);
             httpClient.BaseAddress = uri;
 
@@ -37,7 +37,7 @@ namespace customerportalapi.Repositories
         }
         public async Task<PaymentMethodCRM> GetPaymentMethodByCard(string storeId)
         {
-            var httpClient = _clientFactory.CreateClient("httpClient");
+            var httpClient = _clientFactory.CreateClient("httpClientCRM");
             var uri = new Uri(_configuration["GatewayUrl"] + _configuration["PaymentMethodsCRM"] + storeId + "/card/");
 
             var response = await httpClient.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead);
@@ -51,7 +51,7 @@ namespace customerportalapi.Repositories
 
         public async Task<PaymentMethodCRM> GetPaymentMethodByBankAccount(string storeId)
         {
-            var httpClient = _clientFactory.CreateClient("httpClient");
+            var httpClient = _clientFactory.CreateClient("httpClientCRM");
             var uri = new Uri(_configuration["GatewayUrl"] + _configuration["PaymentMethodsCRM"] + storeId + "/bank/");
 
             var response = await httpClient.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead);
@@ -65,7 +65,7 @@ namespace customerportalapi.Repositories
 
         public async Task<PaymentMethodCRM> GetPaymentMethodById(string paymentMethodId)
         {
-            var httpClient = _clientFactory.CreateClient("httpClient");
+            var httpClient = _clientFactory.CreateClient("httpClientCRM");
             var uri = new Uri(_configuration["GatewayUrl"] + _configuration["PaymentMethodsCRM"] + "method/");
             httpClient.BaseAddress = uri;
 
@@ -80,7 +80,7 @@ namespace customerportalapi.Repositories
 
         public async Task<PaymentMethodsList> GetAllPaymentMethods(string storeId)
         {
-            var httpClient = _clientFactory.CreateClient("httpClient");
+            var httpClient = _clientFactory.CreateClient("httpClientCRM");
             var uri = new Uri(_configuration["GatewayUrl"] + _configuration["PaymentMethodsCRM"] + storeId + "/all/");
             httpClient.BaseAddress = uri;
 

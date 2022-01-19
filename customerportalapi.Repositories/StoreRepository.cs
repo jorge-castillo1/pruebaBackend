@@ -24,7 +24,7 @@ namespace customerportalapi.Repositories
 
         public async Task<List<Store>> GetStoresAsync()
         {
-            var httpClient = _clientFactory.CreateClient("httpClient");
+            var httpClient = _clientFactory.CreateClient("httpClientCRM");
             var uri = new Uri(_configuration["GatewayUrl"] + _configuration["StoresAPI"]);
             httpClient.BaseAddress = uri;
 
@@ -39,7 +39,7 @@ namespace customerportalapi.Repositories
 
         public async Task<Store> GetStoreAsync(string storeCode)
         {
-            var httpClient = _clientFactory.CreateClient("httpClient");
+            var httpClient = _clientFactory.CreateClient("httpClientCRM");
             httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["StoresAPI"]);
 
             var response = await httpClient.GetAsync(storeCode, HttpCompletionOption.ResponseHeadersRead);
@@ -53,7 +53,7 @@ namespace customerportalapi.Repositories
 
         public async Task<Unit> GetUnitAsync(Guid id)
         {
-            var httpClient = _clientFactory.CreateClient("httpClient");
+            var httpClient = _clientFactory.CreateClient("httpClientCRM");
             httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["UnitsAPI"]);
 
             var response = await httpClient.GetAsync(id.ToString(), HttpCompletionOption.ResponseHeadersRead);
@@ -67,7 +67,7 @@ namespace customerportalapi.Repositories
 
         public async Task<Unit> GetUnitBySMIdAsync(string smid)
         {
-            var httpClient = _clientFactory.CreateClient("httpClient");
+            var httpClient = _clientFactory.CreateClient("httpClientCRM");
             httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["UnitsAPI"]);
 
             var response = await httpClient.GetAsync(smid, HttpCompletionOption.ResponseHeadersRead);
@@ -81,7 +81,7 @@ namespace customerportalapi.Repositories
 
         public async Task<Store> UpdateSiteImage(StoreImageUrl storeImageUrl)
         {
-            var httpClient = _clientFactory.CreateClient("httpClient");
+            var httpClient = _clientFactory.CreateClient("httpClientCRM");
             var method = new HttpMethod("PATCH");
             var request = new HttpRequestMessage(method, new Uri(_configuration["GatewayUrl"] + _configuration["StoresAPI"]))
             {

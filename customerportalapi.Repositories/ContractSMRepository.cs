@@ -24,7 +24,7 @@ namespace customerportalapi.Repositories
 
         public async Task<SMContract> GetAccessCodeAsync(string contractId)
         {
-            var httpClient = _clientFactory.CreateClient("httpClient");
+            var httpClient = _clientFactory.CreateClient("httpClientCRM");
             httpClient.BaseAddress = new Uri(_configuration["GatewaySmUrl"] + _configuration["ContractSMAPI"]);
 
             var response = await httpClient.GetAsync(contractId, HttpCompletionOption.ResponseHeadersRead);
@@ -38,7 +38,7 @@ namespace customerportalapi.Repositories
 
         public async Task<List<Invoice>> GetInvoicesAsync(string contractId)
         {
-            var httpClient = _clientFactory.CreateClient("httpClient");
+            var httpClient = _clientFactory.CreateClient("httpClientCRM");
             httpClient.BaseAddress = new Uri(_configuration["GatewaySmUrl"] + _configuration["InvoiceSMAPI"]);
 
             var response = await httpClient.GetAsync(contractId, HttpCompletionOption.ResponseHeadersRead);
@@ -52,7 +52,7 @@ namespace customerportalapi.Repositories
 
         public async Task<List<Invoice>> GetInvoicesByCustomerIdAsync(string cutomerId)
         {
-            var httpClient = _clientFactory.CreateClient("httpClient");
+            var httpClient = _clientFactory.CreateClient("httpClientCRM");
             httpClient.BaseAddress = new Uri(_configuration["GatewaySmUrl"] + _configuration["InvoiceByCustomerIdSMAPI"] + cutomerId);
 
             var response = await httpClient.GetAsync(cutomerId, HttpCompletionOption.ResponseHeadersRead);
@@ -66,7 +66,7 @@ namespace customerportalapi.Repositories
 
         public async Task<bool> MakePayment(MakePayment makePayment)
         {
-            var httpClient = _clientFactory.CreateClient("httpClient");
+            var httpClient = _clientFactory.CreateClient("httpClientCRM");
             var url = new Uri(_configuration["GatewaySmUrl"] + _configuration["InvoicePaymentSMAPI"]);
 
             var postContent = new StringContent(JsonConvert.SerializeObject(makePayment), Encoding.UTF8, "application/json");
@@ -78,7 +78,7 @@ namespace customerportalapi.Repositories
 
         public async Task<SubContract> GetSubContractAsync(string contractId, string unitId)
         {
-            var httpClient = _clientFactory.CreateClient("httpClient");
+            var httpClient = _clientFactory.CreateClient("httpClientCRM");
             var url = new Uri(_configuration["GatewaySmUrl"] + _configuration["ContractSMAPI"] + contractId + "/" + unitId);
 
             var response = await httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
@@ -92,7 +92,7 @@ namespace customerportalapi.Repositories
 
         public async Task<bool> UpdateAccessCodeAsync(UpdateAccessCode updateAccessCode)
         {
-            var httpClient = _clientFactory.CreateClient("httpClient");
+            var httpClient = _clientFactory.CreateClient("httpClientCRM");
             var url = new Uri(_configuration["GatewaySmUrl"] + _configuration["ContractSMAPI"] + "access-code");
             var putContent = new StringContent(JsonConvert.SerializeObject(updateAccessCode), Encoding.UTF8, "application/json");
 
@@ -103,7 +103,7 @@ namespace customerportalapi.Repositories
 
         public async Task<ApsData> GetAps(ApsRequest request)
         {
-            var httpClient = _clientFactory.CreateClient("httpClient");
+            var httpClient = _clientFactory.CreateClient("httpClientCRM");
             var url = new Uri(_configuration["GatewaySmUrl"]+ _configuration["ContractSMAPI"]+ "aps");
             var postContent = new StringContent(JsonConvert.SerializeObject(request), Encoding.UTF8, "application/json");
 

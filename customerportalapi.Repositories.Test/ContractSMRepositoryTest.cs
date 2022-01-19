@@ -31,7 +31,7 @@ namespace customerportalapi.Repositories.Test
         public async Task AlHacerUnaLlamadaGetExternaDeDatosQueDevuelveEntidad_NoDevuelveErrores()
         {
             //Arrange
-            Mock.Get(_clientFactory).Setup(x => x.CreateClient("httpClient"))
+            Mock.Get(_clientFactory).Setup(x => x.CreateClient("httpClientCRM"))
                 .Returns(() =>
                 {
                     return _handler.CreateClient();
@@ -58,7 +58,7 @@ namespace customerportalapi.Repositories.Test
         public async Task AlHacerUnaLlamadaGetExternaDeDatosQueDevuelveLista_NoDevuelveErrores()
         {
             //Arrange
-            Mock.Get(_clientFactory).Setup(x => x.CreateClient("httpClient"))
+            Mock.Get(_clientFactory).Setup(x => x.CreateClient("httpClientCRM"))
                 .Returns(() =>
                 {
                     return _handler.CreateClient();

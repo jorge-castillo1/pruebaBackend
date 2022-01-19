@@ -25,7 +25,7 @@ namespace customerportalapi.Repositories
 
         public async Task<List<DocumentMetadata>> Search(DocumentMetadataSearchFilter filter)
         {
-            var httpClient = _clientFactory.CreateClient("httpClient");
+            var httpClient = _clientFactory.CreateClient("httpClientCRM");
             var method = new HttpMethod("GET");
 
             var url = new Uri(_configuration["GatewayDocumentsUrl"] + _configuration["DocumentsSearchEndpoint"]);

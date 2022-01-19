@@ -26,7 +26,7 @@ namespace customerportalapi.Repositories
         {
             var entitylist = new List<Contract>();
 
-            var httpClient = _clientFactory.CreateClient("httpClient");
+            var httpClient = _clientFactory.CreateClient("httpClientCRM");
             httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["ContractsAPI"]);
 
             var response = await httpClient.GetAsync(dni + "/" + accountType, HttpCompletionOption.ResponseHeadersRead);
@@ -43,7 +43,7 @@ namespace customerportalapi.Repositories
         {
             var entity = new Contract();
 
-            var httpClient = _clientFactory.CreateClient("httpClient");
+            var httpClient = _clientFactory.CreateClient("httpClientCRM");
             httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["ContractsAPI"]);
 
             var response = await httpClient.GetAsync("code/" + smContractCode, HttpCompletionOption.ResponseHeadersRead);
@@ -60,7 +60,7 @@ namespace customerportalapi.Repositories
         {
             var entity = new Contract();
 
-            var httpClient = _clientFactory.CreateClient("httpClient");
+            var httpClient = _clientFactory.CreateClient("httpClientCRM");
             var method = new HttpMethod("PATCH");
             var request = new HttpRequestMessage(method, new Uri(_configuration["GatewayUrl"] + _configuration["ContractsAPI"]))
             {
@@ -78,7 +78,7 @@ namespace customerportalapi.Repositories
         {
             var entitylist = new List<FullContract>();
 
-            var httpClient = _clientFactory.CreateClient("httpClient");
+            var httpClient = _clientFactory.CreateClient("httpClientCRM");
             httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["ContractsAPI"]);
 
             string endPoint = "fullcontracts";
@@ -99,7 +99,7 @@ namespace customerportalapi.Repositories
         {
             var entitylist = new List<FullContract>();
 
-            var httpClient = _clientFactory.CreateClient("httpClient");
+            var httpClient = _clientFactory.CreateClient("httpClientCRM");
             httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["ContractsAPI"]);
 
             var endPoint = $"fullcontracts?smcode={code}";
