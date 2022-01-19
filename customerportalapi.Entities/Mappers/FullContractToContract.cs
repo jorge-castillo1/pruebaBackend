@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 namespace customerportalapi.Entities.Mappers
 {
@@ -22,13 +23,23 @@ namespace customerportalapi.Entities.Mappers
                     ContractDate = contract.iav_contractdate.ToString(),
                     FirstPaymentDate = contract.iav_firstpaymentdate.ToString(),
                     FirstPayment = contract.iav_firstpaymentmoney.ToString(),
-                    PaymentMethod = contract._iav_paymentmethodid_value,
+                    PaymentMethod = contract._iav_paymentmethod,
                     PaymentMethodId = contract._iav_paymentmethodid_value,
                     ContractUrl = contract.new_contacturl,
                     Customer = contract._iav_customerid_value,
                     Unit = contract.iav_unitid,
                     StoreData = contract.iav_storeid,
-                    OpportunityId = contract._iav_opportunityid_value
+                    OpportunityId = contract._iav_opportunityid_value,
+
+                    Currency = contract.iav_price_currency,
+                    ExpectedMoveIn = contract.iav_opportunityid.iav_expectedmovein.ToString(),
+                    MapLink = contract.iav_storeid.MapLink,
+                    AccessType = contract.iav_storeid.AccessType,
+                    PaymentMethodDescription = contract._iav_paymentmethod,
+                    StoreCode = contract.iav_storeid.StoreCode,
+                    StoreImage = contract.iav_storeid.StoreImage,
+                    TimeZone = contract.iav_storeid.TimeZone,
+                    //TotalPrice = contract.iav_storeid,
                 };
 
                 var url = string.Empty;
