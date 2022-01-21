@@ -34,11 +34,16 @@ namespace customerportalapi.Repositories
             var httpClient = _clientFactory.CreateClient("httpClientPayment");
             httpClient.BaseAddress = new Uri(_configuration["GatewayPaymentUrl"] + _configuration["ChangePaymentMethodCardEndpoint"]);
 
+            _logger.LogInformation($"PaymentRepository.ChangePaymentMethodCard(). POST. BaseAddress: {httpClient.BaseAddress}.");
+
             var response = await httpClient.PostAsync(httpClient.BaseAddress, content);
             response.EnsureSuccessStatusCode();
             if (!response.IsSuccessStatusCode) return entity;
 
             var value = await response.Content.ReadAsStringAsync();
+
+            _logger.LogInformation($"PaymentRepository.ChangePaymentMethodCard(). Response. value:{value}.");
+
 
             return value;
         }
@@ -99,7 +104,7 @@ namespace customerportalapi.Repositories
             httpClient.BaseAddress = new Uri(_configuration["GatewayPaymentUrl"] + _configuration["GetCardEndpoint"]);
 
 
-            var response = await httpClient.GetAsync("?token="+ token + "&channel=WEBPORTAL", HttpCompletionOption.ResponseHeadersRead);
+            var response = await httpClient.GetAsync("?token=" + token + "&channel=WEBPORTAL", HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
             if (!response.IsSuccessStatusCode) return entity;
 
@@ -128,7 +133,7 @@ namespace customerportalapi.Repositories
             keyValues.Add(new KeyValuePair<string, string>("documentid", payInvoice.Ourref));
             HttpContent content = new FormUrlEncodedContent(keyValues);
 
-            _logger.LogInformation("PaymentRepositoryPayInvoice:" + Guid.NewGuid().ToString() + "||" + payInvoice.Amount.ToString().Replace(",", ".") +"||" );
+            _logger.LogInformation("PaymentRepositoryPayInvoice:" + Guid.NewGuid().ToString() + "||" + payInvoice.Amount.ToString().Replace(",", ".") + "||");
 
             var response = await httpClient.PostAsync(httpClient.BaseAddress, content);
             response.EnsureSuccessStatusCode();
@@ -151,7 +156,7 @@ namespace customerportalapi.Repositories
             string phoneNumber = payInvoiceNewCard.PhonePrefix + "|" + payInvoiceNewCard.PhoneNumber;
             phoneNumber = phoneNumber.Replace(" ", "");
             var keyValues = new List<KeyValuePair<string, string>>();
-            keyValues.Add(new KeyValuePair<string, string>("recurrent", payInvoiceNewCard.Recurrent == true ?  "true" : "false"));
+            keyValues.Add(new KeyValuePair<string, string>("recurrent", payInvoiceNewCard.Recurrent == true ? "true" : "false"));
             keyValues.Add(new KeyValuePair<string, string>("externalid", payInvoiceNewCard.ExternalId));
             keyValues.Add(new KeyValuePair<string, string>("channel", "WEBPORTAL"));
             keyValues.Add(new KeyValuePair<string, string>("siteid", payInvoiceNewCard.SiteId));
@@ -189,7 +194,7 @@ namespace customerportalapi.Repositories
             string phoneNumber = updateCardData.PhonePrefix + "|" + updateCardData.PhoneNumber;
             var httpClient = _clientFactory.CreateClient("httpClientPayment");
             httpClient.BaseAddress = new Uri(_configuration["GatewayPaymentUrl"] + _configuration["UpdateCardEndpoint"]);
-             var keyValues = new List<KeyValuePair<string, string>>();
+            var keyValues = new List<KeyValuePair<string, string>>();
             keyValues.Add(new KeyValuePair<string, string>("externalid", updateCardData.ExternalId));
             keyValues.Add(new KeyValuePair<string, string>("channel", "WEBPORTAL"));
             keyValues.Add(new KeyValuePair<string, string>("siteid", updateCardData.SiteId));
@@ -211,7 +216,7 @@ namespace customerportalapi.Repositories
             _logger.LogInformation($"PaymentRepository.UpdateCardLoad() Request Body Content: {Newtonsoft.Json.JsonConvert.SerializeObject(keyValues)}.");
 
             var response = await httpClient.PostAsync(httpClient.BaseAddress, content);
-            
+
             _logger.LogInformation($"PaymentRepository.UpdateCardLoad() Request Body Content: {Newtonsoft.Json.JsonConvert.SerializeObject(response)}.");
 
             response.EnsureSuccessStatusCode();
