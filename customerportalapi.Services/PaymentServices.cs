@@ -189,6 +189,7 @@ namespace customerportalapi.Services
                 throw new ServiceException($"Error get payment method crm. StoreName:{store.StoreName}, StoreId:{store.StoreId}. SMId.", HttpStatusCode.BadRequest, "SMId");
 
             account.BankAccount = processedpaymentdocument.BankAccountOrderNumber;
+            account.PaymentMethodId =  payMetCRM.PaymentMethodId;
             AccountProfile updateAccount = await _profileRepository.UpdateAccountAsync(account);
 
             contract.PaymentMethodId = payMetCRM.PaymentMethodId;
@@ -716,6 +717,7 @@ namespace customerportalapi.Services
 
             account.Token = card.Token;
             account.TokenUpdateDate = DateTime.UtcNow.ToString("O");
+            account.PaymentMethodId = payMetCRM.PaymentMethodId;
             AccountProfile updateAccount = await _profileRepository.UpdateAccountAsync(account);
 
             if (updateAccount.SmCustomerId == null)
