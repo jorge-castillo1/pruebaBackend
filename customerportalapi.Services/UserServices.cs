@@ -1190,9 +1190,16 @@ namespace customerportalapi.Services
                             var matchesCount = rx.Matches(contract.Unit.UnitName).Count;
 
                             if (matchesCount > 0)
-                                invitationData.UnitName.SetValueAndState(string.Concat(ValidationMessages.IncorrectFormat, ": ", contract.Unit.UnitName), StateEnum.Error);
+                            {
+                                if (contract.Unit.UnitName.Trim().ToUpper().StartsWith('E')) // Algunos units pueden comenzar por E (anexos a otros edificios)                                    
+                                    invitationData.UnitName.SetValueAndState(contract.Unit.UnitName, StateEnum.Checked);
+                                else
+                                    invitationData.UnitName.SetValueAndState(string.Concat(ValidationMessages.IncorrectFormat, ": ", contract.Unit.UnitName), StateEnum.Error);
+                            }
                             else if (!string.IsNullOrEmpty(contract.Unit.UnitName))
+                            {
                                 invitationData.UnitName.SetValueAndState(contract.Unit.UnitName, StateEnum.Checked);
+                            }
 
                             var intSiteMailType = (int)StoreMailTypes.WithoutSignageOrNull;
                             if (!string.IsNullOrEmpty(invitationData.SiteMailType.Value))
