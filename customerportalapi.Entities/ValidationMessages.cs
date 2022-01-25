@@ -17,5 +17,6 @@ namespace customerportalapi.Entities
         public const string AlreadyInvited = "Already invited";
         public const string NoInformationAvailable = "No information available";
         public const string NoInformationAvailable_FR = "Pas d'information disponible";
+        public const string IncorrectFormat = "Incorrect format";
     }
 }

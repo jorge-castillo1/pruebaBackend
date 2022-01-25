@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -1185,7 +1186,12 @@ namespace customerportalapi.Services
                         if (contract.Unit != null)
                         {
                             invitationData.UnitName.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
-                            if (!string.IsNullOrEmpty(contract.Unit.UnitName))
+                            var rx = new Regex(@"[a-zA-Z/,.+?-]", RegexOptions.Compiled);
+                            var matchesCount = rx.Matches(contract.Unit.UnitName).Count;
+
+                            if (matchesCount > 0)
+                                invitationData.UnitName.SetValueAndState(string.Concat(ValidationMessages.IncorrectFormat, ": ", contract.Unit.UnitName), StateEnum.Error);
+                            else if (!string.IsNullOrEmpty(contract.Unit.UnitName))
                                 invitationData.UnitName.SetValueAndState(contract.Unit.UnitName, StateEnum.Checked);
 
                             var intSiteMailType = (int)StoreMailTypes.WithoutSignageOrNull;

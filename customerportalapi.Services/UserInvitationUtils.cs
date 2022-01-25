@@ -2,6 +2,8 @@
 using customerportalapi.Entities.enums;
 using System;
 using System.Reflection;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace customerportalapi.Services
 {
@@ -138,7 +140,7 @@ namespace customerportalapi.Services
 
                         case "UnitName":
                             body = body.Replace(field, data.Value);
-                            char[] unitName = data.Value.ToCharArray();
+                            char[] unitName = data.Value.Trim().PadLeft(4,'0').ToCharArray();
 
                             int num;
                             if (unitName[0].ToString() != null && int.TryParse(unitName[0].ToString(), out num))
@@ -148,12 +150,13 @@ namespace customerportalapi.Services
                                 unitName[0] = Char.Parse(num.ToString());
                             }
 
-                            if (unitName[3].ToString() != null && int.TryParse(unitName[3].ToString(), out num))
-                            {
-                                num++;
-                                if (num > 9) num = 0;
-                                unitName[3] = Char.Parse(num.ToString());
-                            }
+                            if (unitName.Length >= 4)
+                                if (unitName[3].ToString() != null && int.TryParse(unitName[3].ToString(), out num))
+                                {
+                                    num++;
+                                    if (num > 9) num = 0;
+                                    unitName[3] = Char.Parse(num.ToString());
+                                }
 
                             body = body.Replace("{{LockCode}}", new string(unitName));
                             break;
