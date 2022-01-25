@@ -107,6 +107,12 @@ namespace customerportalapi.Entities
         
         public string TokenUpdateDate { get; set; }
 
+        public string SincronizacionTpvDate { get; set; }
+
+        public string SincronizacionTpv { get; set; }
+
+        public string TokenUpdate { get; set; }
+
         public bool? blue_updatewebportal { get; set; } = false;
     }
 }

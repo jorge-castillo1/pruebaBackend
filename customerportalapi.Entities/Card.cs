@@ -21,6 +21,15 @@ namespace customerportalapi.Entities
         [BsonElement("token")]
         public string Token { get; set; }
 
+        [BsonElement("sincronizacionTpvDate")]
+        public string SincronizacionTpvDate { get; set; }
+
+        [BsonElement("sincronizacionTpv")]
+        public string SincronizacionTpv { get; set; }
+
+        [BsonElement("tokenUpdate")]
+        public string TokenUpdate { get; set; }
+
         [BsonElement("status")]
         public string Status { get; set; }
 

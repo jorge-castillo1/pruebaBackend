@@ -718,6 +718,10 @@ namespace customerportalapi.Services
             account.Token = card.Token;
             account.TokenUpdateDate = DateTime.UtcNow.ToString("O");
             account.PaymentMethodId = payMetCRM.PaymentMethodId;
+            account.TokenUpdate = card.TokenUpdate;
+            account.SincronizacionTpv = card.SincronizacionTpv;
+            account.SincronizacionTpvDate = card.SincronizacionTpvDate;
+
             AccountProfile updateAccount = await _profileRepository.UpdateAccountAsync(account);
 
             if (updateAccount.SmCustomerId == null)
