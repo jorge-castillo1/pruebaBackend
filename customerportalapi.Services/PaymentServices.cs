@@ -116,7 +116,12 @@ namespace customerportalapi.Services
             var store = await _storeRepository.GetStoreAsync(bankmethod.StoreCode);
 
             var form = FillFormBankMethod(store, bankmethod, user);
+
+            _logger.LogInformation($"PaymentServices.ChangePaymentMethod().CreateSignature. form: {JsonConvert.SerializeObject(form)}");
+
             Guid documentid = await _signatureRepository.CreateSignature(form);
+
+            _logger.LogInformation($"PaymentServices.ChangePaymentMethod().CreateSignature. documentid: {documentid}");
 
             //7. Create a change method payment process
             Process process = new Process();
@@ -262,6 +267,9 @@ namespace customerportalapi.Services
             form.Add(new StringContent(store.City), "data[10][value]");
             //form.Add(new StringContent(DateTime.Today(short)), "data[11][value]");
             form.Add(new StringContent(bankmethod.ApsReference), "data[11][value]");
+
+            _logger.LogInformation($"PaymentServices.FillFormBankMethod(). form: {JsonConvert.SerializeObject(form)}");
+
             return form;
 
         }
@@ -360,6 +368,9 @@ namespace customerportalapi.Services
             keyValues.Add(new KeyValuePair<string, string>("HPP_BILLING_CITY", cardmethod.Address.City));
             keyValues.Add(new KeyValuePair<string, string>("HPP_BILLING_POSTALCODE", cardmethod.Address.ZipOrPostalCode));
             keyValues.Add(new KeyValuePair<string, string>("HPP_BILLING_COUNTRY", cardmethod.CountryISOCodeNumeric));
+
+            _logger.LogInformation($"PaymentServices.FillFormUrlEncodedCardMethod(). keyValues: {JsonConvert.SerializeObject(keyValues)}");
+
             HttpContent content = new FormUrlEncodedContent(keyValues);
             return content;
         }
@@ -560,7 +571,12 @@ namespace customerportalapi.Services
             }
 
             var form = FillFormCardMethod(store, cardmethod, user, userProfile);
+
+            _logger.LogInformation($"PaymentServices.ChangePaymentMethod().CreateSignature. form: {JsonConvert.SerializeObject(form)}");
+
             Guid documentid = await _signatureRepository.CreateSignature(form);
+
+            _logger.LogInformation($"PaymentServices.ChangePaymentMethod().CreateSignature. documentid: {documentid}");
 
             Process process = new Process();
             process.Id = processes[0].Id;
@@ -631,6 +647,8 @@ namespace customerportalapi.Services
             form.Add(new StringContent(store.CompanyName), "data[8][value]");
             form.Add(new StringContent(store.CompanyCif), "data[9][value]");
             form.Add(new StringContent(store.City), "data[10][value]");
+
+            _logger.LogInformation($"PaymentServices.FillFormCardMethod(). form: {JsonConvert.SerializeObject(form)}");
             return form;
         }
 
@@ -1508,7 +1526,9 @@ namespace customerportalapi.Services
             foreach (PaymentMethods payMethod in payMet.PaymentMethods)
             {
                 string name = payMethod.Name;
-                if (name == "Recibo domiciliado" || name == "Tarjeta Virtual")
+                if (name == "Recibo domiciliado" || name == "Tarjeta Virtual"
+                    || name == "Prélèvement Automatique" || name == "Carte Bancaire électronique"
+                    || name == "Cartão virtual")
                 {
                     availablePayMet.Add(payMethod);
                 }

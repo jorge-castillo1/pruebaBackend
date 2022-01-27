@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -1124,7 +1125,21 @@ namespace customerportalapi.Services
                                 SiteCode = contract.StoreData.StoreCode,
                                 SizeCode = contract.Unit.UnitCategory
                             };
-                      
+                            List<UnitLocation> unitLocation = _unitLocationRepository.Find(filter);
+
+                            if (contact.Language == "French")
+                            {
+                                invitationData.UnitPassword.SetValueAndState(ValidationMessages.NoInformationAvailable_FR, StateEnum.Warning);
+                            }
+                            else
+                            {
+                                invitationData.UnitPassword.SetValueAndState(ValidationMessages.NoInformationAvailable, StateEnum.Warning);
+                            }
+
+                            invitationData.UnitSizeCode.SetValueAndState(ValidationMessages.NoInformationAvailable, StateEnum.Warning);
+                            if (unitLocation.Count > 0 && !string.IsNullOrEmpty(unitLocation[0].Description))
+                                invitationData.UnitSizeCode.SetValueAndState(unitLocation[0].Description, StateEnum.Checked);
+
                             Store store = await _storeRepository.GetStoreAsync(contract.StoreData.StoreCode);
                             invitationData.StoreCode.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
                             if (store != null)
@@ -1176,7 +1191,7 @@ namespace customerportalapi.Services
                         // Unit
 
                         //Access Code eliminado temporalmente de Mandatory Data
-                        if (value.Language == "French")
+                        if (contact.Language == "French")
                         {
                             invitationData.UnitPassword.SetValueAndState(ValidationMessages.NoInformationAvailable_FR, StateEnum.Warning);
                         }
@@ -1184,14 +1199,27 @@ namespace customerportalapi.Services
                         {
                             invitationData.UnitPassword.SetValueAndState(ValidationMessages.NoInformationAvailable, StateEnum.Warning);
                         }
+
                         if (!string.IsNullOrEmpty(contractSM.Password))
                             invitationData.UnitPassword.SetValueAndState(contractSM.Password, StateEnum.Checked);
 
                         if (contract.Unit != null)
                         {
                             invitationData.UnitName.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
-                            if (!string.IsNullOrEmpty(contract.Unit.UnitName))
+                            var rx = new Regex(@"[a-zA-Z/,.+?-]", RegexOptions.Compiled);
+                            var matchesCount = rx.Matches(contract.Unit.UnitName).Count;
+
+                            if (matchesCount > 0)
+                            {
+                                if (contract.Unit.UnitName.Trim().ToUpper().StartsWith('E')) // Algunos units pueden comenzar por E (anexos a otros edificios)                                    
+                                    invitationData.UnitName.SetValueAndState(contract.Unit.UnitName, StateEnum.Checked);
+                                else
+                                    invitationData.UnitName.SetValueAndState(string.Concat(ValidationMessages.IncorrectFormat, ": ", contract.Unit.UnitName), StateEnum.Error);
+                            }
+                            else if (!string.IsNullOrEmpty(contract.Unit.UnitName))
+                            {
                                 invitationData.UnitName.SetValueAndState(contract.Unit.UnitName, StateEnum.Checked);
+                            }
 
                             var intSiteMailType = (int)StoreMailTypes.WithoutSignageOrNull;
                             if (!string.IsNullOrEmpty(invitationData.SiteMailType.Value))
