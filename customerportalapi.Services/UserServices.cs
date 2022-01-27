@@ -1122,6 +1122,16 @@ namespace customerportalapi.Services
                                 SizeCode = contract.Unit.UnitCategory
                             };
                             List<UnitLocation> unitLocation = _unitLocationRepository.Find(filter);
+
+                            if (contact.Language == "French")
+                            {
+                                invitationData.UnitPassword.SetValueAndState(ValidationMessages.NoInformationAvailable_FR, StateEnum.Warning);
+                            }
+                            else
+                            {
+                                invitationData.UnitPassword.SetValueAndState(ValidationMessages.NoInformationAvailable, StateEnum.Warning);
+                            }
+
                             invitationData.UnitSizeCode.SetValueAndState(ValidationMessages.NoInformationAvailable, StateEnum.Warning);
                             if (unitLocation.Count > 0 && !string.IsNullOrEmpty(unitLocation[0].Description))
                                 invitationData.UnitSizeCode.SetValueAndState(unitLocation[0].Description, StateEnum.Checked);
@@ -1172,7 +1182,7 @@ namespace customerportalapi.Services
                         // Unit
 
                         //Access Code eliminado temporalmente de Mandatory Data
-                        if (value.Language == "French")
+                        if (contact.Language == "French")
                         {
                             invitationData.UnitPassword.SetValueAndState(ValidationMessages.NoInformationAvailable_FR, StateEnum.Warning);
                         }
@@ -1180,6 +1190,7 @@ namespace customerportalapi.Services
                         {
                             invitationData.UnitPassword.SetValueAndState(ValidationMessages.NoInformationAvailable, StateEnum.Warning);
                         }
+
                         if (!string.IsNullOrEmpty(contractSM.Password))
                             invitationData.UnitPassword.SetValueAndState(contractSM.Password, StateEnum.Checked);
 
