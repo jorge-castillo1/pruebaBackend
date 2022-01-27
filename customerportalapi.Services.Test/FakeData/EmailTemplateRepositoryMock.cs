@@ -29,6 +29,14 @@ namespace customerportalapi.Services.Test.FakeData
                 language = "fake lang",
             }).Verifiable();
 
+            db.Setup(x => x.getTemplate(It.IsAny<int>(), It.IsAny<string>())).Returns(new EmailTemplate()
+            {
+                code = 12,
+                subject = "fake subject",
+                body = "fake body",
+                language = "fake lang",
+            }).Verifiable();
+
             return db;
         }
 
