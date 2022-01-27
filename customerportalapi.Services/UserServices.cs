@@ -1182,7 +1182,7 @@ namespace customerportalapi.Services
                                     invitationData.SiteMailType.SetValueAndState(store.MailType, StateEnum.Checked);
                             }
 
-                            List<UnitLocation> unitLocation = _unitLocationRepository.Find(filter);
+                            //List<UnitLocation> unitLocation = _unitLocationRepository.Find(filter);
                             invitationData.UnitSizeCode.SetValueAndState(ValidationMessages.NoInformationAvailable, StateEnum.Warning);
                             if (unitLocation.Count > 0 && !string.IsNullOrEmpty(unitLocation[0].Description))
                                 invitationData.UnitSizeCode.SetValueAndState(unitLocation[0].Description, StateEnum.Checked);
