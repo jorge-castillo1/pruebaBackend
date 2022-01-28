@@ -1104,6 +1104,10 @@ namespace customerportalapi.Services
                     if (contractSM != null && !string.IsNullOrEmpty(contractSM.Contractnumber))
                         invitationData.SMContract.SetValueAndState(contractSM.Contractnumber, StateEnum.Checked);
 
+                    //Leaving
+                    if (!string.IsNullOrEmpty(contractSM.Leaving))
+                        invitationData.Leaving.SetValueAndState(contractSM.Leaving.ToString(), StateEnum.Error);
+
                     // only active contracts, if the contract has "terminated", the field "Leaving" have information.
                     if (contractSM != null && string.IsNullOrEmpty(contractSM.Leaving))
                     {
@@ -1177,6 +1181,11 @@ namespace customerportalapi.Services
                                 if (!string.IsNullOrEmpty(store.MailType))
                                     invitationData.SiteMailType.SetValueAndState(store.MailType, StateEnum.Checked);
                             }
+
+                            //List<UnitLocation> unitLocation = _unitLocationRepository.Find(filter);
+                            invitationData.UnitSizeCode.SetValueAndState(ValidationMessages.NoInformationAvailable, StateEnum.Warning);
+                            if (unitLocation.Count > 0 && !string.IsNullOrEmpty(unitLocation[0].Description))
+                                invitationData.UnitSizeCode.SetValueAndState(unitLocation[0].Description, StateEnum.Checked);
                         }
 
                         // Unit
@@ -1228,6 +1237,7 @@ namespace customerportalapi.Services
 
                                 case (int)StoreMailTypes.WithoutSignageOrNull:
                                 default:
+                                    WithoutSignage(invitationData);
                                     break;
                             }
                         }
@@ -1296,6 +1306,15 @@ namespace customerportalapi.Services
                 invitationData.UnitExceptions.SetValueAndState(contract.Unit.Exceptions, StateEnum.Checked);
         }
 
+        private static void WithoutSignage(InvitationMandatoryData invitationData)
+        {
+            invitationData.UnitColour.SetValueAndState(string.Empty, StateEnum.Unchecked);
+            invitationData.UnitCorridor.SetValueAndState(string.Empty, StateEnum.Unchecked);
+            invitationData.UnitExceptions.SetValueAndState(string.Empty, StateEnum.Unchecked);
+            invitationData.UnitFloor.SetValueAndState(string.Empty, StateEnum.Unchecked);
+            invitationData.UnitZone.SetValueAndState(string.Empty, StateEnum.Unchecked);
+        }
+
         private async Task<bool> CheckMandatoryData(InvitationMandatoryData fields)
         {
             string validations = null;
@@ -1304,14 +1323,16 @@ namespace customerportalapi.Services
             {
                 MandatoryData data = (MandatoryData)property.GetValue(fields);
                 string value = string.Empty;
-                if (data != null && (data.State != StateEnum.Checked && data.State != StateEnum.Warning))
+                if (data != null && (data.State != StateEnum.Checked && data.State != StateEnum.Warning && data.State != StateEnum.Unchecked))
                 {
+                    // Solo se tienen en cuenta como campos no válidos los que tienen estado "StateEnum.Error"
                     validations += property.Name + ", ";
                 }
             }
 
             if (!string.IsNullOrEmpty(validations))
             {
+                // Solo se envía el mail de error de campos cuando hay campos en estado "StateEnum.Error"
                 await SendEmailInvitationError(fields);
                 throw new ServiceException("required some fields", HttpStatusCode.BadRequest, validations, ValidationMessages.Required);
             }

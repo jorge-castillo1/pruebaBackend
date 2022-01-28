@@ -44,7 +44,7 @@ namespace customerportalapi.Repositories.Test
 
             var response = new HttpResponseMessage
             {
-                Content = new StringContent("{ \"success\": \"true\", \"challenge_ts\": \"Fake challenge_ts\", \"hostname\": \"Fake hostname\"}")
+                Content = new StringContent("{\"success\": \"true\", \"challenge_ts\": \"2050-09-08T19:01:55.714942+03:00\", \"hostname\": \"Fake hostname\"}")
             };
             _handler.SetupAnyRequest()
                 .ReturnsAsync(response);
