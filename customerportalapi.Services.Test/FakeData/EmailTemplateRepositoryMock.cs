@@ -14,6 +14,7 @@ namespace customerportalapi.Services.Test.FakeData
             var db = new Mock<IEmailTemplateRepository>();
             db.Setup(x => x.getTemplate(It.IsAny<int>(), It.IsAny<string>())).Returns(new EmailTemplate()
             {
+                _id = "fake id",
                 code = 0,
                 subject = "fake subject",
                 body = "fake body",
@@ -24,6 +25,15 @@ namespace customerportalapi.Services.Test.FakeData
             {
                 _id = "fake id",
                 code = 0,
+                subject = "fake subject",
+                body = "fake body",
+                language = "fake lang",
+            }).Verifiable();
+
+            db.Setup(x => x.getTemplate(It.IsAny<int>(), It.IsAny<string>())).Returns(new EmailTemplate()
+            {
+                _id = "fake id",
+                code = 12,
                 subject = "fake subject",
                 body = "fake body",
                 language = "fake lang",

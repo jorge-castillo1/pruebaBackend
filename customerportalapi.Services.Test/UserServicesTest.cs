@@ -19,7 +19,7 @@ namespace customerportalapi.Services.Test
         private Mock<IMailRepository> _mailRepository;
         private Mock<IEmailTemplateRepository> _emailtemplateRepository;
         private Mock<IIdentityRepository> _identityRepository;
-        private Mock<IConfiguration> _config;
+        private IConfigurationRoot _config;
         private ILoginService _serviceLogin;
         private Mock<IUserAccountRepository> _userAccountRepository;
         private Mock<ILanguageRepository> _languageRepository;
@@ -36,13 +36,16 @@ namespace customerportalapi.Services.Test
         [TestInitialize]
         public void Setup()
         {
+            var builder = new ConfigurationBuilder();
+            builder.AddJsonFile("appsettings.json");
+
             _userRepository = UserRepositoryMock.ValidUserRepository();
             _profileRepository = ProfileRepositoryMock.ProfileRepository();
             _mailRepository = MailRepositoryMock.MailRepository();
             _emailtemplateRepository = EmailTemplateRepositoryMock.EmailTemplateRepository();
             _identityRepository = IdentityRepositoryMock.IdentityRepository();
-            _config = new Mock<IConfiguration>();
-            _serviceLogin = new LoginService(_identityRepository.Object, _userRepository.Object, _emailtemplateRepository.Object, _mailRepository.Object, _config.Object);
+            _config = builder.Build();
+            _serviceLogin = new LoginService(_identityRepository.Object, _userRepository.Object, _emailtemplateRepository.Object, _mailRepository.Object, _config);
             _userAccountRepository = UserAccountRepositoryMock.ValidUserRepository();
             _languageRepository = LanguageRepositoryMock.LanguageRepository();
             _contractRepository = ContractRepositoryMock.ContractRepository();
@@ -54,7 +57,6 @@ namespace customerportalapi.Services.Test
             _newUserRepository = NewUserRepositoryMock.ValidNewUserRepository();
             _googleCaptchaRepository = GoogleCaptchaRepositoryMock.GoogleCaptchaRepository();
         }
-
 
         [TestMethod]
         [ExpectedException(typeof(ServiceException), "No se ha producido la excepci�n esperada.")]
@@ -71,7 +73,7 @@ namespace customerportalapi.Services.Test
                 _mailRepository.Object,
                 _emailtemplateRepository.Object,
                 _identityRepository.Object,
-                _config.Object, _serviceLogin,
+                _config, _serviceLogin,
                 _userAccountRepository.Object,
                 _languageRepository.Object,
                  _contractRepository.Object,
@@ -100,7 +102,7 @@ namespace customerportalapi.Services.Test
                 _mailRepository.Object,
                 _emailtemplateRepository.Object,
                 _identityRepository.Object,
-                _config.Object,
+                _config,
                 _serviceLogin,
                 _userAccountRepository.Object,
                 _languageRepository.Object,
@@ -138,7 +140,7 @@ namespace customerportalapi.Services.Test
                 _mailRepository.Object,
                 _emailtemplateRepository.Object,
                 _identityRepository.Object,
-                _config.Object,
+                _config,
                 _serviceLogin,
                 _userAccountRepository.Object,
                 _languageRepository.Object,
@@ -177,7 +179,7 @@ namespace customerportalapi.Services.Test
                 _mailRepository.Object,
                 _emailtemplateRepository.Object,
                 _identityRepository.Object,
-                _config.Object,
+                _config,
                 _serviceLogin,
                 _userAccountRepository.Object,
                 _languageRepository.Object,
@@ -216,7 +218,7 @@ namespace customerportalapi.Services.Test
                 _mailRepository.Object,
                 _emailtemplateRepository.Object,
                 _identityRepository.Object,
-                _config.Object,
+                _config,
                 _serviceLogin,
                 _userAccountRepository.Object,
                 _languageRepository.Object,
@@ -254,7 +256,7 @@ namespace customerportalapi.Services.Test
                 _mailRepository.Object,
                 _emailtemplateRepository.Object,
                 _identityRepository.Object,
-                _config.Object,
+                _config,
                 _serviceLogin,
                 _userAccountRepository.Object,
                 _languageRepository.Object,
@@ -301,7 +303,7 @@ namespace customerportalapi.Services.Test
                 _mailRepository.Object,
                 _emailtemplateRepository.Object,
                 _identityRepository.Object,
-                _config.Object,
+                _config,
                 _serviceLogin,
                 _userAccountRepository.Object,
                 _languageRepository.Object,
@@ -337,7 +339,7 @@ namespace customerportalapi.Services.Test
                 _mailRepository.Object,
                 _emailtemplateRepository.Object,
                 _identityRepository.Object,
-                _config.Object,
+                _config,
                 _serviceLogin,
                 _userAccountRepository.Object,
                 _languageRepository.Object,
@@ -372,7 +374,7 @@ namespace customerportalapi.Services.Test
                 _mailRepository.Object,
                 _emailtemplateRepository.Object,
                 _identityRepository.Object,
-                _config.Object,
+                _config,
                 _serviceLogin,
                 _userAccountRepository.Object,
                 _languageRepository.Object,
@@ -413,7 +415,7 @@ namespace customerportalapi.Services.Test
                 _mailRepository.Object,
                 _emailtemplateRepository.Object,
                 _identityRepository.Object,
-                _config.Object,
+                _config,
                 _serviceLogin,
                 _userAccountRepository.Object,
                 _languageRepository.Object,
@@ -451,7 +453,7 @@ namespace customerportalapi.Services.Test
                 _mailRepository.Object,
                 _emailtemplateRepository.Object,
                 _identityRepository.Object,
-                _config.Object,
+                _config,
                 _serviceLogin,
                 _userAccountRepository.Object,
                 _languageRepository.Object,
@@ -492,7 +494,7 @@ namespace customerportalapi.Services.Test
                 _mailRepository.Object,
                 _emailtemplateRepository.Object,
                 _identityRepository.Object,
-                _config.Object,
+                _config,
                 _serviceLogin,
                 _userAccountRepository.Object,
                 _languageRepository.Object,
@@ -533,7 +535,7 @@ namespace customerportalapi.Services.Test
                 _mailRepository.Object,
                 _emailtemplateRepository.Object,
                 _identityRepository.Object,
-                _config.Object,
+                _config,
                 _serviceLogin,
                 _userAccountRepository.Object,
                 _languageRepository.Object,
@@ -574,7 +576,7 @@ namespace customerportalapi.Services.Test
                 _mailRepository.Object,
                 _emailtemplateRepository.Object,
                 _identityRepository.Object,
-                _config.Object,
+                _config,
                 _serviceLogin,
                 _userAccountRepository.Object,
                 _languageRepository.Object,
@@ -610,7 +612,7 @@ namespace customerportalapi.Services.Test
                 _mailRepository.Object,
                 _emailtemplateRepository.Object,
                 _identityRepository.Object,
-                _config.Object,
+                _config,
                 _serviceLogin,
                 _userAccountRepository.Object,
                 _languageRepository.Object,
@@ -640,7 +642,7 @@ namespace customerportalapi.Services.Test
                 _mailRepository.Object,
                 _emailtemplateRepository.Object,
                 _identityRepository.Object,
-                _config.Object,
+                _config,
                 _serviceLogin,
                 _userAccountRepository.Object,
                 _languageRepository.Object,
@@ -673,7 +675,7 @@ namespace customerportalapi.Services.Test
                 _mailRepository.Object,
                 _emailtemplateRepository.Object,
                 _identityRepository.Object,
-                _config.Object,
+                _config,
                 _serviceLogin,
                 _userAccountRepository.Object,
                 _languageRepository.Object,
@@ -717,7 +719,7 @@ namespace customerportalapi.Services.Test
                 _mailRepository.Object,
                 _emailtemplateRepository.Object,
                 _identityRepository.Object,
-                _config.Object,
+                _config,
                 _serviceLogin,
                 _userAccountRepository.Object,
                 _languageRepository.Object,
@@ -755,7 +757,7 @@ namespace customerportalapi.Services.Test
                 _mailRepository.Object,
                 _emailtemplateRepository.Object,
                 _identityRepository.Object,
-                _config.Object,
+                _config,
                 _serviceLogin,
                 _userAccountRepository.Object,
                 _languageRepository.Object,
@@ -790,7 +792,7 @@ namespace customerportalapi.Services.Test
                 _mailRepository.Object,
                 _emailtemplateRepository.Object,
                 _identityRepository.Object,
-                _config.Object,
+                _config,
                 _serviceLogin,
                 _userAccountRepository.Object,
                 _languageRepository.Object,
@@ -831,7 +833,7 @@ namespace customerportalapi.Services.Test
                 _mailRepository.Object,
                 _emailtemplateRepository.Object,
                 _identityRepository.Object,
-                _config.Object,
+                _config,
                 _serviceLogin,
                 _userAccountRepository.Object,
                 _languageRepository.Object,
