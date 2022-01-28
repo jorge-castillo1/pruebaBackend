@@ -1106,7 +1106,7 @@ namespace customerportalapi.Services
 
                     //Leaving
                     if (!string.IsNullOrEmpty(contractSM.Leaving))
-                        invitationData.Leaving.SetValueAndState(contractSM.Leaving.ToString(), StateEnum.Checked);
+                        invitationData.Leaving.SetValueAndState(contractSM.Leaving.ToString(), StateEnum.Error);
 
                     // only active contracts, if the contract has "terminated", the field "Leaving" have information.
                     if (contractSM != null && string.IsNullOrEmpty(contractSM.Leaving))
@@ -1323,14 +1323,16 @@ namespace customerportalapi.Services
             {
                 MandatoryData data = (MandatoryData)property.GetValue(fields);
                 string value = string.Empty;
-                if (data != null && (data.State != StateEnum.Checked && data.State != StateEnum.Warning))
+                if (data != null && (data.State != StateEnum.Checked && data.State != StateEnum.Warning && data.State != StateEnum.Unchecked))
                 {
+                    // Solo se tienen en cuenta como campos no válidos los que tienen estado "StateEnum.Error"
                     validations += property.Name + ", ";
                 }
             }
 
             if (!string.IsNullOrEmpty(validations))
             {
+                // Solo se envía el mail de error de campos cuando hay campos en estado "StateEnum.Error"
                 await SendEmailInvitationError(fields);
                 throw new ServiceException("required some fields", HttpStatusCode.BadRequest, validations, ValidationMessages.Required);
             }
