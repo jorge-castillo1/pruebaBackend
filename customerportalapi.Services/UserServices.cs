@@ -1061,6 +1061,9 @@ namespace customerportalapi.Services
                 }
                 list += $"<tr class='{state}'><td>{system}</td><td>{entity}</td><td>{property.Name}</td><td>{value}</td></tr>";
             }
+
+            var env = !string.IsNullOrEmpty(_config["Environment"]) ? $"<tr class='0'><td><strong>Environment: {_config["Environment"]}</strong></td></tr>" : string.Empty;
+            message.Body = message.Body.Replace("{{environment}}", env);
             message.Body = message.Body.Replace("{{rows}}", list);
 
             bool result = await _mailRepository.Send(message);
@@ -1105,8 +1108,8 @@ namespace customerportalapi.Services
                         invitationData.SMContract.SetValueAndState(contractSM.Contractnumber, StateEnum.Checked);
 
                     //Leaving
-                   // if (!string.IsNullOrEmpty(contractSM.Leaving))
-                   //     invitationData.Leaving.SetValueAndState(contractSM.Leaving.ToString(), StateEnum.Error);
+                    // if (!string.IsNullOrEmpty(contractSM.Leaving))
+                    //     invitationData.Leaving.SetValueAndState(contractSM.Leaving.ToString(), StateEnum.Error);
 
                     // only active contracts, if the contract has "terminated", the field "Leaving" have information.
                     if (contractSM != null) //&& string.IsNullOrEmpty(contractSM.Leaving))
