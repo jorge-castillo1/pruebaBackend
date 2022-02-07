@@ -109,7 +109,7 @@ namespace customerportalapi.Services
                 IBAN = bankmethod.IBAN
             };
 
-            ApsData aps = await _contractSMRepository.GetAps(request);
+            ApsData aps = await _contractSMRepository.UpdateAps(request);
             bankmethod.ApsReference = aps.Reference;
 
             //6. Generate and send Document To SignatureAPI
@@ -144,21 +144,21 @@ namespace customerportalapi.Services
 
         public async Task<bool> UpdatePaymentProcess(SignatureStatus value)
         {
-            _logger.LogInformation($"PaymentServices.SignatureStatus(SignatureStatus). value:{JsonConvert.SerializeObject(value)}.");
-            // Add Bank account to SM
-            //
+            _logger.LogInformation($"PaymentServices.UpdatePaymentProcess(SignatureStatus). value:{JsonConvert.SerializeObject(value)}.");
 
-
+            // 1.- Get User info from Mongo
             User user = _userRepository.GetCurrentUserByUsername(value.User);
             string usertype = user.Usertype == (int)UserTypes.Business ? AccountType.Business : string.Empty;
+
+            // 2.- Get info of account by DNI for update the payments data
             AccountProfile account = await _profileRepository.GetAccountAsync(user.Dni, usertype);
 
-            //Get signature data
+            // 3.- Get signature-data from signaturit
             SignatureSearchFilter filter = new SignatureSearchFilter();
             filter.Filters.SignatureId = value.SignatureId;
             List<SignatureProcess> signatures = await _signatureRepository.SearchSignaturesAsync(filter);
             if (signatures.Count != 1)
-                throw new ServiceException($"Error searching signature for this process. SignatureId:{value.SignatureId}.", HttpStatusCode.BadRequest, "SignatureId", "Not exist");
+                throw new ServiceException($"PaymentServices.UpdatePaymentProcess(). Error searching signature for this process. SignatureId:{value.SignatureId}.", HttpStatusCode.BadRequest, "SignatureId", "Not exist");
 
             ProcessedDocument processedpaymentdocument = null;
             var docIndex = 0;
@@ -168,53 +168,50 @@ namespace customerportalapi.Services
                     processedpaymentdocument = signatures[0].Documents[docIndex];
             }
 
-            // bankAccount.CustomerId = account.SmCustomerId;
-            // bankAccount.PaymentMethodId = "AT5";
-            // bankAccount.AccountName = processedpaymentdocument.BankAccountName;
-            // bankAccount.AccountNumber = processedpaymentdocument.BankAccountOrderNumber;
-            // bankAccount.Default = 1;
-            // bankAccount.Iban = processedpaymentdocument.BankAccountOrderNumber;
-            // await _accountSMRepository.AddBankAccountAsync(bankAccount);
-
-            // Send email to the store
+            // 4.- Get the template "UpdatePaymentMethod"
             EmailTemplate template = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.UpdatePaymentMethod, LanguageTypes.en.ToString());
             string smContractCode = processedpaymentdocument.SmContractCode;
 
-            //Contract contract = await _contractRepository.GetContractAsync(smContractCode);
+            // 5.- Get the FullContract with store data
             FullContract fullcontract = (await _contractRepository.GetFullContractsBySMCodeAsync(smContractCode)).FirstOrDefault();
             var contract = FullContractToContract.Mapper(fullcontract);
+            
+            if (contract == null || contract.StoreData == null || contract.StoreData.StoreId == null)
+                throw new ServiceException($"PaymentServices.UpdatePaymentProcess(). Store not found. StoreCode:{contract?.StoreData?.StoreCode}. StoreId.", HttpStatusCode.BadRequest, "StoreId");
 
-            List<Store> stores = await _storeRepository.GetStoresAsync();
-            Store store = stores.Find(x => x.StoreCode.Contains(contract.StoreData.StoreCode));
-            if (store.StoreId == null)
-                throw new ServiceException($"Store not found. StoreCode:{contract?.StoreData?.StoreCode}. StoreId.", HttpStatusCode.BadRequest, "StoreId");
-
-            PaymentMethodCRM payMetCRM = await _paymentMethodRepository.GetPaymentMethodByBankAccount(store.StoreId.ToString());
+            PaymentMethodCRM payMetCRM = await _paymentMethodRepository.GetPaymentMethodByBankAccount(contract.StoreData.StoreId.ToString());
             if (payMetCRM.SMId == null)
-                throw new ServiceException($"Error get payment method crm. StoreName:{store.StoreName}, StoreId:{store.StoreId}. SMId.", HttpStatusCode.BadRequest, "SMId");
+                throw new ServiceException($"PaymentServices.UpdatePaymentProcess(). Error get payment method crm. StoreName:{contract.StoreData.StoreName}, StoreId:{contract.StoreData.StoreId}. SMId.", HttpStatusCode.BadRequest, "SMId");
 
-            account.BankAccount = processedpaymentdocument.BankAccountOrderNumber;
+            //account.BankAccount = processedpaymentdocument.BankAccountOrderNumber; // this info is not valid
+            //Get info of bankaccount from Mongo db spacemanager.apsreferences
+            var aps = (await _contractSMRepository.GetApssByField("username", user.Username)).LastOrDefault();
+            if (aps != null && !string.IsNullOrEmpty(aps.IBAN))
+            {
+                account.BankAccount = aps.IBAN;
+                account.Token = aps.Reference;
+                account.PaymentMethodId = payMetCRM.PaymentMethodId;
+            }
             AccountProfile updateAccount = await _profileRepository.UpdateAccountAsync(account);
 
             contract.PaymentMethodId = payMetCRM.PaymentMethodId;
             Contract updateContract = await _contractRepository.UpdateContractAsync(contract);
-
             if (updateAccount.SmCustomerId == null)
-                throw new ServiceException("Error updating account. SmCustomerId.", HttpStatusCode.BadRequest, "SmCustomerId");
+                throw new ServiceException("PaymentServices.UpdatePaymentProcess(). Error updating account. SmCustomerId.", HttpStatusCode.BadRequest, "SmCustomerId");
 
             _logger.LogInformation($"PaymentServices.UpdatePaymentProcess(). Template StoreMail Information id:{template._id}.");
             if (template._id != null)
             {
                 Email message = new Email();
                 string storeMail = contract.StoreData.EmailAddress1;
-                _logger.LogInformation("Entering StoreMail Information", storeMail);
+                _logger.LogInformation("PaymentServices.UpdatePaymentProcess(). Entering StoreMail Information", storeMail);
                 if (storeMail == null) throw new ServiceException("Store mail not found", HttpStatusCode.NotFound);
                 if (!(_configuration["Environment"] == nameof(EnvironmentTypes.PRO))) storeMail = _configuration["MailStores"];
                 message.To.Add(storeMail);
-                _logger.LogInformation(" StoreMail Information", storeMail);
+                _logger.LogInformation("PaymentServices.UpdatePaymentProcess(). StoreMail Information", storeMail);
                 message.Subject = string.Format(template.subject, user.Name, user.Dni);
                 message.Body = string.Format(template.body, user.Name, user.Dni, processedpaymentdocument.DocumentNumber, "transferencia bancaria");
-                _logger.LogInformation("Sending StoreMail Information", storeMail);
+                _logger.LogInformation("PaymentServices.UpdatePaymentProcess(). Sending StoreMail Information", storeMail);
                 await _mailRepository.Send(message);
             }
             return true;
@@ -734,6 +731,7 @@ namespace customerportalapi.Services
 
             account.Token = card.Token;
             account.TokenUpdateDate = DateTime.UtcNow.ToString("O");
+
             AccountProfile updateAccount = await _profileRepository.UpdateAccountAsync(account);
 
             if (updateAccount.SmCustomerId == null)
