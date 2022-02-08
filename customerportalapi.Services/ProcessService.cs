@@ -98,7 +98,7 @@ namespace customerportalapi.Services
             return true;
         }
 
-        public Process UpdateSignatureProcess(SignatureStatus value)
+        public Process UpdateDocumentStatusProcess(SignatureStatus value)
         {
             if (value.Status != "document_completed" && value.Status != "document_canceled" && value.Status != "audit_trail_completed")
             {

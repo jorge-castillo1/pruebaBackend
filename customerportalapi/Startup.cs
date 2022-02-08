@@ -206,6 +206,25 @@ namespace customerportalapi
                 //Credentials = GetCredentials()
             });
 
+            services.AddHttpClient("httpClientSM", c =>
+            {
+                c.BaseAddress = new Uri(Configuration["GatewaySmUrl"]);
+                c.Timeout = new TimeSpan(0, 2, 0);  //2 minutes
+                c.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                c.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue
+                {
+                    NoCache = true,
+                    NoStore = true,
+                    MaxAge = new TimeSpan(0),
+                    MustRevalidate = true
+                };
+            }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            {
+                AllowAutoRedirect = false,
+                AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip,
+                //Credentials = GetCredentials()
+            });
+
             services.AddHttpClient("identityClient", c =>
             {
                 c.BaseAddress = new Uri(Configuration["Identity:BaseUri"]);

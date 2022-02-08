@@ -39,7 +39,7 @@ namespace customerportalapi.Controllers
             {
                 _logger.LogInformation($"EventsController.SignatureStatus(value). value: {JsonConvert.SerializeObject(value)}.");
 
-                Process process = _service.UpdateSignatureProcess(value);
+                Process process = _service.UpdateDocumentStatusProcess(value);
 
                 _logger.LogInformation($"EventsController.SignatureStatus(value). UpdateSignatureProcess. Returned process: {JsonConvert.SerializeObject(process)}.");
 
