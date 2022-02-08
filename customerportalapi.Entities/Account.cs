@@ -108,5 +108,7 @@ namespace customerportalapi.Entities
         public string TokenUpdateDate { get; set; }
 
         public bool? blue_updatewebportal { get; set; } = false;
+
+        public string CardNumber { get; set; }
     }
 }
