@@ -100,6 +100,10 @@ namespace customerportalapi.Services
 
                 if (!(_configuration["Environment"] == nameof(EnvironmentTypes.PRO))) mailTo = _configuration["MailStores"];
                 message.To.Add(mailTo);
+                if (!string.IsNullOrEmpty(_configuration["MailStoresCC"])) message.Cc.Add(_configuration["MailStoresCC"]);
+                if (!string.IsNullOrEmpty(_configuration["MailStoresCCO"])) message.Cco.Add(_configuration["MailStoresCCO"]);
+
+
                 message.Subject = string.Format(requestDigitalContractTemplate.subject, contract.Customer, dni);
                 // TODO: When we will implement client new template
                 // string htmlbody = requestDigitalContractTemplate.body.Replace("{", "{{").Replace("}", "}}").Replace("%{{", "{").Replace("}}%", "}");
@@ -296,6 +300,6 @@ namespace customerportalapi.Services
               ).Normalize(NormalizationForm.FormC).Replace(" ", "").ToLower();
         }
 
-        
+
     }
 }

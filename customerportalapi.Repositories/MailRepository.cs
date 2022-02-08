@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace customerportalapi.Repositories
 {
@@ -16,7 +17,7 @@ namespace customerportalapi.Repositories
         IConfiguration _configuration;
         private IMailClient _mailClient;
 
-        public MailRepository(IConfiguration configuration, IMailClient mailClient) 
+        public MailRepository(IConfiguration configuration, IMailClient mailClient)
         {
             _configuration = configuration;
             _mailClient = mailClient;
@@ -24,28 +25,36 @@ namespace customerportalapi.Repositories
 
         public async Task<bool> Send(Email messageData)
         {
+            var msData = SplitEmail(messageData);
+
             MimeMessage message = new MimeMessage();
             message.From.Add(new MailboxAddress(_configuration["MailFrom"]));
 
-            foreach (string address in messageData.To)
+            foreach (string address in msData.To)
                 message.To.Add(new MailboxAddress(address));
 
-            if (messageData.Cc.Count == 1 && messageData.Cc[0] == "")
+                     
+            foreach(string addCCO in msData.Cco)
             {
-                foreach (string address in messageData.To)
+                message.Bcc.Add(new MailboxAddress(addCCO));
+            }
+            
+            if (msData.Cc.Count == 1 && msData.Cc[0] == "")
+            {
+                foreach (string address in msData.To)
                     message.Cc.Add(new MailboxAddress(address));
             }
             else
             {
-                foreach (string address in messageData.Cc)
+                foreach (string address in msData.Cc)
                     message.Cc.Add(new MailboxAddress(address));
             }
-            message.Subject = string.IsNullOrEmpty(messageData.Subject) ? " " : messageData.Subject;
-            if (!string.IsNullOrEmpty(messageData.Body))
+            message.Subject = string.IsNullOrEmpty(msData.Subject) ? " " : msData.Subject;
+            if (!string.IsNullOrEmpty(msData.Body))
             {
                 message.Body = new TextPart(TextFormat.Html)
                 {
-                    Text = messageData.Body
+                    Text = msData.Body
                 };
             }
             else
@@ -60,6 +69,40 @@ namespace customerportalapi.Repositories
             _mailClient.Disconnect(true);
 
             return true;
+        }
+
+
+        public Email SplitEmail(Email messageData)
+        {
+            List<string> mailto = new List<string>();
+            foreach (var mail in messageData.To)
+            {
+                List<string> m = mail.Split(';', ',').ToList();
+                mailto.AddRange(m);
+            }
+            messageData.To.Clear();
+            messageData.To.AddRange(mailto);
+
+            List<string> mailcc = new List<string>();
+            foreach (var mail in messageData.Cc)
+            {
+                List<string> m = mail.Split(';', ',').ToList();
+                mailcc.AddRange(m);
+            }
+            messageData.Cc.Clear();
+            messageData.Cc.AddRange(mailcc);
+
+
+            List<string> mailcco = new List<string>();
+            foreach (var mail in messageData.Cco)
+            {
+                List<string> m = mail.Split(';', ',').ToList();
+                mailcco.AddRange(m);
+            }
+            messageData.Cco.Clear();
+            messageData.Cco.AddRange(mailcco);
+
+            return messageData;
         }
 
         public void Dispose()
