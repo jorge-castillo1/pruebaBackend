@@ -190,8 +190,9 @@ namespace customerportalapi.Services
             if (aps != null && !string.IsNullOrEmpty(aps.IBAN))
             {
                 account.BankAccount = aps.IBAN;
-                account.Token = aps.Reference;
+                //account.Token = aps.Reference;
                 account.PaymentMethodId = payMetCRM.PaymentMethodId;
+                account.CardNumber = null;
 
                 // 7.1.- Update account CRM
                 AccountProfile updateAccount = await _profileRepository.UpdateAccountAsync(account);
@@ -747,6 +748,7 @@ namespace customerportalapi.Services
             account.TokenUpdateDate = DateTime.UtcNow.ToString("O");
             account.PaymentMethodId = payMetCRM.PaymentMethodId;
             account.CardNumber = card.Cardnumber;
+            account.BankAccount = null;
 
             AccountProfile updateAccount = await _profileRepository.UpdateAccountAsync(account);
 
