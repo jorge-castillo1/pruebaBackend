@@ -83,7 +83,6 @@ namespace customerportalapi.Services
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
 
             //2. Process paymentmethod change
-
             PaymentMethodBank bankmethod = (PaymentMethodBank)paymentMethod;
 
             //3. Validate contract number
@@ -100,7 +99,14 @@ namespace customerportalapi.Services
             if (processes.Count > 0)
                 throw new ServiceException("User have same pending process for this contract number", HttpStatusCode.BadRequest, "ContractNumber", "Pending process");
 
-            //5. Get Aps
+            // 5. Get & update account
+            AccountProfile account = await _profileRepository.GetAccountByDocumentNumberAsync(user.Dni);
+            account.TokenUpdate = TokenUpdateTypes.Pending.ToString();
+            account.TokenUpdateDate = account.TpvSincronizationDate = DateTime.Now.ToString("O");
+            account.BankAccount = bankmethod.IBAN;
+            account = await _profileRepository.UpdateAccountAsync(account);
+
+            //6. Get Aps
             ApsRequest request = new ApsRequest()
             {
                 Dni = user.Dni,
@@ -189,10 +195,10 @@ namespace customerportalapi.Services
             var aps = (await _contractSMRepository.GetApssByField("username", user.Username)).Where(x => !string.IsNullOrEmpty(x.IBAN)).LastOrDefault();
             if (aps != null && !string.IsNullOrEmpty(aps.IBAN))
             {
-                account.BankAccount = aps.IBAN;
-                //account.Token = aps.Reference;
                 account.PaymentMethodId = payMetCRM.PaymentMethodId;
-                account.CardNumber = null;
+                //account.BankAccount = aps.IBAN;
+                account.TokenUpdate = TokenUpdateTypes.OK.ToString();
+                account.TpvSincronizationDate = DateTime.Now.ToString("O");
 
                 // 7.1.- Update account CRM
                 AccountProfile updateAccount = await _profileRepository.UpdateAccountAsync(account);
@@ -744,11 +750,12 @@ namespace customerportalapi.Services
             if (payMetCRM.SMId == null)
                 throw new ServiceException("Error payment method crm", HttpStatusCode.BadRequest, "SMId");
 
-            account.Token = card.Token;
-            account.TokenUpdateDate = DateTime.UtcNow.ToString("O");
             account.PaymentMethodId = payMetCRM.PaymentMethodId;
+            account.Token = card.Token;
             account.CardNumber = card.Cardnumber;
-            account.BankAccount = null;
+            account.TokenUpdate = TokenUpdateTypes.OK.ToString();
+            account.TpvSincronizationDate = DateTime.Now.ToString("O");
+            account.UpdateToken = "Yes";
 
             AccountProfile updateAccount = await _profileRepository.UpdateAccountAsync(account);
 
@@ -1122,11 +1129,11 @@ namespace customerportalapi.Services
             if (user.Id == null)
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
 
-            //2. Get the udpated token
+            // 2. Get the udpated token
             AccountProfile account = await _profileRepository.GetAccountByDocumentNumberAsync(user.Dni);
             updateCardData.Token = account.Token;
 
-            // 2. Validate data
+            // 3. Validate data
             PaymentMethodUpdateCardData cardmethod = (PaymentMethodUpdateCardData)updateCardData;
 
             if (string.IsNullOrEmpty(cardmethod.SmContractCode))
@@ -1148,7 +1155,13 @@ namespace customerportalapi.Services
             };
             bool result = await CancelProcessByFilter(filter);
 
+            // 4. Call Precognis/openbrabo
             string stringHtml = await _paymentRepository.UpdateCardLoad(updateCardData);
+
+            // 5. Update fields "TokenUpdate to pending & TokenUpdateDate" in CRM Account
+            account.TokenUpdate = TokenUpdateTypes.Pending.ToString();            
+            account.TokenUpdateDate = account.TpvSincronizationDate = DateTime.Now.ToString("O");
+            account = await _profileRepository.UpdateAccountAsync(account);
 
             Card card = new Card()
             {
