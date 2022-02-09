@@ -98,15 +98,8 @@ namespace customerportalapi.Services
             List<Process> processes = _processRepository.Find(searchProcess);
             if (processes.Count > 0)
                 throw new ServiceException("User have same pending process for this contract number", HttpStatusCode.BadRequest, "ContractNumber", "Pending process");
-
-            // 5. Get & update account
-            AccountProfile account = await _profileRepository.GetAccountByDocumentNumberAsync(user.Dni);
-            account.TokenUpdate = TokenUpdateTypes.Pending.ToString();
-            account.TokenUpdateDate = account.TpvSincronizationDate = DateTime.Now.ToString("O");
-            account.BankAccount = bankmethod.IBAN;
-            account = await _profileRepository.UpdateAccountAsync(account);
-
-            //6. Get Aps
+            
+            //5. Get Aps
             ApsRequest request = new ApsRequest()
             {
                 Dni = user.Dni,
@@ -129,7 +122,14 @@ namespace customerportalapi.Services
 
             _logger.LogInformation($"PaymentServices.ChangePaymentMethod().CreateSignature. documentid: {documentid}");
 
-            //7. Create a change method payment process
+            //7. Get & update account
+            AccountProfile account = await _profileRepository.GetAccountByDocumentNumberAsync(user.Dni);
+            account.TokenUpdate = ((int)TokenUpdateTypes.Pending).ToString();
+            account.TokenUpdateDate = account.TpvSincronizationDate = DateTime.Now.ToString("O");
+            account.BankAccount = bankmethod.IBAN;
+            account = await _profileRepository.UpdateAccountAsync(account);
+
+            //8. Create a change method payment process
             Process process = new Process();
             process.Username = user.Username;
             process.ProcessType = (int)ProcessTypes.PaymentMethodChangeBank;
@@ -197,7 +197,7 @@ namespace customerportalapi.Services
             {
                 account.PaymentMethodId = payMetCRM.PaymentMethodId;
                 //account.BankAccount = aps.IBAN;
-                account.TokenUpdate = TokenUpdateTypes.OK.ToString();
+                account.TokenUpdate = ((int)TokenUpdateTypes.OK).ToString();
                 account.TpvSincronizationDate = DateTime.Now.ToString("O");
 
                 // 7.1.- Update account CRM
@@ -753,7 +753,7 @@ namespace customerportalapi.Services
             account.PaymentMethodId = payMetCRM.PaymentMethodId;
             account.Token = card.Token;
             account.CardNumber = card.Cardnumber;
-            account.TokenUpdate = TokenUpdateTypes.OK.ToString();
+            account.TokenUpdate = ((int)TokenUpdateTypes.OK).ToString();
             account.TpvSincronizationDate = DateTime.Now.ToString("O");
             account.UpdateToken = "Yes";
 
@@ -1159,7 +1159,7 @@ namespace customerportalapi.Services
             string stringHtml = await _paymentRepository.UpdateCardLoad(updateCardData);
 
             // 5. Update fields "TokenUpdate to pending & TokenUpdateDate" in CRM Account
-            account.TokenUpdate = TokenUpdateTypes.Pending.ToString();            
+            account.TokenUpdate = ((int)TokenUpdateTypes.Pending).ToString();
             account.TokenUpdateDate = account.TpvSincronizationDate = DateTime.Now.ToString("O");
             account = await _profileRepository.UpdateAccountAsync(account);
 
