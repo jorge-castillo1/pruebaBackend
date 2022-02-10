@@ -769,7 +769,7 @@ namespace customerportalapi.Services
             account.CardNumber = card.Cardnumber;
             account.TokenUpdate = ((int)TokenUpdateTypes.OK).ToString();
             account.TpvSincronizationDate = DateTime.Now.ToString("O");
-            account.UpdateToken = true.ToString().ToLower();
+            account.UpdateToken = true;
 
             AccountProfile updateAccount = await _profileRepository.UpdateAccountAsync(account);
 
@@ -1175,7 +1175,7 @@ namespace customerportalapi.Services
             // 5. Update fields "TokenUpdate to pending & TokenUpdateDate" in CRM Account
             account.TokenUpdate = ((int)TokenUpdateTypes.Pending).ToString();
             account.TokenUpdateDate = account.TpvSincronizationDate = DateTime.Now.ToString("O");
-            account.UpdateToken = false.ToString().ToLower();
+            account.UpdateToken = false;
             account = await _profileRepository.UpdateAccountAsync(account);
 
             Card card = new Card()

@@ -26,7 +26,7 @@ namespace customerportalapi.Entities
         //public string TpvSincronization { get; set; } // no se usa porque toma el mismo valor que el TokenUpdate
         public string TpvSincronizationDate { get; set; }
         public string UseThisAddress { get; set; }
-        public string UpdateToken { get; set; }
+        public bool? UpdateToken { get; set; }
     }
 
     public class AccountProfile
@@ -74,6 +74,6 @@ namespace customerportalapi.Entities
         //public string TpvSincronization { get; set; } // no se usa porque toma el mismo valor que el TokenUpdate
         public string TpvSincronizationDate { get; set; }
         public string UseThisAddress { get; set; }
-        public string UpdateToken { get; set; }
+        public bool? UpdateToken { get; set; }
     }
 }
