@@ -98,7 +98,7 @@ namespace customerportalapi.Services
             List<Process> processes = _processRepository.Find(searchProcess);
             if (processes.Count > 0)
                 throw new ServiceException("User have same pending process for this contract number", HttpStatusCode.BadRequest, "ContractNumber", "Pending process");
-            
+
             //5. Get Aps
             ApsRequest request = new ApsRequest()
             {
@@ -126,7 +126,7 @@ namespace customerportalapi.Services
             AccountProfile account = await _profileRepository.GetAccountByDocumentNumberAsync(user.Dni);
             account.TokenUpdate = ((int)TokenUpdateTypes.Pending).ToString();
             account.TokenUpdateDate = account.TpvSincronizationDate = DateTime.Now.ToString("O");
-            account.BankAccount = bankmethod.IBAN;
+            // Como aun no se ha firmado el documento SEPA, no se puede grabar el IBAN en CRM
             account = await _profileRepository.UpdateAccountAsync(account);
 
             //8. Create a change method payment process
@@ -190,24 +190,38 @@ namespace customerportalapi.Services
             if (payMetCRM.SMId == null)
                 throw new ServiceException($"PaymentServices.UpdatePaymentProcess(). Error get payment method crm. StoreName:{contract.StoreData.StoreName}, StoreId:{contract.StoreData.StoreId}. SMId.", HttpStatusCode.BadRequest, "SMId");
 
-            //account.BankAccount = processedpaymentdocument.BankAccountOrderNumber; // this info is not valid
+            var updateAcc = false;
             // 7.- Get info of bankaccount from Mongo db spacemanager.apsreferences
-            var aps = (await _contractSMRepository.GetApssByField("username", user.Username)).Where(x => !string.IsNullOrEmpty(x.IBAN)).LastOrDefault();
-            if (aps != null && !string.IsNullOrEmpty(aps.IBAN))
+            if (!string.IsNullOrEmpty(processedpaymentdocument.BankAccountOrderNumber.Trim()) && processedpaymentdocument.BankAccountOrderNumber != "null")
+            {
+                account.BankAccount = processedpaymentdocument.BankAccountOrderNumber;
+                updateAcc = true;
+            }
+            else
+            {
+                // Get IBAN from Aps reference table
+                var aps = (await _contractSMRepository.GetApssByField("username", user.Username)).Where(x => !string.IsNullOrEmpty(x.IBAN)).LastOrDefault();
+                if (aps != null && !string.IsNullOrEmpty(aps.IBAN))
+                {
+                    account.BankAccount = aps.IBAN;
+                    updateAcc = true;
+                }
+                else
+                {
+                    throw new ServiceException($"PaymentServices.UpdatePaymentProcess(). No IBAN found in Aps. Username:{user.Username}", HttpStatusCode.BadRequest);
+                }
+            }
+
+            if (updateAcc)
             {
                 account.PaymentMethodId = payMetCRM.PaymentMethodId;
-                //account.BankAccount = aps.IBAN;
                 account.TokenUpdate = ((int)TokenUpdateTypes.OK).ToString();
                 account.TpvSincronizationDate = DateTime.Now.ToString("O");
 
                 // 7.1.- Update account CRM
-                AccountProfile updateAccount = await _profileRepository.UpdateAccountAsync(account);
-                if (updateAccount.SmCustomerId == null)
+                AccountProfile updatedAccount = await _profileRepository.UpdateAccountAsync(account);
+                if (updatedAccount.SmCustomerId == null)
                     throw new ServiceException("PaymentServices.UpdatePaymentProcess(). Error updating account. SmCustomerId.", HttpStatusCode.BadRequest, "SmCustomerId");
-            }
-            else
-            {
-                throw new ServiceException($"PaymentServices.UpdatePaymentProcess(). No IBAN found in Aps. Username:{user.Username}", HttpStatusCode.BadRequest);
             }
 
             // 8.- Update contract CRM
@@ -755,7 +769,7 @@ namespace customerportalapi.Services
             account.CardNumber = card.Cardnumber;
             account.TokenUpdate = ((int)TokenUpdateTypes.OK).ToString();
             account.TpvSincronizationDate = DateTime.Now.ToString("O");
-            account.UpdateToken = "Yes";
+            account.UpdateToken = true.ToString().ToLower();
 
             AccountProfile updateAccount = await _profileRepository.UpdateAccountAsync(account);
 
@@ -1161,6 +1175,7 @@ namespace customerportalapi.Services
             // 5. Update fields "TokenUpdate to pending & TokenUpdateDate" in CRM Account
             account.TokenUpdate = ((int)TokenUpdateTypes.Pending).ToString();
             account.TokenUpdateDate = account.TpvSincronizationDate = DateTime.Now.ToString("O");
+            account.UpdateToken = false.ToString().ToLower();
             account = await _profileRepository.UpdateAccountAsync(account);
 
             Card card = new Card()
