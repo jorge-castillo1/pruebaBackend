@@ -148,7 +148,7 @@ namespace customerportalapi.Services
             return true;
         }
 
-        public async Task<bool> UpdatePaymentProcess(SignatureStatus value)
+        public async Task<bool> UpdatePaymentBankProcess(SignatureStatus value)
         {
             _logger.LogInformation($"PaymentServices.UpdatePaymentProcess(SignatureStatus). value:{JsonConvert.SerializeObject(value)}.");
 

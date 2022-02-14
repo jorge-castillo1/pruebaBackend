@@ -48,7 +48,7 @@ namespace customerportalapi.Controllers
                     if (process.ProcessType == (int)ProcessTypes.PaymentMethodChangeBank && process.ProcessStatus == (int)ProcessStatuses.Accepted)
                     {
                         _logger.LogInformation($"EventsController.SignatureStatus(value). ProcessType == PaymentMethodChangeBank && ProcessStatuses == Accepted: UpdatePaymentProcess(value).");
-                        await _paymentService.UpdatePaymentProcess(value);
+                        await _paymentService.UpdatePaymentBankProcess(value);
                     }
 
                     if (process.ProcessType == (int)ProcessTypes.PaymentMethodChangeCardSignature && process.ProcessStatus == (int)ProcessStatuses.Accepted)
