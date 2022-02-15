@@ -657,8 +657,16 @@ namespace customerportalapi.Services
                 UseThisAddress = value.UseThisAddress,
                 Token = value.Token,
                 TokenUpdateDate = value.TokenUpdateDate,
+                TokenUpdate = value.TokenUpdate,
                 BankAccount = value.BankAccount,
-                blue_updatewebportal = true
+                blue_updatewebportal = true,
+                CardNumber = value.CardNumber,
+                CustomerType = value.CustomerType,
+                DocumentNumber = value.DocumentNumber,
+                PaymentMethodId = value.PaymentMethodId,
+                Profilepicture = value.Profilepicture,
+                UpdateToken = value.UpdateToken,
+                TpvSincronizationDate = value.TpvSincronizationDate,
 
             };
 
@@ -842,6 +850,8 @@ namespace customerportalapi.Services
                 BankAccount = entity.BankAccount,
                 Token = entity.Token,
                 TokenUpdateDate = entity.TokenUpdateDate,
+                CardNumber = entity.CardNumber,
+                TokenUpdate = entity.TokenUpdate,
                 AddressList = new List<Address>
                 {
                     new Address
