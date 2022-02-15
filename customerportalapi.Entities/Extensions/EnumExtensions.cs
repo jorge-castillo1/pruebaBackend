@@ -6,9 +6,9 @@ namespace customerportalapi.Entities.Extensions
     public static class EnumExtensions
     {
         /// <summary>
-        /// USAGE EXAMPLE: "var desc = RoleGroupTypesExtensions.GetDescription(RoleGroupTypes.StoreManagers);"
+        /// USAGE EXAMPLE: "var desc = DocumentStatusTypes.Ready.GetDescription();"
         /// </summary>
-        public static string GetDescription<T>(this T enumerationValue) where T : struct
+        public static string GetDescription<T>(this T enumerationValue) where T : struct, IConvertible
         {
             var type = enumerationValue.GetType();
             if (!type.IsEnum)
@@ -26,14 +26,20 @@ namespace customerportalapi.Entities.Extensions
             return enumerationValue.ToString();
         }
 
-        public static string GetDescription(this Enum value)
+        public static int ToInt<T>(this T soure) where T : struct, IConvertible
         {
-            var type = value.GetType();
-            var fieldInfo = type.GetField(value.ToString());
-            var attributes = fieldInfo?.GetCustomAttributes(typeof(DescriptionAttribute), false) as DescriptionAttribute[];
-            return attributes?.Length > 0 ?
-                attributes?[0].Description :
-                null;
+            if (!typeof(T).IsEnum)
+                throw new ArgumentException("T must be an enumerated type");
+
+            return (int)(IConvertible)soure;
+        }
+
+        public static int Count<T>(this T soure) where T : struct, IConvertible
+        {
+            if (!typeof(T).IsEnum)
+                throw new ArgumentException("T must be an enumerated type");
+
+            return Enum.GetNames(typeof(T)).Length;
         }
     }
 }
