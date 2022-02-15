@@ -1541,10 +1541,10 @@ namespace customerportalapi.Services
 
             foreach (PaymentMethods payMethod in payMet.PaymentMethods)
             {
-                string name = payMethod.Name;
-                if (name == "Recibo domiciliado" || name == "Tarjeta Virtual"
-                    || name == "Prélèvement Automatique" || name == "Carte Bancaire électronique"
-                    || name == "Cartão virtual")
+                string name = payMethod.Name.ToLower();
+                if (name == "recibo domiciliado" || name == "tarjeta virtual"
+                    || name == "prélèvement automatique" || name == "carte bancaire électronique"
+                    || name == "cartão virtual")
                 {
                     availablePayMet.Add(payMethod);
                 }
