@@ -25,7 +25,8 @@ namespace customerportalapi.Repositories
 
         public async Task<bool> Send(Email messageData)
         {
-            var msData = SplitEmail(messageData);
+            var msCC = AddEmailCCandCCOfromConfig(messageData);
+            var msData = SplitEmail(msCC);
 
             MimeMessage message = new MimeMessage();
             message.From.Add(new MailboxAddress(_configuration["MailFrom"]));
@@ -71,6 +72,26 @@ namespace customerportalapi.Repositories
             return true;
         }
 
+        public Email AddEmailCCandCCOfromConfig(Email messageData)
+        {
+            if (!string.IsNullOrEmpty(messageData.EmailFlow))
+            {
+
+                var ccoMail= $"Mail{messageData.EmailFlow}CCO";
+                if (!string.IsNullOrEmpty(_configuration[ccoMail]))
+                {
+                    messageData.Cco.Add(_configuration[ccoMail]);
+                }
+
+                var ccMail = $"Mail{messageData.EmailFlow}CC";
+                if (!string.IsNullOrEmpty(_configuration[ccMail]))
+                {
+                    messageData.Cc.Add(_configuration[ccMail]);
+                }
+            }
+
+            return messageData;
+        }
 
         public Email SplitEmail(Email messageData)
         {

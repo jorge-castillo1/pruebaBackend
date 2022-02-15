@@ -533,6 +533,7 @@ namespace customerportalapi.Services
             if (editDataCustomerTemplate._id != null)
             {
                 Email message = new Email();
+                message.EmailFlow = EmailFlow.UpdateAccessCode.ToString();
                 message.To.Add(currentUser.Email);
                 message.Subject = editDataCustomerTemplate.subject;
                 string htmlbody = editDataCustomerTemplate.body.Replace("{", "{{").Replace("}", "}}").Replace("%{{", "{").Replace("}}%", "}");

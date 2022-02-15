@@ -18,5 +18,6 @@
         WelcomeEmailShort = 13, //creación
         ErrorInvitationEmailAlreadyExists = 14,
         ErrorChangeEmailAlreadyExists = 15,
+        SaveNewUser,
     }
 }
