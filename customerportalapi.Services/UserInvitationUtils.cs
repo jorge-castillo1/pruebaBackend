@@ -141,7 +141,7 @@ namespace customerportalapi.Services
 
                         case "UnitName":
                             body = body.Replace(field, data.Value);
-                            char[] unitName = data.Value.Trim().PadLeft(4,'0').ToCharArray();
+                            char[] unitName = data.Value.Trim().PadLeft(4, '0').ToCharArray();
 
                             int num;
                             if (unitName[0].ToString() != null && int.TryParse(unitName[0].ToString(), out num))

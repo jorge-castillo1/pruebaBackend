@@ -116,6 +116,7 @@ namespace customerportalapi.Services
                         throw new ServiceException("Store mail not found", HttpStatusCode.NotFound, FieldNames.Email, ValidationMessages.NotFound);
 
                     Email message = new Email();
+                    message.EmailFlow = EmailFlowType.GetProfile.ToString();
                     message.To.Add(mailTo);
                     message.Subject = template.subject;
                     message.Body = string.Format(string.Format(template.body, user.Name, user.Dni));
@@ -284,6 +285,7 @@ namespace customerportalapi.Services
             if (editDataCustomerTemplate._id != null)
             {
                 Email message = new Email();
+                message.EmailFlow = EmailFlowType.UpdateProfile.ToString();
                 message.To.Add(user.Email);
                 message.Subject = editDataCustomerTemplate.subject;
                 string htmlbody = editDataCustomerTemplate.body.Replace("{", "{{").Replace("}", "}}").Replace("%{{", "{").Replace("}}%", "}");
@@ -325,6 +327,7 @@ namespace customerportalapi.Services
                     throw new ServiceException("Store mail not found", HttpStatusCode.NotFound, FieldNames.Email, ValidationMessages.NotFound);
 
                 Email message2 = new Email();
+                message2.EmailFlow = EmailFlowType.InviteUser.ToString();
                 message2.To.Add(mailTo);
                 message2.Subject = template.subject;
                 message2.Body = string.Format(template.body, user.Name, user.Dni, user.Email);
@@ -440,6 +443,7 @@ namespace customerportalapi.Services
                 throw new ServiceException("Email template not found, templateCode: " + templateId, HttpStatusCode.NotFound, FieldNames.Email + FieldNames.Template, ValidationMessages.NotFound);
 
             var message = new Email { Subject = invitationTemplate.subject };
+            message.EmailFlow = EmailFlowType.SendWelcome.ToString();
             message.To.Add(user.Email);
             message.Body = UserInvitationUtils.GetBodyFormatted(invitationTemplate, user, invitationFields, _config["BaseUrl"], _config["InviteConfirmation"]);
 
@@ -748,6 +752,7 @@ namespace customerportalapi.Services
                 if (user.Id != null)
                 {
                     Email message = new Email();
+                    message.EmailFlow = EmailFlowType.UpdateAccount.ToString();
                     message.To.Add(user.Email);
                     message.Subject = editDataCustomerTemplate.subject;
                     string htmlbody = editDataCustomerTemplate.body.Replace("{", "{{").Replace("}", "}}").Replace("%{{", "{").Replace("}}%", "}");
@@ -807,6 +812,7 @@ namespace customerportalapi.Services
                     //3. Send Email
                     emailMessage = GenerateEmail(EmailTemplateTypes.FormCall, user, userProfile, value);
                     customerEmailMessage = GenerateEmail(EmailTemplateTypes.FormCallCustomer, user, userProfile, value);
+                    customerEmailMessage.EmailFlow = EmailFlowType.ContactCall.ToString();
                     await _mailRepository.Send(customerEmailMessage);
 
                     break;
@@ -824,10 +830,11 @@ namespace customerportalapi.Services
                     //3. Send Email
                     emailMessage = GenerateEmail(EmailTemplateTypes.FormContact, user, userProfile, value);
                     customerEmailMessage = GenerateEmail(EmailTemplateTypes.FormContactCustomer, user, userProfile, value);
+                    customerEmailMessage.EmailFlow = EmailFlowType.ContactContact.ToString();
                     await _mailRepository.Send(customerEmailMessage);
                     break;
             }
-
+            emailMessage.EmailFlow = EmailFlowType.Contact.ToString();
             var result = await _mailRepository.Send(emailMessage);
             return result;
         }
@@ -1050,6 +1057,7 @@ namespace customerportalapi.Services
                 throw new ServiceException("Store mail not found", HttpStatusCode.NotFound, FieldNames.Email, ValidationMessages.NotFound);
 
             Email message = new Email();
+            message.EmailFlow = EmailFlowType.SendMailInvitationError.ToString();
             message.To.Add(mailTo);
             message.Subject = invitationErrorTemplate.subject;
             message.Body = invitationErrorTemplate.body;
@@ -1071,6 +1079,9 @@ namespace customerportalapi.Services
                 }
                 list += $"<tr class='{state}'><td>{system}</td><td>{entity}</td><td>{property.Name}</td><td>{value}</td></tr>";
             }
+
+            var env = !string.IsNullOrEmpty(_config["Environment"]) ? $"<tr class='0'><td><strong>Environment: {_config["Environment"]}</strong></td></tr>" : string.Empty;
+            message.Body = message.Body.Replace("{{environment}}", env);
             message.Body = message.Body.Replace("{{rows}}", list);
 
             bool result = await _mailRepository.Send(message);
@@ -1401,6 +1412,7 @@ namespace customerportalapi.Services
                     throw new ServiceException("Store mail not found", HttpStatusCode.NotFound, FieldNames.Email, ValidationMessages.NotFound);
 
                 Email message = new Email();
+                message.EmailFlow = EmailFlowType.SaveNewUser.ToString();
                 message.To.Add(mailTo);
                 if (_config["Environment"] == nameof(EnvironmentTypes.DEV) || _config["Environment"] == nameof(EnvironmentTypes.PRE))
                 {

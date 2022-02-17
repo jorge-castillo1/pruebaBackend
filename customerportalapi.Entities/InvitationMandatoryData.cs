@@ -5,7 +5,7 @@ using System.Text;
 
 namespace customerportalapi.Entities
 {
-    public class InvitationMandatoryData 
+    public class InvitationMandatoryData
     {
         public MandatoryData InvokedBy { get; set; }
         public MandatoryData ContactUsername { get; set; }
@@ -13,7 +13,6 @@ namespace customerportalapi.Entities
         public MandatoryData SmContractCode { get; set; }
         public MandatoryData SMContract { get; set; }
         public MandatoryData Leaving { get; set; }
-        
         public MandatoryData ActiveContract { get; set; }
         public MandatoryData ContractStoreCode { get; set; }
         public MandatoryData StoreCode { get; set; }
