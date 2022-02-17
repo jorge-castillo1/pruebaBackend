@@ -235,10 +235,12 @@ namespace customerportalapi.Services
             {
                 // 9.- Send Mail
                 Email message = new Email();
+                message.EmailFlow = EmailFlowType.UpdatePayment.ToString();
                 string storeMail = contract.StoreData.EmailAddress1;
                 _logger.LogInformation("PaymentServices.UpdatePaymentProcess(). Entering StoreMail Information", storeMail);
                 if (storeMail == null) throw new ServiceException("Store mail not found", HttpStatusCode.NotFound);
                 if (!(_configuration["Environment"] == nameof(EnvironmentTypes.PRO))) storeMail = _configuration["MailStores"];
+                
                 message.To.Add(storeMail);
                 _logger.LogInformation("PaymentServices.UpdatePaymentProcess(). StoreMail Information", storeMail);
                 message.Subject = string.Format(template.subject, user.Name, user.Dni);
@@ -795,10 +797,12 @@ namespace customerportalapi.Services
             if (template._id != null)
             {
                 Email message = new Email();
+                message.EmailFlow = EmailFlowType.UpdatePaymentCard.ToString();
                 string storeMail = contract.StoreData.EmailAddress1;
                 _logger.LogInformation("Entering StoreMail Information", storeMail);
                 if (storeMail == null) throw new ServiceException("Store mail not found", HttpStatusCode.NotFound);
                 if (!(_configuration["Environment"] == nameof(EnvironmentTypes.PRO))) storeMail = _configuration["MailStores"];
+
                 message.To.Add(storeMail);
                 message.Subject = string.Format(template.subject, user.Name, user.Dni);
                 message.Body = string.Format(template.body, user.Name, user.Dni, process.ContractNumber, "tarjeta de crédito");

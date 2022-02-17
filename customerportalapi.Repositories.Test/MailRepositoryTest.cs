@@ -59,5 +59,39 @@ namespace customerportalapi.Repositories.Test
             _mailclient.Verify(x => x.SendAsync(It.IsAny<MimeMessage>()));
             _mailclient.Verify(x => x.Disconnect(It.IsAny<bool>()));
         }
+
+
+        [TestMethod]
+        public void AlEnviarCorreoConMultiplesEmails_NoSeProducenErrores()
+        {
+            //Arrange
+            Email mailmessage = new Email();
+            mailmessage.To = new List<string>()
+            {
+                "daniel.vazquez@quantion.com,jorge.castillo@quantion.com"
+            };
+
+            mailmessage.Cc = new List<string>()
+            {
+                "daniel.vazquez@quantion.com;jorge.castillo@quantion.com"
+            };
+
+            mailmessage.Cco = new List<string>()
+            {
+                "daniel.vazquez@quantion.com;jorge.castillo@quantion.com"
+            };
+
+            mailmessage.Subject = "Prueba envio correo multiples recipients To,CC,CCO";
+            mailmessage.Body = String.Format("Prueba envio correo multiples recipients To,CC,CCO");
+
+            //Act
+            MailRepository _mailrepository = new MailRepository(_configurations, _mailclient.Object);
+            bool result = _mailrepository.Send(mailmessage).Result;
+
+            //Assert
+            Assert.IsTrue(result);
+            _mailclient.Verify(x => x.SendAsync(It.IsAny<MimeMessage>()));
+            _mailclient.Verify(x => x.Disconnect(It.IsAny<bool>()));
+        }
     }
 }

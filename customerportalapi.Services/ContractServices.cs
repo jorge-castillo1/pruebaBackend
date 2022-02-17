@@ -94,6 +94,7 @@ namespace customerportalapi.Services
                 }
 
                 Email message = new Email();
+                message.EmailFlow = EmailFlowType.DownloadContract.ToString();
                 string mailTo = contract.StoreData.EmailAddress1;
                 if (mailTo == null)
                     throw new ServiceException("Store mail not found", HttpStatusCode.NotFound);
@@ -138,6 +139,7 @@ namespace customerportalapi.Services
                 }
 
                 Email message = new Email();
+                message.EmailFlow = EmailFlowType.DownloadInvoice.ToString();
                 string mailTo = store.EmailAddress1;
                 if (mailTo == null)
                     throw new ServiceException("Store mail not found", HttpStatusCode.NotFound);
@@ -296,6 +298,6 @@ namespace customerportalapi.Services
               ).Normalize(NormalizationForm.FormC).Replace(" ", "").ToLower();
         }
 
-        
+
     }
 }

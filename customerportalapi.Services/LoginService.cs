@@ -7,7 +7,6 @@ using Microsoft.Extensions.Configuration;
 using PasswordGenerator;
 using System;
 using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace customerportalapi.Services
@@ -189,7 +188,9 @@ namespace customerportalapi.Services
             {
                 //6. Send forgot password invitation
                 Email message = new Email();
+                message.EmailFlow = EmailFlowType.SendNewCredentials.ToString();
                 message.To.Add(user.Email);
+
                 message.Subject = forgotPasswordTemplate.subject;
                 string htmlbody = forgotPasswordTemplate.body.Replace("{", "{{").Replace("}", "}}").Replace("%{{", "{").Replace("}}%", "}");
                 message.Body = string.Format(htmlbody, user.Name, user.Username, user.Password,
