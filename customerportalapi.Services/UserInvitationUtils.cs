@@ -64,7 +64,7 @@ namespace customerportalapi.Services
                 Contract = GetMandatoryData(SystemTypes.CRM, EntityNames.iav_contracts, null, StateEnum.Unchecked),
                 SmContractCode = GetMandatoryData(SystemTypes.CRM, EntityNames.iav_contracts, null, StateEnum.Unchecked),
                 SMContract = GetMandatoryData(SystemTypes.SM, EntityNames.WBSGetContract, null, StateEnum.Unchecked),
-                Leaving = GetMandatoryData(SystemTypes.SM, EntityNames.WBSGetContract, null, StateEnum.Checked),
+                //Leaving = GetMandatoryData(SystemTypes.SM, EntityNames.WBSGetContract, null, StateEnum.Checked),
                 ActiveContract = GetMandatoryData(SystemTypes.SM, EntityNames.WBSGetContract, null, StateEnum.Unchecked),
 
                 UnitPassword = GetMandatoryData(SystemTypes.CRM, EntityNames.WBSGetContract, null, StateEnum.Unchecked),

@@ -1126,11 +1126,11 @@ namespace customerportalapi.Services
                         invitationData.SMContract.SetValueAndState(contractSM.Contractnumber, StateEnum.Checked);
 
                     //Leaving
-                    if (!string.IsNullOrEmpty(contractSM.Leaving))
-                        invitationData.Leaving.SetValueAndState(contractSM.Leaving.ToString(), StateEnum.Error);
+                    //if (!string.IsNullOrEmpty(contractSM.Leaving))
+                    //    invitationData.Leaving.SetValueAndState(contractSM.Leaving.ToString(), StateEnum.Error);
 
                     // only active contracts, if the contract has "terminated", the field "Leaving" have information.
-                    if (contractSM != null && string.IsNullOrEmpty(contractSM.Leaving))
+                    if (contractSM != null) // && string.IsNullOrEmpty(contractSM.Leaving))
                     {
                         invitationData.ActiveContract.SetValueAndState(StateEnum.Checked.ToString(), StateEnum.Checked);
 

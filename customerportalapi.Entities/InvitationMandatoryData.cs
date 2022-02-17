@@ -12,7 +12,7 @@ namespace customerportalapi.Entities
         public MandatoryData Contract { get; set; }
         public MandatoryData SmContractCode { get; set; }
         public MandatoryData SMContract { get; set; }
-        public MandatoryData Leaving { get; set; }
+        //public MandatoryData Leaving { get; set; }
         public MandatoryData ActiveContract { get; set; }
         public MandatoryData ContractStoreCode { get; set; }
         public MandatoryData StoreCode { get; set; }
