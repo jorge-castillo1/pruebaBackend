@@ -304,7 +304,7 @@ namespace customerportalapi.Services
                 };
 
                 Store updatedStore = await _storeRepository.UpdateSiteImage(storeImageUrl);
-               
+
                 return resultDB &&
                     !string.IsNullOrEmpty(documentUrl) &&
                     !string.IsNullOrEmpty(updatedStore.StoreCode);
@@ -337,7 +337,7 @@ namespace customerportalapi.Services
 
                 return resultDB != null &&
                     !string.IsNullOrEmpty(resultDB.Id) &&
-                    !string.IsNullOrEmpty(documentUrl) && 
+                    !string.IsNullOrEmpty(documentUrl) &&
                     !string.IsNullOrEmpty(updatedStore.StoreCode);
             }
         }
