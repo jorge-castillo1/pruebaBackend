@@ -189,7 +189,7 @@ namespace customerportalapi.Services
             {
                 //6. Send forgot password invitation
                 Email message = new Email();
-                message.EmailFlow = EmailFlow.SendNewCredentials.ToString();
+                message.EmailFlow = EmailFlowType.SendNewCredentials.ToString();
                 message.To.Add(user.Email);
 
                 message.Subject = forgotPasswordTemplate.subject;

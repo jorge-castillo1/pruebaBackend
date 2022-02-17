@@ -5,10 +5,8 @@ using MimeKit;
 using MimeKit.Text;
 using System;
 using System.Collections.Generic;
-using System.Net.Mail;
-using System.Text;
-using System.Threading.Tasks;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace customerportalapi.Repositories
 {
@@ -34,12 +32,12 @@ namespace customerportalapi.Repositories
             foreach (string address in msData.To)
                 message.To.Add(new MailboxAddress(address));
 
-                     
-            foreach(string addCCO in msData.Cco)
+
+            foreach (string addCCO in msData.Cco)
             {
                 message.Bcc.Add(new MailboxAddress(addCCO));
             }
-            
+
             if (msData.Cc.Count == 1 && msData.Cc[0] == "")
             {
                 foreach (string address in msData.To)
@@ -77,7 +75,7 @@ namespace customerportalapi.Repositories
             if (!string.IsNullOrEmpty(messageData.EmailFlow))
             {
 
-                var ccoMail= $"Mail{messageData.EmailFlow}CCO";
+                var ccoMail = $"Mail{messageData.EmailFlow}CCO";
                 if (!string.IsNullOrEmpty(_configuration[ccoMail]))
                 {
                     messageData.Cco.Add(_configuration[ccoMail]);

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace customerportalapi.Entities.enums
 {
-    public enum EmailFlow
+    public enum EmailFlowType
     {      
         DownloadContract,
         DownloadInvoice,

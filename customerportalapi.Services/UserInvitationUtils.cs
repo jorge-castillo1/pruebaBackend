@@ -64,7 +64,7 @@ namespace customerportalapi.Services
                 Contract = GetMandatoryData(SystemTypes.CRM, EntityNames.iav_contracts, null, StateEnum.Unchecked),
                 SmContractCode = GetMandatoryData(SystemTypes.CRM, EntityNames.iav_contracts, null, StateEnum.Unchecked),
                 SMContract = GetMandatoryData(SystemTypes.SM, EntityNames.WBSGetContract, null, StateEnum.Unchecked),
-                //Leaving = GetMandatoryData(SystemTypes.SM, EntityNames.WBSGetContract, null, StateEnum.Checked),
+                Leaving = GetMandatoryData(SystemTypes.SM, EntityNames.WBSGetContract, null, StateEnum.Checked),
                 ActiveContract = GetMandatoryData(SystemTypes.SM, EntityNames.WBSGetContract, null, StateEnum.Unchecked),
 
                 UnitPassword = GetMandatoryData(SystemTypes.CRM, EntityNames.WBSGetContract, null, StateEnum.Unchecked),
@@ -141,7 +141,7 @@ namespace customerportalapi.Services
 
                         case "UnitName":
                             body = body.Replace(field, data.Value);
-                            char[] unitName = data.Value.Trim().PadLeft(4,'0').ToCharArray();
+                            char[] unitName = data.Value.Trim().PadLeft(4, '0').ToCharArray();
 
                             int num;
                             if (unitName[0].ToString() != null && int.TryParse(unitName[0].ToString(), out num))

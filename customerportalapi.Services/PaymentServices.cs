@@ -215,7 +215,7 @@ namespace customerportalapi.Services
             {
                 // 9.- Send Mail
                 Email message = new Email();
-                message.EmailFlow = EmailFlow.UpdatePayment.ToString();
+                message.EmailFlow = EmailFlowType.UpdatePayment.ToString();
                 string storeMail = contract.StoreData.EmailAddress1;
                 _logger.LogInformation("PaymentServices.UpdatePaymentProcess(). Entering StoreMail Information", storeMail);
                 if (storeMail == null) throw new ServiceException("Store mail not found", HttpStatusCode.NotFound);
@@ -776,7 +776,7 @@ namespace customerportalapi.Services
             if (template._id != null)
             {
                 Email message = new Email();
-                message.EmailFlow = EmailFlow.UpdatePaymentCard.ToString();
+                message.EmailFlow = EmailFlowType.UpdatePaymentCard.ToString();
                 string storeMail = contract.StoreData.EmailAddress1;
                 _logger.LogInformation("Entering StoreMail Information", storeMail);
                 if (storeMail == null) throw new ServiceException("Store mail not found", HttpStatusCode.NotFound);
