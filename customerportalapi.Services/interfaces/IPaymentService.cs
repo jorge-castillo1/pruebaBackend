@@ -10,7 +10,7 @@ namespace customerportalapi.Services.Interfaces
     {
         Task<bool> ChangePaymentMethod(PaymentMethod paymentMethod);
 
-        Task<bool> UpdatePaymentProcess(SignatureStatus value);
+        Task<bool> UpdatePaymentBankProcess(SignatureStatus value);
 
         Task<bool> UpdatePaymentCardProcess(SignatureStatus value, Process process);
 
