@@ -97,8 +97,10 @@ namespace customerportalapi.Repositories
             var putContent = new StringContent(JsonConvert.SerializeObject(updateAccessCode), Encoding.UTF8, "application/json");
 
             var response = await httpClient.PutAsync(url, putContent);
-            response.EnsureSuccessStatusCode();
-            return response.IsSuccessStatusCode;
+            var content = await response.Content.ReadAsStringAsync();
+            JObject result = JObject.Parse(content);
+
+            return result.GetValue("result").Value<bool>();
         }
 
         public async Task<ApsData> UpdateAps(ApsRequest request)
