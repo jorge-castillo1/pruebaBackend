@@ -813,7 +813,7 @@ namespace customerportalapi.Services
                     emailMessage = GenerateEmail(EmailTemplateTypes.FormCall, user, userProfile, value);
                     customerEmailMessage = GenerateEmail(EmailTemplateTypes.FormCallCustomer, user, userProfile, value);
                     customerEmailMessage.EmailFlow = EmailFlowType.ContactCall.ToString();
-                    await _mailRepository.Send(customerEmailMessage);
+                    await _mailRepository.SendNotDisconnect(customerEmailMessage);
 
                     break;
                 case ContactTypes.Contact:
@@ -831,7 +831,7 @@ namespace customerportalapi.Services
                     emailMessage = GenerateEmail(EmailTemplateTypes.FormContact, user, userProfile, value);
                     customerEmailMessage = GenerateEmail(EmailTemplateTypes.FormContactCustomer, user, userProfile, value);
                     customerEmailMessage.EmailFlow = EmailFlowType.ContactContact.ToString();
-                    await _mailRepository.Send(customerEmailMessage);
+                    await _mailRepository.SendNotDisconnect(customerEmailMessage);
                     break;
             }
             emailMessage.EmailFlow = EmailFlowType.Contact.ToString();

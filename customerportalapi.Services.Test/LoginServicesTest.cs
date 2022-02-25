@@ -216,7 +216,7 @@ namespace customerportalapi.Services.Test
             await service.SendNewCredentialsAsync(credential);
 
             //Assert verificar si se ha invocado a enviarcorreo
-            _mailRepository.Verify(x => x.Send(It.IsAny<Email>()));
+            _mailRepository.Verify(x => x.Send(It.IsAny<Email>(), It.IsAny<bool>()));
         }
 
         [TestMethod]
@@ -238,7 +238,7 @@ namespace customerportalapi.Services.Test
             _userRepository.Verify(x => x.GetCurrentUserByEmail(It.IsAny<string>()));
             _userRepository.Verify(x => x.Update(It.IsAny<User>()));
             _emailtemplateRepository.Verify(x => x.getTemplate(It.IsAny<int>(), It.IsAny<string>()));
-            _mailRepository.Verify(x => x.Send(It.IsAny<Email>()));
+            _mailRepository.Verify(x => x.Send(It.IsAny<Email>(), It.IsAny<bool>()));
         }
     }
 }

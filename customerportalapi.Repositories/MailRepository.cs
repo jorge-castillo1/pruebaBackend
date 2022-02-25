@@ -21,7 +21,12 @@ namespace customerportalapi.Repositories
             _mailClient = mailClient;
         }
 
-        public async Task<bool> Send(Email messageData)
+        public async Task<bool> SendNotDisconnect(Email messageData)
+        {
+            return await Send(messageData, false);
+        }
+
+        public async Task<bool> Send(Email messageData, bool disconnect = true)
         {
             var msCC = AddEmailCCandCCOfromConfig(messageData);
             var msData = SplitEmail(msCC);
@@ -65,7 +70,7 @@ namespace customerportalapi.Repositories
             }
 
             await _mailClient.SendAsync(message);
-            _mailClient.Disconnect(true);
+            if (disconnect) _mailClient.Disconnect(true);
 
             return true;
         }
