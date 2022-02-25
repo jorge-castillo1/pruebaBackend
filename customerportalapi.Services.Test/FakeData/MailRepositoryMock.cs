@@ -13,7 +13,7 @@ namespace customerportalapi.Services.Test.FakeData
         public static Mock<IMailRepository> MailRepository()
         {
             var db = new Mock<IMailRepository>();
-            db.Setup(x => x.Send(It.IsAny<Email>())).Returns(Task.FromResult(true)).Verifiable();
+            db.Setup(x => x.Send(It.IsAny<Email>(), It.IsAny<bool>())).Returns(Task.FromResult(true)).Verifiable();
 
             return db;
         }

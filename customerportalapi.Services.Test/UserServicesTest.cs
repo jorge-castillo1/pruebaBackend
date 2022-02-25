@@ -392,7 +392,7 @@ namespace customerportalapi.Services.Test
             //Assert
             Assert.IsTrue(result);
             _userRepositoryInvalid.Verify(x => x.Create(It.IsAny<User>()));
-            _mailRepository.Verify(x => x.Send(It.IsAny<Email>()));
+            _mailRepository.Verify(x => x.Send(It.IsAny<Email>(), It.IsAny<bool>()));
             _emailtemplateRepository.Verify(x => x.getTemplate((int)EmailTemplateTypes.WelcomeEmailExtended, It.IsAny<string>()));
         }
 
@@ -472,7 +472,7 @@ namespace customerportalapi.Services.Test
             Assert.IsTrue(result);
             _userRepositoryInvalid.Verify(x => x.Update(It.IsAny<User>()));
             _emailtemplateRepository.Verify(x => x.getTemplate((int)EmailTemplateTypes.WelcomeEmailShort, It.IsAny<string>()));
-            _mailRepository.Verify(x => x.Send(It.IsAny<Email>()));
+            _mailRepository.Verify(x => x.Send(It.IsAny<Email>(), It.IsAny<bool>()));
         }
 
         [TestMethod]
@@ -512,7 +512,7 @@ namespace customerportalapi.Services.Test
             //Assert
             Assert.IsTrue(result);
             _userRepositoryInvalid.Verify(x => x.Create(It.IsAny<User>()));
-            _mailRepository.Verify(x => x.Send(It.IsAny<Email>()));
+            _mailRepository.Verify(x => x.Send(It.IsAny<Email>(), It.IsAny<bool>()));
         }
 
         [TestMethod]
@@ -594,7 +594,7 @@ namespace customerportalapi.Services.Test
             //Assert
             Assert.IsTrue(result);
             _emailtemplateRepository.Verify(x => x.getTemplate((int)EmailTemplateTypes.InvitationError, It.IsAny<string>()));
-            _mailRepository.Verify(x => x.Send(It.IsAny<Email>()));
+            _mailRepository.Verify(x => x.Send(It.IsAny<Email>(), It.IsAny<bool>()));
         }
 
 

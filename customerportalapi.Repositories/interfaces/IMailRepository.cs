@@ -8,6 +8,8 @@ namespace customerportalapi.Repositories.interfaces
 {
     public interface IMailRepository
     {
-        Task<bool> Send(Email messageData);
+        Task<bool> Send(Email messageData, bool disconnect = true);
+
+        Task<bool> SendNotDisconnect(Email messageData);
     }
 }
