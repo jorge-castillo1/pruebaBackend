@@ -240,7 +240,7 @@ namespace customerportalapi.Services
                 _logger.LogInformation("PaymentServices.UpdatePaymentProcess(). Entering StoreMail Information", storeMail);
                 if (storeMail == null) throw new ServiceException("Store mail not found", HttpStatusCode.NotFound);
                 if (!(_configuration["Environment"] == nameof(EnvironmentTypes.PRO))) storeMail = _configuration["MailStores"];
-                
+
                 message.To.Add(storeMail);
                 _logger.LogInformation("PaymentServices.UpdatePaymentProcess(). StoreMail Information", storeMail);
                 message.Subject = string.Format(template.subject, user.Name, user.Dni);
@@ -1558,7 +1558,6 @@ namespace customerportalapi.Services
             if (contract.ContractNumber == null)
                 throw new ServiceException("Contract does not exist.", HttpStatusCode.NotFound, FieldNames.ContractNumber, ValidationMessages.NotExist);
 
-
             // 2. Get CRM PayMethods
             List<Store> stores = await _storeRepository.GetStoresAsync();
             Store store = stores.Find(x => x.StoreCode.Equals(contract.StoreData.StoreCode));
@@ -1571,16 +1570,18 @@ namespace customerportalapi.Services
 
             List<PaymentMethods> availablePayMet = new List<PaymentMethods>();
 
-            foreach (PaymentMethods payMethod in payMet.PaymentMethods)
+            var bankAccountMethodList = payMet.PaymentMethods.Where(a => a.BankAccountPayment == true).FirstOrDefault();
+            var cardAccountMethodList = payMet.PaymentMethods.Where(a => a.CardPayment == true).FirstOrDefault();
+
+            if (bankAccountMethodList != null)
             {
-                string name = payMethod.Name.ToLower();
-                if (name == "recibo domiciliado" || name == "tarjeta virtual"
-                    || name == "prélèvement automatique" || name == "carte bancaire électronique"
-                    || name == "cartão virtual")
-                {
-                    availablePayMet.Add(payMethod);
-                }
+                availablePayMet.Add(bankAccountMethodList);
             }
+            if (cardAccountMethodList != null)
+            {
+                availablePayMet.Add(cardAccountMethodList);
+            }
+
             return availablePayMet;
         }
     }

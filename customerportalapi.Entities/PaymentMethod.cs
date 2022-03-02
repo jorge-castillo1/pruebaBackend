@@ -7,5 +7,7 @@ namespace customerportalapi.Entities
         public string Dni { get; set; }
         public string AccountType { get; set; }
         public int PaymentMethodType { get; set; }
+        public bool? CardPayment { get; set; }
+        public bool? BankAccountPayment { get; set; }
     }
 }

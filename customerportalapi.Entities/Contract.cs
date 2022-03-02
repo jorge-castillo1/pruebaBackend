@@ -53,5 +53,7 @@
         public string StoreImage { get; set; }
 
         public string ContractUrl { get; set; }
+
+        public PaymentMethod PaymentMethodClass { get; set; }
     }
 }

@@ -184,8 +184,16 @@ namespace customerportalapi.Services
             if (!string.IsNullOrEmpty(response.contract.PaymentMethodId))
             {
                 payMetCRM = await _paymentMethodRepository.GetPaymentMethodById(response.contract.PaymentMethodId);
-                if (payMetCRM != null && !string.IsNullOrWhiteSpace(payMetCRM.Description))
-                    response.contract.PaymentMethodDescription = payMetCRM.Description;
+                if (payMetCRM != null)
+                {
+                    response.contract.PaymentMethodClass = new PaymentMethod()
+                    {
+                        BankAccountPayment = payMetCRM.BankAccountPayment,
+                        CardPayment = payMetCRM.CardPayment
+                    };
+                    if (!string.IsNullOrWhiteSpace(payMetCRM.Name))
+                        response.contract.PaymentMethodDescription = payMetCRM.Name;
+                }
             }
 
             return response;

@@ -12,6 +12,8 @@ namespace customerportalapi.Entities
         public string DocumentId { get; set; }
         public string PaymentMethodId { get; set; }
         public string Description { get; set; }
+        public bool? CardPayment { get; set; }
+        public bool? BankAccountPayment { get; set; }
 
     }
 }
