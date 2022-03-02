@@ -443,8 +443,21 @@ namespace customerportalapi.Services
                 throw new ServiceException("Email template not found, templateCode: " + templateId, HttpStatusCode.NotFound, FieldNames.Email + FieldNames.Template, ValidationMessages.NotFound);
 
             var message = new Email { Subject = invitationTemplate.subject };
-            message.EmailFlow = EmailFlowType.SendWelcome.ToString();
-            message.To.Add(user.Email);
+            message.EmailFlow = invitationValues.InvokedBy == (int)InviteInvocationType.CronJob ? EmailFlowType.SendWelcomeCronJob.ToString() : EmailFlowType.SendWelcome.ToString();
+
+            if (invitationValues.InvokedBy == (int)InviteInvocationType.CronJob &&
+                string.IsNullOrEmpty(_config["Environment"]) &&
+                _config["Environment"] != nameof(EnvironmentTypes.PRO))
+            {
+                // Cron Job en DEV o PRE
+                message.To.Add(_config["MailIT"]);
+            }
+            else
+            {
+                // Cron Job y Envío normal
+                message.To.Add(user.Email);
+            }
+
             message.Body = UserInvitationUtils.GetBodyFormatted(invitationTemplate, user, invitationFields, _config["BaseUrl"], _config["InviteConfirmation"]);
 
             return await _mailRepository.Send(message);

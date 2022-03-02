@@ -1,7 +1,7 @@
 ﻿namespace customerportalapi.Entities.enums
 {
     public enum EmailFlowType
-    {      
+    {
         DownloadContract,
         DownloadInvoice,
         SendNewCredentials,
@@ -18,6 +18,7 @@
         Contact,
         SendMailInvitationError,
         SaveNewUser,
-        ExceptionDocumetStoreApi
+        ExceptionDocumetStoreApi,
+        SendWelcomeCronJob
     }
 }
