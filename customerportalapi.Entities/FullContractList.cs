@@ -1,7 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace customerportalapi.Entities
 {
@@ -82,7 +81,7 @@ namespace customerportalapi.Entities
         public Unit iav_unitid { get; set; }
         public Iav_Opportunityid iav_opportunityid { get; set; }
         public Iav_Customerid iav_customerid { get; set; }
-    }
+	}
 
     public class Iav_Opportunityid
     {

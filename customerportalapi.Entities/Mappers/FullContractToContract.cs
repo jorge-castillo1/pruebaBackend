@@ -11,6 +11,7 @@ namespace customerportalapi.Entities.Mappers
         {
             if (contract != null)
             {
+
                 Contract newContract = new Contract()
                 {
                     ContractId = contract.iav_contractid,
