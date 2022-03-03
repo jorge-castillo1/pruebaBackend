@@ -446,7 +446,7 @@ namespace customerportalapi.Services
             message.EmailFlow = invitationValues.InvokedBy == (int)InviteInvocationType.CronJob ? EmailFlowType.SendWelcomeCronJob.ToString() : EmailFlowType.SendWelcome.ToString();
 
             if (invitationValues.InvokedBy == (int)InviteInvocationType.CronJob &&
-                string.IsNullOrEmpty(_config["Environment"]) &&
+                !string.IsNullOrEmpty(_config["Environment"]) &&
                 _config["Environment"] != nameof(EnvironmentTypes.PRO))
             {
                 // Cron Job en DEV o PRE

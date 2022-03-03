@@ -54,7 +54,9 @@
         "GOOGLECAPTCHASERVICESECRET": "6Lccnp8dAAAAAGAGGPOyRCi8J-_8mBFGsqPLDwt7",
         "CustomerPortal_ApiKey": "F56A2E61-6D3C-4C3F-B1B5-16C335EADA96",
         "BlobAPI": "api/blob/",
-        "StoresAPI": "crmapi/Sites/"
+        "StoresAPI": "crmapi/Sites/",
+        "MailIT": "support.bluespace@quantion.com",
+        "MailWP": "support.bluespace@quantion.com"
       }
     },
     "customerportalapi": {
@@ -81,7 +83,9 @@
         "ASPNETCORE_ENVIRONMENT": "Development",
         "CountriesAPI": "crmapi/Countries/",
         "LanguagesAPI": "crmapi/Languages/",
-        "StoresAPI": "crmapi/Sites/"
+        "StoresAPI": "crmapi/Sites/",
+        "MailIT": "support.bluespace@quantion.com",
+        "MailWP": "support.bluespace@quantion.com"
       },
       "applicationUrl": "https://localhost:44332;http://localhost:44333"
     },
