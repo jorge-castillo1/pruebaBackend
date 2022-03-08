@@ -1,6 +1,7 @@
 ﻿using customerportalapi.Entities;
 using customerportalapi.Repositories.interfaces;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using MimeKit;
 using MimeKit.Text;
 using System;
@@ -14,11 +15,13 @@ namespace customerportalapi.Repositories
     {
         IConfiguration _configuration;
         private IMailClient _mailClient;
+        private readonly ILogger<MailRepository> _logger;
 
-        public MailRepository(IConfiguration configuration, IMailClient mailClient)
+        public MailRepository(IConfiguration configuration, IMailClient mailClient, ILogger<MailRepository> logger)
         {
             _configuration = configuration;
             _mailClient = mailClient;
+            _logger = logger;
         }
 
         public async Task<bool> SendNotDisconnect(Email messageData)
@@ -69,17 +72,44 @@ namespace customerportalapi.Repositories
                 };
             }
 
+            LogTrySendMessage(messageData);
+
             await _mailClient.SendAsync(message);
             if (disconnect) _mailClient.Disconnect(true);
 
+            if (messageData.EmailFlow != null) _logger.LogInformation($"MailRepository.Send().  {messageData.EmailFlow} SENDSUCCESSFULL ");
             return true;
+        }
+
+
+        private void LogTrySendMessage(Email messageData)
+        {
+            if (messageData != null)
+            {
+                string to = "";
+                foreach (var k in messageData.To)
+                {
+                    to += k + ";";
+                }
+                string cc = "";
+                foreach (var k in messageData.Cc)
+                {
+                    cc += k + ";";
+                }
+                string cco = "";
+                foreach (var k in messageData.Cco)
+                {
+                    cco += k + ";";
+                }
+
+                _logger.LogInformation($"MailRepository.LogTrySendMessage(). {messageData.EmailFlow} TRYSENDMESSAGE  To :{to} || CC : {cc} || CCO : {cco} ");
+            }
         }
 
         public Email AddEmailCCandCCOfromConfig(Email messageData)
         {
             if (!string.IsNullOrEmpty(messageData.EmailFlow))
             {
-
                 var ccoMail = $"Mail{messageData.EmailFlow}CCO";
                 if (!string.IsNullOrEmpty(_configuration[ccoMail]))
                 {

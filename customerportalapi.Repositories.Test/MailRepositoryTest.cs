@@ -1,6 +1,8 @@
 ﻿using customerportalapi.Entities;
+using customerportalapi.Entities.enums;
 using customerportalapi.Repositories.interfaces;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MimeKit;
 using Moq;
@@ -16,6 +18,8 @@ namespace customerportalapi.Repositories.Test
     {
         IConfiguration _configurations;
         Mock<IMailClient> _mailclient;
+        Mock<ILogger<MailRepository>> _logger;
+
 
         [TestInitialize]
         public void Setup()
@@ -28,6 +32,7 @@ namespace customerportalapi.Repositories.Test
             _mailclient.Setup(x => x.SendAsync(It.IsAny<MimeMessage>())).Returns(Task.CompletedTask);
             _mailclient.Setup(x => x.Disconnect(It.IsAny<bool>())).Verifiable();
             _mailclient.Setup(x => x.Dispose()).Verifiable();
+            _logger = new Mock<ILogger<MailRepository>>();
         }
 
         [TestMethod]
@@ -49,9 +54,10 @@ namespace customerportalapi.Repositories.Test
             };
             mailmessage.Subject = "Welcome Bluespace private customer portal.";
             mailmessage.Body = String.Format("Bluespace invite you to access private customer portal. Click the link below to confirm your email address and gain portal access <a href='{0}'>{1}</a>", confirmUrl, confirmText);
+            mailmessage.EmailFlow = EmailFlowType.SendWelcome.ToString();
 
-            //Act
-            MailRepository _mailrepository = new MailRepository(_configurations, _mailclient.Object);
+           //Act
+            MailRepository _mailrepository = new MailRepository(_configurations, _mailclient.Object,_logger.Object);
             bool result = _mailrepository.Send(mailmessage).Result;
 
             //Assert
@@ -83,9 +89,10 @@ namespace customerportalapi.Repositories.Test
 
             mailmessage.Subject = "Prueba envio correo multiples recipients To,CC,CCO";
             mailmessage.Body = String.Format("Prueba envio correo multiples recipients To,CC,CCO");
+            mailmessage.EmailFlow = EmailFlowType.Contact.ToString();
 
             //Act
-            MailRepository _mailrepository = new MailRepository(_configurations, _mailclient.Object);
+            MailRepository _mailrepository = new MailRepository(_configurations, _mailclient.Object, _logger.Object);
             bool result = _mailrepository.Send(mailmessage).Result;
 
             //Assert
