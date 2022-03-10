@@ -191,8 +191,11 @@ namespace customerportalapi.Services
                         BankAccountPayment = payMetCRM.BankAccountPayment,
                         CardPayment = payMetCRM.CardPayment
                     };
-                    if (!string.IsNullOrWhiteSpace(payMetCRM.Name))
-                        response.contract.PaymentMethodDescription = payMetCRM.Name;
+                    if (!string.IsNullOrWhiteSpace(payMetCRM.Description))
+                    {
+                        response.contract.PaymentMethodDescription = payMetCRM.Description;
+                    }
+                        
                 }
             }
 

@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 namespace customerportalapi.Repositories
 {
@@ -32,7 +33,8 @@ namespace customerportalapi.Repositories
         public async Task<bool> Send(Email messageData, bool disconnect = true)
         {
             var msCC = AddEmailCCandCCOfromConfig(messageData);
-            var msData = SplitEmail(msCC);
+            var msSplit = SplitEmail(msCC);
+            var msData = DeleteWrongMailAdressCCandCCO(msSplit);
 
             MimeMessage message = new MimeMessage();
             message.From.Add(new MailboxAddress(_configuration["MailFrom"]));
@@ -80,7 +82,6 @@ namespace customerportalapi.Repositories
             if (messageData.EmailFlow != null) _logger.LogInformation($"MailRepository.Send().  {messageData.EmailFlow} SENDSUCCESSFULL ");
             return true;
         }
-
 
         private void LogTrySendMessage(Email messageData)
         {
@@ -157,6 +158,38 @@ namespace customerportalapi.Repositories
             messageData.Cco.AddRange(mailcco);
 
             return messageData;
+        }
+
+        private Email DeleteWrongMailAdressCCandCCO(Email emailObject)
+        {
+            emailObject.Cc.RemoveAll(direction => !IsValid(direction));
+            emailObject.Cco.RemoveAll(direction => !IsValid(direction));
+            return emailObject;
+        }
+
+
+        public bool IsValid(string emailaddress)
+        {
+            try
+            {
+                MailboxAddress v = new MailboxAddress(emailaddress);
+                Match match = Regex.Match(emailaddress, @"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$");
+
+                if (match.Success)
+                {
+                    return true;
+                }
+                else
+                {
+                    _logger.LogInformation($"MailRepository.IsValid().  WRONG MAIL ADDRESS : {emailaddress} ");
+                    return false;
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.LogInformation($"MailRepository.IsValid().  WRONG MAIL ADDRESS : {emailaddress} ");
+                return false;
+            }
         }
 
         public void Dispose()

@@ -226,6 +226,8 @@ namespace customerportalapi.Services
 
             // 8.- Update contract CRM
             contract.PaymentMethodId = payMetCRM.PaymentMethodId;
+            var paymentName = !String.IsNullOrEmpty(payMetCRM.Description) ? payMetCRM.Description : payMetCRM.Name;
+
             Contract updateContract = await _contractRepository.UpdateContractAsync(contract);
             if (updateContract.ContractNumber == null)
                 throw new ServiceException("PaymentServices.UpdatePaymentProcess(). Error updating contract. ContractNumber.", HttpStatusCode.BadRequest, "ContractNumber");
@@ -244,7 +246,7 @@ namespace customerportalapi.Services
                 message.To.Add(storeMail);
                 _logger.LogInformation("PaymentServices.UpdatePaymentProcess(). StoreMail Information", storeMail);
                 message.Subject = string.Format(template.subject, user.Name, user.Dni);
-                message.Body = string.Format(template.body, user.Name, user.Dni, processedpaymentdocument.DocumentNumber, "transferencia bancaria");
+                message.Body = string.Format(template.body, user.Name, user.Dni, processedpaymentdocument.DocumentNumber, paymentName);
                 _logger.LogInformation("PaymentServices.UpdatePaymentProcess(). Sending StoreMail Information", storeMail);
                 await _mailRepository.Send(message);
             }
@@ -785,6 +787,8 @@ namespace customerportalapi.Services
             var contract = FullContractToContract.Mapper(fullcontract);
 
             contract.PaymentMethodId = payMetCRM.PaymentMethodId;
+            var paymentName = !String.IsNullOrEmpty(payMetCRM.Description) ? payMetCRM.Description : payMetCRM.Name;
+
             Contract updateContract = await _contractRepository.UpdateContractAsync(contract);
 
             // Send email to the store
@@ -805,7 +809,7 @@ namespace customerportalapi.Services
 
                 message.To.Add(storeMail);
                 message.Subject = string.Format(template.subject, user.Name, user.Dni);
-                message.Body = string.Format(template.body, user.Name, user.Dni, process.ContractNumber, "tarjeta de crédito");
+                message.Body = string.Format(template.body, user.Name, user.Dni, process.ContractNumber, paymentName);
                 _logger.LogInformation("Sending StoreMail Information", storeMail);
                 await _mailRepository.Send(message);
             }
