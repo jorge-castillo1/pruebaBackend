@@ -31,12 +31,14 @@ namespace customerportalapi.Services
         }
 
         public static int GetUserType(string invitationCustomerType)
-        {
+        {   
             switch (invitationCustomerType.ToLower())
             {
                 case "residential":
+                case "0":
                     return (int)UserTypes.Residential;
                 case "business":
+                case "1":
                     return (int)UserTypes.Business;
                 default:
                     return (int)UserTypes.Residential;
