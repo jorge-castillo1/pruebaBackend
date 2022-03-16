@@ -32,21 +32,19 @@ namespace customerportalapi.Repositories
             bool result = false;
 
             var features = _features.FindOne(t => t.Name == name).FirstOrDefault();
-            string currentCountry =
-                !String.IsNullOrWhiteSpace(countryCustomer) && countryCustomer.Length >= 5
-                ? countryCustomer.Substring(0, 2)
-                : null;
 
-            if (currentCountry != null)
+            if (!string.IsNullOrEmpty(countryCustomer) && features!=null)
             {
                 var env = features.Environments.Find(e => e.Name == environment);
 
                 if (env != null && !string.IsNullOrEmpty(env.Name) && env.Value)
                 {
-                    if (features.CountryAvailable != null)
+                    if (features.CountryAvailable != null && features.CountryAvailable.Count>0)
                     {
-                        if (features.CountryAvailable.ConvertAll(x => x.ToLower().Trim()).Contains(currentCountry.ToLower().Trim()))
+                        if (features.CountryAvailable.ConvertAll(x => x.ToLower().Trim()).Contains(countryCustomer.ToLower().Trim()))
+                        {
                             result = true;
+                        }     
                     }
                     else
                     {

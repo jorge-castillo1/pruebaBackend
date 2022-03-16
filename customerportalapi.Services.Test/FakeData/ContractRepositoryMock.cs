@@ -10,6 +10,50 @@ namespace customerportalapi.Services.Test.FakeData
 {
     public static class ContractRepositoryMock
     {
+
+        public static Mock<IContractRepository> ContractRepositoryFeature()
+        {
+            var db = new Mock<IContractRepository>();
+            db.Setup(x => x.GetContractsAsync(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(new List<Contract>
+            {
+                new Contract
+                {
+                   ContractNumber = "1234567890",
+                   ContractDate = "01/01/2020",
+                   SmContractCode ="123456786",
+                   Store = "Fake Store",
+                   StoreData = new Store
+                   {
+                       StoreName = "Fake Store",
+                       Telephone = "Fake telephone",
+                       CoordinatesLatitude = "Fake CoordinatesLatitude",
+                       CoordinatesLongitude = "Fake CoordinatesLongitude",
+                       StoreCode ="RI1BBFRI120920060001",
+                       StoreId = Guid.Parse("00000000-0000-0000-0000-000000000001"),
+                        EmailAddress1 = "EmailAddress1",
+                        EmailAddress2 = "EmailAddress2",
+                        CountryCode="ES"
+                   },
+                   Unit = new Unit
+                   {
+                        Depth = "4.96",
+                        Height = "2.5",
+                        Size = "14.5000000000",
+                        SmUnitId = "BD17",
+                        Subtype = "GR",
+                        UnitCategory = "SS",
+                        UnitName = "6104",
+                        Width = "2.92"
+                   },
+                   OpportunityId = "OpportunityId"
+                },
+               
+            })).Verifiable();
+
+            
+            return db;
+        }
+
         public static Mock<IContractRepository> ContractRepository()
         {
             var db = new Mock<IContractRepository>();

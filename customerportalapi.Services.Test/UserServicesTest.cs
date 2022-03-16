@@ -8,6 +8,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System.Threading.Tasks;
 using customerportalapi.Entities.enums;
+using customerportalapi.Repositories;
+using System.Collections.Generic;
 
 namespace customerportalapi.Services.Test
 {
@@ -853,6 +855,51 @@ namespace customerportalapi.Services.Test
             userRepository.Verify(x => x.GetCurrentUserByDniAndType(It.IsAny<string>(), It.IsAny<int>()));
             _profileRepository.Verify(x => x.RevokedWebPortalAccessAsync(It.IsAny<string>(), It.IsAny<string>()));
             userRepository.Verify(x => x.Delete(It.IsAny<User>()));
+        }
+
+
+        [TestMethod]
+        public async Task AlbuscarCountrydelContrato_segunTablaFeatures_retornaPlantillaWelcome()
+        {
+            //Arrange
+            User value = new User()
+            {
+                Dni = "12345678A",
+                Email = "support2",
+
+            };
+            Mock<IContractRepository> contractRepository = ContractRepositoryMock.ContractRepositoryFeature();
+            Mock<IMongoCollectionWrapper<Feature>> feat = MongoFeaturesRepositoryMock.FeatureRepository_WelcomeLong();
+            FeatureRepository featureRepository = new FeatureRepository(null, feat.Object);
+
+            //Act
+            UserServices service = new UserServices(
+                _userRepository.Object,
+                _profileRepository.Object,
+                _mailRepository.Object,
+                _emailtemplateRepository.Object,
+                _identityRepository.Object,
+                _config,
+                _serviceLogin,
+                _userAccountRepository.Object,
+                _languageRepository.Object,
+                contractRepository.Object,
+                _contractSMRepository.Object,
+                _opportunityRepository.Object,
+                _storeRepository.Object,
+                _unitLocationRepository.Object,
+                featureRepository,
+                _newUserRepository.Object,
+                _googleCaptchaRepository.Object
+                );
+
+
+            int result = await service.GetWelcomeTemplateFromFeatures(value, true);
+
+
+            //Assert
+            Assert.AreEqual(result, 0);
+
         }
     }
 }
