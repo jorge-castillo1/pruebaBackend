@@ -394,9 +394,18 @@ namespace customerportalapi.Services
 
             if (idTemplate != -1)
             {
-                user.LastEmailSent = ((EmailTemplateTypes)idTemplate).ToString();
+                if (isNewUser)
+                {
+                    User userSaved = _userRepository.GetCurrentUserByDniAndType(user.Dni, userType);
+                    userSaved.LastEmailSent = ((EmailTemplateTypes)idTemplate).ToString();
+                    _userRepository.Update(userSaved);
+                }
+                else
+                {
+                    user.LastEmailSent = ((EmailTemplateTypes)idTemplate).ToString();
+                    _userRepository.Update(user);
+                }
                 resultWelcomeEmailSent = true;
-                _userRepository.Update(user);
             }
 
             return resultWelcomeEmailSent && resultCreateUser;
