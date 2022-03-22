@@ -40,6 +40,7 @@ namespace customerportalapi.Entities.Mappers
                     StoreCode = contract.iav_storeid.StoreCode,
                     StoreImage = contract.iav_storeid.StoreImage,
                     TimeZone = contract.iav_storeid.TimeZone,
+                    ContractExpectedMoveIn = contract.blue_expectedmovein,
                     //TotalPrice = contract.iav_storeid,
                 };
 

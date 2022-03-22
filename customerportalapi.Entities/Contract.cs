@@ -55,5 +55,8 @@
         public string ContractUrl { get; set; }
 
         public PaymentMethod PaymentMethodClass { get; set; }
+
+        //blue_expectedmovein          
+        public string ContractExpectedMoveIn { get; set; }
     }
 }

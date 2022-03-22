@@ -74,7 +74,9 @@ namespace customerportalapi.Entities
         public string iav_opportunitytype_string { get; set; }
         public int? iav_opportunitytype { get; set; }
 
-        public string _blue_closedby_value { get; set; }
+		public string blue_expectedmovein { get; set; }
+
+		public string _blue_closedby_value { get; set; }
         public string new_contacturl { get; set; }
         public string new_signaturestatus { get; set; }
         public Store iav_storeid { get; set; }
