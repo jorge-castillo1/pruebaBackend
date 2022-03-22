@@ -31,7 +31,7 @@ namespace customerportalapi.Services
         }
 
         public static int GetUserType(string invitationCustomerType)
-        {   
+        {
             switch (invitationCustomerType.ToLower())
             {
                 case "residential":
@@ -143,23 +143,30 @@ namespace customerportalapi.Services
 
                         case "UnitName":
                             body = body.Replace(field, data.Value);
+
+                            data.Value = GetFourLengthString(data.Value);
+                            bool firstLetter = IsFirstLetter(data.Value);
+                            if (firstLetter) data.Value = ChangeFirstLetter(data.Value, '0');
+
                             char[] unitName = data.Value.Trim().PadLeft(4, '0').ToCharArray();
 
                             int num;
-                            if (unitName[0].ToString() != null && int.TryParse(unitName[0].ToString(), out num))
+                            if (unitName[0].ToString() != null && !firstLetter)
                             {
-                                num++;
-                                if (num > 9) num = 0;
-                                unitName[0] = Char.Parse(num.ToString());
-                            }
-
-                            if (unitName.Length >= 4)
-                                if (unitName[3].ToString() != null && int.TryParse(unitName[3].ToString(), out num))
+                                if (int.TryParse(unitName[0].ToString(), out num))
                                 {
                                     num++;
                                     if (num > 9) num = 0;
-                                    unitName[3] = Char.Parse(num.ToString());
+                                    unitName[0] = Char.Parse(num.ToString());
                                 }
+                            }
+
+                            if (unitName[3].ToString() != null && int.TryParse(unitName[3].ToString(), out num))
+                            {
+                                num++;
+                                if (num > 9) num = 0;
+                                unitName[3] = Char.Parse(num.ToString());
+                            }
 
                             body = body.Replace("{{LockCode}}", new string(unitName));
                             break;
@@ -263,6 +270,43 @@ namespace customerportalapi.Services
             }
 
             return null;
+        }
+
+        private static string ChangeFirstNoNumericIfExist(string data, char change)
+        {
+            char[] dataChar = data.ToCharArray();
+            int first;
+            bool isNumeric = int.TryParse(dataChar[0].ToString(), out first);
+            if (!isNumeric)
+            {
+                dataChar[0] = change;
+                data = new string(dataChar);
+            }
+            return data;
+        }
+
+        private static bool IsFirstLetter(string data)
+        {
+            char[] dataChar = data.ToCharArray();
+            int first;
+            bool isNumeric = int.TryParse(dataChar[0].ToString(), out first);
+            return !isNumeric;
+        }
+        private static string ChangeFirstLetter(string data, char change)
+        {
+            char[] dataChar = data.ToCharArray();
+            dataChar[0] = change;
+            data = new string(dataChar);
+            return data;
+        }
+
+        private static string GetFourLengthString(String st)
+        {
+            while (st.Length > 4)
+            {
+                st = st.Remove(0, 1);
+            }
+            return st;
         }
 
         /// <summary>
