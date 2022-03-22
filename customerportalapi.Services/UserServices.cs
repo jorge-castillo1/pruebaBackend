@@ -4,6 +4,8 @@ using customerportalapi.Repositories.interfaces;
 using customerportalapi.Services.Exceptions;
 using customerportalapi.Services.Interfaces;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using PasswordGenerator;
 using System;
 using System.Collections.Generic;
@@ -35,6 +37,7 @@ namespace customerportalapi.Services
         private readonly IFeatureRepository _featureRepository;
         private readonly INewUserRepository _newUserRepository;
         private readonly IGoogleCaptchaRepository _googleCaptchaRepository;
+        private readonly ILogger<UserServices> _logger;
 
 
         public UserServices(
@@ -54,7 +57,8 @@ namespace customerportalapi.Services
             IUnitLocationRepository unitLocationRepository,
             IFeatureRepository featureRepository,
             INewUserRepository newUserRepository,
-            IGoogleCaptchaRepository googleCaptchaRepository
+            IGoogleCaptchaRepository googleCaptchaRepository,
+            ILogger<UserServices> logger
             )
         {
             _userRepository = userRepository;
@@ -74,6 +78,7 @@ namespace customerportalapi.Services
             _featureRepository = featureRepository;
             _newUserRepository = newUserRepository;
             _googleCaptchaRepository = googleCaptchaRepository;
+            _logger = logger;
         }
 
 
@@ -396,7 +401,7 @@ namespace customerportalapi.Services
             {
                 if (isNewUser)
                 {
-                    User userSaved = _userRepository.GetCurrentUserByDniAndType(user.Dni, userType);
+                    User userSaved = _userRepository.GetCurrentUserByEmail(user.Email);
                     userSaved.LastEmailSent = ((EmailTemplateTypes)idTemplate).ToString();
                     _userRepository.Update(userSaved);
                 }
@@ -406,6 +411,10 @@ namespace customerportalapi.Services
                     _userRepository.Update(user);
                 }
                 resultWelcomeEmailSent = true;
+            }
+            else
+            {
+                _logger.LogError($"UserServices.InviteUserAsync(). The configuration for sending welcome mails in that user/store is not active. invitationValues: {JsonConvert.SerializeObject(invitationValues)}.");
             }
 
             return resultWelcomeEmailSent && resultCreateUser;
@@ -420,7 +429,7 @@ namespace customerportalapi.Services
             return invitationFields;
         }
 
-        public async Task<int> GetWelcomeTemplateFromFeatures(User user,bool isNewUser)
+        public async Task<int> GetWelcomeTemplateFromFeatures(User user, bool isNewUser)
         {
             string storeCountryCode = "";
             string accountType = UserInvitationUtils.GetAccountType(user.Usertype);
@@ -448,7 +457,7 @@ namespace customerportalapi.Services
             }
         }
 
-        private async Task<int> SendWelcomeEmail(Invitation invitationValues, User user, InvitationMandatoryData invitationFields,bool isnew)
+        private async Task<int> SendWelcomeEmail(Invitation invitationValues, User user, InvitationMandatoryData invitationFields, bool isnew)
         {
             int templateId = await GetWelcomeTemplateFromFeatures(user, isnew);
             if (templateId == -1) return templateId;
@@ -1263,7 +1272,8 @@ namespace customerportalapi.Services
                             invitationData.UnitName.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
                             var rx = new Regex(@"[a-zA-Z/,.+?-]", RegexOptions.Compiled);
                             var matchesCount = rx.Matches(contract.Unit.UnitName).Count;
-
+                            //si la unit name contiene algún carácter valida si empieza por E y da error con cualquier otro carácter en cualquier posición
+                            //si es numérica total siempre valida
                             if (matchesCount > 0)
                             {
                                 if (contract.Unit.UnitName.Trim().ToUpper().StartsWith('E')) // Algunos units pueden comenzar por E (anexos a otros edificios)                                    
