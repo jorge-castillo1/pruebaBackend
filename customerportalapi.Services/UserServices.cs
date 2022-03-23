@@ -429,7 +429,7 @@ namespace customerportalapi.Services
             return invitationFields;
         }
 
-        public async Task<int> GetWelcomeTemplateFromFeatures(User user, bool isNewUser)
+        public async Task<int> GetWelcomeTemplateFromFeatures(User user, bool isNewUser, int invokedBy)
         {
             string storeCountryCode = "";
             string accountType = UserInvitationUtils.GetAccountType(user.Usertype);
@@ -453,13 +453,17 @@ namespace customerportalapi.Services
             }
             else
             {
-                return (int)EmailTemplateTypes.WelcomeEmailShort;
+                // El welcome email corto NO se envía con el recordatorio de firma del CronJob
+                if (invokedBy == (int)InviteInvocationType.CronJob)
+                    return -1;
+                else                
+                    return (int)EmailTemplateTypes.WelcomeEmailShort;
             }
         }
 
         private async Task<int> SendWelcomeEmail(Invitation invitationValues, User user, InvitationMandatoryData invitationFields, bool isnew)
         {
-            int templateId = await GetWelcomeTemplateFromFeatures(user, isnew);
+            int templateId = await GetWelcomeTemplateFromFeatures(user, isnew, invitationValues.InvokedBy);
             if (templateId == -1) return templateId;
 
             EmailTemplate invitationTemplate = _emailTemplateRepository.getTemplate(templateId, UserInvitationUtils.GetLanguage(invitationValues.Language));
