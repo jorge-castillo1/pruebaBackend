@@ -1337,10 +1337,10 @@ namespace customerportalapi.Services
 
                                     string meTimeZoneKey = "Romance Standard Time";     // By default: "Romance Standard Time";
                                     if (store != null &&
-                                        store.Timezone != null &&
-                                        !string.IsNullOrEmpty(store.Timezone.MSTimeZone))
+                                        store.Timezoneid != null &&
+                                        !string.IsNullOrEmpty(store.Timezoneid.MSTimeZone))
                                     {
-                                        meTimeZoneKey = store.Timezone.MSTimeZone;    // get from store --> iav_stores.iav_timezoneid.iav_mstimezone
+                                        meTimeZoneKey = store.Timezoneid.MSTimeZone;    // get from store --> iav_stores.iav_timezoneid.iav_mstimezone
                                     }
 
                                     try

@@ -56,10 +56,10 @@ namespace customerportalapi.Entities
         public string MailType { get; set; }
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public TimeZone Timezone { get; set; }
+        public Timezoneid Timezoneid { get; set; }
     }
 
-    public class TimeZone
+    public class Timezoneid
     {
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string MSTimeZone { get; set; }
