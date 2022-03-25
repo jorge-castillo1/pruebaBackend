@@ -15,6 +15,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using TimeZoneConverter;
 
 namespace customerportalapi.Services
 {
@@ -1345,7 +1346,8 @@ namespace customerportalapi.Services
 
                                     try
                                     {
-                                        TimeZoneInfo meTimeZone = TimeZoneInfo.FindSystemTimeZoneById(meTimeZoneKey);
+                                        TimeZoneInfo meTimeZone = TZConvert.GetTimeZoneInfo(meTimeZoneKey);
+                                        //TimeZoneInfo meTimeZone = TimeZoneInfo.FindSystemTimeZoneById(meTimeZoneKey);
                                         meDateTime = TimeZoneInfo.ConvertTimeFromUtc(moveIn, meTimeZone);
                                     }
                                     catch (Exception ex)

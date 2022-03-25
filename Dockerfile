@@ -8,7 +8,8 @@ EXPOSE 80
 EXPOSE 443
 
 # Required for Time Zone database lookups
-RUN apt-get install -y tzdata
+RUN apt update && apt install tzdata -y
+ENV TZ="Europe/Madrid"
 
 FROM mcr.microsoft.com/dotnet/core/sdk:2.2-stretch AS build
 WORKDIR /src
