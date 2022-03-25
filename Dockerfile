@@ -7,6 +7,9 @@ WORKDIR /app
 EXPOSE 80
 EXPOSE 443
 
+# Required for Time Zone database lookups
+RUN apt-get install -y tzdata
+
 FROM mcr.microsoft.com/dotnet/core/sdk:2.2-stretch AS build
 WORKDIR /src
 COPY ["customerportalapi/customerportalapi.csproj", "customerportalapi/"]

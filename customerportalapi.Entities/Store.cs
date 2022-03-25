@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 
 namespace customerportalapi.Entities
 {
@@ -47,11 +48,20 @@ namespace customerportalapi.Entities
         public string CompanySocialAddress { get; set; }
 
         public string AccessType { get; set; }
-        
+
         public string StoreImage { get; set; }
 
         public string DocumentRepositoryUrl { get; set; }
 
         public string MailType { get; set; }
+
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public TimeZone Timezone { get; set; }
+    }
+
+    public class TimeZone
+    {
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public string MSTimeZone { get; set; }
     }
 }
