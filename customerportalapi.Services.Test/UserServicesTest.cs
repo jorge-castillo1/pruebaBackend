@@ -918,7 +918,7 @@ namespace customerportalapi.Services.Test
                 );
 
 
-            int result = await service.GetWelcomeTemplateFromFeatures(value, true);
+            int result = await service.GetWelcomeTemplateFromFeatures(value, true, (int)InviteInvocationType.CRM);
 
 
             //Assert

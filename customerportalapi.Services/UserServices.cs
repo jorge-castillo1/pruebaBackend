@@ -1274,20 +1274,22 @@ namespace customerportalapi.Services
                         if (contract.Unit != null)
                         {
                             invitationData.UnitName.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
-                            var rx = new Regex(@"[a-zA-Z/,.+?-]", RegexOptions.Compiled);
-                            var matchesCount = rx.Matches(contract.Unit.UnitName).Count;
-                            //si la unit name contiene algún carácter valida si empieza por E y da error con cualquier otro carácter en cualquier posición
-                            //si es numérica total siempre valida
-                            if (matchesCount > 0)
+
+                            if (!string.IsNullOrEmpty(contract.Unit.UnitName))
                             {
-                                if (contract.Unit.UnitName.Trim().ToUpper().StartsWith('E')) // Algunos units pueden comenzar por E (anexos a otros edificios)                                    
+                                var rxBeginsWordAndRestNumber = new Regex(@"^[a-zA-Z]{1}[0-9]{1,}\b", RegexOptions.Compiled);
+                                var rxIsOnlyNumber = new Regex(@"^[0-9]*$", RegexOptions.Compiled);
+                                var matchesIsOnlyNumber = rxIsOnlyNumber.Matches(contract.Unit.UnitName).Count;
+                                var matchesBeginsWordAndRestNumber = rxBeginsWordAndRestNumber.Matches(contract.Unit.UnitName).Count;
+
+                                if (matchesBeginsWordAndRestNumber > 0 || matchesIsOnlyNumber > 0)
+                                {
                                     invitationData.UnitName.SetValueAndState(contract.Unit.UnitName, StateEnum.Checked);
+                                }
                                 else
+                                {
                                     invitationData.UnitName.SetValueAndState(string.Concat(ValidationMessages.IncorrectFormat, ": ", contract.Unit.UnitName), StateEnum.Error);
-                            }
-                            else if (!string.IsNullOrEmpty(contract.Unit.UnitName))
-                            {
-                                invitationData.UnitName.SetValueAndState(contract.Unit.UnitName, StateEnum.Checked);
+                                }
                             }
 
                             var intSiteMailType = (int)StoreMailTypes.WithoutSignageOrNull;
