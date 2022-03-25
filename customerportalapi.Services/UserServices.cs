@@ -456,7 +456,7 @@ namespace customerportalapi.Services
                 // El welcome email corto NO se envía con el recordatorio de firma del CronJob
                 if (invokedBy == (int)InviteInvocationType.CronJob)
                     return -1;
-                else                
+                else
                     return (int)EmailTemplateTypes.WelcomeEmailShort;
             }
         }
@@ -1165,6 +1165,8 @@ namespace customerportalapi.Services
             {
                 if (contract != null && contract.Unit != null && !string.IsNullOrEmpty(contract.SmContractCode) && invitationData.ActiveContract.State == StateEnum.Unchecked)
                 {
+                    Store store = null;
+
                     invitationData.SmContractCode.SetValueAndState(contract.SmContractCode, StateEnum.Checked);
 
                     SMContract contractSM = await _contractSMRepository.GetAccessCodeAsync(contract.SmContractCode);
@@ -1208,7 +1210,7 @@ namespace customerportalapi.Services
                             if (unitLocation.Count > 0 && !string.IsNullOrEmpty(unitLocation[0].Description))
                                 invitationData.UnitSizeCode.SetValueAndState(unitLocation[0].Description, StateEnum.Checked);
 
-                            Store store = await _storeRepository.GetStoreAsync(contract.StoreData.StoreCode);
+                            store = await _storeRepository.GetStoreAsync(contract.StoreData.StoreCode);
                             invitationData.StoreCode.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
                             if (store != null)
                             {
@@ -1331,7 +1333,26 @@ namespace customerportalapi.Services
                                 if (!string.IsNullOrEmpty(opportunity.ExpectedMoveIn))
                                 {
                                     DateTime moveIn = DateTime.Parse(opportunity.ExpectedMoveIn);
-                                    invitationData.ExpectedMoveIn.SetValueAndState(moveIn.ToString(), StateEnum.Checked);
+                                    DateTime meDateTime = moveIn;
+
+                                    string meTimeZoneKey = "Romance Standard Time";     // By default: "Romance Standard Time";
+                                    if (store != null &&
+                                        store.Timezone != null &&
+                                        !string.IsNullOrEmpty(store.Timezone.MSTimeZone))
+                                    {
+                                        meTimeZoneKey = store.Timezone.MSTimeZone;    // get from store --> iav_stores.iav_timezoneid.iav_mstimezone
+                                    }
+
+                                    try
+                                    {
+                                        TimeZoneInfo meTimeZone = TimeZoneInfo.FindSystemTimeZoneById(meTimeZoneKey);
+                                        meDateTime = TimeZoneInfo.ConvertTimeFromUtc(moveIn, meTimeZone);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        _logger.LogError(ex, "UserServices.InviteUserAsync(). The TimeZone is not valid or not found: {0}.", meTimeZoneKey);
+                                    }
+                                    invitationData.ExpectedMoveIn.SetValueAndState(meDateTime.ToString(), StateEnum.Checked);
                                 }
                             }
 
