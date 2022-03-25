@@ -1332,8 +1332,8 @@ namespace customerportalapi.Services
 
                                 invitationData.ExpectedMoveIn.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
                                 if (!string.IsNullOrEmpty(opportunity.ExpectedMoveIn))
-                                {
-                                    DateTime moveIn = DateTime.Parse(opportunity.ExpectedMoveIn);
+                                {                                    
+                                    DateTime moveIn = Convert.ToDateTime(opportunity.ExpectedMoveIn).ToUniversalTime();                                    
                                     DateTime meDateTime = moveIn;
 
                                     string meTimeZoneKey = "Romance Standard Time";     // By default: "Romance Standard Time";
