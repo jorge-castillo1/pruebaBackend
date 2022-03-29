@@ -1162,206 +1162,223 @@ namespace customerportalapi.Services
             invitationData.Contract.SetValueAndState(contracts.Count.ToString(), StateEnum.Checked);
             invitationData.ActiveContract = UserInvitationUtils.GetMandatoryData(SystemTypes.SM, EntityNames.WBSGetContract, null, StateEnum.Unchecked);
 
-            foreach (Contract contract in contracts)
+            // Recuperar todos los contratos de SM y guardarlos junto a los de CRM en 'ContractInvitation'
+            List<ContractInvitation> listContrats = new List<ContractInvitation>();
+            foreach (Contract c in contracts)
             {
-                if (contract != null && contract.Unit != null && !string.IsNullOrEmpty(contract.SmContractCode) && invitationData.ActiveContract.State == StateEnum.Unchecked)
+                listContrats.Add(new ContractInvitation(c)
                 {
-                    Store store = null;
+                    SmContract = await _contractSMRepository.GetAccessCodeAsync(c.SmContractCode)
+                });
+            }
 
-                    invitationData.SmContractCode.SetValueAndState(contract.SmContractCode, StateEnum.Checked);
+            // Trabajar solo con un contrato, el activo o con el último no activo.
+            ContractInvitation contract = null;
+            if (listContrats != null && listContrats.Count() == 1)
+            {
+                contract = listContrats.FirstOrDefault();
+            }
+            else if (listContrats.Count() > 1)
+            {
+                var countlistContratsActive = listContrats.Where(x => x.SmContract != null && (x.SmContract.Leaving == null || x.SmContract.Leaving == string.Empty)).Count();
+                if (countlistContratsActive == 0)
+                {
+                    contract = listContrats.LastOrDefault(); // devuelve el último contrato no activo
+                }
+                else // countlistContratsActive >= 1
+                {
+                    contract = listContrats.Where(x => x.SmContract != null && x.SmContract.Leaving == null || x.SmContract.Leaving == string.Empty).LastOrDefault(); //devuelve el último contrato activo
+                }
+            }
 
-                    SMContract contractSM = await _contractSMRepository.GetAccessCodeAsync(contract.SmContractCode);
-                    invitationData.SMContract.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
-                    if (contractSM != null && !string.IsNullOrEmpty(contractSM.Contractnumber))
-                        invitationData.SMContract.SetValueAndState(contractSM.Contractnumber, StateEnum.Checked);
+            if (contract != null && contract.Unit != null && !string.IsNullOrEmpty(contract.SmContractCode) && invitationData.ActiveContract.State == StateEnum.Unchecked)
+            {
+                Store store = null;
 
-                    //Leaving
-                    if (!string.IsNullOrEmpty(contractSM.Leaving))
-                        invitationData.Leaving.SetValueAndState(contractSM.Leaving.ToString(), StateEnum.Error);
+                //SmContractCode
+                invitationData.SmContractCode.SetValueAndState(contract.SmContractCode, StateEnum.Checked);
 
-                    // only active contracts, if the contract has "terminated", the field "Leaving" have information.
-                    if (contractSM != null && string.IsNullOrEmpty(contractSM.Leaving))
+                //SmContract.Contractnumber
+                invitationData.SMContract.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
+                if (contract.SmContract != null && !string.IsNullOrEmpty(contract.SmContract.Contractnumber))
+                    invitationData.SMContract.SetValueAndState(contract.SmContract.Contractnumber, StateEnum.Checked);
+
+                //SmContract.Leaving
+                if (!string.IsNullOrEmpty(contract.SmContract.Leaving))
+                    invitationData.Leaving.SetValueAndState(contract.SmContract.Leaving.ToString(), StateEnum.Error);
+
+                // only active contracts, if the contract has "terminated", the field "Leaving" have information.
+                if (contract.SmContract != null && string.IsNullOrEmpty(contract.SmContract.Leaving))
+                {
+                    invitationData.ActiveContract.SetValueAndState(StateEnum.Checked.ToString(), StateEnum.Checked);
+
+                    // Store
+                    invitationData.ContractStoreCode.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
+                    if (contract.StoreData.StoreCode != null)
                     {
-                        invitationData.ActiveContract.SetValueAndState(StateEnum.Checked.ToString(), StateEnum.Checked);
+                        invitationData.ContractStoreCode.SetValueAndState(contract.StoreData.StoreCode, StateEnum.Checked);
 
-                        // Store
-                        invitationData.ContractStoreCode.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
-                        if (contract.StoreData.StoreCode != null)
+                        // UnitSizeCode
+                        UnitLocationSearchFilter filter = new UnitLocationSearchFilter()
                         {
-                            invitationData.ContractStoreCode.SetValueAndState(contract.StoreData.StoreCode, StateEnum.Checked);
-
-                            // TODO: get sizeCode form Contract or Unit
-                            UnitLocationSearchFilter filter = new UnitLocationSearchFilter()
-                            {
-                                SiteCode = contract.StoreData.StoreCode,
-                                SizeCode = contract.Unit.UnitCategory
-                            };
-                            List<UnitLocation> unitLocation = _unitLocationRepository.Find(filter);
-
-                            if (contact.Language == "French")
-                            {
-                                invitationData.UnitPassword.SetValueAndState(ValidationMessages.NoInformationAvailable_FR, StateEnum.Warning);
-                            }
-                            else
-                            {
-                                invitationData.UnitPassword.SetValueAndState(ValidationMessages.NoInformationAvailable, StateEnum.Warning);
-                            }
-
-                            invitationData.UnitSizeCode.SetValueAndState(ValidationMessages.NoInformationAvailable, StateEnum.Warning);
-                            if (unitLocation.Count > 0 && !string.IsNullOrEmpty(unitLocation[0].Description))
-                                invitationData.UnitSizeCode.SetValueAndState(unitLocation[0].Description, StateEnum.Checked);
-
-                            store = await _storeRepository.GetStoreAsync(contract.StoreData.StoreCode);
-                            invitationData.StoreCode.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
-                            if (store != null)
-                            {
-                                if (!string.IsNullOrEmpty(store.StoreCode))
-                                    invitationData.StoreCode.SetValueAndState(store.StoreCode.ToString(), StateEnum.Checked);
-
-                                invitationData.OpeningDaysFirst.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
-                                if (!string.IsNullOrEmpty(store.OpeningDaysFirst))
-                                    invitationData.OpeningDaysFirst.SetValueAndState(store.OpeningDaysFirst, StateEnum.Checked);
-
-                                invitationData.OpeningDaysLast.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
-                                if (!string.IsNullOrEmpty(store.OpeningDaysLast))
-                                    invitationData.OpeningDaysLast.SetValueAndState(store.OpeningDaysLast, StateEnum.Checked);
-
-                                invitationData.OpeningHoursFrom.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
-                                if (!string.IsNullOrEmpty(store.OpeningHoursFrom))
-                                    invitationData.OpeningHoursFrom.SetValueAndState(store.OpeningHoursFrom, StateEnum.Checked);
-
-                                invitationData.OpeningHoursTo.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
-                                if (!string.IsNullOrEmpty(store.OpeningHoursTo))
-                                    invitationData.OpeningHoursTo.SetValueAndState(store.OpeningHoursTo, StateEnum.Checked);
-
-                                invitationData.StoreName.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
-                                if (!string.IsNullOrEmpty(store.StoreName))
-                                    invitationData.StoreName.SetValueAndState(store.StoreName, StateEnum.Checked);
-
-                                invitationData.StoreEmail.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
-
-                                string email = store.EmailAddress1 ?? store.EmailAddress2;
-                                if (!string.IsNullOrEmpty(email))
-                                    invitationData.StoreEmail.SetValueAndState(email, StateEnum.Checked);
-
-                                invitationData.StoreCity.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
-                                if (!string.IsNullOrEmpty(store.City))
-                                    invitationData.StoreCity.SetValueAndState(store.City, StateEnum.Checked);
-
-                                // MailType for WelcomeEmail                                
-                                if (!string.IsNullOrEmpty(store.MailType))
-                                    invitationData.SiteMailType.SetValueAndState(store.MailType, StateEnum.Checked);
-                            }
-
-                            //List<UnitLocation> unitLocation = _unitLocationRepository.Find(filter);
-                            invitationData.UnitSizeCode.SetValueAndState(ValidationMessages.NoInformationAvailable, StateEnum.Warning);
-                            if (unitLocation.Count > 0 && !string.IsNullOrEmpty(unitLocation[0].Description))
-                                invitationData.UnitSizeCode.SetValueAndState(unitLocation[0].Description, StateEnum.Checked);
-                        }
-
-                        // Unit
-
-                        //Access Code eliminado temporalmente de Mandatory Data
+                            SiteCode = contract.StoreData.StoreCode,
+                            SizeCode = contract.Unit.UnitCategory
+                        };
+                        List<UnitLocation> unitLocation = _unitLocationRepository.Find(filter);
                         if (contact.Language == "French")
                         {
-                            invitationData.UnitPassword.SetValueAndState(ValidationMessages.NoInformationAvailable_FR, StateEnum.Warning);
+                            invitationData.UnitSizeCode.SetValueAndState(ValidationMessages.NoInformationAvailable_FR, StateEnum.Warning);
                         }
                         else
                         {
-                            invitationData.UnitPassword.SetValueAndState(ValidationMessages.NoInformationAvailable, StateEnum.Warning);
+                            invitationData.UnitSizeCode.SetValueAndState(ValidationMessages.NoInformationAvailable, StateEnum.Warning);
                         }
+                        if (unitLocation.Count > 0 && !string.IsNullOrEmpty(unitLocation[0].Description))
+                            invitationData.UnitSizeCode.SetValueAndState(unitLocation[0].Description, StateEnum.Checked);
 
-                        if (!string.IsNullOrEmpty(contractSM.Password))
-                            invitationData.UnitPassword.SetValueAndState(contractSM.Password, StateEnum.Checked);
-
-                        if (contract.Unit != null)
+                        store = await _storeRepository.GetStoreAsync(contract.StoreData.StoreCode);
+                        invitationData.StoreCode.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
+                        if (store != null)
                         {
-                            invitationData.UnitName.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
+                            if (!string.IsNullOrEmpty(store.StoreCode))
+                                invitationData.StoreCode.SetValueAndState(store.StoreCode.ToString(), StateEnum.Checked);
 
-                            if (!string.IsNullOrEmpty(contract.Unit.UnitName))
-                            {
-                                var rxBeginsWordAndRestNumber = new Regex(@"^[a-zA-Z]{1}[0-9]{1,}\b", RegexOptions.Compiled);
-                                var rxIsOnlyNumber = new Regex(@"^[0-9]*$", RegexOptions.Compiled);
-                                var matchesIsOnlyNumber = rxIsOnlyNumber.Matches(contract.Unit.UnitName).Count;
-                                var matchesBeginsWordAndRestNumber = rxBeginsWordAndRestNumber.Matches(contract.Unit.UnitName).Count;
+                            invitationData.OpeningDaysFirst.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
+                            if (!string.IsNullOrEmpty(store.OpeningDaysFirst))
+                                invitationData.OpeningDaysFirst.SetValueAndState(store.OpeningDaysFirst, StateEnum.Checked);
 
-                                if (matchesBeginsWordAndRestNumber > 0 || matchesIsOnlyNumber > 0)
-                                {
-                                    invitationData.UnitName.SetValueAndState(contract.Unit.UnitName, StateEnum.Checked);
-                                }
-                                else
-                                {
-                                    invitationData.UnitName.SetValueAndState(string.Concat(ValidationMessages.IncorrectFormat, ": ", contract.Unit.UnitName), StateEnum.Error);
-                                }
-                            }
+                            invitationData.OpeningDaysLast.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
+                            if (!string.IsNullOrEmpty(store.OpeningDaysLast))
+                                invitationData.OpeningDaysLast.SetValueAndState(store.OpeningDaysLast, StateEnum.Checked);
 
-                            var intSiteMailType = (int)StoreMailTypes.WithoutSignageOrNull;
-                            if (!string.IsNullOrEmpty(invitationData.SiteMailType.Value))
-                                intSiteMailType = Convert.ToInt32(invitationData.SiteMailType.Value.Trim());
+                            invitationData.OpeningHoursFrom.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
+                            if (!string.IsNullOrEmpty(store.OpeningHoursFrom))
+                                invitationData.OpeningHoursFrom.SetValueAndState(store.OpeningHoursFrom, StateEnum.Checked);
 
-                            switch (intSiteMailType)
-                            {
-                                case (int)StoreMailTypes.NewSignage:
-                                    NewSignage(invitationData, contract);
-                                    break;
+                            invitationData.OpeningHoursTo.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
+                            if (!string.IsNullOrEmpty(store.OpeningHoursTo))
+                                invitationData.OpeningHoursTo.SetValueAndState(store.OpeningHoursTo, StateEnum.Checked);
 
-                                case (int)StoreMailTypes.OldSignage:
-                                    OldSignage(invitationData, contract);
-                                    break;
+                            invitationData.StoreName.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
+                            if (!string.IsNullOrEmpty(store.StoreName))
+                                invitationData.StoreName.SetValueAndState(store.StoreName, StateEnum.Checked);
 
-                                case (int)StoreMailTypes.WithoutSignageOrNull:
-                                default:
-                                    WithoutSignage(invitationData);
-                                    break;
-                            }
-                        }
+                            invitationData.StoreEmail.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
 
-                        // OpportunityCRM
-                        invitationData.ContractOpportunity.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
-                        if (!string.IsNullOrEmpty(contract.OpportunityId))
-                        {
-                            invitationData.ContractOpportunity.SetValueAndState(StateEnum.Checked.ToString(), StateEnum.Checked);
+                            string email = store.EmailAddress1 ?? store.EmailAddress2;
+                            if (!string.IsNullOrEmpty(email))
+                                invitationData.StoreEmail.SetValueAndState(email, StateEnum.Checked);
 
-                            OpportunityCRM opportunity = await _opportunityRepository.GetOpportunity(contract.OpportunityId);
+                            invitationData.StoreCity.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
+                            if (!string.IsNullOrEmpty(store.City))
+                                invitationData.StoreCity.SetValueAndState(store.City, StateEnum.Checked);
 
-                            if (opportunity != null)
-                            {
-                                invitationData.OpportunityId.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
-                                if (!string.IsNullOrEmpty(opportunity.OpportunityId))
-                                    invitationData.OpportunityId.SetValueAndState(opportunity.OpportunityId, StateEnum.Checked);
-
-                                invitationData.ExpectedMoveIn.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
-                                if (!string.IsNullOrEmpty(opportunity.ExpectedMoveIn))
-                                {                                    
-                                    DateTime moveIn = Convert.ToDateTime(opportunity.ExpectedMoveIn).ToUniversalTime();                                    
-                                    DateTime meDateTime = moveIn;
-
-                                    string meTimeZoneKey = "Romance Standard Time";     // By default: "Romance Standard Time";
-                                    if (store != null &&
-                                        store.Timezoneid != null &&
-                                        !string.IsNullOrEmpty(store.Timezoneid.MSTimeZone))
-                                    {
-                                        meTimeZoneKey = store.Timezoneid.MSTimeZone;    // get from store --> iav_stores.iav_timezoneid.iav_mstimezone
-                                    }
-
-                                    try
-                                    {
-                                        TimeZoneInfo meTimeZone = TZConvert.GetTimeZoneInfo(meTimeZoneKey);
-                                        //TimeZoneInfo meTimeZone = TimeZoneInfo.FindSystemTimeZoneById(meTimeZoneKey);
-                                        meDateTime = TimeZoneInfo.ConvertTimeFromUtc(moveIn, meTimeZone);
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        _logger.LogError(ex, "UserServices.InviteUserAsync(). The TimeZone is not valid or not found: {0}.", meTimeZoneKey);
-                                    }
-                                    invitationData.ExpectedMoveIn.SetValueAndState(meDateTime.ToString(), StateEnum.Checked);
-                                }
-                            }
-
+                            // MailType for WelcomeEmail                                
+                            if (!string.IsNullOrEmpty(store.MailType))
+                                invitationData.SiteMailType.SetValueAndState(store.MailType, StateEnum.Checked);
                         }
                     }
-                }
 
+                    // UnitPassword (SmContract.Password)
+                    //Access Code eliminado temporalmente de Mandatory Data
+                    if (contact.Language == "French")
+                    {
+                        invitationData.UnitPassword.SetValueAndState(ValidationMessages.NoInformationAvailable_FR, StateEnum.Warning);
+                    }
+                    else
+                    {
+                        invitationData.UnitPassword.SetValueAndState(ValidationMessages.NoInformationAvailable, StateEnum.Warning);
+                    }
+                    if (!string.IsNullOrEmpty(contract.SmContract.Password))
+                        invitationData.UnitPassword.SetValueAndState(contract.SmContract.Password, StateEnum.Checked);
+
+                    // UnitName, UnitColour, UnitCorridor, UnitExceptions, UnitFloor, UnitZone
+                    if (contract.Unit != null)
+                    {
+                        invitationData.UnitName.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
+
+                        if (!string.IsNullOrEmpty(contract.Unit.UnitName))
+                        {
+                            var rxBeginsWordAndRestNumber = new Regex(@"^[a-zA-Z]{1}[0-9]{1,}\b", RegexOptions.Compiled);
+                            var rxIsOnlyNumber = new Regex(@"^[0-9]*$", RegexOptions.Compiled);
+                            var matchesIsOnlyNumber = rxIsOnlyNumber.Matches(contract.Unit.UnitName).Count;
+                            var matchesBeginsWordAndRestNumber = rxBeginsWordAndRestNumber.Matches(contract.Unit.UnitName).Count;
+
+                            if (matchesBeginsWordAndRestNumber > 0 || matchesIsOnlyNumber > 0)
+                            {
+                                invitationData.UnitName.SetValueAndState(contract.Unit.UnitName, StateEnum.Checked);
+                            }
+                            else
+                            {
+                                invitationData.UnitName.SetValueAndState(string.Concat(ValidationMessages.IncorrectFormat, ": ", contract.Unit.UnitName), StateEnum.Error);
+                            }
+                        }
+
+                        var intSiteMailType = (int)StoreMailTypes.WithoutSignageOrNull;
+                        if (!string.IsNullOrEmpty(invitationData.SiteMailType.Value))
+                            intSiteMailType = Convert.ToInt32(invitationData.SiteMailType.Value.Trim());
+
+                        switch (intSiteMailType)
+                        {
+                            case (int)StoreMailTypes.NewSignage:
+                                NewSignage(invitationData, contract);
+                                break;
+
+                            case (int)StoreMailTypes.OldSignage:
+                                OldSignage(invitationData, contract);
+                                break;
+
+                            case (int)StoreMailTypes.WithoutSignageOrNull:
+                            default:
+                                WithoutSignage(invitationData);
+                                break;
+                        }
+                    }
+
+                    // OpportunityCRM: ContractOpportunity, OpportunityId, ExpectedMoveIn
+                    invitationData.ContractOpportunity.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
+                    if (!string.IsNullOrEmpty(contract.OpportunityId))
+                    {
+                        invitationData.ContractOpportunity.SetValueAndState(StateEnum.Checked.ToString(), StateEnum.Checked);
+
+                        OpportunityCRM opportunity = await _opportunityRepository.GetOpportunity(contract.OpportunityId);
+
+                        if (opportunity != null)
+                        {
+                            invitationData.OpportunityId.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
+                            if (!string.IsNullOrEmpty(opportunity.OpportunityId))
+                                invitationData.OpportunityId.SetValueAndState(opportunity.OpportunityId, StateEnum.Checked);
+
+                            invitationData.ExpectedMoveIn.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
+                            if (!string.IsNullOrEmpty(opportunity.ExpectedMoveIn))
+                            {
+                                DateTime moveIn = Convert.ToDateTime(opportunity.ExpectedMoveIn).ToUniversalTime();
+                                DateTime meDateTime = moveIn;
+
+                                string meTimeZoneKey = "Romance Standard Time";     // By default: "Romance Standard Time";
+                                if (store != null &&
+                                    store.Timezoneid != null &&
+                                    !string.IsNullOrEmpty(store.Timezoneid.MSTimeZone))
+                                {
+                                    meTimeZoneKey = store.Timezoneid.MSTimeZone;    // get from store --> iav_stores.iav_timezoneid.iav_mstimezone
+                                }
+
+                                try
+                                {
+                                    TimeZoneInfo meTimeZone = TZConvert.GetTimeZoneInfo(meTimeZoneKey);
+                                    //TimeZoneInfo meTimeZone = TimeZoneInfo.FindSystemTimeZoneById(meTimeZoneKey);
+                                    meDateTime = TimeZoneInfo.ConvertTimeFromUtc(moveIn, meTimeZone);
+                                }
+                                catch (Exception ex)
+                                {
+                                    _logger.LogError(ex, "UserServices.InviteUserAsync(). The TimeZone is not valid or not found: {0}.", meTimeZoneKey);
+                                }
+                                invitationData.ExpectedMoveIn.SetValueAndState(meDateTime.ToString(), StateEnum.Checked);
+                            }
+                        }
+
+                    }
+                }
             }
 
             if (invitationData.SmContractCode.State == StateEnum.Unchecked)

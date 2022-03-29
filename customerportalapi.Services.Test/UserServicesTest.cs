@@ -494,12 +494,15 @@ namespace customerportalapi.Services.Test
         public async Task AlInvitarUnUsuario_AunqueNoExistaPlantillaCorreoEnSuIdioma_SeEnviaCorreoIgualmente()
         {
             //Arrange
-            Invitation invitation = new Invitation();
-            invitation.Dni = "FakeDni";
-            invitation.Email = "fakeuser@email.com";
-            invitation.CustomerType = "Residential";
-            invitation.Fullname = "Fake User";
-            invitation.Language = "Portuguese";
+            Invitation invitation = new Invitation
+            {
+                Dni = "FakeDni",
+                Email = "fakeuser@email.com",
+                CustomerType = "Residential",
+                Fullname = "Fake User",
+                Language = "Portuguese",
+                InvokedBy = 0
+            };
 
             //Act
             Mock<IUserRepository> _userRepositoryInvalid = UserRepositoryMock.InvalidUserRepository();
