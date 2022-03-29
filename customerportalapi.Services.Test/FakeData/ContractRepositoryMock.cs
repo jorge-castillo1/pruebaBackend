@@ -47,10 +47,10 @@ namespace customerportalapi.Services.Test.FakeData
                    },
                    OpportunityId = "OpportunityId"
                 },
-               
+
             })).Verifiable();
 
-            
+
             return db;
         }
 
@@ -87,7 +87,10 @@ namespace customerportalapi.Services.Test.FakeData
                         UnitName = "6104",
                         Width = "2.92"
                    },
-                   OpportunityId = "OpportunityId"
+                   OpportunityId = "OpportunityId",
+                   ContractExpectedMoveIn = "01/01/2020",
+                   ExpectedMoveIn = "01/01/2020",
+                   TimeZone = "Fake timezone"
                 },
                 new Contract
                 {
@@ -116,7 +119,11 @@ namespace customerportalapi.Services.Test.FakeData
                         UnitCategory = "SS",
                         UnitName = "6105",
                         Width = "2.92"
-                   }
+                   },
+                   OpportunityId = "OpportunityId",
+                   ContractExpectedMoveIn = "01/01/2020",
+                   ExpectedMoveIn = "01/01/2020",
+                   TimeZone = "Fake timezone"
                 },
                 new Contract
                 {
@@ -146,6 +153,11 @@ namespace customerportalapi.Services.Test.FakeData
                         UnitName = "4100",
                         Width = "2.92"
                    }
+                   ,
+                   OpportunityId = "OpportunityId",
+                   ContractExpectedMoveIn = "01/01/2020",
+                   ExpectedMoveIn = "01/01/2020",
+                   TimeZone = "Fake timezone"
                 },
                 new Contract
                 {
@@ -174,7 +186,11 @@ namespace customerportalapi.Services.Test.FakeData
                         UnitCategory = "SS",
                         UnitName = "5101",
                         Width = "2.92"
-                   }
+                   },
+                   OpportunityId = "OpportunityId",
+                   ContractExpectedMoveIn = "01/01/2020",
+                   ExpectedMoveIn = "01/01/2020",
+                   TimeZone = "Fake timezone"
                 },
             })).Verifiable();
 
@@ -194,7 +210,11 @@ namespace customerportalapi.Services.Test.FakeData
                     EmailAddress1 = "EmailAddress1",
                     EmailAddress2 = "EmailAddress2"
                 },
-                SmContractCode = "123456789"
+                SmContractCode = "123456789",
+                OpportunityId = "OpportunityId",
+                ContractExpectedMoveIn = "01/01/2020",
+                ExpectedMoveIn = "01/01/2020",
+                TimeZone = "Fake timezone"
             })).Verifiable();
 
             return db;
@@ -213,7 +233,11 @@ namespace customerportalapi.Services.Test.FakeData
                     Telephone = "Fake telephone",
                     CoordinatesLatitude = "Fake CoordinatesLatitude",
                     CoordinatesLongitude = "Fake CoordinatesLongitude"
-                }
+                },
+                OpportunityId = "OpportunityId",
+                ContractExpectedMoveIn = "01/01/2020",
+                ExpectedMoveIn = "01/01/2020",
+                TimeZone = "Fake timezone"
 
             })).Verifiable();
 
@@ -229,7 +253,11 @@ namespace customerportalapi.Services.Test.FakeData
                             Telephone = "Fake telephone",
                             CoordinatesLatitude = "Fake CoordinatesLatitude",
                             CoordinatesLongitude = "Fake CoordinatesLongitude"
-                        }
+                        },
+                        OpportunityId = "OpportunityId",
+                        ContractExpectedMoveIn = "01/01/2020",
+                        ExpectedMoveIn = "01/01/2020",
+                        TimeZone = "Fake timezone"
                     }
 
                 }
@@ -256,7 +284,10 @@ namespace customerportalapi.Services.Test.FakeData
                     EmailAddress1 = "EmailAddress1",
                     EmailAddress2 = "EmailAddress2"
                 },
-                OpportunityId = "FakeOpportunityId"
+                OpportunityId = "FakeOpportunityId",
+                ContractExpectedMoveIn = "01/01/2020",
+                ExpectedMoveIn = "01/01/2020",
+                TimeZone = "Fake timezone"
 
             })).Verifiable();
 
@@ -280,7 +311,10 @@ namespace customerportalapi.Services.Test.FakeData
                     CoordinatesLongitude = "Fake CoordinatesLongitude"
                 },
                 OpportunityId = "FakeOpportunityId",
-                PaymentMethodId = "FakePaymentMethodId"
+                PaymentMethodId = "FakePaymentMethodId",
+                ContractExpectedMoveIn = "01/01/2020",
+                ExpectedMoveIn = "01/01/2020",
+                TimeZone = "Fake timezone"
 
             })).Verifiable();
 
@@ -304,7 +338,10 @@ namespace customerportalapi.Services.Test.FakeData
                     CoordinatesLongitude = "Fake CoordinatesLongitude",
                 },
                 OpportunityId = "FakeOpportunityId",
-                PaymentMethodId = "FakePaymentMethodId"
+                PaymentMethodId = "FakePaymentMethodId",
+                ContractExpectedMoveIn = "01/01/2020",
+                ExpectedMoveIn = "01/01/2020",
+                TimeZone = "Fake timezone"
 
             })).Verifiable();
 
