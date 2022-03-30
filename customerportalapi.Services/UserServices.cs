@@ -1152,7 +1152,7 @@ namespace customerportalapi.Services
 
             //Contract
             List<Contract> contracts = await _contractRepository.GetContractsAsync(value.Dni, accountType);
-            if (contracts.Count == 0)
+            if (contracts == null || contracts.Count == 0 || contracts?.Where(c => c.SmContractCode != null && c.SmContractCode != string.Empty).Count() == 0)
             {
                 invitationData.Contract.State = StateEnum.Error;
                 await SendEmailInvitationError(invitationData);
@@ -1164,7 +1164,7 @@ namespace customerportalapi.Services
 
             // Recuperar todos los contratos de SM y guardarlos junto a los de CRM en 'ContractInvitation'
             List<ContractInvitation> listContrats = new List<ContractInvitation>();
-            foreach (Contract c in contracts)
+            foreach (Contract c in contracts.Where(c => c.SmContractCode != null && c.SmContractCode != string.Empty).ToList())
             {
                 listContrats.Add(new ContractInvitation(c)
                 {
