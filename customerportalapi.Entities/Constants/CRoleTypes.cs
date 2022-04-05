@@ -1,6 +1,6 @@
-﻿namespace customerportalapi.Entities
+﻿namespace customerportalapi.Entities.Constants
 {
-    public static class Role
+    public static class CRoleTypes
     {
         public const string Admin = "adminContact";
         public const string User = "contact";

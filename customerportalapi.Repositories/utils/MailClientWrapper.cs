@@ -1,4 +1,4 @@
-﻿using customerportalapi.Repositories.interfaces;
+﻿using customerportalapi.Repositories.Interfaces;
 using MailKit.Net.Smtp;
 using MimeKit;
 using System;
@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace customerportalapi.Repositories.utils
+namespace customerportalapi.Repositories.Utils
 {
     public class MailClientWrapper : IMailClient
     {

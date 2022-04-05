@@ -7,7 +7,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using customerportalapi.Repositories.interfaces;
+using customerportalapi.Repositories.Interfaces;
 using customerportalapi.Entities;
 
 namespace customerportalapi.Repositories

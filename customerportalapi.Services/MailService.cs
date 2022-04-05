@@ -1,4 +1,4 @@
-﻿using customerportalapi.Repositories.interfaces;
+﻿using customerportalapi.Repositories.Interfaces;
 using customerportalapi.Services.Interfaces;
 using Microsoft.Extensions.Configuration;
 using System.Threading.Tasks;

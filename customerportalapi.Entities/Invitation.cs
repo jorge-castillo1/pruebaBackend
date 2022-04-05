@@ -1,4 +1,4 @@
-﻿using customerportalapi.Entities.enums;
+﻿using customerportalapi.Entities.Enums;
 using System;
 using System.Collections.Generic;
 using System.Text;

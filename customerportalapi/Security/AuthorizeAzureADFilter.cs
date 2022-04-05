@@ -1,5 +1,5 @@
-﻿using customerportalapi.Entities.enums;
-using customerportalapi.Repositories.interfaces;
+﻿using customerportalapi.Entities.Enums;
+using customerportalapi.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Configuration;

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reflection;
 
-namespace customerportalapi.Entities.enums
+namespace customerportalapi.Entities.Enums
 {
     public class EnumGuidMapperAttribute : Attribute
     {

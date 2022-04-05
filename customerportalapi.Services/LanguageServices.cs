@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
 using customerportalapi.Entities;
-using customerportalapi.Repositories.interfaces;
+using customerportalapi.Repositories.Interfaces;
 using Microsoft.Extensions.Caching.Distributed;
 using customerportalapi.Services.Interfaces;
 

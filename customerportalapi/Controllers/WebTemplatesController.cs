@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using AutoWrapper.Wrappers;
-using customerportalapi.Entities.enums;
+using customerportalapi.Entities.Enums;
 using customerportalapi.Security;
 using customerportalapi.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;

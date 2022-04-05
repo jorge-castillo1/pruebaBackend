@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using customerportalapi.Entities;
-using customerportalapi.Entities.enums;
-using customerportalapi.Repositories.interfaces;
+using customerportalapi.Entities.Enums;
+using customerportalapi.Repositories.Interfaces;
 using Moq;
 
 namespace customerportalapi.Services.Test.FakeData

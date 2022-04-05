@@ -3,9 +3,9 @@ using System.Net;
 using System.Linq;
 using System.Collections.Generic;
 using customerportalapi.Services.Interfaces;
-using customerportalapi.Repositories.interfaces;
+using customerportalapi.Repositories.Interfaces;
 using customerportalapi.Entities;
-using customerportalapi.Entities.enums;
+using customerportalapi.Entities.Enums;
 using customerportalapi.Services.Exceptions;
 using System.Threading.Tasks;
 

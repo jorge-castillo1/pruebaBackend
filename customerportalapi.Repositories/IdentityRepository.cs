@@ -1,5 +1,5 @@
 using customerportalapi.Entities;
-using customerportalapi.Repositories.interfaces;
+using customerportalapi.Repositories.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols;
@@ -84,9 +84,9 @@ namespace customerportalapi.Repositories
             var jwt = (SecurityToken)new JwtSecurityToken();
             try
             {
-//#if DEBUG
+                //#if DEBUG
                 IdentityModelEventSource.ShowPII = true;
-//#endif
+                //#endif
                 var myAudience = _configuration["AzureAd:ClientId"];
                 var myIssuer = String.Format(CultureInfo.InvariantCulture, "{0}/{1}/", _configuration["AzureAd:Instance"], _configuration["AzureAd:TenantId"]);
                 var configManager = new ConfigurationManager<OpenIdConnectConfiguration>(_configuration["AzureAd:DiscoveryEndpoint"], new OpenIdConnectConfigurationRetriever());
@@ -170,8 +170,8 @@ namespace customerportalapi.Repositories
 
                 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
                     "Basic",
-                    Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes(
-                        String.Format("{0}:{1}", _configuration["Identity:Credentials:User"], _configuration["Identity:Credentials:Password"])))
+                    Convert.ToBase64String(Encoding.ASCII.GetBytes(
+                        $"{_configuration["Identity:Credentials:User"]}:{_configuration["Identity:Credentials:Password"]}"))
                 );
                 var response = await httpClient.GetAsync(url);
                 response.EnsureSuccessStatusCode();

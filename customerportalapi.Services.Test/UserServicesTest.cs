@@ -1,7 +1,7 @@
 using customerportalapi.Entities;
-using customerportalapi.Entities.enums;
+using customerportalapi.Entities.Enums;
 using customerportalapi.Repositories;
-using customerportalapi.Repositories.interfaces;
+using customerportalapi.Repositories.Interfaces;
 using customerportalapi.Services.Exceptions;
 using customerportalapi.Services.Interfaces;
 using customerportalapi.Services.Test.FakeData;

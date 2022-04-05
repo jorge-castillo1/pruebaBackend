@@ -4,7 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Moq;
 using customerportalapi.Entities;
-using customerportalapi.Repositories.interfaces;
+using customerportalapi.Repositories.Interfaces;
 
 namespace customerportalapi.Services.Test.FakeData
 {

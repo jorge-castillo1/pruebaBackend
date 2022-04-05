@@ -33,6 +33,8 @@ namespace customerportalapi.Services.Interfaces
 
         Task<bool> ChangeRole(string username, string role);
 
+        Task<bool> ChangeRoles(ChangeRoles changeRoles);
+
         Task<bool> RemoveRole(string username, string role);
 
         bool ValidateUsername(string username);

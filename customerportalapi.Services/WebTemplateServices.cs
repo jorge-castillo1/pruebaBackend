@@ -1,8 +1,8 @@
-﻿using customerportalapi.Repositories.interfaces;
+﻿using customerportalapi.Repositories.Interfaces;
 using customerportalapi.Entities;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using customerportalapi.Entities.enums;
+using customerportalapi.Entities.Enums;
 using customerportalapi.Services.Interfaces;
 
 namespace customerportalapi.Services

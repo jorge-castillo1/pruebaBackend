@@ -1,11 +1,11 @@
-﻿using customerportalapi.Repositories.interfaces;
+﻿using customerportalapi.Repositories.Interfaces;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
-namespace customerportalapi.Repositories.utils
+namespace customerportalapi.Repositories.Utils
 {
     public class MongoCollectionWrapper<T> : IMongoCollectionWrapper<T>
     {

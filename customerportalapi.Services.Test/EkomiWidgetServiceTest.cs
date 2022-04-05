@@ -1,5 +1,5 @@
 ﻿using customerportalapi.Entities;
-using customerportalapi.Repositories.interfaces;
+using customerportalapi.Repositories.Interfaces;
 using customerportalapi.Services.Test.FakeData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;

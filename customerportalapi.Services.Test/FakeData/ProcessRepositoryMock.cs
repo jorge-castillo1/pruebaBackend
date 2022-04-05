@@ -1,6 +1,6 @@
 ﻿using customerportalapi.Entities;
-using customerportalapi.Entities.enums;
-using customerportalapi.Repositories.interfaces;
+using customerportalapi.Entities.Enums;
+using customerportalapi.Repositories.Interfaces;
 using Moq;
 using System;
 using System.Collections.Generic;

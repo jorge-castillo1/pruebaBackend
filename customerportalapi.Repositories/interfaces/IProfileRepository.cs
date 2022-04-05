@@ -1,7 +1,7 @@
 ﻿using customerportalapi.Entities;
 using System.Threading.Tasks;
 
-namespace customerportalapi.Repositories.interfaces
+namespace customerportalapi.Repositories.Interfaces
 {
     public interface IProfileRepository
     {

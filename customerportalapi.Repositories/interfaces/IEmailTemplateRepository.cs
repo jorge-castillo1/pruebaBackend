@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace customerportalapi.Repositories.interfaces
+namespace customerportalapi.Repositories.Interfaces
 {
     public interface IEmailTemplateRepository
     {

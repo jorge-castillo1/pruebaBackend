@@ -1,5 +1,5 @@
 ﻿using customerportalapi.Entities;
-using customerportalapi.Repositories.interfaces;
+using customerportalapi.Repositories.Interfaces;
 using customerportalapi.Services.Exceptions;
 using customerportalapi.Services.interfaces;
 using System.Collections.Generic;

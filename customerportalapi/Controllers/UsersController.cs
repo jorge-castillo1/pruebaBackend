@@ -435,6 +435,34 @@ namespace customerportalapi.Controllers
         }
 
         /// <summary>
+        /// Update user roles
+        /// </summary>
+        /// <param name="changeRoles">User Name and the list of roles</param>
+        /// <returns></returns>
+        /// <remarks>Use API KEY for this api</remarks>
+        [HttpPatch("roles")]
+        [AuthorizeApiKey]
+        public async Task<ApiResponse> ChangeRoles([FromBody] ChangeRoles changeRoles)
+        {
+            try
+            {
+                var entity = await _services.ChangeRoles(changeRoles);
+                return new ApiResponse(entity);
+            }
+            catch (ServiceException se)
+            {
+                _logger.LogError(se.ToString());
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+
+
+        /// <summary>
         /// Remove user role
         /// </summary>
         /// <param name="username">Username</param>

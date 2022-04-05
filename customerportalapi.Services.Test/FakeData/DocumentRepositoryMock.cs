@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Text;
 using customerportalapi.Entities;
-using customerportalapi.Repositories.interfaces;
+using customerportalapi.Repositories.Interfaces;
 using Moq;
 using System.Threading.Tasks;
-using customerportalapi.Entities.enums;
+using customerportalapi.Entities.Enums;
 
 namespace customerportalapi.Services.Test.FakeData
 {

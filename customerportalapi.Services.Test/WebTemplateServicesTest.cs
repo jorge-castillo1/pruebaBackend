@@ -1,12 +1,12 @@
 using System.Collections.Generic;
 using customerportalapi.Entities;
-using customerportalapi.Repositories.interfaces;
+using customerportalapi.Repositories.Interfaces;
 using customerportalapi.Services.Test.FakeData;
 using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System.Threading.Tasks;
-using customerportalapi.Entities.enums;
+using customerportalapi.Entities.Enums;
 
 namespace customerportalapi.Services.Test
 {

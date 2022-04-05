@@ -1,5 +1,5 @@
 ﻿using customerportalapi.Entities;
-using customerportalapi.Entities.enums;
+using customerportalapi.Entities.Enums;
 using System;
 using System.Reflection;
 using System.Linq;

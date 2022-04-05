@@ -6,7 +6,7 @@
 
   <ItemGroup>
     <Compile Remove="DatabaseRepository.cs" />
-    <Compile Remove="utils\TmpMailClientWrapper.cs" />
+    <Compile Remove="Utils\TmpMailClientWrapper.cs" />
   </ItemGroup>
 
   <ItemGroup>

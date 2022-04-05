@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
-namespace customerportalapi.Repositories.interfaces
+namespace customerportalapi.Repositories.Interfaces
 {
     public interface IMongoCollectionWrapper<T>
     {
