@@ -1,4 +1,4 @@
-﻿using customerportalapi.Repositories.interfaces;
+﻿using customerportalapi.Repositories.Interfaces;
 using customerportalapi.Entities;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;

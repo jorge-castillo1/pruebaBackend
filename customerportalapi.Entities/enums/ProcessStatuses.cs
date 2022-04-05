@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace customerportalapi.Entities.enums
+namespace customerportalapi.Entities.Enums
 {
     public enum ProcessStatuses
     {

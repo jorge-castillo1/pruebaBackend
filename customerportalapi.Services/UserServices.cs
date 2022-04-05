@@ -1,6 +1,7 @@
 ﻿using customerportalapi.Entities;
-using customerportalapi.Entities.enums;
-using customerportalapi.Repositories.interfaces;
+using customerportalapi.Entities.Constants;
+using customerportalapi.Entities.Enums;
+using customerportalapi.Repositories.Interfaces;
 using customerportalapi.Services.Exceptions;
 using customerportalapi.Services.Interfaces;
 using Microsoft.Extensions.Configuration;
@@ -502,20 +503,25 @@ namespace customerportalapi.Services
             // 1. Validate user
             if (string.IsNullOrEmpty(receivedToken)) throw new ServiceException("User must have a received Token.", HttpStatusCode.BadRequest, FieldNames.ReceivedToken, ValidationMessages.EmptyFields);
 
-            User user = _userRepository.GetUserByInvitationToken(receivedToken);
+            var user = _userRepository.GetUserByInvitationToken(receivedToken);
             if (user.Id == null) return new Token();
 
             if (user.Password != value.OldPassword) throw new ServiceException("Wrong password.", HttpStatusCode.BadRequest);
             user.Password = value.NewPassword;
 
             // Get UserProfile from external system
-            string accountType = UserInvitationUtils.GetAccountType(user.Usertype);
-            ProfilePermissions profilepermissions = await _profileRepository.GetProfilePermissionsAsync(user.Dni, accountType);
-            string role = Role.User;
-            if (profilepermissions.CanManageAccounts) role = Role.Admin;
+            var accountType = UserInvitationUtils.GetAccountType(user.Usertype);
 
-            // 2. Change useranme
-            if (value.Username != null && value.Username != "")
+            //
+            // DO NOT check permissions in CRM. Assign all.
+            //
+            //var profilepermissions = await _profileRepository.GetProfilePermissionsAsync(user.Dni, accountType);
+            //var role = CRoleTypes.User;
+            //if (profilepermissions.CanManageAccounts) role = CRoleTypes.Admin;
+            //
+
+            // 2. Change username
+            if (!string.IsNullOrEmpty(value.Username))
             {
                 if (value.Username.Contains('@'))
                     throw new ServiceException("Username must not include @", HttpStatusCode.BadRequest, "Username", "Must not include @");
@@ -524,12 +530,17 @@ namespace customerportalapi.Services
                 else throw new ServiceException("Username must be unique", HttpStatusCode.BadRequest, "Username", "Must be unique");
             }
 
-            // 3. Afegir-lo a l'IS
-            UserIdentity newUser = await AddUserToIdentityServer(user);
+            // 3. Add user to Identity Server
+            var newUser = await AddUserToIdentityServer(user);
 
-            GroupResults group = await _identityRepository.FindGroup(role);
-            if (group.TotalResults == 1)
-                await _identityRepository.AddUserToGroup(newUser, group.Groups[0]);
+            // 3. All groups/roles are assigned to the current user
+            var groupUser = await _identityRepository.FindGroup(CRoleTypes.User);
+            if (groupUser.TotalResults == 1)
+                await _identityRepository.AddUserToGroup(newUser, groupUser.Groups[0]);
+
+            var groupAdmin = await _identityRepository.FindGroup(CRoleTypes.Admin);
+            if (groupAdmin.TotalResults == 1)
+                await _identityRepository.AddUserToGroup(newUser, groupAdmin.Groups[0]);
 
             user.Password = null;
             user.Emailverified = true;
@@ -541,7 +552,7 @@ namespace customerportalapi.Services
             await _profileRepository.ConfirmedWebPortalAccessAsync(user.Dni, accountType);
 
             //8. Get Access Token
-            Token accessToken = await _identityRepository.Authorize(new Login()
+            var accessToken = await _identityRepository.Authorize(new Login()
             {
                 Username = user.Username,
                 Password = value.NewPassword
@@ -552,16 +563,15 @@ namespace customerportalapi.Services
 
         private async Task<UserIdentity> AddUserToIdentityServer(User user)
         {
-            UserIdentity userIdentity = new UserIdentity();
-            userIdentity.UserName = user.Username;
-            userIdentity.Password = user.Password;
-            userIdentity.Emails = new List<string>()
+            UserIdentity userIdentity = new UserIdentity
             {
-                user.Email
+                UserName = user.Username,
+                Password = user.Password,
+                Emails = new List<string>() { user.Email },
+                CardId = user.Dni,
+                Language = user.Language,
+                DisplayName = user.Name
             };
-            userIdentity.CardId = user.Dni;
-            userIdentity.Language = user.Language;
-            userIdentity.DisplayName = user.Name;
             return await _identityRepository.AddUser(userIdentity);
         }
 
@@ -591,9 +601,9 @@ namespace customerportalapi.Services
                 //3. Get UserProfile from external system
                 string accountType = UserInvitationUtils.GetAccountType(user.Usertype);
                 ProfilePermissions profilepermissions = await _profileRepository.GetProfilePermissionsAsync(user.Dni, accountType);
-                string role = Role.User;
+                string role = CRoleTypes.User;
                 if (profilepermissions.CanManageAccounts)
-                    role = Role.Admin;
+                    role = CRoleTypes.Admin;
 
                 //4. Create user in Authentication System
                 UserIdentity newUser = await AddUserToIdentityServer(user);
@@ -1065,6 +1075,69 @@ namespace customerportalapi.Services
                 }
             }
             await _identityRepository.AddUserToGroup(userIdentity, group.Groups[0]);
+            return true;
+        }
+
+        private bool IsRoleValid(string roleName)
+        {
+            return Enum.GetNames(typeof(RoleTypes)).Contains(roleName);
+        }
+
+        public async Task<bool> ChangeRoles(ChangeRoles changeRoles)
+        {
+            // Validate parameters
+            if (changeRoles == null || string.IsNullOrEmpty(changeRoles.UserName) || changeRoles.Roles == null || !changeRoles.Roles.Any())
+                throw new ServiceException("No user name or roles have been sent", HttpStatusCode.NotFound, $"changeRoles: {JsonConvert.SerializeObject(changeRoles)}");
+            if (changeRoles.Roles.Count(n => n.Name == null && n.Name == string.Empty) >= 1)
+                throw new ServiceException("The role name cannot be empty", HttpStatusCode.NotFound, $"Role.Name");
+
+            // Get user from DB
+            var user = _userRepository.GetCurrentUserByUsername(changeRoles.UserName);
+            if (user == null || string.IsNullOrEmpty(user.ExternalId)) throw new ServiceException("User not found", HttpStatusCode.NotFound, $"UserName: {changeRoles.UserName}");
+
+            // Get user from IS
+            var userIdentity = new UserIdentity();
+
+            try
+            {
+                userIdentity = await _identityRepository.GetUser(user.ExternalId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"UserServices.ChangeRoles().GetUser(). User not found. UserName: {changeRoles.UserName}.");
+                throw new ServiceException("User not found", HttpStatusCode.NotFound, $"UserName: {changeRoles.UserName}");
+            }
+
+            if (userIdentity.ID == null) throw new ServiceException("User not found", HttpStatusCode.NotFound, $"UserName: {changeRoles.UserName}");
+
+            foreach (var role in changeRoles.Roles)
+            {
+                // Validate name of role
+                if (!IsRoleValid(role.Name))
+                    throw new ServiceException("Role not found", HttpStatusCode.NotFound, $"Role.Name: {role.Name}");
+
+                // Get role from IS
+                var group = await _identityRepository.FindGroup(role.Name);
+                if (group.Groups.Count == 0)
+                    throw new ServiceException("Role not found", HttpStatusCode.NotFound, $"Role.Name: {role.Name}");
+
+                // Quit all groups/roles from the user
+                if (userIdentity.Groups != null)
+                {
+                    foreach (var oldGroup in userIdentity.Groups)
+                    {
+                        var currentGroup = await _identityRepository.FindGroup(oldGroup.Display);
+                        await _identityRepository.RemoveUserFromGroup(userIdentity, currentGroup.Groups.FirstOrDefault());
+                    }
+                }
+
+                // Only assign active roles
+                if (role.Value)
+                {
+                    await _identityRepository.AddUserToGroup(userIdentity, group.Groups.FirstOrDefault());
+                }
+            }
+
             return true;
         }
 

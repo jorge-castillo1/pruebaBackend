@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using customerportalapi.Entities;
 using customerportalapi.Services.Interfaces;
-using customerportalapi.Entities.enums;
+using customerportalapi.Entities.Enums;
 using Newtonsoft.Json;
 
 namespace customerportalapi.Controllers

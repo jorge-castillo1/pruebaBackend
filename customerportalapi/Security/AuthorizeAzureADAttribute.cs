@@ -1,4 +1,4 @@
-﻿using customerportalapi.Entities.enums;
+﻿using customerportalapi.Entities.Enums;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 

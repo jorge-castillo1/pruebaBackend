@@ -1,6 +1,6 @@
 ﻿using AutoWrapper.Wrappers;
 using customerportalapi.Entities;
-using customerportalapi.Entities.enums;
+using customerportalapi.Entities.Enums;
 using customerportalapi.Security;
 using customerportalapi.Services.Exceptions;
 using customerportalapi.Services.Interfaces;

@@ -1,8 +1,8 @@
 ﻿using AutoWrapper;
 using customerportalapi.Entities;
 using customerportalapi.Repositories;
-using customerportalapi.Repositories.interfaces;
-using customerportalapi.Repositories.utils;
+using customerportalapi.Repositories.Interfaces;
+using customerportalapi.Repositories.Utils;
 using customerportalapi.Security;
 using customerportalapi.Services;
 using customerportalapi.Services.interfaces;

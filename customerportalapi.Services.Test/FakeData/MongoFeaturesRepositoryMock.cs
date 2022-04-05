@@ -1,5 +1,5 @@
 ﻿using customerportalapi.Entities;
-using customerportalapi.Repositories.interfaces;
+using customerportalapi.Repositories.Interfaces;
 using MongoDB.Driver;
 using Moq;
 using System;

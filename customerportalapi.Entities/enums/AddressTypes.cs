@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace customerportalapi.Entities.enums
+namespace customerportalapi.Entities.Enums
 {
     public enum AddressTypes
     {

@@ -4,7 +4,7 @@ using System.Net.Http;
 using customerportalapi.Entities;
 using System.Collections.Generic;
 
-namespace customerportalapi.Repositories.interfaces
+namespace customerportalapi.Repositories.Interfaces
 {
     public interface ISignatureRepository
     {

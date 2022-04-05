@@ -3,7 +3,7 @@ using MongoDB.Driver;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using customerportalapi.Entities;
-using customerportalapi.Repositories.interfaces;
+using customerportalapi.Repositories.Interfaces;
 
 namespace customerportalapi.Repositories
 {

@@ -1,5 +1,5 @@
 ﻿using customerportalapi.Entities;
-using customerportalapi.Repositories.interfaces;
+using customerportalapi.Repositories.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MongoDB.Driver;

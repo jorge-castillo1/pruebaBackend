@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using System.Collections.Generic;
 
-namespace customerportalapi.Repositories.interfaces
+namespace customerportalapi.Repositories.Interfaces
 {
     public interface IPayRepository
     {

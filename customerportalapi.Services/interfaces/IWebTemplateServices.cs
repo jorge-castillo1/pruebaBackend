@@ -1,7 +1,7 @@
 ﻿using customerportalapi.Entities;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using customerportalapi.Entities.enums;
+using customerportalapi.Entities.Enums;
 
 namespace customerportalapi.Services.Interfaces
 {

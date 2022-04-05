@@ -1,5 +1,5 @@
 ﻿using customerportalapi.Entities;
-using customerportalapi.Repositories.interfaces;
+using customerportalapi.Repositories.Interfaces;
 using Moq;
 using System;
 using System.Collections.Generic;
