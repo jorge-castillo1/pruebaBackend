@@ -65,6 +65,8 @@ namespace customerportalapi.Entities
         public string Username { get; set; }
 
         public bool? Blue_updatewebportal { get; set; } = false;
+        public bool? Admincontact { get; set; }
+        public bool? Supercontact { get; set; }
     }
 
     public class AccountCustomerType
