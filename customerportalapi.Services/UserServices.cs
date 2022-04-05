@@ -509,18 +509,16 @@ namespace customerportalapi.Services
             if (user.Password != value.OldPassword) throw new ServiceException("Wrong password.", HttpStatusCode.BadRequest);
             user.Password = value.NewPassword;
 
-            // Get UserProfile from external system
+            // 2. Get UserProfile (Contact) from CRM
             var accountType = UserInvitationUtils.GetAccountType(user.Usertype);
+            var profile = await _profileRepository.GetProfileAsync(user.Dni, accountType);
 
-            //
-            // DO NOT check permissions in CRM. Assign all.
-            //
-            //var profilepermissions = await _profileRepository.GetProfilePermissionsAsync(user.Dni, accountType);
-            //var role = CRoleTypes.User;
-            //if (profilepermissions.CanManageAccounts) role = CRoleTypes.Admin;
-            //
+            // 3. Set all roles in CRM
+            profile.Admincontact = true;
+            profile.Supercontact = true;
+            profile = await _profileRepository.UpdateProfileAsync(profile);
 
-            // 2. Change username
+            // 4. Change username
             if (!string.IsNullOrEmpty(value.Username))
             {
                 if (value.Username.Contains('@'))
@@ -530,10 +528,10 @@ namespace customerportalapi.Services
                 else throw new ServiceException("Username must be unique", HttpStatusCode.BadRequest, "Username", "Must be unique");
             }
 
-            // 3. Add user to Identity Server
+            // 5. Add user to Identity Server
             var newUser = await AddUserToIdentityServer(user);
 
-            // 3. All groups/roles are assigned to the current user
+            // 6. All groups/roles are assigned to the current user
             var groupUser = await _identityRepository.FindGroup(CRoleTypes.User);
             if (groupUser.TotalResults == 1)
                 await _identityRepository.AddUserToGroup(newUser, groupUser.Groups[0]);
@@ -541,17 +539,18 @@ namespace customerportalapi.Services
             var groupAdmin = await _identityRepository.FindGroup(CRoleTypes.Admin);
             if (groupAdmin.TotalResults == 1)
                 await _identityRepository.AddUserToGroup(newUser, groupAdmin.Groups[0]);
-
+            
+            // 7. Update database User
             user.Password = null;
             user.Emailverified = true;
             user.Invitationtoken = null;
             user.ExternalId = newUser.ID;
             _userRepository.UpdateById(user);
 
-            // Confirm access status to external system
+            // 8. Confirm access status to external system
             await _profileRepository.ConfirmedWebPortalAccessAsync(user.Dni, accountType);
 
-            //8. Get Access Token
+            // 9. Get Access Token
             var accessToken = await _identityRepository.Authorize(new Login()
             {
                 Username = user.Username,

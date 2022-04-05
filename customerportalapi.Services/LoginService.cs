@@ -130,6 +130,10 @@ namespace customerportalapi.Services
                         Password = credentials.NewPassword
                     });
 
+                    //5. Update database user
+                    currentUser.Password = null;
+                    _userRepository.Update(currentUser);
+
                     return newToken;
 
                 }
