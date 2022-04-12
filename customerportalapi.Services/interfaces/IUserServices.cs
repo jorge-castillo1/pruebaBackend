@@ -13,7 +13,7 @@ namespace customerportalapi.Services.Interfaces
 
         Task<bool> InviteUserAsync(Invitation value);
 
-        Task<InvitationMandatoryData> FindInvitationMandatoryData(Invitation invitationValues);
+        Task<InvitationMandatoryData> FindInvitationMandatoryData(Invitation invitationValues, Profile profile);
 
         Task<Token> ConfirmUserAsync(string invitationToken);
 
