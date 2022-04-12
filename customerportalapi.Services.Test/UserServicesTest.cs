@@ -26,7 +26,7 @@ namespace customerportalapi.Services.Test
         private Mock<IUserAccountRepository> _userAccountRepository;
         private Mock<ILanguageRepository> _languageRepository;
         private Mock<IContractRepository> _contractRepository;
-        private Mock<IContractSMRepository> _contractSMRepository;
+        private Mock<IContractSMRepository> _contractSmRepository;
         private Mock<IOpportunityCRMRepository> _opportunityRepository;
         private Mock<IStoreRepository> _storeRepository;
         private Mock<IUnitLocationRepository> _unitLocationRepository;
@@ -52,7 +52,7 @@ namespace customerportalapi.Services.Test
             _userAccountRepository = UserAccountRepositoryMock.ValidUserRepository();
             _languageRepository = LanguageRepositoryMock.LanguageRepository();
             _contractRepository = ContractRepositoryMock.ContractRepository();
-            _contractSMRepository = ContractSMRepositoryMock.ContractSMRepository();
+            _contractSmRepository = ContractSMRepositoryMock.ContractSMRepository();
             _opportunityRepository = OpportunityCRMRepositoryMock.OpportunityCRMRepository();
             _storeRepository = StoreRepositoryMock.StoreRepository();
             _unitLocationRepository = UnitLocationRepositoryMock.UnitLocationRepository();
@@ -67,12 +67,12 @@ namespace customerportalapi.Services.Test
         public async Task AlSolicitarUnUsuarioNoExistente_SeProduceUnaExcepcion()
         {
             //Arrange
-            string username = "12345678A";
-            Mock<IUserRepository> _userRepositoryInvalid = UserRepositoryMock.InvalidUserRepository();
+            var username = "12345678A";
+            var userRepositoryInvalid = UserRepositoryMock.InvalidUserRepository();
 
             //Act
-            UserServices service = new UserServices(
-                _userRepositoryInvalid.Object,
+            var service = new UserServices(
+                userRepositoryInvalid.Object,
                 _profileRepository.Object,
                 _mailRepository.Object,
                 _emailtemplateRepository.Object,
@@ -81,7 +81,7 @@ namespace customerportalapi.Services.Test
                 _userAccountRepository.Object,
                 _languageRepository.Object,
                  _contractRepository.Object,
-                _contractSMRepository.Object,
+                _contractSmRepository.Object,
                 _opportunityRepository.Object,
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
@@ -98,10 +98,10 @@ namespace customerportalapi.Services.Test
         public async Task AlSolicitarUnUsuarioExistente_DevuelvePerfil()
         {
             //Arrange
-            string username = "12345678A";
+            var username = "12345678A";
 
             //Act
-            UserServices service = new UserServices(
+            var service = new UserServices(
                 _userRepository.Object,
                 _profileRepository.Object,
                 _mailRepository.Object,
@@ -112,7 +112,7 @@ namespace customerportalapi.Services.Test
                 _userAccountRepository.Object,
                 _languageRepository.Object,
                 _contractRepository.Object,
-                _contractSMRepository.Object,
+                _contractSmRepository.Object,
                 _opportunityRepository.Object,
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
@@ -121,7 +121,7 @@ namespace customerportalapi.Services.Test
                 _googleCaptchaRepository.Object,
                 _logger.Object
                 );
-            Profile usuario = await service.GetProfileAsync(username);
+            var usuario = await service.GetProfileAsync(username);
 
             //Assert
             Assert.IsNotNull(usuario);
@@ -135,13 +135,12 @@ namespace customerportalapi.Services.Test
         public async Task AlActualizarUnUsuarioInexistente_SeProduceUnaExcepcion()
         {
             //Arrange
-            Profile profile = new Profile();
-            profile.DocumentNumber = "12345678A";
-            Mock<IUserRepository> _userRepositoryInvalid = UserRepositoryMock.InvalidUserRepository();
+            var profile = new Profile { DocumentNumber = "12345678A" };
+            var userRepositoryInvalid = UserRepositoryMock.InvalidUserRepository();
 
             //Act
-            UserServices service = new UserServices(
-                _userRepositoryInvalid.Object,
+            var service = new UserServices(
+                userRepositoryInvalid.Object,
                 _profileRepository.Object,
                 _mailRepository.Object,
                 _emailtemplateRepository.Object,
@@ -151,7 +150,7 @@ namespace customerportalapi.Services.Test
                 _userAccountRepository.Object,
                 _languageRepository.Object,
                 _contractRepository.Object,
-                _contractSMRepository.Object,
+                _contractSmRepository.Object,
                 _opportunityRepository.Object,
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
@@ -170,17 +169,19 @@ namespace customerportalapi.Services.Test
         public async Task AlActualizarUnUsuarioExistente_SinEmails_SeProducenErrores()
         {
             //Arrange
-            Profile profile = new Profile();
-            profile.DocumentNumber = "12345678A";
-            profile.Language = "new language";
-            profile.EmailAddress1 = string.Empty;
-            profile.EmailAddress1Principal = false;
-            profile.EmailAddress2 = string.Empty;
-            profile.EmailAddress2Principal = false;
-            profile.Avatar = "new profile image";
+            var profile = new Profile
+            {
+                DocumentNumber = "12345678A",
+                Language = "new language",
+                EmailAddress1 = string.Empty,
+                EmailAddress1Principal = false,
+                EmailAddress2 = string.Empty,
+                EmailAddress2Principal = false,
+                Avatar = "new profile image"
+            };
 
             //Act
-            UserServices service = new UserServices(
+            var service = new UserServices(
                 _userRepository.Object,
                 _profileRepository.Object,
                 _mailRepository.Object,
@@ -191,7 +192,7 @@ namespace customerportalapi.Services.Test
                 _userAccountRepository.Object,
                 _languageRepository.Object,
                 _contractRepository.Object,
-                _contractSMRepository.Object,
+                _contractSmRepository.Object,
                 _opportunityRepository.Object,
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
@@ -200,7 +201,7 @@ namespace customerportalapi.Services.Test
                 _googleCaptchaRepository.Object,
                 _logger.Object
                 );
-            Profile result = await service.UpdateProfileAsync(profile);
+            await service.UpdateProfileAsync(profile);
 
             //Assert
         }
@@ -210,17 +211,19 @@ namespace customerportalapi.Services.Test
         public async Task AlActualizarUnUsuarioExistente_ConEmailPrincipal1Invalido_SeProducenErrores()
         {
             //Arrange
-            Profile profile = new Profile();
-            profile.DocumentNumber = "12345678A";
-            profile.Language = "new language";
-            profile.EmailAddress1 = string.Empty;
-            profile.EmailAddress1Principal = true;
-            profile.EmailAddress2 = "fake email 2";
-            profile.EmailAddress2Principal = false;
-            profile.Avatar = "new profile image";
+            var profile = new Profile
+            {
+                DocumentNumber = "12345678A",
+                Language = "new language",
+                EmailAddress1 = string.Empty,
+                EmailAddress1Principal = true,
+                EmailAddress2 = "fake email 2",
+                EmailAddress2Principal = false,
+                Avatar = "new profile image"
+            };
 
             //Act
-            UserServices service = new UserServices(
+            var service = new UserServices(
                 _userRepository.Object,
                 _profileRepository.Object,
                 _mailRepository.Object,
@@ -231,7 +234,7 @@ namespace customerportalapi.Services.Test
                 _userAccountRepository.Object,
                 _languageRepository.Object,
                 _contractRepository.Object,
-                _contractSMRepository.Object,
+                _contractSmRepository.Object,
                 _opportunityRepository.Object,
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
@@ -240,7 +243,7 @@ namespace customerportalapi.Services.Test
                 _googleCaptchaRepository.Object,
                 _logger.Object
                 );
-            Profile result = await service.UpdateProfileAsync(profile);
+            await service.UpdateProfileAsync(profile);
 
             //Assert
         }
@@ -249,17 +252,19 @@ namespace customerportalapi.Services.Test
         public async Task AlActualizarUnUsuarioExistente_NoSeProducenErrores()
         {
             //Arrange
-            Profile profile = new Profile();
-            profile.DocumentNumber = "12345678A";
-            profile.Language = "new language";
-            profile.EmailAddress1 = "fake email 1 modified";
-            profile.EmailAddress1Principal = true;
-            profile.EmailAddress2 = "fake email 2";
-            profile.EmailAddress2Principal = false;
-            profile.Avatar = "new profile image";
+            var profile = new Profile
+            {
+                DocumentNumber = "12345678A",
+                Language = "new language",
+                EmailAddress1 = "fake email 1 modified",
+                EmailAddress1Principal = true,
+                EmailAddress2 = "fake email 2",
+                EmailAddress2Principal = false,
+                Avatar = "new profile image"
+            };
 
             //Act
-            UserServices service = new UserServices(
+            var service = new UserServices(
                 _userRepository.Object,
                 _profileRepository.Object,
                 _mailRepository.Object,
@@ -270,7 +275,7 @@ namespace customerportalapi.Services.Test
                 _userAccountRepository.Object,
                 _languageRepository.Object,
                 _contractRepository.Object,
-                _contractSMRepository.Object,
+                _contractSmRepository.Object,
                 _opportunityRepository.Object,
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
@@ -279,7 +284,7 @@ namespace customerportalapi.Services.Test
                 _googleCaptchaRepository.Object,
                 _logger.Object
                 );
-            Profile result = await service.UpdateProfileAsync(profile);
+            var result = await service.UpdateProfileAsync(profile);
 
             //Assert
             _userRepository.Verify(x => x.GetCurrentUserByEmail(It.IsAny<string>()));
@@ -299,15 +304,17 @@ namespace customerportalapi.Services.Test
         public async Task AlInvitarUnUsuarioSinDni_DevuelveExcepcion()
         {
             //Arrange
-            Invitation invitation = new Invitation();
-            invitation.Dni = string.Empty;
-            invitation.Email = "fakeuser@email.com";
-            invitation.CustomerType = "Residential";
-            invitation.Fullname = "Fake User";
-            invitation.Language = "French";
+            var invitation = new Invitation
+            {
+                Dni = string.Empty,
+                Email = "fakeuser@email.com",
+                CustomerType = "Residential",
+                Fullname = "Fake User",
+                Language = "French"
+            };
 
             //Act
-            UserServices service = new UserServices(
+            var service = new UserServices(
                 _userRepository.Object,
                 _profileRepository.Object,
                 _mailRepository.Object,
@@ -318,7 +325,7 @@ namespace customerportalapi.Services.Test
                 _userAccountRepository.Object,
                 _languageRepository.Object,
                 _contractRepository.Object,
-                _contractSMRepository.Object,
+                _contractSmRepository.Object,
                 _opportunityRepository.Object,
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
@@ -336,15 +343,17 @@ namespace customerportalapi.Services.Test
         public async Task AlInvitarUnUsuarioSinEmail_DevuelveExcepcion()
         {
             //Arrange
-            Invitation invitation = new Invitation();
-            invitation.Dni = "FakeDni";
-            invitation.Email = string.Empty;
-            invitation.CustomerType = "Residential";
-            invitation.Fullname = "Fake User";
-            invitation.Language = "French";
+            var invitation = new Invitation
+            {
+                Dni = "FakeDni",
+                Email = string.Empty,
+                CustomerType = "Residential",
+                Fullname = "Fake User",
+                Language = "French"
+            };
 
             //Act
-            UserServices service = new UserServices(
+            var service = new UserServices(
                 _userRepository.Object,
                 _profileRepository.Object,
                 _mailRepository.Object,
@@ -355,7 +364,7 @@ namespace customerportalapi.Services.Test
                 _userAccountRepository.Object,
                 _languageRepository.Object,
                 _contractRepository.Object,
-                _contractSMRepository.Object,
+                _contractSmRepository.Object,
                 _opportunityRepository.Object,
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
@@ -371,17 +380,19 @@ namespace customerportalapi.Services.Test
         public async Task AlInvitarUnUsuarioNoExistente_SeCreaUnNuevoUsuario()
         {
             //Arrange
-            Invitation invitation = new Invitation();
-            invitation.Dni = "FakeDni";
-            invitation.Email = "fakeuser@email.com";
-            invitation.CustomerType = "Residential";
-            invitation.Fullname = "Fake User";
-            invitation.Language = "French";
+            var invitation = new Invitation
+            {
+                Dni = "FakeDni",
+                Email = "fakeuser@email.com",
+                CustomerType = "Residential",
+                Fullname = "Fake User",
+                Language = "French"
+            };
 
             //Act
-            Mock<IUserRepository> _userRepositoryInvalid = UserRepositoryMock.InvalidUserRepository();
-            UserServices service = new UserServices(
-                _userRepositoryInvalid.Object,
+            var userRepositoryInvalid = UserRepositoryMock.InvalidUserRepository();
+            var service = new UserServices(
+                userRepositoryInvalid.Object,
                 _profileRepository.Object,
                 _mailRepository.Object,
                 _emailtemplateRepository.Object,
@@ -391,7 +402,7 @@ namespace customerportalapi.Services.Test
                 _userAccountRepository.Object,
                 _languageRepository.Object,
                 _contractRepository.Object,
-                _contractSMRepository.Object,
+                _contractSmRepository.Object,
                 _opportunityRepository.Object,
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
@@ -400,11 +411,11 @@ namespace customerportalapi.Services.Test
                 _googleCaptchaRepository.Object,
                 _logger.Object
                 );
-            bool result = await service.InviteUserAsync(invitation);
+            var result = await service.InviteUserAsync(invitation);
 
             //Assert
             Assert.IsTrue(result);
-            _userRepositoryInvalid.Verify(x => x.Create(It.IsAny<User>()));
+            userRepositoryInvalid.Verify(x => x.Create(It.IsAny<User>()));
             _mailRepository.Verify(x => x.Send(It.IsAny<Email>(), It.IsAny<bool>()));
             _emailtemplateRepository.Verify(x => x.getTemplate((int)EmailTemplateTypes.WelcomeEmailExtended, It.IsAny<string>()));
         }
@@ -414,15 +425,17 @@ namespace customerportalapi.Services.Test
         public async Task AlInvitarUnUsuarioExistente_Activo_DevuelveError()
         {
             //Arrange
-            Invitation invitation = new Invitation();
-            invitation.Dni = "FakeDni";
-            invitation.Email = "fakeuser@email.com";
-            invitation.CustomerType = "Residential";
-            invitation.Fullname = "Fake User";
-            invitation.Language = "French";
+            var invitation = new Invitation
+            {
+                Dni = "FakeDni",
+                Email = "fakeuser@email.com",
+                CustomerType = "Residential",
+                Fullname = "Fake User",
+                Language = "French"
+            };
 
             //Act
-            UserServices service = new UserServices(
+            var service = new UserServices(
                 _userRepository.Object,
                 _profileRepository.Object,
                 _mailRepository.Object,
@@ -433,7 +446,7 @@ namespace customerportalapi.Services.Test
                 _userAccountRepository.Object,
                 _languageRepository.Object,
                 _contractRepository.Object,
-                _contractSMRepository.Object,
+                _contractSmRepository.Object,
                 _opportunityRepository.Object,
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
@@ -442,7 +455,7 @@ namespace customerportalapi.Services.Test
                 _googleCaptchaRepository.Object,
                 _logger.Object
                 );
-            bool result = await service.InviteUserAsync(invitation);
+            await service.InviteUserAsync(invitation);
 
             //Assert
         }
@@ -451,18 +464,20 @@ namespace customerportalapi.Services.Test
         public async Task AlInvitarUnUsuarioExistente_NoActivo_ActualizaUsuario()
         {
             //Arrange
-            Invitation invitation = new Invitation();
-            invitation.Dni = "FakeDni";
-            invitation.Email = "fakeuser@email.com";
-            invitation.CustomerType = "Residential";
-            invitation.Fullname = "Fake User";
-            invitation.Language = "French";
+            var invitation = new Invitation
+            {
+                Dni = "FakeDni",
+                Email = "fakeuser@email.com",
+                CustomerType = "Residential",
+                Fullname = "Fake User",
+                Language = "French"
+            };
 
             //Act
-            Mock<IUserRepository> _userRepositoryInvalid = UserRepositoryMock.Valid_InActiveUser_Repository();
+            var userRepositoryInvalid = UserRepositoryMock.Valid_InActiveUser_Repository();
 
-            UserServices service = new UserServices(
-                _userRepositoryInvalid.Object,
+            var service = new UserServices(
+                userRepositoryInvalid.Object,
                 _profileRepository.Object,
                 _mailRepository.Object,
                 _emailtemplateRepository.Object,
@@ -472,7 +487,7 @@ namespace customerportalapi.Services.Test
                 _userAccountRepository.Object,
                 _languageRepository.Object,
                 _contractRepository.Object,
-                _contractSMRepository.Object,
+                _contractSmRepository.Object,
                 _opportunityRepository.Object,
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
@@ -481,11 +496,11 @@ namespace customerportalapi.Services.Test
                 _googleCaptchaRepository.Object,
                 _logger.Object
                 );
-            bool result = await service.InviteUserAsync(invitation);
+            var result = await service.InviteUserAsync(invitation);
 
             //Assert
             Assert.IsTrue(result);
-            _userRepositoryInvalid.Verify(x => x.Update(It.IsAny<User>()));
+            userRepositoryInvalid.Verify(x => x.Update(It.IsAny<User>()));
             _emailtemplateRepository.Verify(x => x.getTemplate((int)EmailTemplateTypes.WelcomeEmailShort, It.IsAny<string>()));
             _mailRepository.Verify(x => x.Send(It.IsAny<Email>(), It.IsAny<bool>()));
         }
@@ -494,7 +509,7 @@ namespace customerportalapi.Services.Test
         public async Task AlInvitarUnUsuario_AunqueNoExistaPlantillaCorreoEnSuIdioma_SeEnviaCorreoIgualmente()
         {
             //Arrange
-            Invitation invitation = new Invitation
+            var invitation = new Invitation
             {
                 Dni = "FakeDni",
                 Email = "fakeuser@email.com",
@@ -505,9 +520,9 @@ namespace customerportalapi.Services.Test
             };
 
             //Act
-            Mock<IUserRepository> _userRepositoryInvalid = UserRepositoryMock.InvalidUserRepository();
-            UserServices service = new UserServices(
-                _userRepositoryInvalid.Object,
+            var userRepositoryInvalid = UserRepositoryMock.InvalidUserRepository();
+            var service = new UserServices(
+                userRepositoryInvalid.Object,
                 _profileRepository.Object,
                 _mailRepository.Object,
                 _emailtemplateRepository.Object,
@@ -517,7 +532,7 @@ namespace customerportalapi.Services.Test
                 _userAccountRepository.Object,
                 _languageRepository.Object,
                 _contractRepository.Object,
-                _contractSMRepository.Object,
+                _contractSmRepository.Object,
                 _opportunityRepository.Object,
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
@@ -526,11 +541,11 @@ namespace customerportalapi.Services.Test
                 _googleCaptchaRepository.Object,
                 _logger.Object
                 );
-            bool result = await service.InviteUserAsync(invitation);
+            var result = await service.InviteUserAsync(invitation);
 
             //Assert
             Assert.IsTrue(result);
-            _userRepositoryInvalid.Verify(x => x.Create(It.IsAny<User>()));
+            userRepositoryInvalid.Verify(x => x.Create(It.IsAny<User>()));
             _mailRepository.Verify(x => x.Send(It.IsAny<Email>(), It.IsAny<bool>()));
         }
 
@@ -539,17 +554,19 @@ namespace customerportalapi.Services.Test
         public async Task AlInvitarUnUsuarioConUnEmailEnUso_RetornaError()
         {
             //Arrange
-            Invitation invitation = new Invitation();
-            invitation.Dni = "FakeDni";
-            invitation.Email = "fakeuser@email.com";
-            invitation.CustomerType = "Residential";
-            invitation.Fullname = "Fake User";
-            invitation.Language = "French";
+            var invitation = new Invitation
+            {
+                Dni = "FakeDni",
+                Email = "fakeuser@email.com",
+                CustomerType = "Residential",
+                Fullname = "Fake User",
+                Language = "French"
+            };
 
             //Act
-            Mock<IUserRepository> _userRepositoryInvalid = UserRepositoryMock.ValidUserRepository_ByEmail();
-            UserServices service = new UserServices(
-                _userRepositoryInvalid.Object,
+            var userRepositoryInvalid = UserRepositoryMock.ValidUserRepository_ByEmail();
+            var service = new UserServices(
+                userRepositoryInvalid.Object,
                 _profileRepository.Object,
                 _mailRepository.Object,
                 _emailtemplateRepository.Object,
@@ -559,7 +576,7 @@ namespace customerportalapi.Services.Test
                 _userAccountRepository.Object,
                 _languageRepository.Object,
                 _contractRepository.Object,
-                _contractSMRepository.Object,
+                _contractSmRepository.Object,
                 _opportunityRepository.Object,
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
@@ -568,11 +585,11 @@ namespace customerportalapi.Services.Test
                 _googleCaptchaRepository.Object,
                 _logger.Object
                 );
-            bool result = await service.InviteUserAsync(invitation);
+            var result = await service.InviteUserAsync(invitation);
 
             //Assert
             Assert.IsTrue(result);
-            _userRepositoryInvalid.Verify(x => x.GetCurrentUserByEmail(It.IsAny<string>()));
+            userRepositoryInvalid.Verify(x => x.GetCurrentUserByEmail(It.IsAny<string>()));
         }
 
         [TestMethod]
@@ -580,18 +597,20 @@ namespace customerportalapi.Services.Test
         public async Task AlInvitarUnUsuario_HacenFaltaDatos_paraCompletarLaInvitacion_EnviaEmailErroraITBlue_RetornaError()
         {
             //Arrange
-            Invitation invitation = new Invitation();
-            invitation.Dni = "FakeDni";
-            invitation.Email = "fakeuser@email.com";
-            invitation.CustomerType = "Residential";
-            invitation.Fullname = "Fake User";
-            invitation.Language = "French";
+            var invitation = new Invitation
+            {
+                Dni = "FakeDni",
+                Email = "fakeuser@email.com",
+                CustomerType = "Residential",
+                Fullname = "Fake User",
+                Language = "French"
+            };
 
             //Act
-            Mock<IUserRepository> _userRepository = UserRepositoryMock.InvalidUserRepository();
-            Mock<IContractRepository> _contractRepository = ContractRepositoryMock.InvalidContractRepository();
-            UserServices service = new UserServices(
-                _userRepository.Object,
+            var userRepository = UserRepositoryMock.InvalidUserRepository();
+            var contractRepository = ContractRepositoryMock.InvalidContractRepository();
+            var service = new UserServices(
+                userRepository.Object,
                 _profileRepository.Object,
                 _mailRepository.Object,
                 _emailtemplateRepository.Object,
@@ -600,8 +619,8 @@ namespace customerportalapi.Services.Test
                 _serviceLogin,
                 _userAccountRepository.Object,
                 _languageRepository.Object,
-                _contractRepository.Object,
-                _contractSMRepository.Object,
+                contractRepository.Object,
+                _contractSmRepository.Object,
                 _opportunityRepository.Object,
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
@@ -610,7 +629,7 @@ namespace customerportalapi.Services.Test
                 _googleCaptchaRepository.Object,
                 _logger.Object
                 );
-            bool result = await service.InviteUserAsync(invitation);
+            var result = await service.InviteUserAsync(invitation);
 
             //Assert
             Assert.IsTrue(result);
@@ -624,10 +643,10 @@ namespace customerportalapi.Services.Test
         public async Task AlConfirmarUnUsuarioSinToken_DevuelveExcepcion()
         {
             //Arrange
-            string invitationToken = string.Empty;
+            var invitationToken = string.Empty;
 
             //Act
-            UserServices service = new UserServices(
+            var service = new UserServices(
                 _userRepository.Object,
                 _profileRepository.Object,
                 _mailRepository.Object,
@@ -638,7 +657,7 @@ namespace customerportalapi.Services.Test
                 _userAccountRepository.Object,
                 _languageRepository.Object,
                 _contractRepository.Object,
-                _contractSMRepository.Object,
+                _contractSmRepository.Object,
                 _opportunityRepository.Object,
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
@@ -654,11 +673,11 @@ namespace customerportalapi.Services.Test
         public async Task AlConfirmarUnUsuarioExistente_Activo_DevuelveTokenVacio()
         {
             //Arrange
-            string invitationToken = "8e8b9c6c-8943-4482-891d-b92d7414d283";
+            var invitationToken = "8e8b9c6c-8943-4482-891d-b92d7414d283";
 
             //Act
-            Mock<IUserRepository> userRepositoryInvalid = UserRepositoryMock.Invalid_ActiveUserByToken_Repository();
-            UserServices service = new UserServices(
+            var userRepositoryInvalid = UserRepositoryMock.Invalid_ActiveUserByToken_Repository();
+            var service = new UserServices(
                 userRepositoryInvalid.Object,
                 _profileRepository.Object,
                 _mailRepository.Object,
@@ -669,7 +688,7 @@ namespace customerportalapi.Services.Test
                 _userAccountRepository.Object,
                 _languageRepository.Object,
                 _contractRepository.Object,
-                _contractSMRepository.Object,
+                _contractSmRepository.Object,
                 _opportunityRepository.Object,
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
@@ -678,7 +697,7 @@ namespace customerportalapi.Services.Test
                 _googleCaptchaRepository.Object,
                 _logger.Object
                 );
-            Token tokenResult = await service.ConfirmUserAsync(invitationToken);
+            var tokenResult = await service.ConfirmUserAsync(invitationToken);
 
             //Assert
             Assert.IsNull(tokenResult.AccesToken);
@@ -688,11 +707,11 @@ namespace customerportalapi.Services.Test
         public async Task AlConfirmarUnUsuarioExistente_NoActivo_DevuelveToken()
         {
             //Arrange
-            string invitationToken = "8e8b9c6c-8943-4482-891d-b92d7414d283";
+            var invitationToken = "8e8b9c6c-8943-4482-891d-b92d7414d283";
 
             //Act
-            Mock<IUserRepository> userRepositoryInvalid = UserRepositoryMock.Valid_InActiveUserByToken_Repository();
-            UserServices service = new UserServices(
+            var userRepositoryInvalid = UserRepositoryMock.Valid_InActiveUserByToken_Repository();
+            var service = new UserServices(
                 userRepositoryInvalid.Object,
                 _profileRepository.Object,
                 _mailRepository.Object,
@@ -703,7 +722,7 @@ namespace customerportalapi.Services.Test
                 _userAccountRepository.Object,
                 _languageRepository.Object,
                 _contractRepository.Object,
-                _contractSMRepository.Object,
+                _contractSmRepository.Object,
                 _opportunityRepository.Object,
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
@@ -712,12 +731,13 @@ namespace customerportalapi.Services.Test
                 _googleCaptchaRepository.Object,
                 _logger.Object
                 );
-            Token tokenResult = await service.ConfirmUserAsync(invitationToken);
+            var tokenResult = await service.ConfirmUserAsync(invitationToken);
 
             //Assert
             Assert.AreEqual("Fake AccessToken", tokenResult.AccesToken);
             _identityRepository.Verify(x => x.AddUser(It.IsAny<UserIdentity>()));
-            _profileRepository.Verify(x => x.GetProfilePermissionsAsync(It.IsAny<string>(), It.IsAny<string>()));
+            _profileRepository.Verify(x => x.GetProfileAsync(It.IsAny<string>(), It.IsAny<string>()));
+            _profileRepository.Verify(x => x.UpdateProfileAsync(It.IsAny<Profile>()));
             _identityRepository.Verify(x => x.FindGroup(It.IsAny<string>()));
             _identityRepository.Verify(x => x.AddUserToGroup(It.IsAny<UserIdentity>(), It.IsAny<Group>()));
             userRepositoryInvalid.Verify(x => x.Update(It.IsAny<User>()));
@@ -730,14 +750,14 @@ namespace customerportalapi.Services.Test
         public async Task AlDesinvitarUnUsuarioSinDni_DevuelveExcepcion()
         {
             //Arrange
-            Invitation value = new Invitation()
+            var value = new Invitation()
             {
                 Dni = string.Empty,
                 CustomerType = AccountType.Business
             };
 
             //Act
-            UserServices service = new UserServices(
+            var service = new UserServices(
                 _userRepository.Object,
                 _profileRepository.Object,
                 _mailRepository.Object,
@@ -748,7 +768,7 @@ namespace customerportalapi.Services.Test
                 _userAccountRepository.Object,
                 _languageRepository.Object,
                 _contractRepository.Object,
-                _contractSMRepository.Object,
+                _contractSmRepository.Object,
                 _opportunityRepository.Object,
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
@@ -768,16 +788,16 @@ namespace customerportalapi.Services.Test
         public async Task AlDesinvitarUnUsuarioInexistente_SeProduceUnaExcepcion()
         {
             //Arrange
-            Invitation value = new Invitation()
+            var value = new Invitation()
             {
                 Dni = "12345678A",
                 CustomerType = AccountType.Business
             };
-            Mock<IUserRepository> _userRepositoryInvalid = UserRepositoryMock.InvalidUserRepository();
+            var userRepositoryInvalid = UserRepositoryMock.InvalidUserRepository();
 
             //Act
-            UserServices service = new UserServices(
-                _userRepositoryInvalid.Object,
+            var service = new UserServices(
+                userRepositoryInvalid.Object,
                 _profileRepository.Object,
                 _mailRepository.Object,
                 _emailtemplateRepository.Object,
@@ -787,7 +807,7 @@ namespace customerportalapi.Services.Test
                 _userAccountRepository.Object,
                 _languageRepository.Object,
                 _contractRepository.Object,
-                _contractSMRepository.Object,
+                _contractSmRepository.Object,
                 _opportunityRepository.Object,
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
@@ -804,15 +824,15 @@ namespace customerportalapi.Services.Test
         public async Task AlDesinvitarUnUsuarioExistente_ConExternalId_retorna_true()
         {
             //Arrange
-            Invitation value = new Invitation()
+            var value = new Invitation()
             {
                 Dni = "12345678A",
                 CustomerType = AccountType.Residential
             };
-            Mock<IUserRepository> userRepository = UserRepositoryMock.ValidUserRepository_With_ExternalId();
+            var userRepository = UserRepositoryMock.ValidUserRepository_With_ExternalId();
 
             //Act
-            UserServices service = new UserServices(
+            var service = new UserServices(
                 userRepository.Object,
                 _profileRepository.Object,
                 _mailRepository.Object,
@@ -823,7 +843,7 @@ namespace customerportalapi.Services.Test
                 _userAccountRepository.Object,
                 _languageRepository.Object,
                 _contractRepository.Object,
-                _contractSMRepository.Object,
+                _contractSmRepository.Object,
                 _opportunityRepository.Object,
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
@@ -832,7 +852,7 @@ namespace customerportalapi.Services.Test
                 _googleCaptchaRepository.Object,
                 _logger.Object
                 );
-            bool result = await service.UnInviteUserAsync(value);
+            var result = await service.UnInviteUserAsync(value);
 
             //Assert
             Assert.IsTrue(result);
@@ -846,15 +866,15 @@ namespace customerportalapi.Services.Test
         public async Task AlDesinvitarUnUsuarioExistente_SinExternalid_retorna_true()
         {
             //Arrange
-            Invitation value = new Invitation()
+            var value = new Invitation()
             {
                 Dni = "12345678A",
                 CustomerType = AccountType.Residential
             };
-            Mock<IUserRepository> userRepository = UserRepositoryMock.ValidUserRepository();
+            var userRepository = UserRepositoryMock.ValidUserRepository();
 
             //Act
-            UserServices service = new UserServices(
+            var service = new UserServices(
                 userRepository.Object,
                 _profileRepository.Object,
                 _mailRepository.Object,
@@ -865,7 +885,7 @@ namespace customerportalapi.Services.Test
                 _userAccountRepository.Object,
                 _languageRepository.Object,
                 _contractRepository.Object,
-                _contractSMRepository.Object,
+                _contractSmRepository.Object,
                 _opportunityRepository.Object,
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
@@ -874,7 +894,7 @@ namespace customerportalapi.Services.Test
                 _googleCaptchaRepository.Object,
                 _logger.Object
                 );
-            bool result = await service.UnInviteUserAsync(value);
+            var result = await service.UnInviteUserAsync(value);
 
             //Assert
             Assert.IsTrue(result);
@@ -888,18 +908,18 @@ namespace customerportalapi.Services.Test
         public async Task AlbuscarCountrydelContrato_segunTablaFeatures_retornaPlantillaWelcome()
         {
             //Arrange
-            User value = new User()
+            var value = new User()
             {
                 Dni = "12345678A",
                 Email = "support2",
 
             };
-            Mock<IContractRepository> contractRepository = ContractRepositoryMock.ContractRepositoryFeature();
-            Mock<IMongoCollectionWrapper<Feature>> feat = MongoFeaturesRepositoryMock.FeatureRepository_WelcomeLong();
-            FeatureRepository featureRepository = new FeatureRepository(null, feat.Object);
+            var contractRepository = ContractRepositoryMock.ContractRepositoryFeature();
+            var feat = MongoFeaturesRepositoryMock.FeatureRepository_WelcomeLong();
+            var featureRepository = new FeatureRepository(null, feat.Object);
 
             //Act
-            UserServices service = new UserServices(
+            var service = new UserServices(
                 _userRepository.Object,
                 _profileRepository.Object,
                 _mailRepository.Object,
@@ -910,7 +930,7 @@ namespace customerportalapi.Services.Test
                 _userAccountRepository.Object,
                 _languageRepository.Object,
                 contractRepository.Object,
-                _contractSMRepository.Object,
+                _contractSmRepository.Object,
                 _opportunityRepository.Object,
                 _storeRepository.Object,
                 _unitLocationRepository.Object,
@@ -921,7 +941,7 @@ namespace customerportalapi.Services.Test
                 );
 
 
-            int result = await service.GetWelcomeTemplateFromFeatures(value, true, (int)InviteInvocationType.CRM);
+            var result = await service.GetWelcomeTemplateFromFeatures(value, true, (int)InviteInvocationType.CRM);
 
 
             //Assert

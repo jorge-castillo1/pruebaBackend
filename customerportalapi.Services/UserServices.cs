@@ -306,8 +306,8 @@ namespace customerportalapi.Services
 
         public async Task<bool> InviteUserAsync(Invitation invitationValues)
         {
-            bool resultCreateUser = true;
-            bool resultWelcomeEmailSent = false;
+            var resultCreateUser = true;
+            var resultWelcomeEmailSent = false;
 
             //1. Validate email not empty
             if (string.IsNullOrEmpty(invitationValues.Email))
@@ -322,24 +322,25 @@ namespace customerportalapi.Services
             }
 
             //3. Find some user with this email and without confirm email
-            User user = _userRepository.GetCurrentUserByEmail(invitationValues.Email);
+            var user = _userRepository.GetCurrentUserByEmail(invitationValues.Email);
             if (!string.IsNullOrEmpty(user.Id) && user.Emailverified)
             {
 
-                EmailTemplate template = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.ErrorInvitationEmailAlreadyExists, LanguageTypes.es.ToString());
+                var template = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.ErrorInvitationEmailAlreadyExists, LanguageTypes.es.ToString());
                 if (string.IsNullOrEmpty(template._id))
                     throw new ServiceException("Email template not found, templateCode: " + (int)EmailTemplateTypes.ErrorInvitationEmailAlreadyExists, HttpStatusCode.NotFound, FieldNames.Email + FieldNames.Template, ValidationMessages.NotFound);
 
-                string mailTo = _config["MailIT"];
+                var mailTo = _config["MailIT"];
                 if (string.IsNullOrEmpty(mailTo))
                     throw new ServiceException("Store mail not found", HttpStatusCode.NotFound, FieldNames.Email, ValidationMessages.NotFound);
 
-                Email message2 = new Email();
-                message2.EmailFlow = EmailFlowType.InviteUser.ToString();
-                message2.To.Add(mailTo);
-                message2.Subject = template.subject;
-                message2.Body = string.Format(template.body, user.Name, user.Dni, user.Email);
-
+                var message2 = new Email
+                {
+                    EmailFlow = EmailFlowType.InviteUser.ToString(),
+                    Subject = template.subject,
+                    Body = string.Format(template.body, user.Name, user.Dni, user.Email),
+                    To = mailTo.Select(c => c.ToString().Trim()).ToList()     //message2.To.Add(mailTo);
+                };
                 await _mailRepository.Send(message2);
 
                 throw new ServiceException("Invitation user fails. Email in use by another user", HttpStatusCode.NotFound, FieldNames.Email, ValidationMessages.AlreadyInUse);
@@ -350,22 +351,25 @@ namespace customerportalapi.Services
             user = _userRepository.GetCurrentUserByDniAndType(invitationValues.Dni, userType);
             if (!string.IsNullOrEmpty(user.Id) && user.Emailverified)
             {
-                throw new ServiceException("Invitation user fails. User was actived before", HttpStatusCode.NotFound, FieldNames.User, ValidationMessages.AlreadyInvited);
+                throw new ServiceException("Invitation user fails. User was activated before", HttpStatusCode.NotFound, FieldNames.User, ValidationMessages.AlreadyInvited);
             }
 
+            var profile = await _profileRepository.GetProfileAsync(invitationValues.Dni, invitationValues.CustomerType);
+
             //5. Get Mandatory data for body email template
-            var invitationFields = await FindInvitationMandatoryData(invitationValues);
+            var invitationFields = await FindInvitationMandatoryData(invitationValues, profile);
 
             //6. Check all mandatory data            
             await CheckMandatoryData(invitationFields);
 
-
             var userName = userType == 0 ? invitationValues.Dni : "B" + invitationValues.Dni;
+
+            //7. Set temporary password
             var pwd = new Password(true, true, true, false, 6);
             var password = pwd.Next();
             var isNewUser = false;
 
-            //8. Verify user exsist
+            //8. Verify that the user exist
             if (user.Id == null)
             {
                 isNewUser = true;
@@ -397,13 +401,13 @@ namespace customerportalapi.Services
             }
 
             //9. Send Welcome Email
-            int idTemplate = SendWelcomeEmail(invitationValues, user, invitationFields, isNewUser).Result;
+            var idTemplate = SendWelcomeEmail(invitationValues, user, invitationFields, isNewUser).Result;
 
             if (idTemplate != -1)
             {
                 if (isNewUser)
                 {
-                    User userSaved = _userRepository.GetCurrentUserByEmail(user.Email);
+                    var userSaved = _userRepository.GetCurrentUserByEmail(user.Email);
                     userSaved.LastEmailSent = ((EmailTemplateTypes)idTemplate).ToString();
                     _userRepository.Update(userSaved);
                 }
@@ -413,6 +417,10 @@ namespace customerportalapi.Services
                     _userRepository.Update(user);
                 }
                 resultWelcomeEmailSent = true;
+
+                // Update check in contact (Profile) in CRM
+                profile.WebPortalAccess = true;
+                await _profileRepository.UpdateProfileAsync(profile);
             }
             else
             {
@@ -422,12 +430,12 @@ namespace customerportalapi.Services
             return resultWelcomeEmailSent && resultCreateUser;
         }
 
-        public async Task<InvitationMandatoryData> FindInvitationMandatoryData(Invitation invitationValues)
+        public async Task<InvitationMandatoryData> FindInvitationMandatoryData(Invitation invitationValues, Profile profile)
         {
             var userType = UserInvitationUtils.GetUserType(invitationValues.CustomerType);
-            InvitationMandatoryData invitationFields = UserInvitationUtils.InitInvitationData();
-            string accountType = (userType == (int)UserTypes.Business) ? AccountType.Business : AccountType.Residential;
-            await FindInvitationMandatoryData(invitationFields, invitationValues, accountType);
+            var invitationFields = UserInvitationUtils.InitInvitationData();
+            var accountType = (userType == (int)UserTypes.Business) ? AccountType.Business : AccountType.Residential;
+            await FindInvitationMandatoryData(invitationFields, invitationValues, accountType, profile);
             return invitationFields;
         }
 
@@ -516,7 +524,8 @@ namespace customerportalapi.Services
             // 3. Set all roles in CRM
             profile.Admincontact = true;
             profile.Supercontact = true;
-            profile = await _profileRepository.UpdateProfileAsync(profile);
+            profile.WebPortalAccess = true;
+            await _profileRepository.UpdateProfileAsync(profile);
 
             // 4. Change username
             if (!string.IsNullOrEmpty(value.Username))
@@ -539,7 +548,7 @@ namespace customerportalapi.Services
             var groupAdmin = await _identityRepository.FindGroup(CRoleTypes.Admin);
             if (groupAdmin.TotalResults == 1)
                 await _identityRepository.AddUserToGroup(newUser, groupAdmin.Groups[0]);
-            
+
             // 7. Update database User
             user.Password = null;
             user.Emailverified = true;
@@ -562,7 +571,7 @@ namespace customerportalapi.Services
 
         private async Task<UserIdentity> AddUserToIdentityServer(User user)
         {
-            UserIdentity userIdentity = new UserIdentity
+            var userIdentity = new UserIdentity
             {
                 UserName = user.Username,
                 Password = user.Password,
@@ -581,36 +590,40 @@ namespace customerportalapi.Services
                 throw new ServiceException("User must have a receivedToken.", HttpStatusCode.BadRequest, FieldNames.ReceivedToken, ValidationMessages.EmptyFields);
 
             //2. Validate user by invitationToken or forgotPasswordToken
-            bool invitationToken = false;
-            bool forgotPasswordToken = false;
-            User user = _userRepository.GetUserByInvitationToken(receivedToken);
+            var invitationToken = false;
+            var user = _userRepository.GetUserByInvitationToken(receivedToken);
             if (user.Id != null)
                 invitationToken = true;
             else
             {
                 user = _userRepository.GetUserByForgotPasswordToken(receivedToken);
-                if (user.Id != null)
-                    forgotPasswordToken = true;
-                else
+                if (user.Id == null)
                     return new Token();
             }
 
             if (invitationToken)
             {
-                //3. Get UserProfile from external system
-                string accountType = UserInvitationUtils.GetAccountType(user.Usertype);
-                ProfilePermissions profilepermissions = await _profileRepository.GetProfilePermissionsAsync(user.Dni, accountType);
-                string role = CRoleTypes.User;
-                if (profilepermissions.CanManageAccounts)
-                    role = CRoleTypes.Admin;
+                // 3. Get UserProfile (Contact) from CRM
+                var accountType = UserInvitationUtils.GetAccountType(user.Usertype);
+                var profile = await _profileRepository.GetProfileAsync(user.Dni, accountType);
 
-                //4. Create user in Authentication System
-                UserIdentity newUser = await AddUserToIdentityServer(user);
+                // 4. Set all roles in CRM
+                profile.Admincontact = true;
+                profile.Supercontact = true;
+                profile.WebPortalAccess = true;
+                await _profileRepository.UpdateProfileAsync(profile);
 
-                //5 AddUserToGroup
-                GroupResults group = await _identityRepository.FindGroup(role);
-                if (group.TotalResults == 1)
-                    await _identityRepository.AddUserToGroup(newUser, group.Groups[0]);
+                // 5. Add user to Identity Server
+                var newUser = await AddUserToIdentityServer(user);
+
+                // 6. All groups/roles are assigned to the current user
+                var groupUser = await _identityRepository.FindGroup(CRoleTypes.User);
+                if (groupUser.TotalResults == 1)
+                    await _identityRepository.AddUserToGroup(newUser, groupUser.Groups[0]);
+
+                var groupAdmin = await _identityRepository.FindGroup(CRoleTypes.Admin);
+                if (groupAdmin.TotalResults == 1)
+                    await _identityRepository.AddUserToGroup(newUser, groupAdmin.Groups[0]);
 
                 //6. Update email verification data
                 user.Emailverified = true;
@@ -621,23 +634,21 @@ namespace customerportalapi.Services
                 //7. Confirm access status to external system
                 await _profileRepository.ConfirmedWebPortalAccessAsync(user.Dni, accountType);
             }
-            else if (forgotPasswordToken)
+            else
             {
+                //forgot Password Token
+
                 //3. Update user
-                UserIdentity existingUser = await _identityRepository.GetUser(user.ExternalId);
+                var existingUser = await _identityRepository.GetUser(user.ExternalId);
                 if (existingUser != null)
                 {
                     existingUser.Password = user.Password;
                     await _identityRepository.UpdateUser(existingUser);
                 }
+            }
 
-            }
-            else
-            {
-                return new Token();
-            }
             //8. Get Access Token
-            Token accessToken = await _identityRepository.Authorize(new Login()
+            var accessToken = await _identityRepository.Authorize(new Login()
             {
                 Username = user.Username,
                 Password = user.Password
@@ -653,8 +664,8 @@ namespace customerportalapi.Services
                 throw new ServiceException("User must have a valid document number.", HttpStatusCode.BadRequest, "Dni", "Empty field");
 
             //2. Validate user
-            int userType = UserInvitationUtils.GetUserType(value.CustomerType);
-            User user = _userRepository.GetCurrentUserByDniAndType(value.Dni, userType);
+            var userType = UserInvitationUtils.GetUserType(value.CustomerType);
+            var user = _userRepository.GetCurrentUserByDniAndType(value.Dni, userType);
             if (user.Id == null)
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
 
@@ -1207,38 +1218,38 @@ namespace customerportalapi.Services
             return result;
         }
 
-        private async Task<bool> FindInvitationMandatoryData(InvitationMandatoryData invitationData, Invitation value, string accountType)
+        private async Task<bool> FindInvitationMandatoryData(InvitationMandatoryData invitationData, Invitation value, string accountType, Profile contact)
         {
             invitationData.InvokedBy.SetValueAndState(value.InvokedBy.ToString(), StateEnum.Checked);
 
             // Contact
-            string userIdentification = value.Dni + " - " + accountType;
-            Profile contact = await _profileRepository.GetProfileAsync(value.Dni, accountType);
+            var userIdentification = value.Dni + " - " + accountType;
+            //contact = await _profileRepository.GetProfileAsync(value.Dni, accountType);
             if (contact == null)
             {
                 invitationData.ContactUsername.State = StateEnum.Error;
                 await SendEmailInvitationError(invitationData);
-                throw new ServiceException("Contact required:  user: " + userIdentification, HttpStatusCode.NotFound, FieldNames.Contact, ValidationMessages.Required);
+                throw new ServiceException($"Contact required:  user: {userIdentification}", HttpStatusCode.NotFound, FieldNames.Contact, ValidationMessages.Required);
             }
             invitationData.ContactUsername.SetValueAndState(value.Fullname, StateEnum.Checked);
 
             //Contract
-            List<Contract> contracts = await _contractRepository.GetContractsAsync(value.Dni, accountType);
-            if (contracts == null || contracts.Count == 0 || contracts?.Where(c => c.SmContractCode != null && c.SmContractCode != string.Empty).Count() == 0)
+            var contracts = await _contractRepository.GetContractsAsync(value.Dni, accountType);
+            if (contracts == null || contracts.Count == 0 || !(contracts?.Where(c => !string.IsNullOrEmpty(c.SmContractCode))).Any())
             {
                 invitationData.Contract.State = StateEnum.Error;
                 await SendEmailInvitationError(invitationData);
-                throw new ServiceException("User without contract, user: " + userIdentification, HttpStatusCode.BadRequest, FieldNames.Contract, ValidationMessages.NotFound);
+                throw new ServiceException($"User without contract, user: {userIdentification}", HttpStatusCode.BadRequest, FieldNames.Contract, ValidationMessages.NotFound);
             }
 
             invitationData.Contract.SetValueAndState(contracts.Count.ToString(), StateEnum.Checked);
             invitationData.ActiveContract = UserInvitationUtils.GetMandatoryData(SystemTypes.SM, EntityNames.WBSGetContract, null, StateEnum.Unchecked);
 
             // Recuperar todos los contratos de SM y guardarlos junto a los de CRM en 'ContractInvitation'
-            List<ContractInvitation> listContrats = new List<ContractInvitation>();
-            foreach (Contract c in contracts.Where(c => c.SmContractCode != null && c.SmContractCode != string.Empty).ToList())
+            var listContracts = new List<ContractInvitation>();
+            foreach (var c in contracts.Where(c => !string.IsNullOrEmpty(c.SmContractCode)).ToList())
             {
-                listContrats.Add(new ContractInvitation(c)
+                listContracts.Add(new ContractInvitation(c)
                 {
                     SmContract = await _contractSMRepository.GetAccessCodeAsync(c.SmContractCode)
                 });
@@ -1246,24 +1257,19 @@ namespace customerportalapi.Services
 
             // Trabajar solo con un contrato, el activo o con el último no activo.
             ContractInvitation contract = null;
-            if (listContrats != null && listContrats.Count() == 1)
+            if (listContracts.Count() == 1)
             {
-                contract = listContrats.FirstOrDefault();
+                contract = listContracts.FirstOrDefault();
             }
-            else if (listContrats.Count() > 1)
+            else if (listContracts.Count() > 1)
             {
-                var countlistContratsActive = listContrats.Where(x => x.SmContract != null && (x.SmContract.Leaving == null || x.SmContract.Leaving == string.Empty)).Count();
-                if (countlistContratsActive == 0)
-                {
-                    contract = listContrats.LastOrDefault(); // devuelve el último contrato no activo
-                }
-                else // countlistContratsActive >= 1
-                {
-                    contract = listContrats.Where(x => x.SmContract != null && x.SmContract.Leaving == null || x.SmContract.Leaving == string.Empty).LastOrDefault(); //devuelve el último contrato activo
-                }
+                var countListContractsActive = listContracts.Count(x => x.SmContract != null && string.IsNullOrEmpty(x.SmContract.Leaving));
+                contract = countListContractsActive == 0 ?
+                    listContracts.LastOrDefault() :
+                    listContracts.LastOrDefault(x => x.SmContract != null && string.IsNullOrEmpty(x.SmContract.Leaving));
             }
 
-            if (contract != null && contract.Unit != null && !string.IsNullOrEmpty(contract.SmContractCode) && invitationData.ActiveContract.State == StateEnum.Unchecked)
+            if (contract?.Unit != null && !string.IsNullOrEmpty(contract.SmContractCode) && invitationData.ActiveContract.State == StateEnum.Unchecked)
             {
                 Store store = null;
 
@@ -1276,7 +1282,7 @@ namespace customerportalapi.Services
                     invitationData.SMContract.SetValueAndState(contract.SmContract.Contractnumber, StateEnum.Checked);
 
                 //SmContract.Leaving
-                if (!string.IsNullOrEmpty(contract.SmContract.Leaving))
+                if (contract.SmContract != null && !string.IsNullOrEmpty(contract.SmContract.Leaving))
                     invitationData.Leaving.SetValueAndState(contract.SmContract.Leaving.ToString(), StateEnum.Error);
 
                 // only active contracts, if the contract has "terminated", the field "Leaving" have information.
@@ -1291,12 +1297,12 @@ namespace customerportalapi.Services
                         invitationData.ContractStoreCode.SetValueAndState(contract.StoreData.StoreCode, StateEnum.Checked);
 
                         // UnitSizeCode
-                        UnitLocationSearchFilter filter = new UnitLocationSearchFilter()
+                        var filter = new UnitLocationSearchFilter()
                         {
                             SiteCode = contract.StoreData.StoreCode,
                             SizeCode = contract.Unit.UnitCategory
                         };
-                        List<UnitLocation> unitLocation = _unitLocationRepository.Find(filter);
+                        var unitLocation = _unitLocationRepository.Find(filter);
                         if (contact.Language == "French")
                         {
                             invitationData.UnitSizeCode.SetValueAndState(ValidationMessages.NoInformationAvailable_FR, StateEnum.Warning);
@@ -1413,7 +1419,7 @@ namespace customerportalapi.Services
                     {
                         invitationData.ContractOpportunity.SetValueAndState(StateEnum.Checked.ToString(), StateEnum.Checked);
 
-                        OpportunityCRM opportunity = await _opportunityRepository.GetOpportunity(contract.OpportunityId);
+                        var opportunity = await _opportunityRepository.GetOpportunity(contract.OpportunityId);
 
                         if (opportunity != null)
                         {
@@ -1424,20 +1430,18 @@ namespace customerportalapi.Services
                             invitationData.ExpectedMoveIn.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
                             if (!string.IsNullOrEmpty(opportunity.ExpectedMoveIn))
                             {
-                                DateTime moveIn = Convert.ToDateTime(opportunity.ExpectedMoveIn).ToUniversalTime();
-                                DateTime meDateTime = moveIn;
+                                var moveIn = Convert.ToDateTime(opportunity.ExpectedMoveIn).ToUniversalTime();
+                                var meDateTime = moveIn;
 
-                                string meTimeZoneKey = "Romance Standard Time";     // By default: "Romance Standard Time";
-                                if (store != null &&
-                                    store.Timezoneid != null &&
-                                    !string.IsNullOrEmpty(store.Timezoneid.MSTimeZone))
+                                var meTimeZoneKey = "Romance Standard Time";     // By default: "Romance Standard Time";
+                                if (store?.Timezoneid != null && !string.IsNullOrEmpty(store.Timezoneid.MSTimeZone))
                                 {
                                     meTimeZoneKey = store.Timezoneid.MSTimeZone;    // get from store --> iav_stores.iav_timezoneid.iav_mstimezone
                                 }
 
                                 try
                                 {
-                                    TimeZoneInfo meTimeZone = TZConvert.GetTimeZoneInfo(meTimeZoneKey);
+                                    var meTimeZone = TZConvert.GetTimeZoneInfo(meTimeZoneKey);
                                     //TimeZoneInfo meTimeZone = TimeZoneInfo.FindSystemTimeZoneById(meTimeZoneKey);
                                     meDateTime = TimeZoneInfo.ConvertTimeFromUtc(moveIn, meTimeZone);
                                 }

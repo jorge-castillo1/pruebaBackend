@@ -123,7 +123,7 @@ namespace customerportalapi.Controllers
             }
             catch (ServiceException se)
             {
-                string obj = string.Empty;
+                var obj = string.Empty;
                 if (value != null)
                     obj = ", params:" + JsonConvert.SerializeObject(value);
 
@@ -133,7 +133,7 @@ namespace customerportalapi.Controllers
             catch (Exception ex)
             {
                 _logger.LogInformation("api/users/invite");
-                string obj = string.Empty;
+                var obj = string.Empty;
                 if (value != null)
                     obj = ", params:" + JsonConvert.SerializeObject(value);
 
@@ -244,7 +244,7 @@ namespace customerportalapi.Controllers
         {
             try
             {
-                Invitation value = new Invitation()
+                var value = new Invitation()
                 {
                     Dni = dni,
                     CustomerType = AccountType.Residential
