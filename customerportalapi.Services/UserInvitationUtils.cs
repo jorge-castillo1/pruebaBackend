@@ -11,6 +11,8 @@ namespace customerportalapi.Services
     {
         public static string GetLanguage(string invitationLanguage)
         {
+            if (invitationLanguage == null)
+                return LanguageTypes.en.ToString();
             switch (invitationLanguage.ToLower().Trim())
             {
                 case "spanish":
@@ -32,6 +34,8 @@ namespace customerportalapi.Services
 
         public static int GetUserType(string invitationCustomerType)
         {
+            if (invitationCustomerType == null)
+                return (int)UserTypes.Residential;
             switch (invitationCustomerType.ToLower())
             {
                 case "residential":
@@ -60,7 +64,7 @@ namespace customerportalapi.Services
 
         public static InvitationMandatoryData InitInvitationData()
         {
-            InvitationMandatoryData data = new InvitationMandatoryData
+            var data = new InvitationMandatoryData
             {
                 ContactUsername = GetMandatoryData(SystemTypes.CRM, EntityNames.contacts, null, StateEnum.Unchecked),
                 Contract = GetMandatoryData(SystemTypes.CRM, EntityNames.iav_contracts, null, StateEnum.Unchecked),
@@ -100,7 +104,7 @@ namespace customerportalapi.Services
 
         public static MandatoryData GetMandatoryData(SystemTypes system, EntityNames entity, string value, StateEnum state)
         {
-            MandatoryData data = new MandatoryData()
+            var data = new MandatoryData()
             {
                 Value = value,
                 State = state,
@@ -157,7 +161,7 @@ namespace customerportalapi.Services
                                 {
                                     num++;
                                     if (num > 9) num = 0;
-                                    unitName[0] = Char.Parse(num.ToString());
+                                    unitName[0] = char.Parse(num.ToString());
                                 }
                             }
 
@@ -165,7 +169,7 @@ namespace customerportalapi.Services
                             {
                                 num++;
                                 if (num > 9) num = 0;
-                                unitName[3] = Char.Parse(num.ToString());
+                                unitName[3] = char.Parse(num.ToString());
                             }
 
                             body = body.Replace("{{LockCode}}", new string(unitName));
@@ -217,7 +221,7 @@ namespace customerportalapi.Services
                                             .Replace("{{Zona}}", fields.UnitZone.Value)
                                             .Replace("{{ColorZona}}", fields.UnitColour.Value)
                                             .Replace("{{Pasillo}}", fields.UnitCorridor.Value)
-                                            .Replace("{{Excepciones}}", fields.UnitExceptions.Value)
+                                            .Replace("{{Excepciones}}", string.Empty)
                                             .Replace("{{LocationSTART}}", string.Empty)
                                             .Replace("{{LocationEND}}", string.Empty);
                                     break;
@@ -300,7 +304,7 @@ namespace customerportalapi.Services
             return data;
         }
 
-        private static string GetFourLengthString(String st)
+        private static string GetFourLengthString(string st)
         {
             while (st.Length > 4)
             {
@@ -318,11 +322,11 @@ namespace customerportalapi.Services
         /// <returns>Returns the string without the characters between "start" and "end"</returns>
         public static string RemoveString(string source, string start, string end)
         {
-            string result = source;
+            var result = source;
             if (source.Contains(start) && source.Contains(end))
             {
-                int startIndex = source.IndexOf(start);
-                int endIndex = source.IndexOf(end, startIndex) + end.Length;
+                var startIndex = source.IndexOf(start, StringComparison.Ordinal);
+                var endIndex = source.IndexOf(end, startIndex, StringComparison.Ordinal) + end.Length;
                 //result = source.Substring(startIndex, endIndex - startIndex);
                 result = source.Remove(startIndex, endIndex - startIndex);
                 return result;

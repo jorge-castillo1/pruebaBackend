@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Threading.Tasks;
+using customerportalapi.Entities.Enums;
 
 namespace customerportalapi.Controllers
 {
@@ -453,6 +454,32 @@ namespace customerportalapi.Controllers
             {
                 _logger.LogError(se.ToString());
                 return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Check if the user exists by email and dni 
+        /// </summary>
+        /// <param name="email">Email</param>
+        /// <param name="dni">DNI</param>
+        /// <param name="customerType">Customer Type, "Residential" or "Business"</param>
+        /// <returns>True or False</returns>
+        [HttpGet("exist/{email}/{dni}/{customerType}")]
+        public ApiResponse UserExistInDb(string email, string dni, string customerType = "Residential")
+        {
+            try
+            {
+                var entity = _services.UserExistInDb(email, dni, customerType).Result;
+
+                if (string.IsNullOrEmpty(entity?.Id) || string.IsNullOrEmpty(entity.ExternalId))
+                    return new ApiResponse(false);
+
+                return new ApiResponse(true);
             }
             catch (Exception ex)
             {

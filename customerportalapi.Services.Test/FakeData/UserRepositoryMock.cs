@@ -28,6 +28,22 @@ namespace customerportalapi.Services.Test.FakeData
 
             db.Setup(x => x.GetCurrentUserByEmail(It.IsAny<string>())).Returns(new User()).Verifiable();
 
+            db.Setup(x => x.GetCurrentUserByEmailAndDniAndType(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>())).Returns(new User
+            {
+                Dni = "12345678A",
+                Email = "fakeuser@email.com",
+                Language = "fr",
+                Profilepicture = "fake profile image",
+                Emailverified = false,
+                Usertype = 0,
+                LoginAttempts = 5,
+                LastLoginAttempts = DateTime.Now.ToUniversalTime().AddMinutes(-10),
+                AccessCodeAttempts = 5,
+                LastAccessCodeAttempts = DateTime.Now.ToUniversalTime().AddMinutes(-10),
+                ExternalId = "ExternalId",
+                Username = "fake.username"
+            }).Verifiable();
+
             db.Setup(x => x.GetCurrentUserByDniAndType(It.IsAny<string>(), It.IsAny<int>())).Returns(new User
             {
                 Dni = "12345678A",
@@ -119,6 +135,21 @@ namespace customerportalapi.Services.Test.FakeData
 
             db.Setup(x => x.Delete(It.IsAny<User>())).Returns(Task.FromResult(true)).Verifiable();
 
+            db.Setup(x => x.GetCurrentUserByEmailAndDniAndType(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>())).Returns(new User
+            {
+                Id = "b02fc244-40e4-e511-80bf-00155d018a4f",
+                Dni = "12345678A",
+                Email = "fake email 1 modified",
+                Language = "en",
+                Profilepicture = "fake profile image modified",
+                Emailverified = true,
+                Usertype = 1,
+                LoginAttempts = 1,
+                LastLoginAttempts = DateTime.Now.ToUniversalTime(),
+                AccessCodeAttempts = 1,
+                LastAccessCodeAttempts = DateTime.Now.ToUniversalTime()
+            }).Verifiable();
+
             return db;
         }
 
@@ -172,6 +203,20 @@ namespace customerportalapi.Services.Test.FakeData
                 LastAccessCodeAttempts = DateTime.Now.ToUniversalTime()
             }).Verifiable();
 
+            db.Setup(x => x.GetCurrentUserByEmailAndDniAndType(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>())).Returns(new User
+            {
+                Id = "b02fc244-40e4-e511-80bf-00155d018a4f",
+                Dni = "12345678A",
+                Email = "fake email 1 modified",
+                Language = "en",
+                Profilepicture = "fake profile image modified",
+                Emailverified = true,
+                Usertype = 1,
+                LoginAttempts = 5,
+                LastLoginAttempts = DateTime.Now.ToUniversalTime(),
+                AccessCodeAttempts = 5,
+                LastAccessCodeAttempts = DateTime.Now.ToUniversalTime()
+            }).Verifiable();
             return db;
         }
 
@@ -221,6 +266,19 @@ namespace customerportalapi.Services.Test.FakeData
                 LastLoginAttempts = DateTime.Now.ToUniversalTime()
             }).Verifiable();
 
+            db.Setup(x => x.GetCurrentUserByEmailAndDniAndType(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>())).Returns(new User
+            {
+                Id = "b02fc244-40e4-e511-80bf-00155d018a4f",
+                Dni = "12345678A",
+                Email = "fake email 1 modified",
+                Language = "en",
+                Profilepicture = "fake profile image modified",
+                Emailverified = true,
+                Usertype = 1,
+                LoginAttempts = 5,
+                LastLoginAttempts = DateTime.Now.ToUniversalTime()
+            }).Verifiable();
+
             return db;
         }
         public static Mock<IUserRepository> Valid_InActiveUser_Repository()
@@ -252,6 +310,17 @@ namespace customerportalapi.Services.Test.FakeData
             }).Verifiable();
 
             db.Setup(x => x.Update(It.IsAny<User>())).Returns(new User
+            {
+                Id = "b02fc244-40e4-e511-80bf-00155d018a4f",
+                Dni = "12345678A",
+                Email = "fake email 1 modified",
+                Language = "en",
+                Profilepicture = "fake profile image modified",
+                Emailverified = false,
+                Usertype = 1
+            }).Verifiable();
+
+            db.Setup(x => x.GetCurrentUserByEmailAndDniAndType(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>())).Returns(new User
             {
                 Id = "b02fc244-40e4-e511-80bf-00155d018a4f",
                 Dni = "12345678A",
@@ -361,6 +430,22 @@ namespace customerportalapi.Services.Test.FakeData
             }).Verifiable();
 
             db.Setup(x => x.Create(It.IsAny<User>())).Returns(Task.FromResult(true)).Verifiable();
+
+            db.Setup(x => x.GetCurrentUserByEmailAndDniAndType(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>())).Returns(new User
+            {
+                Dni = "12345678A",
+                Email = "fake email",
+                Language = "en",
+                Profilepicture = "fake profile image",
+                Emailverified = false,
+                Usertype = 1,
+                LoginAttempts = 5,
+                LastLoginAttempts = DateTime.Now.ToUniversalTime().AddMinutes(-10),
+                AccessCodeAttempts = 5,
+                LastAccessCodeAttempts = DateTime.Now.ToUniversalTime().AddMinutes(-10),
+                Username = "fake.user",
+                Password = "1234"
+            }).Verifiable();
 
             return db;
         }
