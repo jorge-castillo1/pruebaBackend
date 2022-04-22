@@ -7,12 +7,9 @@ namespace customerportalapi.Entities
 {
     public class ChangeRoles
     {
-        //[JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        //public string UserName { get; set; }
-        
-        public string Dni { get; set; }
-
         public string Email { get; set; }
+
+        public string Dni { get; set; }
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string CustomerType { get; set; }
