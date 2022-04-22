@@ -311,15 +311,11 @@ namespace customerportalapi.Services
 
             //1. Validate email not empty
             if (string.IsNullOrEmpty(invitationValues.Email))
-            {
                 throw new ServiceException("User must have a valid email address.", HttpStatusCode.BadRequest, FieldNames.Email, ValidationMessages.EmptyFields);
-            }
 
             //2. Validate dni not empty
             if (string.IsNullOrEmpty(invitationValues.Dni))
-            {
                 throw new ServiceException("User must have a valid document number.", HttpStatusCode.BadRequest, FieldNames.Dni, ValidationMessages.EmptyFields);
-            }
 
             //3. Find some user with this email and without confirm email
             var user = _userRepository.GetCurrentUserByEmail(invitationValues.Email);
@@ -347,8 +343,7 @@ namespace customerportalapi.Services
             }
 
             //4. If emailverified is true throw error
-            var userType = UserInvitationUtils.GetUserType(invitationValues.CustomerType);
-            user = _userRepository.GetCurrentUserByDniAndType(invitationValues.Dni, userType);
+            user = UserExistInDb(invitationValues.Email, invitationValues.Dni, invitationValues.CustomerType).Result;
             if (!string.IsNullOrEmpty(user.Id) && user.Emailverified)
             {
                 throw new ServiceException("Invitation user fails. User was activated before", HttpStatusCode.NotFound, FieldNames.User, ValidationMessages.AlreadyInvited);
@@ -362,6 +357,7 @@ namespace customerportalapi.Services
             //6. Check all mandatory data            
             await CheckMandatoryData(invitationFields);
 
+            var userType = UserInvitationUtils.GetUserType(invitationValues.CustomerType);
             var userName = userType == 0 ? invitationValues.Dni : "B" + invitationValues.Dni;
 
             //7. Set temporary password
@@ -382,7 +378,7 @@ namespace customerportalapi.Services
                     Name = invitationValues.Fullname,
                     Password = password,
                     Language = UserInvitationUtils.GetLanguage(invitationValues.Language),
-                    Usertype = UserInvitationUtils.GetUserType(invitationValues.CustomerType),
+                    Usertype = userType,
                     Emailverified = false,
                     Invitationtoken = Guid.NewGuid().ToString(),
                 };
@@ -395,7 +391,7 @@ namespace customerportalapi.Services
                 user.Name = invitationValues.Fullname;
                 user.Password = password;
                 user.Language = UserInvitationUtils.GetLanguage(invitationValues.Language);
-                user.Usertype = UserInvitationUtils.GetUserType(invitationValues.CustomerType);
+                user.Usertype = userType;
                 user.Invitationtoken = Guid.NewGuid().ToString();
                 _userRepository.Update(user);
             }
@@ -1093,32 +1089,46 @@ namespace customerportalapi.Services
             return Enum.GetNames(typeof(RoleTypes)).Contains(roleName);
         }
 
+        public Task<User> UserExistInDb(string email, string dni, string customerType)
+        {
+            var userType = UserInvitationUtils.GetUserType(customerType);
+            var user = _userRepository.GetCurrentUserByEmailAndDniAndType(email, dni, userType);
+            return Task.FromResult(user);
+        }
+
         public async Task<bool> ChangeRoles(ChangeRoles changeRoles)
         {
             // Validate parameters
-            if (changeRoles == null || string.IsNullOrEmpty(changeRoles.UserName) || changeRoles.Roles == null || !changeRoles.Roles.Any())
-                throw new ServiceException("No user name or roles have been sent", HttpStatusCode.NotFound, $"changeRoles: {JsonConvert.SerializeObject(changeRoles)}");
+            if (string.IsNullOrEmpty(changeRoles?.Email))
+                throw new ServiceException("User must have a valid email address.", HttpStatusCode.BadRequest, FieldNames.Email, ValidationMessages.EmptyFields);
+
+            if (string.IsNullOrEmpty(changeRoles?.Dni))
+                throw new ServiceException("User must have a valid document number.", HttpStatusCode.BadRequest, FieldNames.Dni, ValidationMessages.EmptyFields);
+
+            if (changeRoles?.Roles == null || !changeRoles.Roles.Any())
+                throw new ServiceException("No roles have been sent", HttpStatusCode.NotFound, $"changeRoles: {JsonConvert.SerializeObject(changeRoles)}");
+
             if (changeRoles.Roles.Count(n => n.Name == null && n.Name == string.Empty) >= 1)
                 throw new ServiceException("The role name cannot be empty", HttpStatusCode.NotFound, $"Role.Name");
 
             // Get user from DB
-            var user = _userRepository.GetCurrentUserByUsername(changeRoles.UserName);
-            if (user == null || string.IsNullOrEmpty(user.ExternalId)) throw new ServiceException("User not found", HttpStatusCode.NotFound, $"UserName: {changeRoles.UserName}");
+            var user = UserExistInDb(changeRoles.Email, changeRoles.Dni, changeRoles.CustomerType).Result;
+            if (string.IsNullOrEmpty(user?.Id) || string.IsNullOrEmpty(user.ExternalId))
+                throw new ServiceException("User not found", HttpStatusCode.NotFound, $"Email: {changeRoles.Email}. Dni: {changeRoles.Dni}. CustomerType: {changeRoles.CustomerType}.");
 
             // Get user from IS
-            var userIdentity = new UserIdentity();
-
+            UserIdentity userIdentity;
             try
             {
                 userIdentity = await _identityRepository.GetUser(user.ExternalId);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"UserServices.ChangeRoles().GetUser(). User not found. UserName: {changeRoles.UserName}.");
-                throw new ServiceException("User not found", HttpStatusCode.NotFound, $"UserName: {changeRoles.UserName}");
+                _logger.LogError(ex, $"UserServices.ChangeRoles().GetUser(). User not found. Email: {changeRoles.Email}.");
+                throw new ServiceException("User not found", HttpStatusCode.NotFound, $"Email: {changeRoles.Email}");
             }
 
-            if (userIdentity.ID == null) throw new ServiceException("User not found", HttpStatusCode.NotFound, $"UserName: {changeRoles.UserName}");
+            if (userIdentity?.ID == null) throw new ServiceException("User not found", HttpStatusCode.NotFound, $"Email: {changeRoles.Email}");
 
             foreach (var role in changeRoles.Roles)
             {

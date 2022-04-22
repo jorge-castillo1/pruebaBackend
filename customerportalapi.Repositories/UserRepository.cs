@@ -3,6 +3,7 @@ using MongoDB.Driver;
 using System.Threading.Tasks;
 using customerportalapi.Entities;
 using customerportalapi.Repositories.Interfaces;
+using System.Linq;
 
 namespace customerportalapi.Repositories
 {
@@ -50,6 +51,12 @@ namespace customerportalapi.Repositories
             }
             return user;
         }
+
+        public User GetCurrentUserByEmailAndDniAndType(string email, string dni, int userType)
+        {
+            return _users.FindOne(t => t.Email == email && t.Dni == dni && t.Usertype == userType).LastOrDefault();
+        }
+
         public User Update(User user)
         {
             //update User
