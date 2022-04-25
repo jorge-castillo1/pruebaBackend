@@ -148,6 +148,22 @@ namespace customerportalapi.Services
             return true;
         }
 
+        public EmailTemplate GetTemplateByLanguage(string language, EmailTemplateTypes template)
+        {
+            EmailTemplate requestDigitalContractTemplate = null;
+            if (!string.IsNullOrEmpty(language))
+            {
+                requestDigitalContractTemplate = _emailTemplateRepository.getTemplate((int)template, language.ToLower());
+            }
+
+            if (requestDigitalContractTemplate == null || string.IsNullOrEmpty(requestDigitalContractTemplate._id))
+            {
+                requestDigitalContractTemplate = _emailTemplateRepository.getTemplate((int)template, LanguageTypes.en.ToString());
+            }
+
+            return requestDigitalContractTemplate;
+        }
+
         public async Task<bool> UpdatePaymentBankProcess(SignatureStatus value)
         {
             _logger.LogInformation($"PaymentServices.UpdatePaymentProcess(SignatureStatus). value:{JsonConvert.SerializeObject(value)}.");
@@ -174,13 +190,14 @@ namespace customerportalapi.Services
                     processedpaymentdocument = signatures[0].Documents[docIndex];
             }
 
-            // 4.- Get the template "UpdatePaymentMethod"
-            EmailTemplate template = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.UpdatePaymentMethod, LanguageTypes.en.ToString());
             string smContractCode = processedpaymentdocument.SmContractCode;
 
             // 5.- Get the FullContract with store data
             FullContract fullcontract = (await _contractRepository.GetFullContractsBySMCodeAsync(smContractCode)).FirstOrDefault();
             var contract = FullContractToContract.Mapper(fullcontract);
+
+            // 4.- Get the template "UpdatePaymentMethod"
+            EmailTemplate template = GetTemplateByLanguage(contract?.StoreData?.CountryCode, EmailTemplateTypes.UpdatePaymentMethod);
 
             if (contract == null || contract.StoreData == null || contract.StoreData.StoreId == null)
                 throw new ServiceException($"PaymentServices.UpdatePaymentProcess(). Store not found. StoreCode:{contract?.StoreData?.StoreCode}. StoreId.", HttpStatusCode.BadRequest, "StoreId");
@@ -685,7 +702,7 @@ namespace customerportalapi.Services
             return form;
         }
 
-        public async Task<bool> UpdatePaymentCardProcess(SignatureStatus value, Process process)
+            public async Task<bool> UpdatePaymentCardProcess(SignatureStatus value, Process process)
         {
             // 1.- Get user
             User user = _userRepository.GetCurrentUserByUsername(value.User);
@@ -791,8 +808,8 @@ namespace customerportalapi.Services
 
             Contract updateContract = await _contractRepository.UpdateContractAsync(contract);
 
-            // Send email to the store
-            EmailTemplate template = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.UpdatePaymentMethod, LanguageTypes.en.ToString());
+            // Get template
+            EmailTemplate template = GetTemplateByLanguage(store?.CountryCode, EmailTemplateTypes.UpdatePaymentMethod);
 
             store = stores.Find(x => x.StoreCode.Contains(contract.StoreData.StoreCode));
             if (store.StoreId == null)
