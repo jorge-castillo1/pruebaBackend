@@ -70,6 +70,24 @@ namespace customerportalapi.Services
             return contract;
         }
 
+        public EmailTemplate GetTemplateByLanguage(string language, EmailTemplateTypes template)
+        {
+            EmailTemplate requestDigitalContractTemplate = null;
+            if (!string.IsNullOrEmpty(language))
+            {
+                requestDigitalContractTemplate = _emailTemplateRepository.getTemplate((int)template, language.ToLower());
+            }
+
+            if (requestDigitalContractTemplate == null || string.IsNullOrEmpty(requestDigitalContractTemplate._id))
+            {
+                requestDigitalContractTemplate = _emailTemplateRepository.getTemplate((int)template, LanguageTypes.en.ToString());
+            }
+
+            return requestDigitalContractTemplate;
+        }
+
+
+
         public async Task<string> GetDownloadContractAsync(string dni, string smContractCode)
         {
             DocumentMetadataSearchFilter filter = new DocumentMetadataSearchFilter()
@@ -85,11 +103,13 @@ namespace customerportalapi.Services
             {
                 var contract = await GetContractAsync(smContractCode);
 
-                EmailTemplate requestDigitalContractTemplate = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.RequestDigitalContract, LanguageTypes.en.ToString());
+                // Get template Language
+                string storeCountryCode = contract?.StoreData?.CountryCode;
+                EmailTemplate requestDigitalContractTemplate = GetTemplateByLanguage(storeCountryCode, EmailTemplateTypes.RequestDigitalContract);
 
-                if (string.IsNullOrEmpty(requestDigitalContractTemplate._id))
+                    if (string.IsNullOrEmpty(requestDigitalContractTemplate._id))
                 {
-                    string errorMessage = (int)EmailTemplateTypes.RequestDigitalContract + " : " + EmailTemplateTypes.RequestDigitalContract.ToString() + " : " + LanguageTypes.en.ToString();
+                    string errorMessage = (int)EmailTemplateTypes.RequestDigitalContract + " : " + EmailTemplateTypes.RequestDigitalContract.ToString() + " : " + storeCountryCode?.ToLower();
                     throw new ServiceException("Email Template not exist, " + errorMessage, HttpStatusCode.NotFound, FieldNames.Email + FieldNames.Template, ValidationMessages.NotExist);
                 }
 
@@ -114,6 +134,7 @@ namespace customerportalapi.Services
 
             return await _documentRepository.GetDocumentAsync(documentId);
         }
+
         public async Task<string> GetDownloadInvoiceAsync(InvoiceDownload invoiceDownload)
         {
             DocumentMetadataSearchFilter filter = new DocumentMetadataSearchFilter()
@@ -130,11 +151,13 @@ namespace customerportalapi.Services
                 User user = _userRepository.GetCurrentUserByUsername(invoiceDownload.Username);
                 Store store = await _storeRepository.GetStoreAsync(invoiceDownload.StoreCode);
 
-                EmailTemplate requestDigitalInvoiceTemplate = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.RequestDigitalInvoice, LanguageTypes.en.ToString());
+                // Get template Language
+                string storeCountryCode = store?.CountryCode;
+                EmailTemplate requestDigitalInvoiceTemplate = GetTemplateByLanguage(storeCountryCode, EmailTemplateTypes.RequestDigitalInvoice);
 
                 if (string.IsNullOrEmpty(requestDigitalInvoiceTemplate._id))
                 {
-                    string errorMessage = (int)EmailTemplateTypes.RequestDigitalInvoice + " : " + EmailTemplateTypes.RequestDigitalInvoice.ToString() + " : " + LanguageTypes.en.ToString();
+                    string errorMessage = (int)EmailTemplateTypes.RequestDigitalInvoice + " : " + EmailTemplateTypes.RequestDigitalInvoice.ToString() + " : " + storeCountryCode?.ToLower();
                     throw new ServiceException("Email Template not exist, " + errorMessage, HttpStatusCode.NotFound, FieldNames.Email + FieldNames.Template, ValidationMessages.NotExist);
                 }
 
