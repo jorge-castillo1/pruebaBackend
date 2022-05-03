@@ -335,9 +335,9 @@ namespace customerportalapi.Services
                 {
                     EmailFlow = EmailFlowType.InviteUser.ToString(),
                     Subject = template.subject,
-                    Body = string.Format(template.body, user.Name, user.Dni, user.Email),
-                    To = mailTo.Select(c => c.ToString().Trim()).ToList()     //message2.To.Add(mailTo);
+                    Body = string.Format(template.body, user.Name, user.Dni, user.Email)
                 };
+                message2.To.Add(mailTo);
                 await _mailRepository.Send(message2);
 
                 throw new ServiceException("Invitation user fails. Email in use by another user", HttpStatusCode.NotFound, FieldNames.Email, ValidationMessages.AlreadyInUse);
