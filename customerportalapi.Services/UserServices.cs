@@ -1,6 +1,7 @@
 ﻿using customerportalapi.Entities;
 using customerportalapi.Entities.Constants;
 using customerportalapi.Entities.Enums;
+using customerportalapi.Entities.Extensions;
 using customerportalapi.Repositories.Interfaces;
 using customerportalapi.Services.Exceptions;
 using customerportalapi.Services.Interfaces;
@@ -344,7 +345,7 @@ namespace customerportalapi.Services
 
             //4. If emailverified is true throw error
             user = UserExistInDb(invitationValues.Email, invitationValues.Dni, invitationValues.CustomerType).Result;
-            if (!string.IsNullOrEmpty(user.Id) && user.Emailverified)
+            if (user != null && !string.IsNullOrEmpty(user.Id) && user.Emailverified)
             {
                 throw new ServiceException("Invitation user fails. User was activated before", HttpStatusCode.NotFound, FieldNames.User, ValidationMessages.AlreadyInvited);
             }
@@ -366,7 +367,7 @@ namespace customerportalapi.Services
             var isNewUser = false;
 
             //8. Verify that the user exist
-            if (user.Id == null)
+            if (user?.Id == null)
             {
                 isNewUser = true;
                 //8.1 Create user in portal database
@@ -1235,7 +1236,7 @@ namespace customerportalapi.Services
             // Contact
             var userIdentification = value.Dni + " - " + accountType;
             //contact = await _profileRepository.GetProfileAsync(value.Dni, accountType);
-            if (contact == null)
+            if (contact?.DocumentNumber == null || contact.Language == null)
             {
                 invitationData.ContactUsername.State = StateEnum.Error;
                 await SendEmailInvitationError(invitationData);
@@ -1361,7 +1362,8 @@ namespace customerportalapi.Services
                             if (!string.IsNullOrEmpty(store.City))
                                 invitationData.StoreCity.SetValueAndState(store.City, StateEnum.Checked);
 
-                            // MailType for WelcomeEmail                                
+                            // MailType for WelcomeEmail 
+                            invitationData.SiteMailType.SetValueAndState(((int)StoreMailTypes.WithoutSignageOrNull).ToString(), StateEnum.Checked);
                             if (!string.IsNullOrEmpty(store.MailType))
                                 invitationData.SiteMailType.SetValueAndState(store.MailType, StateEnum.Checked);
                         }

@@ -30,7 +30,7 @@ namespace customerportalapi.Repositories
             httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["ContractsAPI"]);
 
             var response = await httpClient.GetAsync(dni + "/" + accountType, HttpCompletionOption.ResponseHeadersRead);
-            response.EnsureSuccessStatusCode();
+            //response.EnsureSuccessStatusCode();
             if (!response.IsSuccessStatusCode) return entitylist;
             var content = await response.Content.ReadAsStringAsync();
             JObject result = JObject.Parse(content);
