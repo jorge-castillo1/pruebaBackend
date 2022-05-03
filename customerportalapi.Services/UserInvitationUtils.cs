@@ -89,12 +89,22 @@ namespace customerportalapi.Services
                 OpportunityId = GetMandatoryData(SystemTypes.CRM, EntityNames.opportunities, null, StateEnum.Unchecked),
                 ExpectedMoveIn = GetMandatoryData(SystemTypes.CRM, EntityNames.opportunities, null, StateEnum.Unchecked),
 
-                SiteMailType = GetMandatoryData(SystemTypes.CRM, EntityNames.iav_stores, ((int)StoreMailTypes.WithoutSignageOrNull).ToString(), StateEnum.Checked),
+
+                SiteMailType = GetMandatoryData(SystemTypes.CRM, EntityNames.iav_stores, null, StateEnum.Unchecked),
+                UnitColour = GetMandatoryData(SystemTypes.CRM, EntityNames.products, null, StateEnum.Unchecked),
+                UnitCorridor = GetMandatoryData(SystemTypes.CRM, EntityNames.products, null, StateEnum.Unchecked),
+                UnitExceptions = GetMandatoryData(SystemTypes.CRM, EntityNames.products, null, StateEnum.Unchecked),
+                UnitFloor = GetMandatoryData(SystemTypes.CRM, EntityNames.products, null, StateEnum.Unchecked),
+                UnitZone = GetMandatoryData(SystemTypes.CRM, EntityNames.products, null, StateEnum.Unchecked),
+
+
+
+                /*SiteMailType = GetMandatoryData(SystemTypes.CRM, EntityNames.iav_stores, ((int)StoreMailTypes.WithoutSignageOrNull).ToString(), StateEnum.Checked),
                 UnitColour = GetMandatoryData(SystemTypes.CRM, EntityNames.products, null, StateEnum.Checked),
                 UnitCorridor = GetMandatoryData(SystemTypes.CRM, EntityNames.products, null, StateEnum.Checked),
                 UnitExceptions = GetMandatoryData(SystemTypes.CRM, EntityNames.products, null, StateEnum.Checked),
                 UnitFloor = GetMandatoryData(SystemTypes.CRM, EntityNames.products, null, StateEnum.Checked),
-                UnitZone = GetMandatoryData(SystemTypes.CRM, EntityNames.products, null, StateEnum.Checked),
+                UnitZone = GetMandatoryData(SystemTypes.CRM, EntityNames.products, null, StateEnum.Checked),*/
 
                 InvokedBy = GetMandatoryData(SystemTypes.empty, EntityNames.empty, null, StateEnum.Unchecked),
             };
