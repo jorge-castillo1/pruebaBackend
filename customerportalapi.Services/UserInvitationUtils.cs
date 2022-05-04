@@ -126,7 +126,8 @@ namespace customerportalapi.Services
         }
 
 
-        public static string GetBodyFormatted(EmailTemplate invitationTemplate, User user, InvitationMandatoryData fields, string baseURL, string inviteConfirmation)
+        public static string GetBodyFormatted(EmailTemplate invitationTemplate, User user,
+            InvitationMandatoryData fields, string baseURL, string inviteConfirmation)
         {
             string body = invitationTemplate.body;
 
@@ -152,7 +153,8 @@ namespace customerportalapi.Services
                             body = body.Replace("{{UserPassword}}", user.Password);
 
 
-                            body = body.Replace("{{UserName}}", string.IsNullOrEmpty(user.Username) ? string.Empty : user.Username);
+                            body = body.Replace("{{UserName}}",
+                                string.IsNullOrEmpty(user.Username) ? string.Empty : user.Username);
                             break;
 
                         case "UnitName":
@@ -216,8 +218,9 @@ namespace customerportalapi.Services
                             else
                             {
                                 // Remove all characters between the starting string and the ending string
-                                body = RemoveString(body, "{{RememberSTART}}", "{{RememberEND}}");
+                                body = RemoveBlockBetweenStrings(body, "{{RememberSTART}}", "{{RememberEND}}");
                             }
+
                             break;
 
                         case "SiteMailType":
@@ -227,26 +230,18 @@ namespace customerportalapi.Services
                             switch (intSiteMailType)
                             {
                                 case (int)StoreMailTypes.NewSignage:
-                                    body = body.Replace("{{Planta}}", fields.UnitFloor.Value)
-                                            .Replace("{{Zona}}", fields.UnitZone.Value)
-                                            .Replace("{{ColorZona}}", fields.UnitColour.Value)
-                                            .Replace("{{Pasillo}}", fields.UnitCorridor.Value)
-                                            .Replace("{{Excepciones}}", string.Empty)
-                                            .Replace("{{LocationSTART}}", string.Empty)
-                                            .Replace("{{LocationEND}}", string.Empty);
+                                    NewSignageFormat(ref body, fields.UnitFloor.Value, fields.UnitZone.Value, fields.UnitColour.Value, fields.UnitCorridor.Value);
                                     break;
 
                                 case (int)StoreMailTypes.OldSignage:
-                                    body = body.Replace("{{Excepciones}}", fields.UnitExceptions.Value);
-                                    body = RemoveString(body, "{{LocationSTART}}", "{{LocationEND}}");
+                                    OldSignageFormat(ref body, fields.UnitExceptions.Value, fields.UnitFloor.Value);
                                     break;
 
-                                case (int)StoreMailTypes.WithoutSignageOrNull:
                                 default:
-                                    body = body.Replace("{{Excepciones}}", string.Empty);
-                                    body = RemoveString(body, "{{LocationSTART}}", "{{LocationEND}}");
+                                    WithoutSignageOrNullFormat(ref body, fields.UnitExceptions.Value);
                                     break;
                             }
+
                             break;
 
                         default:
@@ -255,24 +250,47 @@ namespace customerportalapi.Services
                     }
                 }
             }
+
             body = body.Replace("{{BaseUrl}}", baseURL);
             body = body.Replace("{{InviteConfirmationUrl}}", inviteConfirmation + user.Invitationtoken);
 
             return body;
         }
 
-        private static void OldSignageFormat(ref string body, string unitExceptions)
+        // Solo muestra Excepciones
+        // Oculta: Planta, Zona, ColorZona y Pasillo
+        private static void WithoutSignageOrNullFormat(ref string body, string unitExceptions)
         {
-            body = body.Replace("{{Excepciones}}", unitExceptions);
+            body = RemoveBlockBetweenStrings(body, "{{LocationSTART}}", "{{LocationEND}}");
+            ReplaceKeyValueStringEmpty(ref body, "Excepciones", unitExceptions);
         }
 
-        private static void NewSignageFormat(ref string body, string unitColour, string unitCorridor, string unitExceptions, string unitFloor, string unitZone)
+        // Muestra: Planta y Excepciones
+        // Oculta:  Zona, ColorZona y Pasillo
+        private static void OldSignageFormat(ref string body, string unitExceptions, string unitFloor)
         {
-            body = body
-                .Replace("{{Planta}}", unitFloor)
-                .Replace("{{Zona}}", unitZone)
-                .Replace("{{Color de la zona}}", unitColour)
-                .Replace("{{Excepciones}}", unitExceptions);
+            ReplaceKeyValueStringEmpty(ref body, "Planta", unitFloor);
+            ReplaceKeyValueStringEmpty(ref body, "Zona", string.Empty);
+            ReplaceKeyValueStringEmpty(ref body, "ColorZona", string.Empty);
+            ReplaceKeyValueStringEmpty(ref body, "Pasillo", string.Empty);
+            ReplaceKeyValueStringEmpty(ref body, "Excepciones", unitExceptions);
+
+            body = body.Replace("{{LocationSTART}}", string.Empty)
+                .Replace("{{LocationEND}}", string.Empty);
+        }
+
+        // Muestra: Planta, Zona, ColorZona y Pasillo
+        // Oculta: Excepciones
+        private static void NewSignageFormat(ref string body, string unitFloor, string unitZone, string unitColour, string unitCorridor)
+        {
+            ReplaceKeyValueStringEmpty(ref body, "Planta", unitFloor);
+            ReplaceKeyValueStringEmpty(ref body, "Zona", unitZone);
+            ReplaceKeyValueStringEmpty(ref body, "ColorZona", unitColour);
+            ReplaceKeyValueStringEmpty(ref body, "Pasillo", unitCorridor);
+            ReplaceKeyValueStringEmpty(ref body, "Excepciones", string.Empty);
+
+            body = body.Replace("{{LocationSTART}}", string.Empty)
+                .Replace("{{LocationEND}}", string.Empty);
         }
 
         private static EmailParagraph GetParagraphByName(EmailTemplate template, string name)
@@ -324,13 +342,34 @@ namespace customerportalapi.Services
         }
 
         /// <summary>
+        /// Replace in Body the "value" string with the "key", and remove entry if the value is empty
+        /// </summary>
+        /// <param name="body">Body HTML</param>
+        /// <param name="key">Key</param>
+        /// <param name="value">Value of string</param>
+        private static void ReplaceKeyValueStringEmpty(ref string body, string key, string value)
+        {
+            if (value == null || string.IsNullOrEmpty(value.Trim()))
+            {
+                body = RemoveBlockBetweenStrings(body, string.Concat("{{Location", key, "START}}"),
+                    string.Concat("{{Location", key, "END}}"));
+            }
+            else
+            {
+                body = body.Replace(string.Concat("{{", key, "}}"), value)
+                    .Replace(string.Concat("{{Location", key, "START}}"), string.Empty)
+                    .Replace(string.Concat("{{Location", key, "END}}"), string.Empty);
+            }
+        }
+
+        /// <summary>
         /// Remove all characters between the starting string and the ending string (both included)
         /// </summary>
         /// <param name="source">String</param>
         /// <param name="start">Starting string</param>
         /// <param name="end">Ending string</param>
         /// <returns>Returns the string without the characters between "start" and "end"</returns>
-        public static string RemoveString(string source, string start, string end)
+        public static string RemoveBlockBetweenStrings(string source, string start, string end)
         {
             var result = source;
             if (source.Contains(start) && source.Contains(end))
