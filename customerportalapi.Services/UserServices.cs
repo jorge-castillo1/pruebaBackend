@@ -1418,9 +1418,8 @@ namespace customerportalapi.Services
                                 OldSignage(invitationData, contract);
                                 break;
 
-                            case (int)StoreMailTypes.WithoutSignageOrNull:
                             default:
-                                WithoutSignage(invitationData);
+                                WithoutSignage(invitationData, contract);
                                 break;
                         }
                     }
@@ -1477,41 +1476,38 @@ namespace customerportalapi.Services
 
         private static void NewSignage(InvitationMandatoryData invitationData, Contract contract)
         {
-            invitationData.UnitColour.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
-            if (!string.IsNullOrEmpty(contract.Unit.Colour))
-                invitationData.UnitColour.SetValueAndState(contract.Unit.Colour, StateEnum.Checked);
-
-            invitationData.UnitCorridor.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
-            if (!string.IsNullOrEmpty(contract.Unit.Corridor))
-                invitationData.UnitCorridor.SetValueAndState(contract.Unit.Corridor, StateEnum.Checked);
-
-            invitationData.UnitExceptions.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
-            if (!string.IsNullOrEmpty(contract.Unit.Exceptions))
-                invitationData.UnitExceptions.SetValueAndState(contract.Unit.Exceptions, StateEnum.Checked);
-
-            invitationData.UnitFloor.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
+            //invitationData.UnitFloor.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
             if (!string.IsNullOrEmpty(contract.Unit.Floor))
                 invitationData.UnitFloor.SetValueAndState(contract.Unit.Floor, StateEnum.Checked);
 
-            invitationData.UnitZone.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
+            //invitationData.UnitZone.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
             if (!string.IsNullOrEmpty(contract.Unit.Zone))
                 invitationData.UnitZone.SetValueAndState(contract.Unit.Zone, StateEnum.Checked);
+
+            //invitationData.UnitColour.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
+            if (!string.IsNullOrEmpty(contract.Unit.Colour))
+                invitationData.UnitColour.SetValueAndState(contract.Unit.Colour, StateEnum.Checked);
+
+            //invitationData.UnitCorridor.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
+            if (!string.IsNullOrEmpty(contract.Unit.Corridor))
+                invitationData.UnitCorridor.SetValueAndState(contract.Unit.Corridor, StateEnum.Checked);
         }
 
         private static void OldSignage(InvitationMandatoryData invitationData, Contract contract)
         {
-            invitationData.UnitExceptions.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
+            //invitationData.UnitFloor.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
+            if (!string.IsNullOrEmpty(contract.Unit.Floor))
+                invitationData.UnitFloor.SetValueAndState(contract.Unit.Floor, StateEnum.Checked);
+
+            //invitationData.UnitExceptions.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
             if (!string.IsNullOrEmpty(contract.Unit.Exceptions))
                 invitationData.UnitExceptions.SetValueAndState(contract.Unit.Exceptions, StateEnum.Checked);
         }
 
-        private static void WithoutSignage(InvitationMandatoryData invitationData)
+        private static void WithoutSignage(InvitationMandatoryData invitationData, Contract contract)
         {
-            invitationData.UnitColour.SetValueAndState(string.Empty, StateEnum.Unchecked);
-            invitationData.UnitCorridor.SetValueAndState(string.Empty, StateEnum.Unchecked);
-            invitationData.UnitExceptions.SetValueAndState(string.Empty, StateEnum.Unchecked);
-            invitationData.UnitFloor.SetValueAndState(string.Empty, StateEnum.Unchecked);
-            invitationData.UnitZone.SetValueAndState(string.Empty, StateEnum.Unchecked);
+            if (!string.IsNullOrEmpty(contract.Unit.Exceptions))
+                invitationData.UnitExceptions.SetValueAndState(contract.Unit.Exceptions, StateEnum.Checked);
         }
 
         private async Task<bool> CheckMandatoryData(InvitationMandatoryData fields)
