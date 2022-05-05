@@ -1491,6 +1491,10 @@ namespace customerportalapi.Services
             //invitationData.UnitCorridor.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
             if (!string.IsNullOrEmpty(contract.Unit.Corridor))
                 invitationData.UnitCorridor.SetValueAndState(contract.Unit.Corridor, StateEnum.Checked);
+
+            //invitationData.UnitExceptions.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
+            if (!string.IsNullOrEmpty(contract.Unit.Exceptions))
+                invitationData.UnitExceptions.SetValueAndState(contract.Unit.Exceptions, StateEnum.Checked);
         }
 
         private static void OldSignage(InvitationMandatoryData invitationData, Contract contract)
