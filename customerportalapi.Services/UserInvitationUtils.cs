@@ -230,7 +230,7 @@ namespace customerportalapi.Services
                             switch (intSiteMailType)
                             {
                                 case (int)StoreMailTypes.NewSignage:
-                                    NewSignageFormat(ref body, fields.UnitFloor.Value, fields.UnitZone.Value, fields.UnitColour.Value, fields.UnitCorridor.Value);
+                                    NewSignageFormat(ref body, fields.UnitFloor.Value, fields.UnitZone.Value, fields.UnitColour.Value, fields.UnitCorridor.Value, fields.UnitExceptions.Value);
                                     break;
 
                                 case (int)StoreMailTypes.OldSignage:
@@ -281,13 +281,13 @@ namespace customerportalapi.Services
 
         // Muestra: Planta, Zona, ColorZona y Pasillo
         // Oculta: Excepciones
-        private static void NewSignageFormat(ref string body, string unitFloor, string unitZone, string unitColour, string unitCorridor)
+        private static void NewSignageFormat(ref string body, string unitFloor, string unitZone, string unitColour, string unitCorridor, string unitExceptions)
         {
             ReplaceKeyValueStringEmpty(ref body, "Planta", unitFloor);
             ReplaceKeyValueStringEmpty(ref body, "Zona", unitZone);
             ReplaceKeyValueStringEmpty(ref body, "ColorZona", unitColour);
             ReplaceKeyValueStringEmpty(ref body, "Pasillo", unitCorridor);
-            ReplaceKeyValueStringEmpty(ref body, "Excepciones", string.Empty);
+            ReplaceKeyValueStringEmpty(ref body, "Excepciones", unitExceptions);
 
             body = body.Replace("{{LocationSTART}}", string.Empty)
                 .Replace("{{LocationEND}}", string.Empty);
