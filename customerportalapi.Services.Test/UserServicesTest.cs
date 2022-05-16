@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace customerportalapi.Services.Test
@@ -908,12 +909,16 @@ namespace customerportalapi.Services.Test
         public async Task AlbuscarCountrydelContrato_segunTablaFeatures_retornaPlantillaWelcome()
         {
             //Arrange
-            var value = new User()
+            var contract = new Contract()
             {
-                Dni = "12345678A",
-                Email = "support2",
-
+                ContractId = "",
+                StoreCode = "FR",
+                StoreData = new Store(){
+                    CountryCode = "FR",
+                }
             };
+            List<Contract> listContract = new List<Contract>();
+            listContract.Add(contract);
             var contractRepository = ContractRepositoryMock.ContractRepositoryFeature();
             var feat = MongoFeaturesRepositoryMock.FeatureRepository_WelcomeLong();
             var featureRepository = new FeatureRepository(null, feat.Object);
@@ -941,7 +946,7 @@ namespace customerportalapi.Services.Test
                 );
 
 
-            var result = await service.GetWelcomeTemplateFromFeatures(value, true, (int)InviteInvocationType.CRM);
+            var result = await service.GetWelcomeTemplateFromFeatures( listContract, true, (int)InviteInvocationType.CRM);
 
 
             //Assert

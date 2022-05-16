@@ -436,11 +436,9 @@ namespace customerportalapi.Services
             return invitationFields;
         }
 
-        public async Task<int> GetWelcomeTemplateFromFeatures(User user, bool isNewUser, int invokedBy)
+        public async Task<int> GetWelcomeTemplateFromFeatures(List<Contract> contracts, bool isNewUser, int invokedBy)
         {
             string storeCountryCode = "";
-            string accountType = UserInvitationUtils.GetAccountType(user.Usertype);
-            List<Contract> contracts = await _contractRepository.GetContractsAsync(user.Dni, accountType);
             if (contracts != null && contracts.Any() && contracts.FirstOrDefault().StoreData != null)
             {
                 storeCountryCode = contracts.FirstOrDefault().StoreData.CountryCode;
@@ -454,6 +452,7 @@ namespace customerportalapi.Services
             if (!isWelcome) return -1;
 
             bool isWelcomeExtended = _featureRepository.CheckFeatureByNameAndEnvironment(FeatureNames.EmailWelcomeInvitationExtended, _config["Environment"], storeCountryCode);
+            
             if (isWelcomeExtended && isNewUser)
             {
                 return (int)EmailTemplateTypes.WelcomeEmailExtended;
@@ -470,7 +469,9 @@ namespace customerportalapi.Services
 
         private async Task<int> SendWelcomeEmail(Invitation invitationValues, User user, InvitationMandatoryData invitationFields, bool isnew)
         {
-            int templateId = await GetWelcomeTemplateFromFeatures(user, isnew, invitationValues.InvokedBy);
+            string accountType = UserInvitationUtils.GetAccountType(user.Usertype);
+            List<Contract> contracts = await _contractRepository.GetContractsAsync(user.Dni, accountType);
+            int templateId = await GetWelcomeTemplateFromFeatures(contracts, isnew, invitationValues.InvokedBy);
             if (templateId == -1) return templateId;
 
             EmailTemplate invitationTemplate = _emailTemplateRepository.getTemplate(templateId, UserInvitationUtils.GetLanguage(invitationValues.Language));
@@ -497,11 +498,13 @@ namespace customerportalapi.Services
             }
 
             message.Body = UserInvitationUtils.GetBodyFormatted(invitationTemplate, user, invitationFields, _config["BaseUrl"], _config["InviteConfirmation"]);
+            message.Body = UserInvitationUtils.GetBodyFormattedHideButtonAccessPortal(message.Body, contracts, user);
             await _mailRepository.Send(message);
 
 
             return templateId;
         }
+
 
         public async Task<Token> ConfirmAndChangeCredentialsAsync(string receivedToken, ResetPassword value)
         {
