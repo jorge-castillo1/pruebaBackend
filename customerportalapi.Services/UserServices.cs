@@ -454,6 +454,7 @@ namespace customerportalapi.Services
             if (!isWelcome) return -1;
 
             bool isWelcomeExtended = _featureRepository.CheckFeatureByNameAndEnvironment(FeatureNames.EmailWelcomeInvitationExtended, _config["Environment"], storeCountryCode);
+
             if (isWelcomeExtended && isNewUser)
             {
                 return (int)EmailTemplateTypes.WelcomeEmailExtended;
@@ -1131,6 +1132,16 @@ namespace customerportalapi.Services
 
             if (userIdentity?.ID == null) throw new ServiceException("User not found", HttpStatusCode.NotFound, $"Email: {changeRoles.Email}");
 
+            // Quit all groups/roles from the user
+            if (userIdentity.Groups != null)
+            {
+                foreach (var oldGroup in userIdentity.Groups)
+                {
+                    var currentGroup = await _identityRepository.FindGroup(oldGroup.Display);
+                    await _identityRepository.RemoveUserFromGroup(userIdentity, currentGroup.Groups.FirstOrDefault());
+                }
+            }
+
             foreach (var role in changeRoles.Roles)
             {
                 // Validate name of role
@@ -1141,16 +1152,6 @@ namespace customerportalapi.Services
                 var group = await _identityRepository.FindGroup(role.Name);
                 if (group.Groups.Count == 0)
                     throw new ServiceException("Role not found", HttpStatusCode.NotFound, $"Role.Name: {role.Name}");
-
-                // Quit all groups/roles from the user
-                if (userIdentity.Groups != null)
-                {
-                    foreach (var oldGroup in userIdentity.Groups)
-                    {
-                        var currentGroup = await _identityRepository.FindGroup(oldGroup.Display);
-                        await _identityRepository.RemoveUserFromGroup(userIdentity, currentGroup.Groups.FirstOrDefault());
-                    }
-                }
 
                 // Only assign active roles
                 if (role.Value)
