@@ -54,6 +54,73 @@ namespace customerportalapi.Services.Test.FakeData
             return db;
         }
 
+        public static Mock<IContractRepository> ContractRepositoryOne()
+        {
+            var db = new Mock<IContractRepository>();
+            db.Setup(x => x.GetContractsAsync(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(new List<Contract>
+            {
+                new Contract
+                {
+                   ContractNumber = "1234567890",
+                   ContractDate = "01/01/2020",
+                   SmContractCode ="123456786",
+                   Store = "Fake Store",
+                   StoreData = new Store
+                   {
+                       StoreName = "Fake Store",
+                       Telephone = "Fake telephone",
+                       CoordinatesLatitude = "Fake CoordinatesLatitude",
+                       CoordinatesLongitude = "Fake CoordinatesLongitude",
+                       StoreCode ="RI1BBFRI120920060001",
+                       StoreId = Guid.Parse("00000000-0000-0000-0000-000000000001"),
+                        EmailAddress1 = "EmailAddress1",
+                        EmailAddress2 = "EmailAddress2"
+                   },
+                   Unit = new Unit
+                   {
+                        Depth = "4.96",
+                        Height = "2.5",
+                        Size = "14.5000000000",
+                        SmUnitId = "BD17",
+                        Subtype = "GR",
+                        UnitCategory = "SS",
+                        UnitName = "6104",
+                        Width = "2.92"
+                   },
+                   OpportunityId = "OpportunityId",
+                   ContractExpectedMoveIn = "01/01/2020",
+                   ExpectedMoveIn = "01/01/2020",
+                   TimeZone = "Fake timezone"
+                }
+            })).Verifiable();
+
+            db.Setup(x => x.GetContractAsync(It.IsAny<string>())).Returns(Task.FromResult(new Contract
+            {
+                ContractNumber = "1234567893",
+                ContractDate = "01/01/2020",
+                Store = "Fake Store 2",
+                StoreData = new Store
+                {
+                    StoreName = "Fake Store",
+                    Telephone = "Fake telephone",
+                    CoordinatesLatitude = "Fake CoordinatesLatitude",
+                    CoordinatesLongitude = "Fake CoordinatesLongitude",
+                    StoreCode = "RI1BBFRI120920060000",
+                    StoreId = Guid.Parse("00000000-0000-0000-0000-000000000002"),
+                    EmailAddress1 = "EmailAddress1",
+                    EmailAddress2 = "EmailAddress2"
+                },
+                SmContractCode = "123456789",
+                OpportunityId = "OpportunityId",
+                ContractExpectedMoveIn = "01/01/2020",
+                ExpectedMoveIn = "01/01/2020",
+                TimeZone = "Fake timezone"
+            })).Verifiable();
+
+            return db;
+        }
+
+
         public static Mock<IContractRepository> ContractRepository()
         {
             var db = new Mock<IContractRepository>();
