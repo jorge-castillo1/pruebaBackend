@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace customerportalapi.Services.Test
@@ -26,6 +27,7 @@ namespace customerportalapi.Services.Test
         private Mock<IUserAccountRepository> _userAccountRepository;
         private Mock<ILanguageRepository> _languageRepository;
         private Mock<IContractRepository> _contractRepository;
+        private Mock<IContractRepository> _contractRepositoryOne;
         private Mock<IContractSMRepository> _contractSmRepository;
         private Mock<IOpportunityCRMRepository> _opportunityRepository;
         private Mock<IStoreRepository> _storeRepository;
@@ -52,6 +54,7 @@ namespace customerportalapi.Services.Test
             _userAccountRepository = UserAccountRepositoryMock.ValidUserRepository();
             _languageRepository = LanguageRepositoryMock.LanguageRepository();
             _contractRepository = ContractRepositoryMock.ContractRepository();
+            _contractRepositoryOne = ContractRepositoryMock.ContractRepositoryOne();
             _contractSmRepository = ContractSMRepositoryMock.ContractSMRepository();
             _opportunityRepository = OpportunityCRMRepositoryMock.OpportunityCRMRepository();
             _storeRepository = StoreRepositoryMock.StoreRepository();
@@ -422,7 +425,7 @@ namespace customerportalapi.Services.Test
 
         [TestMethod]
         [ExpectedException(typeof(ServiceException), "No se ha producido la excepci�n esperada.")]
-        public async Task AlInvitarUnUsuarioExistente_Activo_DevuelveError()
+        public async Task AlInvitarUnUsuarioExistenteConUnSoloContrato_Activo_DevuelveError()
         {
             //Arrange
             var invitation = new Invitation
@@ -445,7 +448,7 @@ namespace customerportalapi.Services.Test
                 _serviceLogin,
                 _userAccountRepository.Object,
                 _languageRepository.Object,
-                _contractRepository.Object,
+                _contractRepositoryOne.Object,
                 _contractSmRepository.Object,
                 _opportunityRepository.Object,
                 _storeRepository.Object,
@@ -551,7 +554,7 @@ namespace customerportalapi.Services.Test
 
         [TestMethod]
         [ExpectedException(typeof(ServiceException), "No se ha producido la excepci�n esperada.")]
-        public async Task AlInvitarUnUsuarioConUnEmailEnUso_RetornaError()
+        public async Task AlInvitarUnUsuarioConUnEmailEnUsoYunContrato_RetornaError()
         {
             //Arrange
             var invitation = new Invitation
@@ -575,7 +578,7 @@ namespace customerportalapi.Services.Test
                 _serviceLogin,
                 _userAccountRepository.Object,
                 _languageRepository.Object,
-                _contractRepository.Object,
+                _contractRepositoryOne.Object,
                 _contractSmRepository.Object,
                 _opportunityRepository.Object,
                 _storeRepository.Object,
@@ -908,15 +911,26 @@ namespace customerportalapi.Services.Test
         public async Task AlbuscarCountrydelContrato_segunTablaFeatures_retornaPlantillaWelcome()
         {
             //Arrange
-            var value = new User()
+            var contract = new Contract()
             {
-                Dni = "12345678A",
-                Email = "support2",
-
+                ContractId = "",
+                StoreCode = "FR",
+                StoreData = new Store()
+                {
+                    CountryCode = "FR",
+                }
             };
+            List<Contract> listContract = new List<Contract>();
+            listContract.Add(contract);
             var contractRepository = ContractRepositoryMock.ContractRepositoryFeature();
             var feat = MongoFeaturesRepositoryMock.FeatureRepository_WelcomeLong();
             var featureRepository = new FeatureRepository(null, feat.Object);
+
+            var user = new User()
+            {
+                Emailverified = true,
+            };
+
 
             //Act
             var service = new UserServices(
@@ -941,7 +955,7 @@ namespace customerportalapi.Services.Test
                 );
 
 
-            var result = await service.GetWelcomeTemplateFromFeatures(value, true, (int)InviteInvocationType.CRM);
+            var result = service.GetWelcomeTemplateFromFeatures(listContract, true, user, (int)InviteInvocationType.CRM);
 
 
             //Assert

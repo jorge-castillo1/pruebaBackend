@@ -318,11 +318,15 @@ namespace customerportalapi.Services
             if (string.IsNullOrEmpty(invitationValues.Dni))
                 throw new ServiceException("User must have a valid document number.", HttpStatusCode.BadRequest, FieldNames.Dni, ValidationMessages.EmptyFields);
 
+            var userType = UserInvitationUtils.GetUserType(invitationValues.CustomerType);
+            string accountType = UserInvitationUtils.GetAccountType(userType);
+            List<Contract> contracts = await _contractRepository.GetContractsAsync(invitationValues.Dni, accountType);
+            bool onlyOneContract = contracts == null || contracts.Count < 2 ? true : false;
+
             //3. Find some user with this email and without confirm email
             var user = _userRepository.GetCurrentUserByEmail(invitationValues.Email);
-            if (!string.IsNullOrEmpty(user.Id) && user.Emailverified)
+            if (!string.IsNullOrEmpty(user.Id) && user.Emailverified && onlyOneContract)
             {
-
                 var template = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.ErrorInvitationEmailAlreadyExists, LanguageTypes.es.ToString());
                 if (string.IsNullOrEmpty(template._id))
                     throw new ServiceException("Email template not found, templateCode: " + (int)EmailTemplateTypes.ErrorInvitationEmailAlreadyExists, HttpStatusCode.NotFound, FieldNames.Email + FieldNames.Template, ValidationMessages.NotFound);
@@ -345,7 +349,7 @@ namespace customerportalapi.Services
 
             //4. If emailverified is true throw error
             user = UserExistInDb(invitationValues.Email, invitationValues.Dni, invitationValues.CustomerType).Result;
-            if (user != null && !string.IsNullOrEmpty(user.Id) && user.Emailverified)
+            if (user != null && !string.IsNullOrEmpty(user.Id) && user.Emailverified && onlyOneContract)
             {
                 throw new ServiceException("Invitation user fails. User was activated before", HttpStatusCode.NotFound, FieldNames.User, ValidationMessages.AlreadyInvited);
             }
@@ -358,7 +362,7 @@ namespace customerportalapi.Services
             //6. Check all mandatory data            
             await CheckMandatoryData(invitationFields);
 
-            var userType = UserInvitationUtils.GetUserType(invitationValues.CustomerType);
+            //var userType = UserInvitationUtils.GetUserType(invitationValues.CustomerType);
             var userName = userType == 0 ? invitationValues.Dni : "B" + invitationValues.Dni;
 
             //7. Set temporary password
@@ -398,7 +402,7 @@ namespace customerportalapi.Services
             }
 
             //9. Send Welcome Email
-            var idTemplate = SendWelcomeEmail(invitationValues, user, invitationFields, isNewUser).Result;
+            var idTemplate = SendWelcomeEmail(invitationValues, contracts, isNewUser, user, invitationFields).Result;
 
             if (idTemplate != -1)
             {
@@ -436,11 +440,9 @@ namespace customerportalapi.Services
             return invitationFields;
         }
 
-        public async Task<int> GetWelcomeTemplateFromFeatures(User user, bool isNewUser, int invokedBy)
+        public int GetWelcomeTemplateFromFeatures(List<Contract> contracts, bool newUser, User user, int invokedBy)
         {
             string storeCountryCode = "";
-            string accountType = UserInvitationUtils.GetAccountType(user.Usertype);
-            List<Contract> contracts = await _contractRepository.GetContractsAsync(user.Dni, accountType);
             if (contracts != null && contracts.Any() && contracts.FirstOrDefault().StoreData != null)
             {
                 storeCountryCode = contracts.FirstOrDefault().StoreData.CountryCode;
@@ -455,7 +457,11 @@ namespace customerportalapi.Services
 
             bool isWelcomeExtended = _featureRepository.CheckFeatureByNameAndEnvironment(FeatureNames.EmailWelcomeInvitationExtended, _config["Environment"], storeCountryCode);
 
-            if (isWelcomeExtended && isNewUser)
+            if (isWelcomeExtended && newUser)
+            {
+                return (int)EmailTemplateTypes.WelcomeEmailExtended;
+            }
+            else if (isWelcomeExtended && user != null && user.Emailverified)
             {
                 return (int)EmailTemplateTypes.WelcomeEmailExtended;
             }
@@ -469,9 +475,9 @@ namespace customerportalapi.Services
             }
         }
 
-        private async Task<int> SendWelcomeEmail(Invitation invitationValues, User user, InvitationMandatoryData invitationFields, bool isnew)
+        private async Task<int> SendWelcomeEmail(Invitation invitationValues, List<Contract> contracts, bool isNewUser, User user, InvitationMandatoryData invitationFields)
         {
-            int templateId = await GetWelcomeTemplateFromFeatures(user, isnew, invitationValues.InvokedBy);
+            int templateId = GetWelcomeTemplateFromFeatures(contracts, isNewUser, user, invitationValues.InvokedBy);
             if (templateId == -1) return templateId;
 
             EmailTemplate invitationTemplate = _emailTemplateRepository.getTemplate(templateId, UserInvitationUtils.GetLanguage(invitationValues.Language));
@@ -498,11 +504,13 @@ namespace customerportalapi.Services
             }
 
             message.Body = UserInvitationUtils.GetBodyFormatted(invitationTemplate, user, invitationFields, _config["BaseUrl"], _config["InviteConfirmation"]);
+            message.Body = UserInvitationUtils.GetBodyFormattedHideButtonAccessPortal(message.Body, contracts, user);
             await _mailRepository.Send(message);
 
 
             return templateId;
         }
+
 
         public async Task<Token> ConfirmAndChangeCredentialsAsync(string receivedToken, ResetPassword value)
         {
