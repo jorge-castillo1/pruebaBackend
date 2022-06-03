@@ -321,11 +321,11 @@ namespace customerportalapi.Services
             var userType = UserInvitationUtils.GetUserType(invitationValues.CustomerType);
             string accountType = UserInvitationUtils.GetAccountType(userType);
             List<Contract> contracts = await _contractRepository.GetContractsAsync(invitationValues.Dni, accountType);
-            bool onlyOneContract = contracts == null || contracts.Count < 2 ? true : false;
+            bool hasOnlyOneContract = contracts == null || contracts.Count < 2 ? true : false;
 
             //3. Find some user with this email and without confirm email
             var user = _userRepository.GetCurrentUserByEmail(invitationValues.Email);
-            if (!string.IsNullOrEmpty(user.Id) && user.Emailverified && onlyOneContract)
+            if (!string.IsNullOrEmpty(user.Id) && user.Emailverified && hasOnlyOneContract)
             {
                 var template = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.ErrorInvitationEmailAlreadyExists, LanguageTypes.es.ToString());
                 if (string.IsNullOrEmpty(template._id))
@@ -349,7 +349,7 @@ namespace customerportalapi.Services
 
             //4. If emailverified is true throw error
             user = UserExistInDb(invitationValues.Email, invitationValues.Dni, invitationValues.CustomerType).Result;
-            if (user != null && !string.IsNullOrEmpty(user.Id) && user.Emailverified && onlyOneContract)
+            if (user != null && !string.IsNullOrEmpty(user.Id) && user.Emailverified && hasOnlyOneContract)
             {
                 throw new ServiceException("Invitation user fails. User was activated before", HttpStatusCode.NotFound, FieldNames.User, ValidationMessages.AlreadyInvited);
             }
@@ -440,12 +440,14 @@ namespace customerportalapi.Services
             return invitationFields;
         }
 
-        public int GetWelcomeTemplateFromFeatures(List<Contract> contracts, bool newUser, User user, int invokedBy)
+        public int GetWelcomeTemplateFromFeatures(List<Contract> contracts, bool newUser, int invokedBy)
         {
             string storeCountryCode = "";
+            bool hasOnlyOneContract = false;
             if (contracts != null && contracts.Any() && contracts.FirstOrDefault().StoreData != null)
             {
                 storeCountryCode = contracts.FirstOrDefault().StoreData.CountryCode;
+                hasOnlyOneContract = contracts.Count < 2 ? true : false;
             }
             else
             {
@@ -461,7 +463,7 @@ namespace customerportalapi.Services
             {
                 return (int)EmailTemplateTypes.WelcomeEmailExtended;
             }
-            else if (isWelcomeExtended && user != null && user.Emailverified)
+            else if (isWelcomeExtended && !hasOnlyOneContract)
             {
                 return (int)EmailTemplateTypes.WelcomeEmailExtended;
             }
@@ -477,7 +479,7 @@ namespace customerportalapi.Services
 
         private async Task<int> SendWelcomeEmail(Invitation invitationValues, List<Contract> contracts, bool isNewUser, User user, InvitationMandatoryData invitationFields)
         {
-            int templateId = GetWelcomeTemplateFromFeatures(contracts, isNewUser, user, invitationValues.InvokedBy);
+            int templateId = GetWelcomeTemplateFromFeatures(contracts, isNewUser, invitationValues.InvokedBy);
             if (templateId == -1) return templateId;
 
             EmailTemplate invitationTemplate = _emailTemplateRepository.getTemplate(templateId, UserInvitationUtils.GetLanguage(invitationValues.Language));
@@ -504,7 +506,7 @@ namespace customerportalapi.Services
             }
 
             message.Body = UserInvitationUtils.GetBodyFormatted(invitationTemplate, user, invitationFields, _config["BaseUrl"], _config["InviteConfirmation"]);
-            message.Body = UserInvitationUtils.GetBodyFormattedHideButtonAccessPortal(message.Body, contracts, user);
+            message.Body = UserInvitationUtils.GetBodyFormattedHideButtonAccessPortal(message.Body, contracts);
             await _mailRepository.Send(message);
 
 
