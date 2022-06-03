@@ -489,7 +489,7 @@ namespace customerportalapi.Services.Test
                 _serviceLogin,
                 _userAccountRepository.Object,
                 _languageRepository.Object,
-                _contractRepository.Object,
+                _contractRepositoryOne.Object,
                 _contractSmRepository.Object,
                 _opportunityRepository.Object,
                 _storeRepository.Object,
@@ -955,7 +955,7 @@ namespace customerportalapi.Services.Test
                 );
 
 
-            var result = service.GetWelcomeTemplateFromFeatures(listContract, true, user, (int)InviteInvocationType.CRM);
+            var result = service.GetWelcomeTemplateFromFeatures(listContract, true, (int)InviteInvocationType.CRM);
 
 
             //Assert
