@@ -1,7 +1,7 @@
 ﻿namespace customerportalapi.Entities.Enums
 {
     public enum EmailTemplateTypes
-    {        
+    {
         WelcomeEmailExtended = 0, //recordatorio de invitación
         FormContact = 1,
         FormCall = 2,
@@ -18,6 +18,8 @@
         WelcomeEmailShort = 13, //creación
         ErrorInvitationEmailAlreadyExists = 14,
         ErrorChangeEmailAlreadyExists = 15,
-        SaveNewUser,
+        SaveNewUser = 16,
+        RegisteredInvoicePayment = 17,
+        EditAccessCodeToStore = 18
     }
 }

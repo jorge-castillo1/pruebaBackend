@@ -308,5 +308,22 @@ namespace customerportalapi.Services.Test.FakeData
 
             return db;
         }
+
+        public static Mock<IContractSMRepository> UpdateAps()
+        {
+
+            var db = new Mock<IContractSMRepository>();
+            db.Setup(x => x.UpdateAps(It.IsAny<ApsRequest>())).Returns(Task.FromResult(new ApsData()
+            {
+                Username = "Fake username",
+                Dni = "Fake Dni",
+                IBAN = "Fake IBAN",
+                Reference = "Fake Reference"
+            })).Verifiable();
+
+           
+
+            return db;
+        }
     }
 }
