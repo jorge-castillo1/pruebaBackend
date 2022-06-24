@@ -2,16 +2,15 @@
 using customerportalapi.Repositories.Interfaces;
 using customerportalapi.Services.Exceptions;
 using customerportalapi.Services.Test.FakeData;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Caching.Distributed;
-using System.Security.Principal;
 using System.Linq;
-using Org.BouncyCastle.Math.EC.Rfc7748;
-using Microsoft.Extensions.Configuration;
+using System.Security.Principal;
+using System.Threading.Tasks;
 
 namespace customerportalapi.Services.Test
 {
@@ -29,6 +28,7 @@ namespace customerportalapi.Services.Test
         private Mock<IEmailTemplateRepository> _emailTemplateRepository;
         private Mock<IDocumentRepository> _documentRepository;
         private Mock<IStoreImageRepository> _storeImageRepository;
+        Mock<ILogger<SiteServices>> _logger;
 
 
         [TestInitialize]
@@ -42,9 +42,9 @@ namespace customerportalapi.Services.Test
             _contractSMRepository = ContractSMRepositoryMock.ContractSMRepository();
             _mailRepository = MailRepositoryMock.MailRepository();
             _emailTemplateRepository = EmailTemplateRepositoryMock.EmailTemplateRepository();
-            //_config = new Mock<IConfiguration>();
             _documentRepository = DocumentRepositoryMock.DocumentRepository();
             _storeImageRepository = StoreImageRepositoryMock.StoreImageRepository();
+            _logger = new Mock<ILogger<SiteServices>>();
 
             var builder = new ConfigurationBuilder();
             builder.AddJsonFile("appsettings.json");
@@ -60,7 +60,10 @@ namespace customerportalapi.Services.Test
             Mock<IUserRepository> userRepositoryInvalid = UserRepositoryMock.InvalidUserRepository();
 
             //Act
-            SiteServices service = new SiteServices(userRepositoryInvalid.Object, _contractRepository.Object, _storeRepository.Object, _distributedCache.Object, _identityRepository.Object, _contractSMRepository.Object, _config, _mailRepository.Object, _emailTemplateRepository.Object, _documentRepository.Object, _storeImageRepository.Object);
+            SiteServices service = new SiteServices(userRepositoryInvalid.Object, _contractRepository.Object,
+                _storeRepository.Object, _distributedCache.Object, _identityRepository.Object,
+                _contractSMRepository.Object, _config, _mailRepository.Object, _emailTemplateRepository.Object,
+                _documentRepository.Object, _storeImageRepository.Object, _logger.Object);
             await service.GetContractsAsync(username);
 
             //Assert
@@ -73,7 +76,10 @@ namespace customerportalapi.Services.Test
             string username = "12345678A";
 
             //Act
-            SiteServices service = new SiteServices(_userRepository.Object, _contractRepository.Object, _storeRepository.Object, _distributedCache.Object, _identityRepository.Object, _contractSMRepository.Object, _config, _mailRepository.Object, _emailTemplateRepository.Object, _documentRepository.Object, _storeImageRepository.Object);
+            SiteServices service = new SiteServices(_userRepository.Object, _contractRepository.Object,
+                _storeRepository.Object, _distributedCache.Object, _identityRepository.Object,
+                _contractSMRepository.Object, _config, _mailRepository.Object, _emailTemplateRepository.Object,
+                _documentRepository.Object, _storeImageRepository.Object, _logger.Object);
             List<Site> sites = await service.GetContractsAsync(username);
 
             //Assert
@@ -95,7 +101,10 @@ namespace customerportalapi.Services.Test
 
             //Act
             _contractRepository = ContractRepositoryMock.ValidContractRepository();
-            SiteServices service = new SiteServices(_userRepository.Object, _contractRepository.Object, _storeRepository.Object, _distributedCache.Object, _identityRepository.Object, _contractSMRepository.Object, _config, _mailRepository.Object, _emailTemplateRepository.Object, _documentRepository.Object, _storeImageRepository.Object);
+            SiteServices service = new SiteServices(_userRepository.Object, _contractRepository.Object,
+                _storeRepository.Object, _distributedCache.Object, _identityRepository.Object,
+                _contractSMRepository.Object, _config, _mailRepository.Object, _emailTemplateRepository.Object,
+                _documentRepository.Object, _storeImageRepository.Object, _logger.Object);
             AccessCode entity = await service.GetAccessCodeAsync("fake contractid", "fake password");
 
             //Assert
@@ -118,7 +127,10 @@ namespace customerportalapi.Services.Test
 
             //Act
             _identityRepository = IdentityRepositoryMock.IdentityRepository_Invalid();
-            SiteServices service = new SiteServices(_userRepository.Object, _contractRepository.Object, _storeRepository.Object, _distributedCache.Object, _identityRepository.Object, _contractSMRepository.Object, _config, _mailRepository.Object, _emailTemplateRepository.Object, _documentRepository.Object, _storeImageRepository.Object);
+            SiteServices service = new SiteServices(_userRepository.Object, _contractRepository.Object,
+                _storeRepository.Object, _distributedCache.Object, _identityRepository.Object,
+                _contractSMRepository.Object, _config, _mailRepository.Object, _emailTemplateRepository.Object,
+                _documentRepository.Object, _storeImageRepository.Object, _logger.Object);
             AccessCode entity = await service.GetAccessCodeAsync("fake contractid", "fake password");
         }
 
@@ -131,7 +143,10 @@ namespace customerportalapi.Services.Test
             System.Threading.Thread.CurrentPrincipal = gp;
 
             _userRepository = UserRepositoryMock.InvalidUserRepository();
-            SiteServices service = new SiteServices(_userRepository.Object, _contractRepository.Object, _storeRepository.Object, _distributedCache.Object, _identityRepository.Object, _contractSMRepository.Object, _config, _mailRepository.Object, _emailTemplateRepository.Object, _documentRepository.Object, _storeImageRepository.Object);
+            SiteServices service = new SiteServices(_userRepository.Object, _contractRepository.Object,
+                _storeRepository.Object, _distributedCache.Object, _identityRepository.Object,
+                _contractSMRepository.Object, _config, _mailRepository.Object, _emailTemplateRepository.Object,
+                _documentRepository.Object, _storeImageRepository.Object, _logger.Object);
             bool available = await service.IsAccessCodeAvailableAsync();
             Assert.IsFalse(available);
         }
@@ -145,7 +160,10 @@ namespace customerportalapi.Services.Test
             System.Threading.Thread.CurrentPrincipal = gp;
 
             _userRepository = UserRepositoryMock.ValidUserRepository_With5Attempts();
-            SiteServices service = new SiteServices(_userRepository.Object, _contractRepository.Object, _storeRepository.Object, _distributedCache.Object, _identityRepository.Object, _contractSMRepository.Object, _config, _mailRepository.Object, _emailTemplateRepository.Object, _documentRepository.Object, _storeImageRepository.Object);
+            SiteServices service = new SiteServices(_userRepository.Object, _contractRepository.Object,
+                _storeRepository.Object, _distributedCache.Object, _identityRepository.Object,
+                _contractSMRepository.Object, _config, _mailRepository.Object, _emailTemplateRepository.Object,
+                _documentRepository.Object, _storeImageRepository.Object, _logger.Object);
             bool available = await service.IsAccessCodeAvailableAsync();
             Assert.IsTrue(available);
         }
@@ -159,7 +177,10 @@ namespace customerportalapi.Services.Test
             System.Threading.Thread.CurrentPrincipal = gp;
 
             _userRepository = UserRepositoryMock.ValidUserRepository();
-            SiteServices service = new SiteServices(_userRepository.Object, _contractRepository.Object, _storeRepository.Object, _distributedCache.Object, _identityRepository.Object, _contractSMRepository.Object, _config, _mailRepository.Object, _emailTemplateRepository.Object, _documentRepository.Object, _storeImageRepository.Object);
+            SiteServices service = new SiteServices(_userRepository.Object, _contractRepository.Object,
+                _storeRepository.Object, _distributedCache.Object, _identityRepository.Object,
+                _contractSMRepository.Object, _config, _mailRepository.Object, _emailTemplateRepository.Object,
+                _documentRepository.Object, _storeImageRepository.Object, _logger.Object);
             bool available = await service.IsAccessCodeAvailableAsync();
             Assert.IsTrue(available);
         }
@@ -169,7 +190,10 @@ namespace customerportalapi.Services.Test
         {
             //Arrange
             string username = "fake user";
-            SiteServices service = new SiteServices(_userRepository.Object, _contractRepository.Object, _storeRepository.Object, _distributedCache.Object, _identityRepository.Object, _contractSMRepository.Object, _config, _mailRepository.Object, _emailTemplateRepository.Object, _documentRepository.Object, _storeImageRepository.Object);
+            SiteServices service = new SiteServices(_userRepository.Object, _contractRepository.Object,
+                _storeRepository.Object, _distributedCache.Object, _identityRepository.Object,
+                _contractSMRepository.Object, _config, _mailRepository.Object, _emailTemplateRepository.Object,
+                _documentRepository.Object, _storeImageRepository.Object, _logger.Object);
 
             //Act
             List<SiteInvoices> siteInvoices = await service.GetLastInvoices(username);
@@ -189,7 +213,10 @@ namespace customerportalapi.Services.Test
             //Arrange
             string username = "fake user";
             _contractSMRepository = ContractSMRepositoryMock.ContractSMNoInvoiceRepository();
-            SiteServices service = new SiteServices(_userRepository.Object, _contractRepository.Object, _storeRepository.Object, _distributedCache.Object, _identityRepository.Object, _contractSMRepository.Object, _config, _mailRepository.Object, _emailTemplateRepository.Object, _documentRepository.Object, _storeImageRepository.Object);
+            SiteServices service = new SiteServices(_userRepository.Object, _contractRepository.Object,
+                _storeRepository.Object, _distributedCache.Object, _identityRepository.Object,
+                _contractSMRepository.Object, _config, _mailRepository.Object, _emailTemplateRepository.Object,
+                _documentRepository.Object, _storeImageRepository.Object, _logger.Object);
 
             //Act
             List<SiteInvoices> siteInvoices = await service.GetLastInvoices(username);
@@ -205,7 +232,10 @@ namespace customerportalapi.Services.Test
             //Arrange
             string username = "fake user";
             _contractSMRepository = ContractSMRepositoryMock.ContractSMRepositoryInactiveContractSM();
-            SiteServices service = new SiteServices(_userRepository.Object, _contractRepository.Object, _storeRepository.Object, _distributedCache.Object, _identityRepository.Object, _contractSMRepository.Object, _config, _mailRepository.Object, _emailTemplateRepository.Object, _documentRepository.Object, _storeImageRepository.Object);
+            SiteServices service = new SiteServices(_userRepository.Object, _contractRepository.Object,
+                _storeRepository.Object, _distributedCache.Object, _identityRepository.Object,
+                _contractSMRepository.Object, _config, _mailRepository.Object, _emailTemplateRepository.Object,
+                _documentRepository.Object, _storeImageRepository.Object, _logger.Object);
 
             //Act
             List<SiteInvoices> siteInvoices = await service.GetLastInvoices(username);
@@ -222,7 +252,10 @@ namespace customerportalapi.Services.Test
             string username = "fake user";
 
             _contractSMRepository = ContractSMRepositoryMock.ContractSMRepositoryUnpaidInvoices();
-            SiteServices service = new SiteServices(_userRepository.Object, _contractRepository.Object, _storeRepository.Object, _distributedCache.Object, _identityRepository.Object, _contractSMRepository.Object, _config, _mailRepository.Object, _emailTemplateRepository.Object, _documentRepository.Object, _storeImageRepository.Object);
+            SiteServices service = new SiteServices(_userRepository.Object, _contractRepository.Object,
+                _storeRepository.Object, _distributedCache.Object, _identityRepository.Object,
+                _contractSMRepository.Object, _config, _mailRepository.Object, _emailTemplateRepository.Object,
+                _documentRepository.Object, _storeImageRepository.Object, _logger.Object);
 
             //Act
             List<SiteInvoices> siteInvoices = await service.GetLastInvoices(username);

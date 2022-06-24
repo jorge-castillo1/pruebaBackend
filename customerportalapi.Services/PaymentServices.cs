@@ -702,7 +702,7 @@ namespace customerportalapi.Services
             return form;
         }
 
-            public async Task<bool> UpdatePaymentCardProcess(SignatureStatus value, Process process)
+        public async Task<bool> UpdatePaymentCardProcess(SignatureStatus value, Process process)
         {
             // 1.- Get user
             User user = _userRepository.GetCurrentUserByUsername(value.User);
@@ -1155,6 +1155,30 @@ namespace customerportalapi.Services
             process.Documents = null;
 
             _processRepository.Update(process);
+
+            // Get user
+            User user = _userRepository.GetCurrentUserByUsername(updatePay.Username);
+
+            // Get template
+            EmailTemplate template = GetTemplateByLanguage(store?.CountryCode, EmailTemplateTypes.RegisteredInvoicePayment);
+            _logger.LogInformation("Template StoreMail Information. RegisteredInvoicePayment.", template._id);
+            if (template._id != null)
+            {
+                Email message = new Email();
+                message.EmailFlow = EmailFlowType.UpdatePaymentCard.ToString();
+                string storeMail = store.EmailAddress1;
+                _logger.LogInformation("Entering StoreMail Information. RegisteredInvoicePayment.", storeMail);
+                if (storeMail == null)
+                    throw new ServiceException("Store mail not found. RegisteredInvoicePayment.", HttpStatusCode.NotFound);
+                if (_configuration["Environment"] != nameof(EnvironmentTypes.PRO))
+                    storeMail = _configuration["MailStores"];
+
+                message.To.Add(storeMail);
+                message.Subject = string.Format(template.subject, user.Name, user.Dni);
+                message.Body = string.Format(template.body, user.Name, user.Dni, process.SmContractCode, updatePay.InvoiceNumber, inv.Amount);
+                _logger.LogInformation("Sending StoreMail Information. RegisteredInvoicePayment.", storeMail);
+                await _mailRepository.Send(message);
+            }
 
             return true;
         }

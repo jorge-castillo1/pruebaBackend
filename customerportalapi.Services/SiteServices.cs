@@ -12,6 +12,7 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace customerportalapi.Services
 {
@@ -28,6 +29,7 @@ namespace customerportalapi.Services
         private readonly IEmailTemplateRepository _emailTemplateRepository;
         private readonly IDocumentRepository _documentRepository;
         private readonly IStoreImageRepository _storeImageRepository;
+        private readonly ILogger<SiteServices> _logger;
 
         public SiteServices(
             IUserRepository userRepository,
@@ -40,7 +42,8 @@ namespace customerportalapi.Services
             IMailRepository mailRepository,
             IEmailTemplateRepository emailTemplateRepository,
             IDocumentRepository documentRepository,
-            IStoreImageRepository storeImageRepository
+            IStoreImageRepository storeImageRepository,
+            ILogger<SiteServices> logger
         )
         {
             _userRepository = userRepository;
@@ -54,6 +57,7 @@ namespace customerportalapi.Services
             _emailTemplateRepository = emailTemplateRepository;
             _documentRepository = documentRepository;
             _storeImageRepository = storeImageRepository;
+            _logger = logger;
         }
 
 
@@ -528,8 +532,8 @@ namespace customerportalapi.Services
             if (updateAccCode == false)
                 throw new ServiceException("Error updating accessCode.", HttpStatusCode.InternalServerError);
 
+            // Get template for send mail to user (client)
             EmailTemplate editDataCustomerTemplate = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.EditAccessCode, currentUser.Language);
-
             if (editDataCustomerTemplate._id != null)
             {
                 Email message = new Email();
@@ -538,7 +542,44 @@ namespace customerportalapi.Services
                 message.Subject = editDataCustomerTemplate.subject;
                 string htmlbody = editDataCustomerTemplate.body.Replace("{", "{{").Replace("}", "}}").Replace("%{{", "{").Replace("}}%", "}");
                 message.Body = string.Format(htmlbody, currentUser.Name);
-                await _mailRepository.Send(message);
+                await _mailRepository.SendNotDisconnect(message);
+            }
+
+            var listContractsCrm = _contractRepository.GetFullContractsBySMCodeAsync(contractId).Result;
+            if (!listContractsCrm.Any())
+            {
+                _logger.LogInformation($"UpdateAccessCodeAsync. GetFullContractsBySMCodeAsync(). Not found contracts by SMContractCode: {contractId}.");
+            }
+            else
+            {
+                var contractCrm = listContractsCrm.First();
+
+                // Get template for send mail to Store
+                EmailTemplate template = _emailTemplateRepository.getTemplate((int)EmailTemplateTypes.EditAccessCodeToStore, contractCrm.iav_storeid?.CountryCode.ToLower());
+                _logger.LogInformation("Template StoreMail Information. EditAccessCodeToStore.", template._id);
+                if (template._id != null)
+                {
+                    Email message = new Email();
+                    message.EmailFlow = EmailFlowType.UpdatePaymentCard.ToString();
+                    string storeMail = contractCrm.iav_storeid?.EmailAddress1;
+                    _logger.LogInformation("Entering StoreMail Information. EditAccessCodeToStore.", storeMail);
+
+                    if (_config["Environment"] != nameof(EnvironmentTypes.PRO))
+                        storeMail = _config["MailStores"];
+
+                    if (storeMail != null)
+                    {
+                        message.To.Add(storeMail);
+                        message.Subject = string.Format(template.subject, currentUser.Name, currentUser.Dni);
+                        message.Body = string.Format(template.body, currentUser.Name, currentUser.Dni);
+                        _logger.LogInformation("Sending StoreMail Information. EditAccessCodeToStore.", storeMail);
+                        await _mailRepository.Send(message);
+                    }
+                    else
+                    {
+                        _logger.LogInformation("Store mail not found. EditAccessCodeToStore.", HttpStatusCode.NotFound);
+                    }
+                }
             }
 
             return updateAccCode;

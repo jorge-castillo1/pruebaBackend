@@ -67,6 +67,15 @@ namespace customerportalapi.Services.Test.FakeData
                 EmailAddress2 = "fake email 2 modified"
             })).Verifiable();
 
+            db.Setup(x => x.GetAccountByDocumentNumberAsync(It.IsAny<string>())).Returns(Task.FromResult(new AccountProfile()
+            {
+                SmCustomerId =  "fake SM Customer Id",
+                Phone1 = "fake phone 1",
+                MobilePhone1 = "fake mobile phone 1",
+                EmailAddress1 = "fake email 2 modified",
+                EmailAddress2 = "fake email 2 modified"
+            })).Verifiable();
+
             return db;
         }
 
