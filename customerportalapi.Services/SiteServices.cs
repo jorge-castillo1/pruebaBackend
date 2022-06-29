@@ -527,6 +527,9 @@ namespace customerportalapi.Services
                 Code = password
             };
 
+
+            _logger.LogInformation($"SiteServices.UpdateAccessCodeAsync()  updateAccessCode: {Newtonsoft.Json.JsonConvert.SerializeObject(updateAccessCode)}");
+
             bool updateAccCode = await _contractSMRepository.UpdateAccessCodeAsync(updateAccessCode);
 
             if (updateAccCode == false)

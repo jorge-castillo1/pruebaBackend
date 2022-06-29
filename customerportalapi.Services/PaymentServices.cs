@@ -874,19 +874,19 @@ namespace customerportalapi.Services
         public async Task<PaymentMethodPayInvoiceResponse> PayInvoice(PaymentMethodPayInvoice payInvoice)
         {
             // 1. Check payInvoice required values
-            if (payInvoice.SiteId == null || payInvoice.SiteId == "")
+            if (string.IsNullOrEmpty(payInvoice.SiteId))
                 throw new ServiceException("SiteId is required", HttpStatusCode.BadRequest, FieldNames.SiteId);
 
-            if (payInvoice.SmContractCode == null || payInvoice.SmContractCode == "")
+            if (string.IsNullOrEmpty(payInvoice.SmContractCode))
                 throw new ServiceException("SmContractCode is required", HttpStatusCode.BadRequest, FieldNames.SMContractCode);
 
-            if (payInvoice.Ourref == null || payInvoice.Ourref == "")
+            if (string.IsNullOrEmpty(payInvoice.Ourref))
                 throw new ServiceException("Ourref is required", HttpStatusCode.BadRequest, FieldNames.Ourref);
 
-            if (payInvoice.Token == null || payInvoice.Token == "")
+            if (string.IsNullOrEmpty(payInvoice.Token))
                 throw new ServiceException("Token is required", HttpStatusCode.BadRequest, FieldNames.Token);
 
-            if (payInvoice.Username == null || payInvoice.Username == "")
+            if (string.IsNullOrEmpty(payInvoice.Username))
                 throw new ServiceException("Username is required", HttpStatusCode.BadRequest, FieldNames.Username);
 
             // 2. Get Invoice
@@ -922,12 +922,18 @@ namespace customerportalapi.Services
             _logger.LogInformation("after:" + after);
 
 
+            // 6. Get contract and store from CRM
+            var listFullContract = await _contractRepository.GetFullContractsBySMCodeAsync(payInvoice.SmContractCode);
+            var contractCrm = listFullContract.FirstOrDefault(x => x.iav_storeid?.StoreCode == payInvoice.SiteId);
+            if (contractCrm?.iav_storeid?.StoreId == null)
+                throw new ServiceException("Store not found", HttpStatusCode.BadRequest, FieldNames.StoreId);
+            var store = contractCrm.iav_storeid;
 
-            // 6. Get CRM PayMethods
+            /*// 6. Get CRM PayMethods
             List<Store> stores = await _storeRepository.GetStoresAsync();
             Store store = stores.Find(x => x.StoreCode.Contains(payInvoice.SiteId));
             if (store.StoreId == null)
-                throw new ServiceException("Store not found", HttpStatusCode.BadRequest, FieldNames.StoreId);
+                throw new ServiceException("Store not found", HttpStatusCode.BadRequest, FieldNames.StoreId);*/
 
             PaymentMethodCRM payMetCRM = await _paymentMethodRepository.GetPaymentMethod(store.StoreId.ToString());
             string payMetCRMlog = JsonConvert.SerializeObject(payMetCRM);
@@ -949,6 +955,31 @@ namespace customerportalapi.Services
 
             string makePaymentlog = JsonConvert.SerializeObject(makePayment);
             _logger.LogInformation("makePaymentlog:" + makePaymentlog);
+
+
+            // 8. Get user
+            User user = _userRepository.GetCurrentUserByUsername(payInvoice.Username);
+
+            // 9. Get template
+            EmailTemplate template = GetTemplateByLanguage(store?.CountryCode, EmailTemplateTypes.RegisteredInvoicePayment);
+            _logger.LogInformation("Template StoreMail Information. RegisteredInvoicePayment.", template._id);
+            if (template._id != null)
+            {
+                Email message = new Email();
+                message.EmailFlow = EmailFlowType.UpdatePaymentCard.ToString();
+                string storeMail = store.EmailAddress1;
+                _logger.LogInformation("Entering StoreMail Information. RegisteredInvoicePayment.", storeMail);
+                if (storeMail == null)
+                    throw new ServiceException("Store mail not found. RegisteredInvoicePayment.", HttpStatusCode.NotFound);
+                if (_configuration["Environment"] != nameof(EnvironmentTypes.PRO))
+                    storeMail = _configuration["MailStores"];
+
+                message.To.Add(storeMail);
+                message.Subject = string.Format(template.subject, user.Name, user.Dni);
+                message.Body = string.Format(template.body, user.Name, user.Dni, contractCrm.iav_name, payInvoice.Ourref, inv.Amount);
+                _logger.LogInformation("Sending StoreMail Information. RegisteredInvoicePayment.", storeMail);
+                await _mailRepository.Send(message);
+            }
 
             return payResponse;
         }
@@ -1082,7 +1113,6 @@ namespace customerportalapi.Services
             if (processes.Count == 0)
                 throw new ServiceException("User don't have started process for this externalId & ProcessType", HttpStatusCode.BadRequest, "CardExternalId", "Started process");
 
-
             // 2. Pay verification failed
             if (payRes.Status != "00")
             {
@@ -1103,11 +1133,19 @@ namespace customerportalapi.Services
                 _processRepository.Update(cancelProcess);
                 throw new ServiceException("Payment error", HttpStatusCode.BadRequest);
             }
+
+            // 3. Get contract and store from CRM
+            var listFullContract = await _contractRepository.GetFullContractsBySMCodeAsync(findPay.SmContractCode);
+            var contractCrm = listFullContract.FirstOrDefault(x => x.iav_storeid?.StoreCode == payRes.SiteId);
+            if (contractCrm?.iav_storeid?.StoreId == null)
+                throw new ServiceException("Store not found", HttpStatusCode.BadRequest, FieldNames.StoreId);
+            var store = contractCrm.iav_storeid;
+
             // 3. Get CRM PayMethods
-            List<Store> stores = await _storeRepository.GetStoresAsync();
+            /*List<Store> stores = await _storeRepository.GetStoresAsync();
             Store store = stores.Find(x => x.StoreCode.Contains(payRes.SiteId));
             if (store.StoreId == null)
-                throw new ServiceException("Store not found", HttpStatusCode.BadRequest, FieldNames.StoreId);
+                throw new ServiceException("Store not found", HttpStatusCode.BadRequest, FieldNames.StoreId);*/
 
             // 4. Get Payment Method from CRM
             PaymentMethodCRM payMetCRM = await _paymentMethodRepository.GetPaymentMethod(store.StoreId.ToString());
@@ -1145,7 +1183,7 @@ namespace customerportalapi.Services
             process.Username = updatePay.Username;
             process.ProcessType = (int)ProcessTypes.Payment;
             process.ProcessStatus = (int)ProcessStatuses.Accepted;
-            process.ContractNumber = null;
+            process.ContractNumber = contractCrm.iav_name;
             process.SmContractCode = updatePay.SmContractCode;
             process.Pay = new ProcessPay()
             {
@@ -1175,7 +1213,7 @@ namespace customerportalapi.Services
 
                 message.To.Add(storeMail);
                 message.Subject = string.Format(template.subject, user.Name, user.Dni);
-                message.Body = string.Format(template.body, user.Name, user.Dni, process.SmContractCode, updatePay.InvoiceNumber, inv.Amount);
+                message.Body = string.Format(template.body, user.Name, user.Dni, process.ContractNumber, updatePay.InvoiceNumber, inv.Amount);
                 _logger.LogInformation("Sending StoreMail Information. RegisteredInvoicePayment.", storeMail);
                 await _mailRepository.Send(message);
             }
