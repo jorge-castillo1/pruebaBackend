@@ -360,7 +360,7 @@ namespace customerportalapi.Services
             var invitationFields = await FindInvitationMandatoryData(invitationValues, profile);
 
             //6. Check all mandatory data            
-            await CheckMandatoryData(invitationFields);
+            await CheckMandatoryData(invitationFields, invitationValues);
 
             //var userType = UserInvitationUtils.GetUserType(invitationValues.CustomerType);
             var userName = userType == 0 ? invitationValues.Dni : "B" + invitationValues.Dni;
@@ -1196,7 +1196,7 @@ namespace customerportalapi.Services
         }
 
 
-        private async Task<bool> SendEmailInvitationError(InvitationMandatoryData fields)
+        private async Task<bool> SendEmailInvitationError(InvitationMandatoryData fields, Invitation values)
         {
             PropertyInfo[] properties = typeof(InvitationMandatoryData).GetProperties();
 
@@ -1234,6 +1234,14 @@ namespace customerportalapi.Services
 
             var env = !string.IsNullOrEmpty(_config["Environment"]) ? $"<tr class='0'><td><strong>Environment: {_config["Environment"]}</strong></td></tr>" : string.Empty;
             message.Body = message.Body.Replace("{{environment}}", env);
+
+            message.Body = message.Body.Replace("{{invitationdni}}", values.Dni);
+            message.Body = message.Body.Replace("{{invitationfullname}}", values.Fullname);
+            message.Body = message.Body.Replace("{{invitationemail}}", values.Email);
+            message.Body = message.Body.Replace("{{invitationlanguage}}", values.Language);
+            message.Body = message.Body.Replace("{{invitationcustomertype}}", values.CustomerType);
+            message.Body = message.Body.Replace("{{invitationinvokedby}}", values.InvokedBy.ToString());
+
             message.Body = message.Body.Replace("{{rows}}", list);
 
             bool result = await _mailRepository.Send(message);
@@ -1250,7 +1258,7 @@ namespace customerportalapi.Services
             if (contact?.DocumentNumber == null || contact.Language == null)
             {
                 invitationData.ContactUsername.State = StateEnum.Error;
-                await SendEmailInvitationError(invitationData);
+                await SendEmailInvitationError(invitationData, value);
                 throw new ServiceException($"Contact required:  user: {userIdentification}", HttpStatusCode.NotFound, FieldNames.Contact, ValidationMessages.Required);
             }
             invitationData.ContactUsername.SetValueAndState(value.Fullname, StateEnum.Checked);
@@ -1260,7 +1268,7 @@ namespace customerportalapi.Services
             if (contracts == null || contracts.Count == 0 || !(contracts?.Where(c => !string.IsNullOrEmpty(c.SmContractCode))).Any())
             {
                 invitationData.Contract.State = StateEnum.Error;
-                await SendEmailInvitationError(invitationData);
+                await SendEmailInvitationError(invitationData, value);
                 throw new ServiceException($"User without contract, user: {userIdentification}", HttpStatusCode.BadRequest, FieldNames.Contract, ValidationMessages.NotFound);
             }
 
@@ -1525,7 +1533,7 @@ namespace customerportalapi.Services
                 invitationData.UnitExceptions.SetValueAndState(contract.Unit.Exceptions, StateEnum.Checked);
         }
 
-        private async Task<bool> CheckMandatoryData(InvitationMandatoryData fields)
+        private async Task<bool> CheckMandatoryData(InvitationMandatoryData fields, Invitation values)
         {
             string validations = null;
             PropertyInfo[] properties = typeof(InvitationMandatoryData).GetProperties();
@@ -1543,7 +1551,7 @@ namespace customerportalapi.Services
             if (!string.IsNullOrEmpty(validations))
             {
                 // Solo se envía el mail de error de campos cuando hay campos en estado "StateEnum.Error"
-                await SendEmailInvitationError(fields);
+                await SendEmailInvitationError(fields, values);
                 throw new ServiceException("required some fields", HttpStatusCode.BadRequest, validations, ValidationMessages.Required);
             }
 
