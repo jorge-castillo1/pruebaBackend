@@ -506,7 +506,7 @@ namespace customerportalapi.Services
             }
 
             message.Body = UserInvitationUtils.GetBodyFormatted(invitationTemplate, user, invitationFields, _config["BaseUrl"], _config["InviteConfirmation"]);
-            message.Body = UserInvitationUtils.GetBodyFormattedHideButtonAccessPortal(message.Body, contracts);
+            message.Body = UserInvitationUtils.GetBodyFormattedHideButtonAccessPortal(message.Body, contracts, user);
             await _mailRepository.Send(message);
 
 
