@@ -125,9 +125,9 @@ namespace customerportalapi.Services
             return data;
         }
 
-        public static string GetBodyFormattedHideButtonAccessPortal(string body, List<Contract> contracts)
+        public static string GetBodyFormattedHideButtonAccessPortal(string body, List<Contract> contracts, User user)
         {
-            if (contracts != null && contracts.Count > 1)
+            if (contracts != null && contracts.Count > 1 && user != null && user.Emailverified)
             {
                 body = RemoveBlockBetweenStrings(body, "{{ButtonAccessPortalSTART}}", "{{ButtonAccessPortalEND}}");
                 body = RemoveBlockBetweenStrings(body, "{{ButtonAccessPortalSTART}}", "{{ButtonAccessPortalEND}}");
