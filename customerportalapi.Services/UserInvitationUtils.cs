@@ -36,7 +36,7 @@ namespace customerportalapi.Services
         {
             if (invitationCustomerType == null)
                 return (int)UserTypes.Residential;
-            switch (invitationCustomerType.ToLower())
+            switch (invitationCustomerType.ToLower().Trim())
             {
                 case "residential":
                 case "0":
