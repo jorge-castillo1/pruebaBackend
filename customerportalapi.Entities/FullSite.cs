@@ -38,6 +38,12 @@ namespace customerportalapi.Entities
         [JsonProperty("iav_openinghoursend@OData.Community.Display.V1.FormattedValue")]
         public string OpeningHoursTo { get; set; }
 
+        [JsonProperty("new_openinghoursstartweekend@OData.Community.Display.V1.FormattedValue")]
+        public string OpeningHoursFromSaturday { get; set; }
+
+        [JsonProperty("new_openinghoursendweekend@OData.Community.Display.V1.FormattedValue")]
+        public string OpeningHoursToSaturday { get; set; }
+
         [JsonProperty("_iav_cityid_value@OData.Community.Display.V1.FormattedValue")]
         public string City { get; set; }
 

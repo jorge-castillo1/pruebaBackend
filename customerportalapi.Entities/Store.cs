@@ -25,6 +25,10 @@ namespace customerportalapi.Entities
 
         public string OpeningHoursTo { get; set; }
 
+        public string OpeningHoursFromSaturday { get; set; }
+
+        public string OpeningHoursToSaturday { get; set; }
+
         public string City { get; set; }
 
         public string Country { get; set; }
