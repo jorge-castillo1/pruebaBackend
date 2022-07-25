@@ -1400,12 +1400,9 @@ namespace customerportalapi.Services
 
                         if (!string.IsNullOrEmpty(contract.Unit.UnitName))
                         {
-                            var rxBeginsWordAndRestNumber = new Regex(@"^[a-zA-Z]{1}[0-9]{1,}\b", RegexOptions.Compiled);
-                            var rxIsOnlyNumber = new Regex(@"^[0-9]*$", RegexOptions.Compiled);
-                            var matchesIsOnlyNumber = rxIsOnlyNumber.Matches(contract.Unit.UnitName).Count;
-                            var matchesBeginsWordAndRestNumber = rxBeginsWordAndRestNumber.Matches(contract.Unit.UnitName).Count;
+                            bool isUnitNamePermited = ValidateUnitName(contract.Unit.UnitName);
 
-                            if (matchesBeginsWordAndRestNumber > 0 || matchesIsOnlyNumber > 0)
+                            if (isUnitNamePermited)
                             {
                                 invitationData.UnitName.SetValueAndState(contract.Unit.UnitName, StateEnum.Checked);
                             }
@@ -1483,6 +1480,26 @@ namespace customerportalapi.Services
                 invitationData.SmContractCode.SetValueAndState(ValidationMessages.Required, StateEnum.Error);
 
             return true;
+        }
+
+        public bool ValidateUnitName(string unitName)
+        {
+            var rxBeginsWordAndRestNumber = new Regex(@"^[a-zA-Z]{1}[0-9]{1,}\b", RegexOptions.Compiled);
+            var rxEndWordAndRestNumber = new Regex(@"\d[a-zA-Z]{1}\b", RegexOptions.Compiled);
+            var rxIsOnlyNumber = new Regex(@"^[0-9]*$", RegexOptions.Compiled);
+
+            var matchesIsOnlyNumber = rxIsOnlyNumber.Matches(unitName).Count;
+            var matchesEndWordAndRestNumber = rxEndWordAndRestNumber.Matches(unitName).Count;
+            var matchesBeginsWordAndRestNumber = rxBeginsWordAndRestNumber.Matches(unitName).Count;
+
+            if (matchesBeginsWordAndRestNumber > 0 || matchesIsOnlyNumber > 0 || matchesEndWordAndRestNumber > 0)
+            {
+                    return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         private static void NewSignage(InvitationMandatoryData invitationData, Contract contract)
