@@ -1485,7 +1485,7 @@ namespace customerportalapi.Services
         public bool ValidateUnitName(string unitName)
         {
             var rxBeginsWordAndRestNumber = new Regex(@"^[a-zA-Z]{1}[0-9]{1,}\b", RegexOptions.Compiled);
-            var rxEndWordAndRestNumber = new Regex(@"\d[a-zA-Z]{1}\b", RegexOptions.Compiled);
+            var rxEndWordAndRestNumber = new Regex(@"^[0-9]{1,}[a-zA-Z]{1}\b", RegexOptions.Compiled);
             var rxIsOnlyNumber = new Regex(@"^[0-9]*$", RegexOptions.Compiled);
 
             var matchesIsOnlyNumber = rxIsOnlyNumber.Matches(unitName).Count;
