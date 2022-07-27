@@ -476,7 +476,7 @@ namespace customerportalapi.Controllers
             {
                 var entity = _services.UserExistInDb(email, dni, customerType).Result;
 
-                if (string.IsNullOrEmpty(entity?.Id) || string.IsNullOrEmpty(entity.ExternalId))
+                if (string.IsNullOrEmpty(entity?.Id))
                     return new ApiResponse(false);
 
                 return new ApiResponse(true);
