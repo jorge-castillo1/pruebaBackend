@@ -214,7 +214,7 @@ namespace customerportalapi.Repositories
             var httpClient = _clientFactory.CreateClient("identityClient");
             try
             {
-                var url = new Uri(httpClient.BaseAddress + _configuration["Identity:Endpoints:Groups"] + $"?&filter=displayName eq PRIMARY/{groupName}");
+                var url = new Uri(httpClient.BaseAddress + _configuration["Identity:Endpoints:Groups"] + $"?&filter=displayName eq PRIMARY/{groupName}&excludedAttributes=members,meta");
 
                 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
                     "Basic",

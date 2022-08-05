@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <Content Remove="nuget.config" />
+    <Content Remove="Properties\launchSettings_pro.json" />
   </ItemGroup>
 
   <ItemGroup>
@@ -44,6 +45,18 @@
 
   <ItemGroup>
     <None Remove="..\.dockerignore" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <_WebToolingArtifacts Remove="Properties\launchSettings_pro.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Properties\launchSettings_pro.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
