@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Linq;
-
-namespace customerportalapi.Entities.Mappers
+﻿namespace customerportalapi.Entities.Mappers
 {
     public static class FullContractToContract
     {
@@ -11,7 +6,6 @@ namespace customerportalapi.Entities.Mappers
         {
             if (contract != null)
             {
-
                 Contract newContract = new Contract()
                 {
                     ContractId = contract.iav_contractid,
@@ -41,6 +35,10 @@ namespace customerportalapi.Entities.Mappers
                     StoreImage = contract.iav_storeid.StoreImage,
                     TimeZone = contract.iav_storeid.TimeZone,
                     ContractExpectedMoveIn = contract.blue_expectedmovein,
+
+                    SignatureStatus = contract.new_signaturestatus,
+                    SignatureIdSignature = contract.blue_signatureidsignature,
+                    DocumentIdSignature = contract.blue_documentidsignature,
                     //TotalPrice = contract.iav_storeid,
                 };
 

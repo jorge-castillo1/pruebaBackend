@@ -6,6 +6,7 @@ using customerportalapi.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace customerportalapi.Controllers
@@ -16,7 +17,6 @@ namespace customerportalapi.Controllers
     {
         private readonly IContractServices _services;
         private readonly ILogger<ContractsController> _logger;
-
 
         public ContractsController(IContractServices services, ILogger<ContractsController> logger)
         {
@@ -135,7 +135,6 @@ namespace customerportalapi.Controllers
         /// <param name="document">Document content and metadata</param>
         /// <returns>Unique document identification number</returns>
         [HttpPost]
-        //[AuthorizeAzureAD(new[] { Entities.enums.RoleGroupTypes.StoreManager })]
         public async Task<ApiResponse> UploadContractAsync([FromBody] Document document)
         {
             try
@@ -161,7 +160,6 @@ namespace customerportalapi.Controllers
         /// <param name="smContractCode">friendly user contract number</param>
         /// <returns>boolean</returns>
         [HttpGet("document/{smContractCode}/exists")]
-        //[AuthorizeToken]
         public async Task<ApiResponse> DocumentExists(string smContractCode)
         {
             try
@@ -181,14 +179,12 @@ namespace customerportalapi.Controllers
             }
         }
 
-
         /// <summary>
         /// Obtain if invoice exists in sharepoint from contract number
         /// </summary>
         /// <param name="invoiceRequest">friendly user contract number</param>
         /// <returns>boolean</returns>
         [HttpPost("invoice/exists")]
-        //[AuthorizeToken]
         public async Task<ApiResponse> InvoiceExists([FromBody] InvoiceRequest invoiceRequest)
         {
             try
@@ -218,6 +214,61 @@ namespace customerportalapi.Controllers
             try
             {
                 var entity = await _services.UpdateContractUrlAsync(skip, limit);
+                return new ApiResponse(entity);
+            }
+            catch (ServiceException se)
+            {
+                _logger.LogError(se.ToString());
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Update Signature Id in CRM Contracts
+        /// </summary>
+        /// <returns>Contract info of Signaturit</returns>
+        [HttpPost("UpdateSignatureId")]
+        public async Task<ApiResponse> UpdateContractsWithoutSignatureId(string fromCreatedOn, string toCreatedOn = null, string arrContracts = null)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(fromCreatedOn))
+                    return new ApiResponse(400, "Params not valid");
+
+                var entity = await _services.UpdateContractsWithoutSignatureId(fromCreatedOn, toCreatedOn, arrContracts);
+                return new ApiResponse(entity);
+            }
+            catch (ServiceException se)
+            {
+                _logger.LogError(se.ToString());
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Upload Documents in Sharepoint by ContractId
+        /// </summary>
+        /// <param name="arrContracts"></param>
+        /// <returns></returns>
+        [HttpPatch("UploadDocuments")]
+        public async Task<ApiResponse> UploadDocuments(string arrContracts)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(arrContracts))
+                    return new ApiResponse(400, "Params not valid");
+
+                var entity = await _services.UploadDocuments(arrContracts);
                 return new ApiResponse(entity);
             }
             catch (ServiceException se)

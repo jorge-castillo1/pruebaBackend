@@ -29,9 +29,9 @@ namespace customerportalapi.Services
         private readonly IStoreRepository _storeRepository;
         private readonly IOpportunityCRMRepository _opportunityRepository;
         private readonly IPaymentMethodRepository _paymentMethodRepository;
+        private readonly ISignatureRepository _signatureRepository;
         private readonly IConfiguration _config;
         private readonly ILogger<ContractServices> _logger;
-
 
         public ContractServices(
             IConfiguration configuration,
@@ -44,7 +44,7 @@ namespace customerportalapi.Services
             IStoreRepository storeRepository,
             IOpportunityCRMRepository opportunityRepository,
             IPaymentMethodRepository paymentMethodRepository,
-
+            ISignatureRepository signatureRepository,
             ILogger<ContractServices> logger
         )
         {
@@ -58,6 +58,7 @@ namespace customerportalapi.Services
             _storeRepository = storeRepository;
             _opportunityRepository = opportunityRepository;
             _paymentMethodRepository = paymentMethodRepository;
+            _signatureRepository = signatureRepository;
             _logger = logger;
         }
 
@@ -86,8 +87,6 @@ namespace customerportalapi.Services
             return requestDigitalContractTemplate;
         }
 
-
-
         public async Task<string> GetDownloadContractAsync(string dni, string smContractCode)
         {
             DocumentMetadataSearchFilter filter = new DocumentMetadataSearchFilter()
@@ -107,7 +106,7 @@ namespace customerportalapi.Services
                 string storeCountryCode = contract?.StoreData?.CountryCode;
                 EmailTemplate requestDigitalContractTemplate = GetTemplateByLanguage(storeCountryCode, EmailTemplateTypes.RequestDigitalContract);
 
-                    if (string.IsNullOrEmpty(requestDigitalContractTemplate._id))
+                if (string.IsNullOrEmpty(requestDigitalContractTemplate._id))
                 {
                     string errorMessage = (int)EmailTemplateTypes.RequestDigitalContract + " : " + EmailTemplateTypes.RequestDigitalContract.ToString() + " : " + storeCountryCode?.ToLower();
                     throw new ServiceException("Email Template not exist, " + errorMessage, HttpStatusCode.NotFound, FieldNames.Email + FieldNames.Template, ValidationMessages.NotExist);
@@ -147,7 +146,6 @@ namespace customerportalapi.Services
             if (list.Count > 1) throw new ServiceException("More than one document was found", HttpStatusCode.BadRequest);
             else if (list.Count == 0)
             {
-
                 User user = _userRepository.GetCurrentUserByUsername(invoiceDownload.Username);
                 Store store = await _storeRepository.GetStoreAsync(invoiceDownload.StoreCode);
 
@@ -218,7 +216,6 @@ namespace customerportalapi.Services
                     {
                         response.contract.PaymentMethodDescription = payMetCRM.Description;
                     }
-                        
                 }
             }
 
@@ -332,6 +329,140 @@ namespace customerportalapi.Services
               ).Normalize(NormalizationForm.FormC).Replace(" ", "").ToLower();
         }
 
+        public async Task<SignatureResultDataResponse> UpdateContractsWithoutSignatureId(string fromCreatedOn, string toCreatedOn = null, string arrContracts = null)
+        {
+            var result = new SignatureResultDataResponse();
 
+            //var listFullContract = await _contractRepository.GetFullContractsBySMCodeAsync("RI227MI204901C0N8000");
+
+            // Obtener contratos de CRM
+            var listFullContract = new List<FullContract>() { };
+            if (!string.IsNullOrEmpty(arrContracts))
+            {
+                var listContractIds = arrContracts.Replace("\"", "").Replace(" ", "").Split(",");
+
+                foreach (var contractId in listContractIds)
+                {
+                    var fullContract = await _contractRepository.GetFullContractsByCRMCodeAsync(contractId);
+                    listFullContract.Add(fullContract);
+                }
+            }
+            else
+            {
+                listFullContract = await _contractRepository.GetFullContractsWithoutSignaturitId(fromCreatedOn, toCreatedOn);
+            }
+
+
+            if (listFullContract != null)
+            {
+                // por cada contrato, consultar en signaturit
+                foreach (var fullcontract in listFullContract)
+                {
+                    try
+                    {
+                        var signaturitContracts = await _signatureRepository.GetSignatureInfoAsync(fullcontract.iav_name, fromCreatedOn, fullcontract.iav_storeid.CountryCode);
+
+                        var contract = FullContractToContract.Mapper(fullcontract);
+                        result.ListContracts.Add(contract);
+                        if (signaturitContracts != null && signaturitContracts.Any() &&
+                            signaturitContracts.FirstOrDefault()?.Documents != null &&
+                            signaturitContracts.FirstOrDefault().Documents.Any())
+                        {
+                            var signContract = signaturitContracts.FirstOrDefault();
+                            result.ListSignatureResultData.Add(signContract);
+                            try
+                            {
+                                var resultDB = await _signatureRepository.Create(signContract);
+                            }
+                            catch
+                            {
+                            }
+
+                            switch (signContract.Documents.FirstOrDefault().Status.ToLower())
+                            {
+                                case "completed":
+                                    contract.SignatureStatus = "audit_trail_completed";
+                                    break;
+                                case "canceled":
+                                    contract.SignatureStatus = "document_canceled";
+                                    contract.ContractUrl = "";
+                                    break;
+                                case "expired":
+                                    contract.SignatureStatus = "document_expired";
+                                    contract.ContractUrl = "";
+                                    break;
+                                default:
+                                    contract.SignatureStatus = signContract.Documents.FirstOrDefault().Status;
+                                    contract.ContractUrl = "";
+                                    break;
+                            }
+
+                            contract.SignatureIdSignature = signContract.Id.ToString();
+                            contract.DocumentIdSignature = signContract.Documents.FirstOrDefault().Id.ToString();
+
+                            var updatedContract = await _contractRepository.UpdateContractAsync(contract);
+                        }
+                    }
+                    catch
+                    {
+                        result.ListContractsNoProcessed.Add(fullcontract.iav_name);
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        public async Task<List<KeyValuePair<string, string>>> UploadDocuments(string arrContracts)
+        {
+
+            var listContractsUploaded = new List<KeyValuePair<string, string>>();
+
+            // Obtener contratos de CRM
+            var listFullContract = new List<FullContract>() { };
+            if (!string.IsNullOrEmpty(arrContracts))
+            {
+                var listContractIds = arrContracts.Replace("\"", "").Replace(" ", "").Split(",");
+
+                foreach (var contractId in listContractIds)
+                {
+                    var fullContract = await _contractRepository.GetFullContractsByCRMCodeAsync(contractId);
+                    listFullContract.Add(fullContract);
+                }
+            }
+
+            if (listFullContract.Any())
+            {
+                // por cada contrato
+                foreach (var fullcontract in listFullContract)
+                {
+                    var docMetadata = new DocumentMetadata()
+                    {
+                        AccountDni = fullcontract.iav_customerid.iav_dni,
+                        AccountType = UserInvitationUtils.GetUserType(fullcontract.iav_customerid.blue_customertypestring),
+                        ContractNumber = fullcontract.iav_name,
+                        SmContractCode = fullcontract.iav_smcontractcode,
+                        BankAccountOrderNumber = string.Empty,
+                        BankAccountName = string.Empty,
+                        CreatedBy = string.Empty,
+                        DocumentType = 0,
+                        StoreName = fullcontract.iav_storeid.StoreName
+                    };
+
+                    var docId = string.Empty;
+                    try
+                    {
+                        docId = await _signatureRepository.UploadDocumentAsync(fullcontract.iav_storeid.CountryCode, docMetadata);
+                    }
+                    catch
+                    {
+
+                    }
+                    listContractsUploaded.Add(new KeyValuePair<string, string>(fullcontract.iav_name, docId));
+                }
+            }
+
+            return listContractsUploaded;
+        }
     }
 }

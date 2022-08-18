@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace customerportalapi.Entities
 {
@@ -9,7 +8,21 @@ namespace customerportalapi.Entities
         public int StatusCode { get; set; }
         public string Message { get; set; }
         public SignatureResult Result { get; set; } = new SignatureResult();
-        
+    }
+
+    public class SignatureResultData
+    {
+        public Guid Id { get; set; }
+        public string Created_at { get; set; }
+        public Dictionary<string, string> Data { get; set; } = new Dictionary<string, string>() { };
+        public List<SignatureDocumentResult> Documents { get; set; } = new List<SignatureDocumentResult>();
+    }
+
+    public class SignatureResultDataResponse
+    {
+        public List<SignatureResultData> ListSignatureResultData { get; set; } = new List<SignatureResultData>() { };
+        public List<Contract> ListContracts { get; set; } = new List<Contract>() { };
+        public List<string> ListContractsNoProcessed { get; set; } = new List<string>() { };
     }
 
     public class SignatureResult

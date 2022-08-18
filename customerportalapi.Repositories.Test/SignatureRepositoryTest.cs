@@ -1,10 +1,11 @@
 ﻿using customerportalapi.Entities;
+using customerportalapi.Repositories.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using System.Net.Http;
 using Moq.Contrib.HttpClient;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace customerportalapi.Repositories.Test
@@ -12,9 +13,10 @@ namespace customerportalapi.Repositories.Test
     [TestClass]
     public class SignatureRepositoryTest
     {
-        IConfiguration _configurations;
-        IHttpClientFactory _clientFactory;
-        Mock<HttpMessageHandler> _handler;
+        private IConfiguration _configurations;
+        private IHttpClientFactory _clientFactory;
+        private Mock<HttpMessageHandler> _handler;
+        private Mock<IMongoCollectionWrapper<SignatureResultData>> _signatureResult;
 
         [TestInitialize]
         public void Setup()
@@ -25,6 +27,9 @@ namespace customerportalapi.Repositories.Test
 
             _handler = new Mock<HttpMessageHandler>();
             _clientFactory = _handler.CreateClientFactory();
+            _signatureResult = new Mock<IMongoCollectionWrapper<SignatureResultData>>();
+
+            _signatureResult.Setup(x => x.InsertOne(It.IsAny<SignatureResultData>())).Verifiable();
         }
 
         [TestMethod]
@@ -50,12 +55,12 @@ namespace customerportalapi.Repositories.Test
             filter.Filters.SignatureId = "fake signature id";
 
             //Act
-            SignatureRepository repository = new SignatureRepository(_configurations, _clientFactory);
+            SignatureRepository repository = new SignatureRepository(_configurations, _clientFactory, _signatureResult.Object);
             List<SignatureProcess> result = await repository.SearchSignaturesAsync(filter);
 
             //Assert
             Assert.IsNotNull(result);
             Assert.AreEqual(1, result.Count);
-        }   
+        }
     }
 }

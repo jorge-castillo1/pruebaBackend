@@ -1,16 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using customerportalapi.Entities;
 using customerportalapi.Repositories.Interfaces;
-using System.Threading.Tasks;
-using System.Net.Http;
-using customerportalapi.Entities;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
+using System.Net.Http;
 using System.Net.Http.Headers;
-//using AutoWrapper.Wrappers;
+using System.Text;
+using System.Threading.Tasks;
 
+//using AutoWrapper.Wrappers;
 
 namespace customerportalapi.Repositories
 {
@@ -19,10 +19,13 @@ namespace customerportalapi.Repositories
         private readonly IConfiguration _configuration;
         private readonly IHttpClientFactory _clientFactory;
 
-        public SignatureRepository(IConfiguration configuration, IHttpClientFactory clientFactory)
+        private readonly IMongoCollectionWrapper<SignatureResultData> _signatureResult;
+
+        public SignatureRepository(IConfiguration configuration, IHttpClientFactory clientFactory, IMongoCollectionWrapper<SignatureResultData> signatureResult)
         {
             _configuration = configuration;
             _clientFactory = clientFactory;
+            _signatureResult = signatureResult;
         }
 
         public async Task<Guid> CreateSignature(MultipartFormDataContent form)
@@ -66,9 +69,55 @@ namespace customerportalapi.Repositories
             var response = await httpClient.SendAsync(request);
             response.EnsureSuccessStatusCode();
             var contentresult = await response.Content.ReadAsStringAsync();
-            
+
             var deserializedContent = JsonConvert.DeserializeObject<SignatureSearchResponse>(contentresult);
             return deserializedContent.Result;
+        }
+
+        public async Task<List<SignatureResultData>> GetSignatureInfoAsync(string contractNumber, string fromDate, string documentCountry)
+        {
+            var httpClient = _clientFactory.CreateClient("httpClientSignature");
+            httpClient.BaseAddress = new Uri($"{httpClient.BaseAddress}{_configuration["SignatureEndpoint"]}");
+            httpClient.Timeout = TimeSpan.FromMinutes(10);
+            var url = $"{contractNumber}/{fromDate}";
+            if (!string.IsNullOrEmpty(documentCountry))
+            {
+                url += $"/{documentCountry}";
+            }
+
+            var response = await httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
+            var contentresult = await response.Content.ReadAsStringAsync();
+
+            var deserializedContent = JsonConvert.DeserializeObject<SignatureResultDataListResponse>(contentresult);
+            return deserializedContent.Result;
+        }
+
+        public async Task<string> UploadDocumentAsync(string documentCountry, DocumentMetadata metadata)
+        {
+            var httpClient = _clientFactory.CreateClient("httpClientSignature");
+            //httpClient.BaseAddress = new Uri($"{httpClient.BaseAddress}{_configuration["SignatureEndpoint"]}");
+            httpClient.Timeout = TimeSpan.FromMinutes(10);
+
+            //PATCH api/signature/UploadDocument/ES
+            var request = new HttpRequestMessage(new HttpMethod("PATCH"), new Uri($"{httpClient.BaseAddress}{_configuration["SignatureEndpoint"]}UploadDocument/{documentCountry}/"))
+            {
+                Content = new StringContent(JsonConvert.SerializeObject(metadata), Encoding.UTF8, "application/json")
+            };
+            var response = await httpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+            var content = await response.Content.ReadAsStringAsync();
+
+            JObject result = JObject.Parse(content);
+            var documentId = result.GetValue("result")?.ToString();
+            return documentId;
+        }
+
+        public Task<bool> Create(SignatureResultData signatureResult)
+        {
+            _signatureResult.InsertOne(signatureResult);
+
+            return Task.FromResult(true); ;
         }
     }
 }

@@ -2,15 +2,12 @@
 using customerportalapi.Repositories.Interfaces;
 using customerportalapi.Services.Exceptions;
 using customerportalapi.Services.Test.FakeData;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Distributed;
-using System.Security.Principal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
+using System.Threading.Tasks;
 
 namespace customerportalapi.Services.Test
 {
@@ -29,6 +26,7 @@ namespace customerportalapi.Services.Test
         private Mock<IDocumentRepository> _documentRepository;
         private Mock<IOpportunityCRMRepository> _opportunityCRMRepository;
         private Mock<IPaymentMethodRepository> _paymentMethodRepository;
+        private Mock<ISignatureRepository> _signatureRepository;
         private Mock<ILogger<ContractServices>> _logger;
 
         [TestInitialize]
@@ -45,6 +43,7 @@ namespace customerportalapi.Services.Test
             _documentRepository = DocumentRepositoryMock.DocumentRepository();
             _opportunityCRMRepository = OpportunityCRMRepositoryMock.OpportunityCRMRepository();
             _paymentMethodRepository = PaymentMethodRepositoryMock.PaymentMethodRepository();
+            _signatureRepository = SignatureRepositoryMock.SignatureRepository();
             _logger = new Mock<ILogger<ContractServices>>();
 
             var builder = new ConfigurationBuilder();
@@ -72,10 +71,10 @@ namespace customerportalapi.Services.Test
                 _storeRepository.Object,
                 _opportunityCRMRepository.Object,
                 _paymentMethodRepository.Object,
+                _signatureRepository.Object,
                 _logger.Object
             );
             await service.GetContractAsync(contractNumber);
-
         }
 
         [TestMethod]
@@ -98,6 +97,7 @@ namespace customerportalapi.Services.Test
                 _storeRepository.Object,
                 _opportunityCRMRepository.Object,
                 _paymentMethodRepository.Object,
+                _signatureRepository.Object,
                 _logger.Object
             );
             Contract contract = await service.GetContractAsync(contractNumber);
@@ -127,6 +127,7 @@ namespace customerportalapi.Services.Test
                 _storeRepository.Object,
                 _opportunityCRMRepository.Object,
                 _paymentMethodRepository.Object,
+                _signatureRepository.Object,
                 _logger.Object
             );
             string document = await service.GetDownloadContractAsync(dni, smContractCode);
@@ -156,12 +157,12 @@ namespace customerportalapi.Services.Test
                 _storeRepository.Object,
                 _opportunityCRMRepository.Object,
                 _paymentMethodRepository.Object,
+                _signatureRepository.Object,
                 _logger.Object
             );
             string document = await service.GetDownloadContractAsync(dni, smContractCode);
 
             //Assert
-
         }
 
         [TestMethod]
@@ -187,6 +188,7 @@ namespace customerportalapi.Services.Test
                 _storeRepository.Object,
                 _opportunityCRMRepository.Object,
                 _paymentMethodRepository.Object,
+                _signatureRepository.Object,
                 _logger.Object
             );
             string document = await service.GetDownloadContractAsync(dni, smContractCode);
@@ -216,6 +218,7 @@ namespace customerportalapi.Services.Test
                 _storeRepository.Object,
                 _opportunityCRMRepository.Object,
                 _paymentMethodRepository.Object,
+                _signatureRepository.Object,
                 _logger.Object
             );
             string document = await service.GetDownloadContractAsync(dni, smContractCode);
@@ -244,13 +247,13 @@ namespace customerportalapi.Services.Test
                 _storeRepository.Object,
                 _opportunityCRMRepository.Object,
                 _paymentMethodRepository.Object,
+                _signatureRepository.Object,
                 _logger.Object
             );
             string document = await service.GetDownloadContractAsync(dni, smContractCode);
 
             //Assert
         }
-
 
         [TestMethod]
         public async Task ShouldReturnAInvoiceFile()
@@ -276,6 +279,7 @@ namespace customerportalapi.Services.Test
                 _storeRepository.Object,
                 _opportunityCRMRepository.Object,
                 _paymentMethodRepository.Object,
+                _signatureRepository.Object,
                 _logger.Object
             );
             string document = await service.GetDownloadInvoiceAsync(invoice);
@@ -309,12 +313,12 @@ namespace customerportalapi.Services.Test
                 _storeRepository.Object,
                 _opportunityCRMRepository.Object,
                 _paymentMethodRepository.Object,
+                _signatureRepository.Object,
                 _logger.Object
             );
             string document = await service.GetDownloadInvoiceAsync(invoice);
 
             //Assert
-
         }
 
         [TestMethod]
@@ -344,6 +348,7 @@ namespace customerportalapi.Services.Test
                 _storeRepository.Object,
                 _opportunityCRMRepository.Object,
                 _paymentMethodRepository.Object,
+                _signatureRepository.Object,
                 _logger.Object
             );
             string document = await service.GetDownloadInvoiceAsync(invoice);
@@ -377,6 +382,7 @@ namespace customerportalapi.Services.Test
                 storeRepository.Object,
                 _opportunityCRMRepository.Object,
                 _paymentMethodRepository.Object,
+                _signatureRepository.Object,
                 _logger.Object
             );
             string document = await service.GetDownloadInvoiceAsync(invoice);
@@ -398,7 +404,6 @@ namespace customerportalapi.Services.Test
 
             Mock<IDocumentRepository> documentRepository = DocumentRepositoryMock.NoContractnumberDocumentRepository();
 
-
             //Act
             ContractServices service = new ContractServices
             (
@@ -411,6 +416,7 @@ namespace customerportalapi.Services.Test
                 _storeRepository.Object,
                 _opportunityCRMRepository.Object,
                 _paymentMethodRepository.Object,
+                _signatureRepository.Object,
                 _logger.Object
             );
             string document = await service.GetDownloadInvoiceAsync(invoice);
@@ -438,10 +444,10 @@ namespace customerportalapi.Services.Test
                 _storeRepository.Object,
                 _opportunityCRMRepository.Object,
                 _paymentMethodRepository.Object,
+                _signatureRepository.Object,
                 _logger.Object
             );
             await service.GetFullContractAsync(smContractCode);
-
         }
 
         [TestMethod]
@@ -464,6 +470,7 @@ namespace customerportalapi.Services.Test
                 _storeRepository.Object,
                 _opportunityCRMRepository.Object,
                 _paymentMethodRepository.Object,
+                _signatureRepository.Object,
                 _logger.Object
             );
             ContractFull contractFull = await service.GetFullContractAsync(smContractCode);
@@ -494,6 +501,7 @@ namespace customerportalapi.Services.Test
                 _storeRepository.Object,
                 _opportunityCRMRepository.Object,
                 _paymentMethodRepository.Object,
+                _signatureRepository.Object,
                 _logger.Object
             );
             ContractFull contractFull = await service.GetFullContractAsync(smContractCode);

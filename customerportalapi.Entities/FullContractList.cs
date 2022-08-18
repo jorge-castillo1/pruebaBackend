@@ -21,22 +21,27 @@ namespace customerportalapi.Entities
 
         [JsonProperty("_iav_storeid_value@OData.Community.Display.V1.FormattedValue")]
         public string _iav_store { get; set; }
+
         public string _iav_storeid_value { get; set; }
 
         [JsonProperty("_iav_unitid_value@OData.Community.Display.V1.FormattedValue")]
         public string _iav_unit { get; set; }
+
         public string _iav_unitid_value { get; set; }
 
         [JsonProperty("_transactioncurrencyid_value@OData.Community.Display.V1.FormattedValue")]
         public string _transactioncurrency { get; set; }
+
         public string _transactioncurrencyid_value { get; set; }
 
         [JsonProperty("iav_price@OData.Community.Display.V1.FormattedValue")]
         public string iav_price_currency { get; set; }
+
         public float iav_price { get; set; }
 
         [JsonProperty("iav_vat@OData.Community.Display.V1.FormattedValue")]
         public string iav_vat_currency { get; set; }
+
         public float iav_vat { get; set; }
 
         public float? iav_reservationfee { get; set; }
@@ -44,46 +49,70 @@ namespace customerportalapi.Entities
 
         [JsonProperty("iav_contractdate@OData.Community.Display.V1.FormattedValue")]
         public string iav_contractdate_formatted { get; set; }
+
         public DateTime iav_contractdate { get; set; }
 
         [JsonProperty("iav_firstpaymentdate@OData.Community.Display.V1.FormattedValue")]
         public string iav_firstpaymentdate_formatted { get; set; }
+
         public DateTime iav_firstpaymentdate { get; set; }
 
         [JsonProperty("iav_firstpaymentmoney@OData.Community.Display.V1.FormattedValue")]
         public string iav_firstpaymentmoney_currency { get; set; }
+
         public float iav_firstpaymentmoney { get; set; }
 
         [JsonProperty("_iav_paymentmethodid_value@OData.Community.Display.V1.FormattedValue")]
         public string _iav_paymentmethod { get; set; }
+
         public string _iav_paymentmethodid_value { get; set; }
 
         [JsonProperty("iav_paid@OData.Community.Display.V1.FormattedValue")]
         public string iav_paid_string { get; set; }
+
         public bool iav_paid { get; set; }
 
         [JsonProperty("_iav_opportunityid_value@OData.Community.Display.V1.FormattedValue")]
         public string _iav_opportunity { get; set; }
+
         public string _iav_opportunityid_value { get; set; }
 
         [JsonProperty("_iav_customerid_value@OData.Community.Display.V1.FormattedValue")]
         public string _iav_customer { get; set; }
+
         public string _iav_customerid_value { get; set; }
 
         [JsonProperty("iav_opportunitytype@OData.Community.Display.V1.FormattedValue")]
         public string iav_opportunitytype_string { get; set; }
+
         public int? iav_opportunitytype { get; set; }
 
-		public string blue_expectedmovein { get; set; }
+        public string blue_expectedmovein { get; set; }
 
-		public string _blue_closedby_value { get; set; }
+        [JsonProperty("blue_esignatureoptions@OData.Community.Display.V1.FormattedValue")]
+        public string blue_esignatureoptions_string { get; set; }
+
+        public string blue_esignatureoptions { get; set; }
+
+        //(documents.id). Private Identifier
+        public string blue_documentidsignature { get; set; }
+
+        //(id) blue_signatureidsignature. Signing Process Id
+        public string blue_signatureidsignature { get; set; }
+
+        public string createdon { get; set; }
+
+        public string _blue_closedby_value { get; set; }
         public string new_contacturl { get; set; }
+
+        //audit_trail_completed
         public string new_signaturestatus { get; set; }
+
         public Store iav_storeid { get; set; }
         public Unit iav_unitid { get; set; }
         public Iav_Opportunityid iav_opportunityid { get; set; }
         public Iav_Customerid iav_customerid { get; set; }
-	}
+    }
 
     public class Iav_Opportunityid
     {
@@ -114,10 +143,8 @@ namespace customerportalapi.Entities
     }
 }
 
-
-
 /*
- * // EXAMPLE 
+ * // EXAMPLE
  {
 	"@odata.context": "https://bluebasetest.bluespace.es/BLUESPACEPRE/api/data/v8.1/$metadata#iav_contracts(iav_contractid,iav_name,iav_smcontractcode,_iav_storeid_value,_iav_unitid_value,_transactioncurrencyid_value,iav_price,iav_vat,iav_reservationfee,iav_promotions,iav_contractdate,iav_firstpaymentdate,iav_firstpaymentmoney,_iav_paymentmethodid_value,iav_paid,_iav_opportunityid_value,_iav_customerid_value,iav_opportunitytype,_blue_closedby_value,new_contacturl,new_signaturestatus,iav_storeid,iav_unitid,iav_opportunityid,iav_customerid,iav_unitid(name,iav_smunitid,iav_size,iav_unitcategorytext,iav_subtype,price,iav_height,iav_width,iav_depth),iav_opportunityid(opportunityid,iav_expectedmovein),iav_customerid(iav_documenttype,iav_dni,emailaddress1,emailaddress2,address1_telephone1,telephone1,telephone2,address1_telephone1,address1_telephone2,address1_composite,address1_line1,address1_line2,address1_line3,address1_city,address1_postalcode,address1_stateorprovince,address1_country,blue_updatewebportal,blue_customertypestring))",
 	"value": [
@@ -139,7 +166,7 @@ namespace customerportalapi.Entities
 			"iav_reservationfee": null,
 			"iav_promotions": "1€ quote",
 			"iav_contractdate@OData.Community.Display.V1.FormattedValue": "31/10/2017",
-			"iav_contractdate": "2017-10-30T23:00:00Z",			
+			"iav_contractdate": "2017-10-30T23:00:00Z",
 			"iav_firstpaymentdate@OData.Community.Display.V1.FormattedValue": "31/10/2017",
 			"iav_firstpaymentdate": "2017-10-30T23:00:00Z",
 			"iav_firstpaymentmoney@OData.Community.Display.V1.FormattedValue": "€10.00",

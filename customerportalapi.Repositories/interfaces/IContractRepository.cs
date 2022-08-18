@@ -1,7 +1,5 @@
 ﻿using customerportalapi.Entities;
-using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace customerportalapi.Repositories.Interfaces
@@ -17,5 +15,9 @@ namespace customerportalapi.Repositories.Interfaces
         Task<List<FullContract>> GetFullContractsWithoutUrlAsync(int? limit);
 
         Task<List<FullContract>> GetFullContractsBySMCodeAsync(string code);
+
+        Task<FullContract> GetFullContractsByCRMCodeAsync(string crmCode);
+
+        Task<List<FullContract>> GetFullContractsWithoutSignaturitId(string fromCreatedOn, string toCreatedOn = null);
     }
 }

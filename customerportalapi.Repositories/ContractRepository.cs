@@ -1,13 +1,13 @@
-﻿using customerportalapi.Repositories.Interfaces;
-using customerportalapi.Entities;
+﻿using customerportalapi.Entities;
+using customerportalapi.Repositories.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Text;
-using System.Net.Http;
-using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace customerportalapi.Repositories
 {
@@ -105,6 +105,50 @@ namespace customerportalapi.Repositories
             var endPoint = $"fullcontracts?smcode={code}";
 
             var response = await httpClient.GetAsync(endPoint, HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode) return entitylist;
+            var content = await response.Content.ReadAsStringAsync();
+            JObject result = JObject.Parse(content);
+            var contractList = JsonConvert.DeserializeObject<List<FullContract>>(result.GetValue("result").ToString());
+
+            return contractList;
+        }
+
+        public async Task<FullContract> GetFullContractsByCRMCodeAsync(string crmCode)
+        {
+            var entitylist = new FullContract();
+
+            var httpClient = _clientFactory.CreateClient("httpClientCRM");
+            httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["ContractsAPI"]);
+
+            var endPoint = $"fullcontractscrmcode?crmcode={crmCode}";
+
+            var response = await httpClient.GetAsync(endPoint, HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode) return entitylist;
+            var content = await response.Content.ReadAsStringAsync();
+            JObject result = JObject.Parse(content);
+            var contractList = JsonConvert.DeserializeObject<FullContract>(result.GetValue("result").ToString());
+
+            return contractList;
+        }
+
+        public async Task<List<FullContract>> GetFullContractsWithoutSignaturitId(string fromCreatedOn, string toCreatedOn = null)
+        {
+            var entitylist = new List<FullContract>();
+
+            var httpClient = _clientFactory.CreateClient("httpClientCRM");
+            httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["ContractsAPI"]);
+            //httpClient.Timeout = TimeSpan.FromMilliseconds(Timeout.Infinite);
+
+            var url = $"{_configuration["GatewayUrl"]}{_configuration["ContractsAPI"]}";
+            httpClient.BaseAddress = new Uri(url);
+            if (!string.IsNullOrEmpty(toCreatedOn))
+            {
+                url += $"&toCreatedOn={toCreatedOn}";
+            }
+
+            var response = await httpClient.GetAsync($"withoutsignaturitid?fromCreatedOn={fromCreatedOn}", HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
             if (!response.IsSuccessStatusCode) return entitylist;
             var content = await response.Content.ReadAsStringAsync();

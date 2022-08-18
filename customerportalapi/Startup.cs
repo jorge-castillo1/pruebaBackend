@@ -30,12 +30,12 @@ using System.Net.Http.Headers;
 namespace customerportalapi
 {
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public class Startup
     {
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public Startup(IConfiguration configuration, IHostingEnvironment env)
         {
@@ -56,7 +56,7 @@ namespace customerportalapi
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public IConfiguration Configuration { get; }
 
@@ -127,6 +127,12 @@ namespace customerportalapi
                 IMongoDatabase database = GetDatabase();
                 return new MongoCollectionWrapper<NewUser>(database, "newusers");
             });
+            services.AddScoped<IMongoCollectionWrapper<SignatureResultData>>(serviceProvider =>
+            {
+                IMongoDatabase database = GetDatabase();
+                return new MongoCollectionWrapper<SignatureResultData>(database, "signatureresult");
+            });
+
             //Mail service
             services.AddScoped(serviceProvider =>
             {
@@ -170,7 +176,6 @@ namespace customerportalapi
             services.AddScoped<IStoreImageRepository, StoreImageRepository>();
             services.AddScoped<INewUserRepository, NewUserRepository>();
             services.AddScoped<IGoogleCaptchaRepository, GoogleCaptchaRepository>();
-
 
             //Register Business Services
             services.AddTransient<IUserServices, UserServices>();
@@ -387,11 +392,7 @@ namespace customerportalapi
                 // of course you also need to register that scheme, e.g. using
                 options.AddScheme<SchemeHandler>("scheme name", "scheme display name");
             });
-
-
         }
-
-
 
         /// <summary>
         /// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
