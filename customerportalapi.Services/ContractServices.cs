@@ -8,10 +8,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -329,7 +331,7 @@ namespace customerportalapi.Services
               ).Normalize(NormalizationForm.FormC).Replace(" ", "").ToLower();
         }
 
-        public async Task<SignatureResultDataResponse> UpdateContractsWithoutSignatureId(string fromCreatedOn, string toCreatedOn = null, string arrContracts = null)
+        public async Task<SignatureResultDataResponse> UpdateContractsWithoutSignatureId(string fromCreatedOn, string toCreatedOn = null, string arrContracts = null, string status = null)
         {
             var result = new SignatureResultDataResponse();
 
@@ -343,8 +345,16 @@ namespace customerportalapi.Services
 
                 foreach (var contractId in listContractIds)
                 {
-                    var fullContract = await _contractRepository.GetFullContractsByCRMCodeAsync(contractId);
-                    listFullContract.Add(fullContract);
+                    try
+                    {
+                        var fullContract = await _contractRepository.GetFullContractsByCRMCodeAsync(contractId);
+                        listFullContract.Add(fullContract);
+                    }
+                    catch
+                    {
+
+                    }
+
                 }
             }
             else
@@ -360,7 +370,7 @@ namespace customerportalapi.Services
                 {
                     try
                     {
-                        var signaturitContracts = await _signatureRepository.GetSignatureInfoAsync(fullcontract.iav_name, fromCreatedOn, fullcontract.iav_storeid.CountryCode);
+                        var signaturitContracts = await _signatureRepository.GetSignatureInfoAsync(fullcontract.iav_name, fromCreatedOn, fullcontract.iav_storeid.CountryCode, status);
 
                         var contract = FullContractToContract.Mapper(fullcontract);
                         result.ListContracts.Add(contract);
@@ -413,10 +423,11 @@ namespace customerportalapi.Services
             return result;
         }
 
-        public async Task<List<KeyValuePair<string, string>>> UploadDocuments(string arrContracts)
+        public async Task<List<KeyValuePair<string, string>>> UploadDocuments(string arrContracts, string status = null)
         {
 
             var listContractsUploaded = new List<KeyValuePair<string, string>>();
+
 
             // Obtener contratos de CRM
             var listFullContract = new List<FullContract>() { };
@@ -426,8 +437,18 @@ namespace customerportalapi.Services
 
                 foreach (var contractId in listContractIds)
                 {
-                    var fullContract = await _contractRepository.GetFullContractsByCRMCodeAsync(contractId);
-                    listFullContract.Add(fullContract);
+
+                    try
+                    {
+                        var fullContract = await _contractRepository.GetFullContractsByCRMCodeAsync(contractId);
+                        listFullContract.Add(fullContract);
+
+                        listContractsUploaded.Add(new KeyValuePair<string, string>(contractId, string.Empty));
+                    }
+                    catch
+                    {
+                        listContractsUploaded.Add(new KeyValuePair<string, string>(contractId, "Sin contrato en CRM"));
+                    }
                 }
             }
 
@@ -439,7 +460,8 @@ namespace customerportalapi.Services
                     var docMetadata = new DocumentMetadata()
                     {
                         AccountDni = fullcontract.iav_customerid.iav_dni,
-                        AccountType = UserInvitationUtils.GetUserType(fullcontract.iav_customerid.blue_customertypestring),
+                        AccountType =
+                            UserInvitationUtils.GetUserType(fullcontract.iav_customerid.blue_customertypestring),
                         ContractNumber = fullcontract.iav_name,
                         SmContractCode = fullcontract.iav_smcontractcode,
                         BankAccountOrderNumber = string.Empty,
@@ -452,13 +474,19 @@ namespace customerportalapi.Services
                     var docId = string.Empty;
                     try
                     {
-                        docId = await _signatureRepository.UploadDocumentAsync(fullcontract.iav_storeid.CountryCode, docMetadata);
+                        var strSince = fullcontract.iav_contractdate.ToString("yyyy-MM-dd");
+                        docId = await _signatureRepository.UploadDocumentAsync(docMetadata, fullcontract.iav_storeid.CountryCode, strSince, status);
                     }
                     catch
                     {
 
                     }
-                    listContractsUploaded.Add(new KeyValuePair<string, string>(fullcontract.iav_name, docId));
+
+                    var removalStatus = listContractsUploaded.RemoveAll(x => x.Key == fullcontract.iav_name);
+                    if (removalStatus == 1)
+                    {
+                        listContractsUploaded.Add(new KeyValuePair<string, string>(fullcontract.iav_name, docId));
+                    }
                 }
             }
 

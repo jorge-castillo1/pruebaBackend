@@ -74,7 +74,7 @@ namespace customerportalapi.Repositories
             return deserializedContent.Result;
         }
 
-        public async Task<List<SignatureResultData>> GetSignatureInfoAsync(string contractNumber, string fromDate, string documentCountry)
+        public async Task<List<SignatureResultData>> GetSignatureInfoAsync(string contractNumber, string fromDate, string documentCountry, string status = null)
         {
             var httpClient = _clientFactory.CreateClient("httpClientSignature");
             httpClient.BaseAddress = new Uri($"{httpClient.BaseAddress}{_configuration["SignatureEndpoint"]}");
@@ -83,6 +83,10 @@ namespace customerportalapi.Repositories
             if (!string.IsNullOrEmpty(documentCountry))
             {
                 url += $"/{documentCountry}";
+                if (!string.IsNullOrEmpty(status))
+                {
+                    url += $"/{status}";
+                }
             }
 
             var response = await httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
@@ -93,14 +97,22 @@ namespace customerportalapi.Repositories
             return deserializedContent.Result;
         }
 
-        public async Task<string> UploadDocumentAsync(string documentCountry, DocumentMetadata metadata)
+        public async Task<string> UploadDocumentAsync(DocumentMetadata metadata, string documentCountry, string since, string status)
         {
             var httpClient = _clientFactory.CreateClient("httpClientSignature");
-            //httpClient.BaseAddress = new Uri($"{httpClient.BaseAddress}{_configuration["SignatureEndpoint"]}");
             httpClient.Timeout = TimeSpan.FromMinutes(10);
 
-            //PATCH api/signature/UploadDocument/ES
-            var request = new HttpRequestMessage(new HttpMethod("PATCH"), new Uri($"{httpClient.BaseAddress}{_configuration["SignatureEndpoint"]}UploadDocument/{documentCountry}/"))
+            //[HttpPatch("UploadDocument/{documentCountry}/{since}/{status}")]
+            var url = $"{httpClient.BaseAddress}{_configuration["SignatureEndpoint"]}UploadDocument/{documentCountry}";
+            if (!string.IsNullOrEmpty(since))
+            {
+                url += $"/{since}";
+
+                if (!string.IsNullOrEmpty(status))
+                    url += $"/{status}";
+            }
+
+            var request = new HttpRequestMessage(new HttpMethod("PATCH"), new Uri(url))
             {
                 Content = new StringContent(JsonConvert.SerializeObject(metadata), Encoding.UTF8, "application/json")
             };

@@ -233,14 +233,14 @@ namespace customerportalapi.Controllers
         /// </summary>
         /// <returns>Contract info of Signaturit</returns>
         [HttpPost("UpdateSignatureId")]
-        public async Task<ApiResponse> UpdateContractsWithoutSignatureId(string fromCreatedOn, string toCreatedOn = null, string arrContracts = null)
+        public async Task<ApiResponse> UpdateContractsWithoutSignatureId(string fromCreatedOn, string toCreatedOn = null, string arrContracts = null, string status = null)
         {
             try
             {
                 if (string.IsNullOrEmpty(fromCreatedOn))
                     return new ApiResponse(400, "Params not valid");
 
-                var entity = await _services.UpdateContractsWithoutSignatureId(fromCreatedOn, toCreatedOn, arrContracts);
+                var entity = await _services.UpdateContractsWithoutSignatureId(fromCreatedOn, toCreatedOn, arrContracts, status);
                 return new ApiResponse(entity);
             }
             catch (ServiceException se)
@@ -259,16 +259,17 @@ namespace customerportalapi.Controllers
         /// Upload Documents in Sharepoint by ContractId
         /// </summary>
         /// <param name="arrContracts"></param>
+        /// <param name="status">completed</param>
         /// <returns></returns>
         [HttpPatch("UploadDocuments")]
-        public async Task<ApiResponse> UploadDocuments(string arrContracts)
+        public async Task<ApiResponse> UploadDocuments(string arrContracts, string status = null)
         {
             try
             {
                 if (string.IsNullOrEmpty(arrContracts))
                     return new ApiResponse(400, "Params not valid");
 
-                var entity = await _services.UploadDocuments(arrContracts);
+                var entity = await _services.UploadDocuments(arrContracts, status);
                 return new ApiResponse(entity);
             }
             catch (ServiceException se)

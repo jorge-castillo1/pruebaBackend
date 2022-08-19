@@ -14,9 +14,11 @@ namespace customerportalapi.Repositories.Interfaces
 
         Task<List<SignatureProcess>> SearchSignaturesAsync(SignatureSearchFilter filter);
 
-        Task<List<SignatureResultData>> GetSignatureInfoAsync(string contractNumber, string fromDate, string documentCountry);
+        Task<List<SignatureResultData>> GetSignatureInfoAsync(string contractNumber, string fromDate,
+            string documentCountry, string status = null);
 
-        Task<string> UploadDocumentAsync(string documentCountry, DocumentMetadata metadata);
+        Task<string> UploadDocumentAsync(DocumentMetadata metadata, string documentCountry, string since,
+            string status);
 
         Task<bool> Create(SignatureResultData signatureResult);
     }
