@@ -551,11 +551,29 @@ namespace customerportalapi.Services
             // 6. All groups/roles are assigned to the current user
             var groupUser = await _identityRepository.FindGroup(CRoleTypes.User);
             if (groupUser.TotalResults == 1)
-                await _identityRepository.AddUserToGroup(newUser, groupUser.Groups[0]);
+            {
+                try
+                {
+                    await _identityRepository.AddUserToGroup(newUser, groupUser.Groups[0]);
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError(e.ToString());
+                }
+            }
 
             var groupAdmin = await _identityRepository.FindGroup(CRoleTypes.Admin);
             if (groupAdmin.TotalResults == 1)
-                await _identityRepository.AddUserToGroup(newUser, groupAdmin.Groups[0]);
+            {
+                try
+                {
+                    await _identityRepository.AddUserToGroup(newUser, groupAdmin.Groups[0]);
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError(e.ToString());
+                }
+            }
 
             // 7. Update database User
             user.Password = null;
