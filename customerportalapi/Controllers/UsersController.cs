@@ -8,7 +8,6 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Threading.Tasks;
-using customerportalapi.Entities.Enums;
 
 namespace customerportalapi.Controllers
 {
@@ -590,6 +589,28 @@ namespace customerportalapi.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, ex.Message);
+                throw;
+            }
+        }
+
+
+        [HttpPatch("trimuserdata")]
+        [AuthorizeApiKey]
+        public async Task<ApiResponse> TrimUserData()
+        {
+            try
+            {
+                var entity = await _services.TrimUserData();
+                return new ApiResponse(entity);
+            }
+            catch (ServiceException se)
+            {
+                _logger.LogError(se.ToString());
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
                 throw;
             }
         }

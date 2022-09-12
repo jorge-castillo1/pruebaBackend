@@ -15,5 +15,6 @@ namespace customerportalapi.Repositories.Interfaces
         Task<bool> Delete(User user);
         User GetUserByInvitationToken(string invitationToken);
         User GetUserByForgotPasswordToken(string forgotPasswordToken);
+        Task<bool> TrimUserData();
     }
 }

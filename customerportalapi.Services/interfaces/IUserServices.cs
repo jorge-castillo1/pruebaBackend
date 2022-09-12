@@ -49,6 +49,6 @@ namespace customerportalapi.Services.Interfaces
 
         Task<bool> ValidateCaptcha(string token);
 
-
+        Task<bool> TrimUserData();
     }
 }

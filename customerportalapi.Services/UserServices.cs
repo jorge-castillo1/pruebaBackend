@@ -1654,5 +1654,13 @@ namespace customerportalapi.Services
 
         }
 
+        public async Task<bool> TrimUserData()
+        {
+            var user = _userRepository.TrimUserData();
+            if (user == null)
+                throw new ServiceException("User is not found.", HttpStatusCode.NotFound, FieldNames.User, ValidationMessages.NotExist);
+
+            return await Task.FromResult(true);
+        }
     }
 }
