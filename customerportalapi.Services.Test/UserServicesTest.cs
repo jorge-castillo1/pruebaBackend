@@ -960,7 +960,129 @@ namespace customerportalapi.Services.Test
 
             //Assert
             Assert.AreEqual(result, 0);
+        }
 
+        [TestMethod]
+        public async Task AlValidarUnitName_DevolverSoloUnitNamesPermitidos()
+        {
+            //Arrange
+            var contract = new Contract()
+            {
+                ContractId = "",
+                StoreCode = "FR",
+                StoreData = new Store()
+                {
+                    CountryCode = "FR",
+                }
+            };
+            List<Contract> listContract = new List<Contract>();
+            listContract.Add(contract);
+            var contractRepository = ContractRepositoryMock.ContractRepositoryFeature();
+            var feat = MongoFeaturesRepositoryMock.FeatureRepository_WelcomeLong();
+            var featureRepository = new FeatureRepository(null, feat.Object);
+
+            var user = new User()
+            {
+                Emailverified = true,
+            };
+
+            //Act
+            var service = new UserServices(
+                _userRepository.Object,
+                _profileRepository.Object,
+                _mailRepository.Object,
+                _emailtemplateRepository.Object,
+                _identityRepository.Object,
+                _config,
+                _serviceLogin,
+                _userAccountRepository.Object,
+                _languageRepository.Object,
+                contractRepository.Object,
+                _contractSmRepository.Object,
+                _opportunityRepository.Object,
+                _storeRepository.Object,
+                _unitLocationRepository.Object,
+                featureRepository,
+                _newUserRepository.Object,
+                _googleCaptchaRepository.Object,
+                _logger.Object
+                );
+
+            //inicia por una letra, terminan por una letra, todo numérico
+            var result1 = service.ValidateUnitName("E012");
+            var result2 = service.ValidateUnitName("E03456223");
+            var result3 = service.ValidateUnitName("E34");
+            var result4 = service.ValidateUnitName("491A");
+            var result5 = service.ValidateUnitName("44491A");
+            var result6 = service.ValidateUnitName("87B");
+            var result7 = service.ValidateUnitName("33");
+            var result8 = service.ValidateUnitName("32456");
+            var result9 = service.ValidateUnitName("9329");
+
+            var result10 = service.ValidateUnitName("Ee012");
+            var result11 = service.ValidateUnitName("87BB");
+            var result12 = service.ValidateUnitName("93(29");
+            var result13 = service.ValidateUnitName(".9329");
+            var result14 = service.ValidateUnitName("93A29");
+            var result15 = service.ValidateUnitName("9?329");
+            var result16 = service.ValidateUnitName(" .E92 ");
+            var result17 = service.ValidateUnitName("0018ADEL");
+            var result18 = service.ValidateUnitName("#DEL#");
+            var result19 = service.ValidateUnitName("000000..DEL");
+            var result20 = service.ValidateUnitName(" ");
+
+            //Assert
+            Assert.AreEqual(result1, true);
+            Assert.AreEqual(result2, true);
+            Assert.AreEqual(result3, true);
+            Assert.AreEqual(result4, true);
+            Assert.AreEqual(result5, true);
+            Assert.AreEqual(result6, true);
+            Assert.AreEqual(result7, true);
+            Assert.AreEqual(result8, true);
+            Assert.AreEqual(result9, true);
+
+            Assert.AreEqual(result10, false);
+            Assert.AreEqual(result11, false);
+            Assert.AreEqual(result12, false);
+            Assert.AreEqual(result13, false);
+            Assert.AreEqual(result14, false);
+            Assert.AreEqual(result15, false);
+            Assert.AreEqual(result16, false);
+            Assert.AreEqual(result17, false);
+            Assert.AreEqual(result18, false);
+            Assert.AreEqual(result19, false);
+            Assert.AreEqual(result20, false);
+        }
+
+        [TestMethod]
+        public async Task UnitNamesPermitidos_FormatearUnitNameSiguiendoElPatronMarcado()
+        {
+
+            var result1 = UserInvitationUtils.GetFormatedUnitName("E012");
+            var result2 = UserInvitationUtils.GetFormatedUnitName("E03456223");
+            var result3 = UserInvitationUtils.GetFormatedUnitName("E34");
+
+            var result4 = UserInvitationUtils.GetFormatedUnitName("491A");
+            var result5 = UserInvitationUtils.GetFormatedUnitName("44491A");
+            var result6 = UserInvitationUtils.GetFormatedUnitName("87B");
+
+            var result7 = UserInvitationUtils.GetFormatedUnitName("33");
+            var result8 = UserInvitationUtils.GetFormatedUnitName("32456");
+            var result9 = UserInvitationUtils.GetFormatedUnitName("9329");
+
+            //Assert
+            Assert.AreEqual(new string(result1), "1013");
+            Assert.AreEqual(new string(result2), "7224");
+            Assert.AreEqual(new string(result3), "1035");
+
+            Assert.AreEqual(new string(result4), "5911");
+            Assert.AreEqual(new string(result5), "5440");
+            Assert.AreEqual(new string(result6), "1871");
+
+            Assert.AreEqual(new string(result7), "1034");
+            Assert.AreEqual(new string(result8), "3457");
+            Assert.AreEqual(new string(result9), "0320");
         }
     }
 }

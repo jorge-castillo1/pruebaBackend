@@ -173,29 +173,7 @@ namespace customerportalapi.Services
                         case "UnitName":
                             body = body.Replace(field, data.Value);
 
-                            data.Value = GetFourLengthString(data.Value);
-                            bool firstLetter = IsFirstLetter(data.Value);
-                            if (firstLetter) data.Value = ChangeFirstLetter(data.Value, '0');
-
-                            char[] unitName = data.Value.Trim().PadLeft(4, '0').ToCharArray();
-
-                            int num;
-                            if (unitName[0].ToString() != null && !firstLetter)
-                            {
-                                if (int.TryParse(unitName[0].ToString(), out num))
-                                {
-                                    num++;
-                                    if (num > 9) num = 0;
-                                    unitName[0] = char.Parse(num.ToString());
-                                }
-                            }
-
-                            if (unitName[3].ToString() != null && int.TryParse(unitName[3].ToString(), out num))
-                            {
-                                num++;
-                                if (num > 9) num = 0;
-                                unitName[3] = char.Parse(num.ToString());
-                            }
+                            char[] unitName = GetFormatedUnitName(data.Value);
 
                             body = body.Replace("{{LockCode}}", new string(unitName));
                             break;
@@ -270,6 +248,53 @@ namespace customerportalapi.Services
             return body;
         }
 
+        public static char[] GetFormatedUnitName(string data)
+        {
+            if (data.Length < 1)
+            {
+                return data.ToCharArray();
+            }
+
+            //Si hay una letra al final se cogen los primeros dígitos
+            if (IsLastLetter(data))
+            {
+                data = GetFourLeftLengthString(data);
+            }
+            //Si hay una letra al inicio se cogen los últimos dígitos
+            else
+            {
+                data = GetFourRightLengthString(data);
+            }
+
+            bool firstLetter = IsFirstLetter(data);
+            bool lastLetter = IsLastLetter(data);
+
+            //Se cambia la letra por un 0
+            if (firstLetter) data = ChangeFirstLetter(data, '0');
+            if (lastLetter) data = ChangeLastLetter(data, '0');
+
+            char[] unitName = data.Trim().PadLeft(4, '0').ToCharArray();
+
+            int num;
+            if (unitName[0].ToString() != null && (!firstLetter || !lastLetter))
+            {
+                if (int.TryParse(unitName[0].ToString(), out num))
+                {
+                    num++;
+                    if (num > 9) num = 0;
+                    unitName[0] = char.Parse(num.ToString());
+                }
+            }
+
+            if (unitName[3].ToString() != null && int.TryParse(unitName[3].ToString(), out num))
+            {
+                num++;
+                if (num > 9) num = 0;
+                unitName[3] = char.Parse(num.ToString());
+            }
+            return unitName;
+        }
+
         // Solo muestra Excepciones
         // Oculta: Planta, Zona, ColorZona y Pasillo
         private static void WithoutSignageOrNullFormat(ref string body, string unitExceptions)
@@ -332,11 +357,13 @@ namespace customerportalapi.Services
 
         private static bool IsFirstLetter(string data)
         {
-            char[] dataChar = data.ToCharArray();
-            int first;
-            bool isNumeric = int.TryParse(dataChar[0].ToString(), out first);
-            return !isNumeric;
+            return char.IsLetter(data.ToCharArray().First());
         }
+        private static bool IsLastLetter(string data)
+        {
+            return char.IsLetter(data.ToCharArray().Last());
+        }
+
         private static string ChangeFirstLetter(string data, char change)
         {
             char[] dataChar = data.ToCharArray();
@@ -345,11 +372,28 @@ namespace customerportalapi.Services
             return data;
         }
 
-        private static string GetFourLengthString(string st)
+        private static string ChangeLastLetter(string data, char change)
+        {
+            char[] dataChar = data.ToCharArray();
+            dataChar[dataChar.Length - 1] = change;
+            data = new string(dataChar);
+            return data;
+        }
+
+        private static string GetFourRightLengthString(string st)
         {
             while (st.Length > 4)
             {
                 st = st.Remove(0, 1);
+            }
+            return st;
+        }
+
+        private static string GetFourLeftLengthString(string st)
+        {
+            while (st.Length > 4)
+            {
+                st = st.Remove(st.Length - 1, 1);
             }
             return st;
         }
