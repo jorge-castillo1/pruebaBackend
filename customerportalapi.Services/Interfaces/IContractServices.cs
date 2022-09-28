@@ -28,5 +28,7 @@ namespace customerportalapi.Services.Interfaces
             string toCreatedOn = null, string arrContracts = null, string status = null);
 
         Task<List<KeyValuePair<string, string>>> UploadDocuments(string arrContracts, string status = null);
+
+        Task<ListContractStatusResponseList> UpdateContractStatusInCrm(List<ContractStatusRequest> contactListIds);
     }
 }

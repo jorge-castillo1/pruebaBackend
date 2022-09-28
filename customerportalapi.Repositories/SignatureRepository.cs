@@ -97,6 +97,21 @@ namespace customerportalapi.Repositories
             return deserializedContent.Result;
         }
 
+        public async Task<SignatureResultData> GetSignatureInfoByIdAsync(string signatureId)
+        {
+            var httpClient = _clientFactory.CreateClient("httpClientSignature");
+            httpClient.BaseAddress = new Uri($"{httpClient.BaseAddress}{_configuration["SignatureEndpoint"]}");
+            httpClient.Timeout = TimeSpan.FromMinutes(10);
+            var url = $"info/{signatureId}/es";
+
+            var response = await httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
+            var contentresult = await response.Content.ReadAsStringAsync();
+
+            var deserializedContent = JsonConvert.DeserializeObject<SignatureDataResponse>(contentresult).Result;
+            return deserializedContent;
+        }
+
         public async Task<string> UploadDocumentAsync(DocumentMetadata metadata, string documentCountry, string since, string status)
         {
             var httpClient = _clientFactory.CreateClient("httpClientSignature");

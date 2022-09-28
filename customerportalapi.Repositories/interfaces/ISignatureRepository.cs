@@ -17,6 +17,8 @@ namespace customerportalapi.Repositories.Interfaces
         Task<List<SignatureResultData>> GetSignatureInfoAsync(string contractNumber, string fromDate,
             string documentCountry, string status = null);
 
+        Task<SignatureResultData> GetSignatureInfoByIdAsync(string signatureId);
+
         Task<string> UploadDocumentAsync(DocumentMetadata metadata, string documentCountry, string since,
             string status);
 

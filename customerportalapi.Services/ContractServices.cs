@@ -8,12 +8,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net;
-using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -491,6 +489,130 @@ namespace customerportalapi.Services
             }
 
             return listContractsUploaded;
+        }
+
+        public async Task<ListContractStatusResponseList> UpdateContractStatusInCrm(List<ContractStatusRequest> contactListIds)
+        {
+            var result = new ListContractStatusResponseList();
+
+            var lstContractStatusResponse = new List<ContractStatusResponse>() { };
+
+            var ListSignatureResultData = new List<SignatureResultData>() { };
+            var ListContracts = new List<Entities.Contract>() { };
+
+            var listContractsNoProcessed = new List<ListContractsNoProcessed> { };
+
+            // por cada id de signaturit
+            foreach (var requestContractId in contactListIds)
+            {
+                var contractStatusResponse = new ContractStatusResponse() { };
+
+                try
+                {
+                    var signaturitId = requestContractId.SignatureId;
+                    var signaturitStatusExcel = requestContractId.Status;
+
+                    contractStatusResponse.SignatureId = signaturitId;
+                    contractStatusResponse.ExcelStatus = signaturitStatusExcel;
+
+                    // se comprueba si ya se ha procesado este ID
+                    if (string.IsNullOrEmpty(signaturitId) ||
+                        ListSignatureResultData?.Count(c => c.Id.ToString() == signaturitId) > 0 ||
+                        listContractsNoProcessed?.Count(c => c.SignatureId == signaturitId) > 0)
+                        continue;
+
+                    var noProcessed = new ListContractsNoProcessed() { };
+                    if (listContractsNoProcessed.Count(c => c.SignatureId == signaturitId) <= 0)
+                        noProcessed.SignatureId = signaturitId;
+
+
+                    // se obtiene el contrato de signaturit
+                    var signaturitContract = await _signatureRepository.GetSignatureInfoByIdAsync(requestContractId.SignatureId);
+                    ListSignatureResultData.Add(signaturitContract);
+
+                    if (signaturitContract?.Documents != null && signaturitContract.Data.Any())
+                    {
+                        signaturitContract.Data.TryGetValue("00_contract_ContractNumber", out var iav_name);
+                        var signatureStatus = signaturitContract?.Documents.FirstOrDefault().Status;
+
+                        contractStatusResponse.StatusSignaturitNow = signatureStatus;
+
+                        if (string.IsNullOrEmpty(iav_name))
+                            continue;
+
+                        noProcessed.CrmContractId = iav_name;
+
+                        if (!string.IsNullOrEmpty(noProcessed.SignatureId))
+                            listContractsNoProcessed.Add(noProcessed);
+
+                        // se obtiene el contrato de crm
+                        var fullContract = await _contractRepository.GetFullContractsByCRMCodeAsync(iav_name);
+                        var contract = FullContractToContract.Mapper(fullContract); // el mapper rellena el campo ContractUrl
+                        ListContracts.Add(contract);
+
+                        contractStatusResponse.CrmContractId = iav_name;
+                        contractStatusResponse.CrmOldStatus = contract.SignatureStatus;
+                        contractStatusResponse.CrmOldContractUrl = fullContract.new_contacturl;
+                        contractStatusResponse.CrmOldSignatureIdSignature = contract.SignatureIdSignature;
+                        contractStatusResponse.CrmOldDocumentIdSignature = contract.DocumentIdSignature;
+
+                        string newSignatureStatus;
+                        switch (signatureStatus.ToLower())
+                        {
+                            case "completed":
+                                newSignatureStatus = "audit_trail_completed";
+                                contractStatusResponse.CrmNewContractUrl = contract.ContractUrl;
+                                break;
+                            case "canceled":
+                                newSignatureStatus = "document_canceled";
+                                contract.ContractUrl = contractStatusResponse.CrmNewContractUrl = "";
+                                break;
+                            case "expired":
+                                newSignatureStatus = "document_expired";
+                                contract.ContractUrl = contractStatusResponse.CrmNewContractUrl = "";
+                                break;
+                            default:
+                                newSignatureStatus = signatureStatus;
+                                contract.ContractUrl = contractStatusResponse.CrmNewContractUrl = "";
+                                break;
+                        }
+
+                        //contractStatusResponse.CrmContractUrl = newContractUrl;
+                        contractStatusResponse.CrmNewStatus = newSignatureStatus;
+                        contractStatusResponse.CrmNewSignatureIdSignature = signaturitContract.Id.ToString();
+                        contractStatusResponse.CrmNewDocumentIdSignature = signaturitContract.Documents.FirstOrDefault().Id.ToString();
+
+                        if (contractStatusResponse.CrmOldStatus != "audit_trail_completed"
+                            && contractStatusResponse.CrmOldStatus != contractStatusResponse.CrmNewStatus)
+                        {
+                            contract.SignatureStatus = contractStatusResponse.CrmNewStatus;
+                            contract.SignatureIdSignature = contractStatusResponse.CrmNewSignatureIdSignature;
+                            contract.DocumentIdSignature = contractStatusResponse.CrmNewDocumentIdSignature;
+
+                            var updatedContract = await _contractRepository.UpdateContractAsync(contract);
+
+                            contractStatusResponse.CrmUpdated = true;
+                        }
+
+                        try
+                        {
+                            listContractsNoProcessed.Remove(noProcessed);
+                        }
+                        catch { }
+
+                    }
+                }
+                catch { }
+
+                lstContractStatusResponse.Add(contractStatusResponse);
+            }
+
+            result.ListContractStatusResponse = lstContractStatusResponse;
+            result.ListContractsNoProcessed = listContractsNoProcessed;
+            result.ListSignatureResultData = ListSignatureResultData;
+            result.ListContracts = ListContracts;
+
+            return result;
         }
     }
 }

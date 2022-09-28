@@ -283,5 +283,33 @@ namespace customerportalapi.Controllers
                 throw;
             }
         }
+
+        /// <summary>
+        /// Update Contracts Status in CRM with data of Status in Signaturit
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [HttpPatch("UpdateContractStatusInCrm")]
+        public async Task<ApiResponse> UpdateContractStatusInCrm([FromBody] List<ContractStatusRequest> request)
+        {
+            try
+            {
+                if (request == null)
+                    return new ApiResponse(400, "Params not valid");
+
+                var entity = await _services.UpdateContractStatusInCrm(request);
+                return new ApiResponse(entity);
+            }
+            catch (ServiceException se)
+            {
+                _logger.LogError(se.ToString());
+                return new ApiResponse((int)se.StatusCode, new ApiError(se.Message, new[] { new ValidationError(se.Field, se.FieldMessage) }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
     }
 }

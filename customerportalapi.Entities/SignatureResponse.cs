@@ -10,6 +10,13 @@ namespace customerportalapi.Entities
         public SignatureResult Result { get; set; } = new SignatureResult();
     }
 
+    public class SignatureDataResponse
+    {
+        public int StatusCode { get; set; }
+        public string Message { get; set; }
+        public SignatureResultData Result { get; set; } = new SignatureResultData();
+    }
+
     public class SignatureResultData
     {
         public Guid Id { get; set; }
