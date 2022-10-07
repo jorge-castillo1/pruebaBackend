@@ -1,5 +1,6 @@
 ﻿using AutoWrapper;
 using customerportalapi.Entities;
+using customerportalapi.Loggers;
 using customerportalapi.Repositories;
 using customerportalapi.Repositories.Interfaces;
 using customerportalapi.Repositories.Utils;
@@ -13,6 +14,7 @@ using Microsoft.AspNetCore.Authentication.AzureAD.UI;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -127,6 +129,13 @@ namespace customerportalapi
                 IMongoDatabase database = GetDatabase();
                 return new MongoCollectionWrapper<NewUser>(database, "newusers");
             });
+            services.AddScoped<IMongoCollectionWrapper<ApiLog>>(serviceProvider =>
+            {
+                IMongoDatabase database = GetDatabase();
+                return new MongoCollectionWrapper<ApiLog>(database, "apilogs");
+            });
+
+
             //Mail service
             services.AddScoped(serviceProvider =>
             {
@@ -170,6 +179,10 @@ namespace customerportalapi
             services.AddScoped<IStoreImageRepository, StoreImageRepository>();
             services.AddScoped<INewUserRepository, NewUserRepository>();
             services.AddScoped<IGoogleCaptchaRepository, GoogleCaptchaRepository>();
+            services.AddScoped<IApiLogRepository, ApiLogRepository>();
+
+            services.AddScoped<IAuthorizationFilter, AuthorizeTokenFilter>();
+            services.AddScoped<CustomLogAttribute>();
 
 
             //Register Business Services
@@ -186,6 +199,7 @@ namespace customerportalapi
             services.AddTransient<ILanguageServices, LanguageServices>();
             services.AddTransient<IStoreImageServices, StoreImageServices>();
             services.AddTransient<IMailService, MailService>();
+            services.AddScoped<IApiLogService, ApiLogService>();
 
             services.AddHttpClient("httpClientCRM", c =>
             {

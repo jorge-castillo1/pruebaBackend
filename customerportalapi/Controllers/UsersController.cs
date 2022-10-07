@@ -1,5 +1,6 @@
 ﻿using AutoWrapper.Wrappers;
 using customerportalapi.Entities;
+using customerportalapi.Loggers;
 using customerportalapi.Security;
 using customerportalapi.Services.Exceptions;
 using customerportalapi.Services.Interfaces;
@@ -8,7 +9,6 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Threading.Tasks;
-using customerportalapi.Entities.Enums;
 
 namespace customerportalapi.Controllers
 {
@@ -17,11 +17,14 @@ namespace customerportalapi.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IUserServices _services;
+        private readonly IApiLogService _apiLogService;
+
         private readonly ILogger<UsersController> _logger;
 
-        public UsersController(IUserServices services, ILogger<UsersController> logger)
+        public UsersController(IUserServices services, IApiLogService apiLogService, ILogger<UsersController> logger)
         {
             _services = services;
+            _apiLogService = apiLogService;
             _logger = logger;
         }
 
@@ -115,6 +118,7 @@ namespace customerportalapi.Controllers
         /// <remarks>Use API KEY for this api</remarks>
         // POST api/users/invite
         [HttpPost("invite")]
+        [ServiceFilter(typeof(CustomLogAttribute))]
         public async Task<ApiResponse> Invite([FromBody] Invitation value)
         {
             try
