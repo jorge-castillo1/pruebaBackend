@@ -12,12 +12,12 @@ using System.Threading;
 
 namespace customerportalapi.Loggers
 {
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
-    public class CustomLogAttribute : ActionFilterAttribute, IExceptionFilter
+    //[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
+    public class CustomLogFilter : ActionFilterAttribute, IExceptionFilter
     {
         private readonly IApiLogService _apiLogService;
 
-        public CustomLogAttribute(IApiLogService apiLogService)
+        public CustomLogFilter(IApiLogService apiLogService)
         {
             _apiLogService = apiLogService;
         }
@@ -26,7 +26,7 @@ namespace customerportalapi.Loggers
         {
             context.HttpContext.TraceIdentifier = Guid.NewGuid().ToString();
 
-            string body = GetRawBodyString(context.HttpContext);
+            var body = GetRawBodyString(context.HttpContext);
 
             var method = context.HttpContext.Request.Method;
             var path = context.HttpContext.Request.Path;
@@ -36,13 +36,13 @@ namespace customerportalapi.Loggers
 
             var actionId = context.ActionDescriptor.Id;
 
-            this.Log("Start Process", "OnActionExecuting", "Info", context.RouteData, body, context.HttpContext.TraceIdentifier, actionId, method, path, url, remoteIp, username);
+            CustomLog("Start Process", "OnActionExecuting", "Info", context.RouteData, body, context.HttpContext.TraceIdentifier, actionId, method, path, url, remoteIp, username);
             base.OnActionExecuting(context);
         }
 
         public override void OnResultExecuted(ResultExecutedContext context)
         {
-            string body = GetRawBodyString(context.HttpContext, false);
+            var body = GetRawBodyString(context.HttpContext, false);
 
             var method = context.HttpContext.Request.Method;
             var path = context.HttpContext.Request.Path;
@@ -52,7 +52,7 @@ namespace customerportalapi.Loggers
 
             var actionId = context.ActionDescriptor.Id;
 
-            this.Log("End Process", "OnResultExecuted", "Info", context.RouteData, body, context.HttpContext.TraceIdentifier, actionId, method, path, url, remoteIp, username);
+            CustomLog("End Process", "OnResultExecuted", "Info", context.RouteData, body, context.HttpContext.TraceIdentifier, actionId, method, path, url, remoteIp, username);
             base.OnResultExecuted(context);
         }
 
@@ -68,17 +68,15 @@ namespace customerportalapi.Loggers
 
             var actionId = context.ActionDescriptor.Id;
 
-            this.Log("End Process", "OnException", "Error", context.RouteData, "", context.HttpContext.TraceIdentifier, actionId, method, path, url, remoteIp, username, e.Message, e.StackTrace);
+            CustomLog("End Process", "OnException", "Error", context.RouteData, "", context.HttpContext.TraceIdentifier, actionId, method, path, url, remoteIp, username, e.Message, e.StackTrace);
         }
 
-        private void Log(string message, string methodName, string level, RouteData routeData, string body, string traceIdentifier,
+        private void CustomLog(string message, string methodName, string level, RouteData routeData, string body, string traceIdentifier,
             string actionId, string method = "", string path = "", string url = "", string remoteIp = "", string username = "",
             string exceptionMessage = "", string exceptionTrace = "")
         {
             var controllerName = routeData.Values["controller"].ToString();
             var actionName = routeData.Values["action"].ToString();
-            var myMessage =
-                $"MethodName :{methodName} , method:{method} , path: {path} , url: {url} , controller:{controllerName} , action:{actionName} , params:{body} , traceId:{traceIdentifier} , fecha:{DateTime.Now:u}.";
 
             var log = new ApiLog
             {
@@ -88,6 +86,7 @@ namespace customerportalapi.Loggers
                 ActionId = actionId,
                 Level = level,
                 Message = message,
+                MethodName = methodName,
                 HttpMethod = method,
                 Path = path,
                 Url = url,
@@ -98,7 +97,6 @@ namespace customerportalapi.Loggers
                 Username = username,
                 ExceptionMessage = exceptionMessage,
                 ExceptionTrace = exceptionTrace
-
             };
 
             _apiLogService.AddLog(log);
@@ -160,22 +158,19 @@ namespace customerportalapi.Loggers
         private static string GetUserName(HttpContext context)
         {
             var userName = string.Empty;
-            //var context = httpContext;
-            if (context != null && context.User != null && context.User.Identity.IsAuthenticated)
+            if (context?.User != null && context.User.Identity.IsAuthenticated)
             {
                 userName = context.User.Identity.Name;
             }
             else
             {
-                var threadPincipal = Thread.CurrentPrincipal;
-                if (threadPincipal != null && threadPincipal.Identity.IsAuthenticated)
+                var threadPrincipal = Thread.CurrentPrincipal;
+                if (threadPrincipal != null && threadPrincipal.Identity.IsAuthenticated)
                 {
-                    userName = threadPincipal.Identity.Name;
+                    userName = threadPrincipal.Identity.Name;
                 }
             }
             return userName;
         }
-
-
     }
 }

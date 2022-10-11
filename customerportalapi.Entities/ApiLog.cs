@@ -25,6 +25,9 @@ namespace customerportalapi.Entities
         [BsonElement("message")]
         public string Message { get; set; }
 
+        [BsonElement("methodname")]
+        public string MethodName { get; set; }
+
         [BsonElement("httpmethod")]
         public string HttpMethod { get; set; }
 

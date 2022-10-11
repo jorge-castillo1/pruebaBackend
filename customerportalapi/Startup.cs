@@ -181,9 +181,6 @@ namespace customerportalapi
             services.AddScoped<IGoogleCaptchaRepository, GoogleCaptchaRepository>();
             services.AddScoped<IApiLogRepository, ApiLogRepository>();
 
-            services.AddScoped<IAuthorizationFilter, AuthorizeTokenFilter>();
-            services.AddScoped<CustomLogAttribute>();
-
 
             //Register Business Services
             services.AddTransient<IUserServices, UserServices>();
