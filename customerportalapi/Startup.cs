@@ -124,6 +124,12 @@ namespace customerportalapi
                 IMongoDatabase database = GetDatabase();
                 return new MongoCollectionWrapper<StoreImage>(database, "storesimages");
             });
+            services.AddScoped<IMongoCollectionWrapper<BannerImage>>(serviceProvider =>
+            {
+                IMongoDatabase database = GetDatabase();
+                return new MongoCollectionWrapper<BannerImage>(database, "bannerimages");
+            });
+
             services.AddScoped<IMongoCollectionWrapper<NewUser>>(serviceProvider =>
             {
                 IMongoDatabase database = GetDatabase();
@@ -177,6 +183,7 @@ namespace customerportalapi
             services.AddScoped<IUnitLocationRepository, UnitLocationRepository>();
             services.AddScoped<IFeatureRepository, FeatureRepository>();
             services.AddScoped<IStoreImageRepository, StoreImageRepository>();
+            services.AddScoped<IBannerImageRepository, BannerImageRepository>();
             services.AddScoped<INewUserRepository, NewUserRepository>();
             services.AddScoped<IGoogleCaptchaRepository, GoogleCaptchaRepository>();
             services.AddScoped<IApiLogRepository, ApiLogRepository>();

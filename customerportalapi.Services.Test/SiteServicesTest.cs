@@ -29,6 +29,7 @@ namespace customerportalapi.Services.Test
         private Mock<IDocumentRepository> _documentRepository;
         private Mock<IStoreImageRepository> _storeImageRepository;
         private Mock<IFeatureRepository> _featureRepository;
+        private Mock<IBannerImageRepository> _bannerRepository;
         Mock<ILogger<SiteServices>> _logger;
 
 
@@ -46,6 +47,7 @@ namespace customerportalapi.Services.Test
             _documentRepository = DocumentRepositoryMock.DocumentRepository();
             _storeImageRepository = StoreImageRepositoryMock.StoreImageRepository();
             _featureRepository = FeatureRepositoryMock.FeatureRepository();
+            _bannerRepository = BannerRepositoryMock.BanerRepository();
             _logger = new Mock<ILogger<SiteServices>>();
 
             var builder = new ConfigurationBuilder();
@@ -65,7 +67,7 @@ namespace customerportalapi.Services.Test
             SiteServices service = new SiteServices(userRepositoryInvalid.Object, _contractRepository.Object,
                 _storeRepository.Object, _distributedCache.Object, _identityRepository.Object,
                 _contractSMRepository.Object, _config, _mailRepository.Object, _emailTemplateRepository.Object,
-                _documentRepository.Object, _storeImageRepository.Object, _featureRepository.Object, _logger.Object);
+                _documentRepository.Object, _storeImageRepository.Object, _featureRepository.Object, _bannerRepository.Object, _logger.Object);
             await service.GetContractsAsync(username);
 
             //Assert
@@ -81,7 +83,7 @@ namespace customerportalapi.Services.Test
             SiteServices service = new SiteServices(_userRepository.Object, _contractRepository.Object,
                 _storeRepository.Object, _distributedCache.Object, _identityRepository.Object,
                 _contractSMRepository.Object, _config, _mailRepository.Object, _emailTemplateRepository.Object,
-                _documentRepository.Object, _storeImageRepository.Object, _featureRepository.Object, _logger.Object);
+                _documentRepository.Object, _storeImageRepository.Object, _featureRepository.Object, _bannerRepository.Object, _logger.Object);
             List<Site> sites = await service.GetContractsAsync(username);
 
             //Assert
@@ -106,7 +108,7 @@ namespace customerportalapi.Services.Test
             SiteServices service = new SiteServices(_userRepository.Object, _contractRepository.Object,
                 _storeRepository.Object, _distributedCache.Object, _identityRepository.Object,
                 _contractSMRepository.Object, _config, _mailRepository.Object, _emailTemplateRepository.Object,
-                _documentRepository.Object, _storeImageRepository.Object, _featureRepository.Object, _logger.Object);
+                _documentRepository.Object, _storeImageRepository.Object, _featureRepository.Object, _bannerRepository.Object, _logger.Object);
             AccessCode entity = await service.GetAccessCodeAsync("fake contractid", "fake password");
 
             //Assert
@@ -132,7 +134,7 @@ namespace customerportalapi.Services.Test
             SiteServices service = new SiteServices(_userRepository.Object, _contractRepository.Object,
                 _storeRepository.Object, _distributedCache.Object, _identityRepository.Object,
                 _contractSMRepository.Object, _config, _mailRepository.Object, _emailTemplateRepository.Object,
-                _documentRepository.Object, _storeImageRepository.Object, _featureRepository.Object, _logger.Object);
+                _documentRepository.Object, _storeImageRepository.Object, _featureRepository.Object, _bannerRepository.Object, _logger.Object);
             AccessCode entity = await service.GetAccessCodeAsync("fake contractid", "fake password");
         }
 
@@ -148,7 +150,7 @@ namespace customerportalapi.Services.Test
             SiteServices service = new SiteServices(_userRepository.Object, _contractRepository.Object,
                 _storeRepository.Object, _distributedCache.Object, _identityRepository.Object,
                 _contractSMRepository.Object, _config, _mailRepository.Object, _emailTemplateRepository.Object,
-                _documentRepository.Object, _storeImageRepository.Object, _featureRepository.Object, _logger.Object);
+                _documentRepository.Object, _storeImageRepository.Object, _featureRepository.Object, _bannerRepository.Object, _logger.Object);
             bool available = await service.IsAccessCodeAvailableAsync();
             Assert.IsFalse(available);
         }
@@ -165,7 +167,7 @@ namespace customerportalapi.Services.Test
             SiteServices service = new SiteServices(_userRepository.Object, _contractRepository.Object,
                 _storeRepository.Object, _distributedCache.Object, _identityRepository.Object,
                 _contractSMRepository.Object, _config, _mailRepository.Object, _emailTemplateRepository.Object,
-                _documentRepository.Object, _storeImageRepository.Object, _featureRepository.Object, _logger.Object);
+                _documentRepository.Object, _storeImageRepository.Object, _featureRepository.Object, _bannerRepository.Object, _logger.Object);
             bool available = await service.IsAccessCodeAvailableAsync();
             Assert.IsTrue(available);
         }
@@ -182,7 +184,7 @@ namespace customerportalapi.Services.Test
             SiteServices service = new SiteServices(_userRepository.Object, _contractRepository.Object,
                 _storeRepository.Object, _distributedCache.Object, _identityRepository.Object,
                 _contractSMRepository.Object, _config, _mailRepository.Object, _emailTemplateRepository.Object,
-                _documentRepository.Object, _storeImageRepository.Object, _featureRepository.Object, _logger.Object);
+                _documentRepository.Object, _storeImageRepository.Object, _featureRepository.Object, _bannerRepository.Object, _logger.Object);
             bool available = await service.IsAccessCodeAvailableAsync();
             Assert.IsTrue(available);
         }
@@ -195,7 +197,7 @@ namespace customerportalapi.Services.Test
             SiteServices service = new SiteServices(_userRepository.Object, _contractRepository.Object,
                 _storeRepository.Object, _distributedCache.Object, _identityRepository.Object,
                 _contractSMRepository.Object, _config, _mailRepository.Object, _emailTemplateRepository.Object,
-                _documentRepository.Object, _storeImageRepository.Object, _featureRepository.Object, _logger.Object);
+                _documentRepository.Object, _storeImageRepository.Object, _featureRepository.Object, _bannerRepository.Object, _logger.Object);
 
             //Act
             List<SiteInvoices> siteInvoices = await service.GetLastInvoices(username);
@@ -218,7 +220,7 @@ namespace customerportalapi.Services.Test
             SiteServices service = new SiteServices(_userRepository.Object, _contractRepository.Object,
                 _storeRepository.Object, _distributedCache.Object, _identityRepository.Object,
                 _contractSMRepository.Object, _config, _mailRepository.Object, _emailTemplateRepository.Object,
-                _documentRepository.Object, _storeImageRepository.Object, _featureRepository.Object, _logger.Object);
+                _documentRepository.Object, _storeImageRepository.Object, _featureRepository.Object, _bannerRepository.Object, _logger.Object);
 
             //Act
             List<SiteInvoices> siteInvoices = await service.GetLastInvoices(username);
@@ -237,7 +239,7 @@ namespace customerportalapi.Services.Test
             SiteServices service = new SiteServices(_userRepository.Object, _contractRepository.Object,
                 _storeRepository.Object, _distributedCache.Object, _identityRepository.Object,
                 _contractSMRepository.Object, _config, _mailRepository.Object, _emailTemplateRepository.Object,
-                _documentRepository.Object, _storeImageRepository.Object, _featureRepository.Object, _logger.Object);
+                _documentRepository.Object, _storeImageRepository.Object, _featureRepository.Object, _bannerRepository.Object, _logger.Object);
 
             //Act
             List<SiteInvoices> siteInvoices = await service.GetLastInvoices(username);
@@ -257,7 +259,7 @@ namespace customerportalapi.Services.Test
             SiteServices service = new SiteServices(_userRepository.Object, _contractRepository.Object,
                 _storeRepository.Object, _distributedCache.Object, _identityRepository.Object,
                 _contractSMRepository.Object, _config, _mailRepository.Object, _emailTemplateRepository.Object,
-                _documentRepository.Object, _storeImageRepository.Object, _featureRepository.Object, _logger.Object);
+                _documentRepository.Object, _storeImageRepository.Object, _featureRepository.Object, _bannerRepository.Object, _logger.Object);
 
             //Act
             List<SiteInvoices> siteInvoices = await service.GetLastInvoices(username);

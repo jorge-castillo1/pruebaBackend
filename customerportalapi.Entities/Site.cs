@@ -21,5 +21,7 @@ namespace customerportalapi.Entities
         public List<Contract> Contracts { get; } = new List<Contract>();
 
         public string MailType { get; set; }
+
+        public string BannerUrl { get; set; }
     }
 }
