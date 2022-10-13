@@ -503,7 +503,7 @@ namespace customerportalapi.Services.Test
 
             //Assert
             Assert.IsTrue(result);
-            userRepositoryInvalid.Verify(x => x.Update(It.IsAny<User>()));
+            userRepositoryInvalid.Verify(x => x.UpdateById(It.IsAny<User>()));
             _emailtemplateRepository.Verify(x => x.getTemplate((int)EmailTemplateTypes.WelcomeEmailShort, It.IsAny<string>()));
             _mailRepository.Verify(x => x.Send(It.IsAny<Email>(), It.IsAny<bool>()));
         }

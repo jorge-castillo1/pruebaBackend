@@ -398,7 +398,7 @@ namespace customerportalapi.Services
                 user.Language = UserInvitationUtils.GetLanguage(invitationValues.Language);
                 user.Usertype = userType;
                 user.Invitationtoken = Guid.NewGuid().ToString();
-                _userRepository.Update(user);
+                _userRepository.UpdateById(user);
             }
 
             //9. Send Welcome Email
@@ -410,12 +410,12 @@ namespace customerportalapi.Services
                 {
                     var userSaved = _userRepository.GetCurrentUserByEmail(user.Email);
                     userSaved.LastEmailSent = ((EmailTemplateTypes)idTemplate).ToString();
-                    _userRepository.Update(userSaved);
+                    _userRepository.UpdateById(userSaved);
                 }
                 else
                 {
                     user.LastEmailSent = ((EmailTemplateTypes)idTemplate).ToString();
-                    _userRepository.Update(user);
+                    _userRepository.UpdateById(user);
                 }
                 resultWelcomeEmailSent = true;
 

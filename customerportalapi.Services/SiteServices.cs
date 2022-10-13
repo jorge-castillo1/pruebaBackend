@@ -5,6 +5,7 @@ using customerportalapi.Services.Exceptions;
 using customerportalapi.Services.Interfaces;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -12,7 +13,6 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 
 namespace customerportalapi.Services
 {
@@ -29,6 +29,7 @@ namespace customerportalapi.Services
         private readonly IEmailTemplateRepository _emailTemplateRepository;
         private readonly IDocumentRepository _documentRepository;
         private readonly IStoreImageRepository _storeImageRepository;
+        private readonly IFeatureRepository _featureRepository;
         private readonly ILogger<SiteServices> _logger;
 
         public SiteServices(
@@ -43,7 +44,8 @@ namespace customerportalapi.Services
             IEmailTemplateRepository emailTemplateRepository,
             IDocumentRepository documentRepository,
             IStoreImageRepository storeImageRepository,
-            ILogger<SiteServices> logger
+            IFeatureRepository featureRepository,
+        ILogger<SiteServices> logger
         )
         {
             _userRepository = userRepository;
@@ -57,6 +59,7 @@ namespace customerportalapi.Services
             _emailTemplateRepository = emailTemplateRepository;
             _documentRepository = documentRepository;
             _storeImageRepository = storeImageRepository;
+            _featureRepository = featureRepository;
             _logger = logger;
         }
 
@@ -412,7 +415,9 @@ namespace customerportalapi.Services
 
         public async Task<List<SiteInvoices>> GetLastInvoices(string username, string contractNumber = null)
         {
-            int limitInvoices = 3;
+            //int limitInvoices = 12;
+            int limitInvoices = _featureRepository.CheckFeature(FeatureNames.LimitInvoices, _config["Environment"], "", 3);
+
             List<SiteInvoices> siteInvoices = new List<SiteInvoices>();
             //Add customer portal Business Logic
             User user = _userRepository.GetCurrentUserByUsername(username);

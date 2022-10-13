@@ -1,8 +1,6 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
-using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace customerportalapi.Entities
 {
@@ -28,6 +26,6 @@ namespace customerportalapi.Entities
         public string Name { get; set; }
 
         [BsonElement("value")]
-        public bool Value { get; set; }
+        public object Value { get; set; }
     }
 }
