@@ -24,5 +24,7 @@ namespace customerportalapi.Services.Interfaces
         Task<List<BlobResult>> GetDocumentInfoStoreFacadeAsync(string storeCode);
         Task<List<SiteInvoices>> GetLastInvoices(string username, string contractNumber = null);
         Task<bool> UpdateAccessCodeAsync(string contractId, string black);
+
+
     }
 }

@@ -30,6 +30,7 @@ namespace customerportalapi.Services
         private readonly IDocumentRepository _documentRepository;
         private readonly IStoreImageRepository _storeImageRepository;
         private readonly IFeatureRepository _featureRepository;
+        private readonly IBannerImageRepository _bannerImageRepository;
         private readonly ILogger<SiteServices> _logger;
 
         public SiteServices(
@@ -45,7 +46,8 @@ namespace customerportalapi.Services
             IDocumentRepository documentRepository,
             IStoreImageRepository storeImageRepository,
             IFeatureRepository featureRepository,
-        ILogger<SiteServices> logger
+            IBannerImageRepository bannerRepository,
+            ILogger<SiteServices> logger
         )
         {
             _userRepository = userRepository;
@@ -60,6 +62,7 @@ namespace customerportalapi.Services
             _documentRepository = documentRepository;
             _storeImageRepository = storeImageRepository;
             _featureRepository = featureRepository;
+            _bannerImageRepository = bannerRepository;
             _logger = logger;
         }
 
@@ -75,6 +78,8 @@ namespace customerportalapi.Services
             //Invoke repository
             string accountType = (user.Usertype == (int)UserTypes.Business) ? AccountType.Business : AccountType.Residential;
             List<Contract> entitylist = await _contractRepository.GetContractsAsync(user.Dni, accountType);
+
+            string bannerUrl = GetBanner(entitylist, user);
 
             List<Site> stores = new List<Site>();
             foreach (var storegroup in entitylist.GroupBy(x => new
@@ -100,7 +105,8 @@ namespace customerportalapi.Services
                     EmailAddress1 = storegroup.Key.EmailAddress1,
                     StoreCode = storegroup.Key.StoreCode,
                     StoreId = storeId,
-                    MailType = storegroup.Key.MailType
+                    MailType = storegroup.Key.MailType,
+                    BannerUrl = bannerUrl,
                 };
 
                 foreach (var contract in storegroup)
@@ -126,8 +132,21 @@ namespace customerportalapi.Services
 
                 stores.Add(site);
             }
-
             return stores;
+        }
+
+        public string GetBanner(List<Contract> contractList, User user)
+        {
+            if (contractList?.ElementAt(0)?.StoreData?.Country != null && user?.Language != null)
+            {
+                string countryCode = contractList?.ElementAt(0)?.StoreData?.CountryCode;
+                string userLanguage = user?.Language;
+                return _bannerImageRepository.GetUrlImage(countryCode, userLanguage);
+            }
+            else
+            {
+                return "";
+            }
         }
 
         public async Task<List<Store>> GetStoresAsync(string countryCode, string city)
