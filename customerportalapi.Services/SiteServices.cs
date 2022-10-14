@@ -506,6 +506,11 @@ namespace customerportalapi.Services
                         // First, find unpaid invoices, invoice.OutStanding != 0
                         GetInvoicesWhitOutStanding(contract.Unit.UnitName, invoicesByCustomerIdOrdered, invoicesFiltered);
 
+                        if (invoicesFiltered.Count > limitInvoices)
+                            invoicesFiltered = invoicesFiltered.Take(limitInvoices).ToList();
+                        //.OrderByDescending(order => order.DocumentDate)
+                        //.ThenByDescending(o => o.OurReference)
+
                         // Second, if invoices by contract is minor to  limitInvoices(3 by default), find invoices by DocumentDate
                         if (invoicesFiltered.Count < limitInvoices && invoicesByCustomerIdOrdered.Count > 0)
                         {
