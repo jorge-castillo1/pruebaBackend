@@ -500,7 +500,7 @@ namespace customerportalapi.Services
                         {
                             previousStoreId = site.StoreId;
                             invoicesByCustomerId = await _contractSMRepository.GetInvoicesByCustomerIdAsync(contractSM.Customerid);
-                            invoicesByCustomerIdOrdered.AddRange(invoicesByCustomerId.OrderByDescending(x => x.DocumentDate));
+                            invoicesByCustomerIdOrdered.AddRange(invoicesByCustomerId.OrderByDescending(x => x.DocumentDate).ThenByDescending(x => x.OurReference));
                         }
 
                         // First, find unpaid invoices, invoice.OutStanding != 0
