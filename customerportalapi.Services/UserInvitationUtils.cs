@@ -4,6 +4,7 @@ using System;
 using System.Reflection;
 using System.Linq;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace customerportalapi.Services
 {
@@ -173,7 +174,7 @@ namespace customerportalapi.Services
                         case "UnitName":
                             body = body.Replace(field, data.Value);
 
-                            char[] unitName = GetFormatedUnitName(data.Value);
+                            char[] unitName = GetFormattedUnitName(data.Value);
 
                             body = body.Replace("{{LockCode}}", new string(unitName));
                             break;
@@ -248,7 +249,87 @@ namespace customerportalapi.Services
             return body;
         }
 
-        public static char[] GetFormatedUnitName(string data)
+        public static char[] GetFormattedUnitName(string data)
+        {
+            string resultado = string.Empty;
+
+            // si la longitud es de 3 caracteres --> 2 dígitos + letra --> "87B"
+            // Empieza con 2 dígitos y termina con 1 sola letra: ^\d{2}[a-zA-Z]
+            // (NO HACE FALTA) Empieza con 1 sola letra y luego 2 dígitos: ^[a-zA-Z]\d{2}
+            if (data.Length == 3 &&
+                Regex.IsMatch(data, @"^\d{2}[a-zA-Z]", RegexOptions.Compiled))
+            {
+                // reemplazar la letra por un "1"
+                //resultado = Regex.Replace(data, "[a-zA-Z.]", "1");
+
+                // se toman los 2 primeros caracteres
+                resultado = data.Substring(0, 2);
+
+                // concatena un "1" al principio de la cadena
+                resultado = $"1{resultado}1";
+
+                return resultado.ToCharArray();
+            }
+
+            // si la longitud es de 5 caracteres --> 4 dígitos + letra --> "4911A"
+            // Empieza con 4 dígitos y termina con 1 sola letra: ^\d{4}[a-zA-Z]
+            // (NO HACE FALTA) Empieza con 1 sola letra y luego 4 dígitos: ^[a-zA-Z]\d{4}
+            if (data.Length == 5 &&
+                Regex.IsMatch(data, @"^\d{4}[a-zA-Z]", RegexOptions.Compiled))
+            {
+                // se toman los 4 primeros caracteres
+                var charArray = data.Substring(0, 4).ToCharArray();
+
+                for (var i = 0; i < charArray.Length - 1; i++)
+                {
+                    if (i == 0 || i == 3) // posiciones 1 y 4 de la cadena
+                    {
+                        // se aumenta el valor de esas posiciones en 1
+                        if (int.TryParse(charArray[i].ToString(), out var numero))
+                        {
+                            numero++;
+                            if (numero > 9)
+                                numero = 0;
+                            charArray[i] = char.Parse(numero.ToString());
+                        }
+                    }
+                }
+
+                return charArray;
+            }
+
+            // Si no cumple las condiciones anteriores, que haga lo que hacía hasta ahora
+            bool firstLetter = IsFirstLetter(data);
+            if (firstLetter) data = ChangeFirstLetter(data, '0');
+
+            bool lastLetter = IsLastLetter(data);
+            if (lastLetter) data = ChangeLastLetter(data, '0');
+
+            char[] unitName = data.Trim().PadLeft(4, '0').ToCharArray();
+
+            int num;
+            if (unitName[0].ToString() != null && !firstLetter)
+            {
+                if (int.TryParse(unitName[0].ToString(), out num))
+                {
+                    num++;
+                    if (num > 9) num = 0;
+                    unitName[0] = char.Parse(num.ToString());
+                }
+            }
+
+            if (unitName[3].ToString() != null && int.TryParse(unitName[3].ToString(), out num))
+            {
+                num++;
+                if (num > 9) num = 0;
+                unitName[3] = char.Parse(num.ToString());
+            }
+
+            return unitName;
+        }
+
+
+        public static char[] GetFormattedUnitNameNO(string data)
         {
             if (data.Length < 1)
             {
