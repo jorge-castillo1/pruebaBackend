@@ -269,7 +269,7 @@ namespace customerportalapi.Services.Test
             Assert.IsTrue(siteInvoices[0].Contracts.Count == 2);
 
             //Invoices by Site & Contract
-            Assert.IsTrue(siteInvoices[0].Contracts[0].Invoices.Count(x => x.SiteID == "RI1BBFRI120920060001") == 4);
+            Assert.IsTrue(siteInvoices[0].Contracts[0].Invoices.Count(x => x.SiteID == "RI1BBFRI120920060001") == 3);
             Assert.IsTrue(siteInvoices[0].Contracts[1].Invoices.Count(x => x.SiteID == "RI1BBFRI120920060001") == 2);
         }
     }
