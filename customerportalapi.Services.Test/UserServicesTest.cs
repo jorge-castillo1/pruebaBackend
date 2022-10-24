@@ -313,7 +313,8 @@ namespace customerportalapi.Services.Test
                 Email = "fakeuser@email.com",
                 CustomerType = "Residential",
                 Fullname = "Fake User",
-                Language = "French"
+                Language = "French",
+                InvokedBy = 1
             };
 
             //Act
@@ -352,7 +353,8 @@ namespace customerportalapi.Services.Test
                 Email = string.Empty,
                 CustomerType = "Residential",
                 Fullname = "Fake User",
-                Language = "French"
+                Language = "French",
+                InvokedBy = 1
             };
 
             //Act
@@ -389,7 +391,8 @@ namespace customerportalapi.Services.Test
                 Email = "fakeuser@email.com",
                 CustomerType = "Residential",
                 Fullname = "Fake User",
-                Language = "French"
+                Language = "French",
+                InvokedBy = 1
             };
 
             //Act
@@ -434,7 +437,8 @@ namespace customerportalapi.Services.Test
                 Email = "fakeuser@email.com",
                 CustomerType = "Residential",
                 Fullname = "Fake User",
-                Language = "French"
+                Language = "French",
+                InvokedBy = 1
             };
 
             //Act
@@ -473,7 +477,8 @@ namespace customerportalapi.Services.Test
                 Email = "fakeuser@email.com",
                 CustomerType = "Residential",
                 Fullname = "Fake User",
-                Language = "French"
+                Language = "French",
+                InvokedBy = 0 // CRM
             };
 
             //Act
@@ -501,6 +506,7 @@ namespace customerportalapi.Services.Test
                 );
             var result = await service.InviteUserAsync(invitation);
 
+            // CRM Siempre devolverá un WE corto
             //Assert
             Assert.IsTrue(result);
             userRepositoryInvalid.Verify(x => x.UpdateById(It.IsAny<User>()));
@@ -563,7 +569,8 @@ namespace customerportalapi.Services.Test
                 Email = "fakeuser@email.com",
                 CustomerType = "Residential",
                 Fullname = "Fake User",
-                Language = "French"
+                Language = "French",
+                InvokedBy = 1 //audit_trail_completed
             };
 
             //Act
@@ -606,7 +613,8 @@ namespace customerportalapi.Services.Test
                 Email = "fakeuser@email.com",
                 CustomerType = "Residential",
                 Fullname = "Fake User",
-                Language = "French"
+                Language = "French",
+                InvokedBy = 1
             };
 
             //Act
@@ -756,7 +764,8 @@ namespace customerportalapi.Services.Test
             var value = new Invitation()
             {
                 Dni = string.Empty,
-                CustomerType = AccountType.Business
+                CustomerType = AccountType.Business,
+                InvokedBy = 1
             };
 
             //Act
@@ -794,7 +803,9 @@ namespace customerportalapi.Services.Test
             var value = new Invitation()
             {
                 Dni = "12345678A",
-                CustomerType = AccountType.Business
+                CustomerType = AccountType.Business,
+                InvokedBy = 1
+
             };
             var userRepositoryInvalid = UserRepositoryMock.InvalidUserRepository();
 
@@ -830,7 +841,8 @@ namespace customerportalapi.Services.Test
             var value = new Invitation()
             {
                 Dni = "12345678A",
-                CustomerType = AccountType.Residential
+                CustomerType = AccountType.Residential,
+                InvokedBy = 1
             };
             var userRepository = UserRepositoryMock.ValidUserRepository_With_ExternalId();
 
@@ -872,7 +884,8 @@ namespace customerportalapi.Services.Test
             var value = new Invitation()
             {
                 Dni = "12345678A",
-                CustomerType = AccountType.Residential
+                CustomerType = AccountType.Residential,
+                InvokedBy = 1
             };
             var userRepository = UserRepositoryMock.ValidUserRepository();
 
@@ -955,8 +968,9 @@ namespace customerportalapi.Services.Test
                 );
 
 
-            var result = service.GetWelcomeTemplateFromFeatures(listContract, true, (int)InviteInvocationType.CRM);
+            var result = service.GetWelcomeTemplateFromFeatures(listContract.Count, true, (int)InviteInvocationType.audit_trail_complete, contract?.StoreData?.CountryCode);
 
+            //Desde CRM siempre debe devolver Welcome email corto
 
             //Assert
             Assert.AreEqual(result, 0);

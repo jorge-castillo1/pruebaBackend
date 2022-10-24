@@ -1,7 +1,7 @@
-﻿using System;
+﻿using customerportalapi.Entities;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using customerportalapi.Entities;
 
 namespace customerportalapi.Services.Interfaces
 {
@@ -24,7 +24,5 @@ namespace customerportalapi.Services.Interfaces
         Task<List<BlobResult>> GetDocumentInfoStoreFacadeAsync(string storeCode);
         Task<List<SiteInvoices>> GetLastInvoices(string username, string contractNumber = null);
         Task<bool> UpdateAccessCodeAsync(string contractId, string black);
-
-
     }
 }

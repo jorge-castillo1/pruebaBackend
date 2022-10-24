@@ -402,7 +402,7 @@ namespace customerportalapi.Services
             }
 
             //9. Send Welcome Email
-            var idTemplate = SendWelcomeEmail(invitationValues, contracts, isNewUser, user, invitationFields).Result;
+            var idTemplate = SendWelcomeEmail(invitationValues, contracts.Count, isNewUser, user, invitationFields, contracts.FirstOrDefault().StoreData.CountryCode).Result;
 
             if (idTemplate != -1)
             {
@@ -440,25 +440,31 @@ namespace customerportalapi.Services
             return invitationFields;
         }
 
-        public int GetWelcomeTemplateFromFeatures(List<Contract> contracts, bool newUser, int invokedBy)
+        public int GetWelcomeTemplateFromFeatures(int numContracts, bool newUser, int invokedBy, string storeCountryCode)
         {
-            string storeCountryCode = "";
-            bool hasOnlyOneContract = false;
-            if (contracts != null && contracts.Any() && contracts.FirstOrDefault().StoreData != null)
-            {
-                storeCountryCode = contracts.FirstOrDefault().StoreData.CountryCode;
-                hasOnlyOneContract = contracts.Count < 2 ? true : false;
-            }
-            else
-            {
+            if (string.IsNullOrEmpty(storeCountryCode) || numContracts <= 0)
                 return -1;
+
+            // Se comprueba si está activo el envío de WelcomeEmail
+            var isWelcomeActive = _featureRepository.CheckFeatureByNameAndEnvironment(FeatureNames.EmailWelcomeInvitation, _config["Environment"], storeCountryCode);
+            if (!isWelcomeActive)
+                return -1;
+
+            // Se comprueba si está activo el WelcomeEmail Extended
+            var isWelcomeExtended = _featureRepository.CheckFeatureByNameAndEnvironment(FeatureNames.EmailWelcomeInvitationExtended, _config["Environment"], storeCountryCode);
+
+            // Desde CRM siempre se manda el Welcome Email Corto, el resto dependerá de la configuración
+            switch (invokedBy)
+            {
+                case (int)InviteInvocationType.CronJob:
+                case (int)InviteInvocationType.audit_trail_complete:
+                    return isWelcomeExtended ? (int)EmailTemplateTypes.WelcomeEmailExtended : (int)EmailTemplateTypes.WelcomeEmailShort;
+
+                default:  // crm
+                    return (int)EmailTemplateTypes.WelcomeEmailShort;
             }
 
-            bool isWelcome = _featureRepository.CheckFeatureByNameAndEnvironment(FeatureNames.EmailWelcomeInvitation, _config["Environment"], storeCountryCode);
-            if (!isWelcome) return -1;
-
-            bool isWelcomeExtended = _featureRepository.CheckFeatureByNameAndEnvironment(FeatureNames.EmailWelcomeInvitationExtended, _config["Environment"], storeCountryCode);
-
+            /*
             if (isWelcomeExtended && newUser)
             {
                 return (int)EmailTemplateTypes.WelcomeEmailExtended;
@@ -474,12 +480,12 @@ namespace customerportalapi.Services
                     return -1;
                 else
                     return (int)EmailTemplateTypes.WelcomeEmailShort;
-            }
+            }*/
         }
 
-        private async Task<int> SendWelcomeEmail(Invitation invitationValues, List<Contract> contracts, bool isNewUser, User user, InvitationMandatoryData invitationFields)
+        private async Task<int> SendWelcomeEmail(Invitation invitationValues, int numContracts, bool isNewUser, User user, InvitationMandatoryData invitationFields, string countryCode)
         {
-            int templateId = GetWelcomeTemplateFromFeatures(contracts, isNewUser, invitationValues.InvokedBy);
+            int templateId = GetWelcomeTemplateFromFeatures(numContracts, isNewUser, invitationValues.InvokedBy, countryCode);
             if (templateId == -1) return templateId;
 
             EmailTemplate invitationTemplate = _emailTemplateRepository.getTemplate(templateId, UserInvitationUtils.GetLanguage(invitationValues.Language));
@@ -506,7 +512,7 @@ namespace customerportalapi.Services
             }
 
             message.Body = UserInvitationUtils.GetBodyFormatted(invitationTemplate, user, invitationFields, _config["BaseUrl"], _config["InviteConfirmation"]);
-            message.Body = UserInvitationUtils.GetBodyFormattedHideButtonAccessPortal(message.Body, contracts, user);
+            message.Body = UserInvitationUtils.GetBodyFormattedHideButtonAccessPortal(message.Body, numContracts, user);
             await _mailRepository.Send(message);
 
 

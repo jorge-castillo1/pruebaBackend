@@ -126,18 +126,16 @@ namespace customerportalapi.Services
             return data;
         }
 
-        public static string GetBodyFormattedHideButtonAccessPortal(string body, List<Contract> contracts, User user)
+        public static string GetBodyFormattedHideButtonAccessPortal(string body, int numContracts, User user)
         {
-            if (contracts != null && contracts.Count > 1 && user != null && user.Emailverified)
+            if (numContracts > 1 && user != null && user.Emailverified)
             {
                 body = RemoveBlockBetweenStrings(body, "{{ButtonAccessPortalSTART}}", "{{ButtonAccessPortalEND}}");
                 body = RemoveBlockBetweenStrings(body, "{{ButtonAccessPortalSTART}}", "{{ButtonAccessPortalEND}}");
                 return body;
             }
-            else
-            {
-                return body.Replace("{{ButtonAccessPortalSTART}}", string.Empty).Replace("{{ButtonAccessPortalEND}}", string.Empty); ;
-            }
+
+            return body.Replace("{{ButtonAccessPortalSTART}}", string.Empty).Replace("{{ButtonAccessPortalEND}}", string.Empty);
         }
 
         public static string GetBodyFormatted(EmailTemplate invitationTemplate, User user,
