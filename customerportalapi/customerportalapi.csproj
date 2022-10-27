@@ -13,6 +13,7 @@
 
 	<ItemGroup>
 		<Content Remove="nuget.config" />
+		<Content Remove="Properties\launchSettings_pre.json" />
 		<Content Remove="Properties\launchSettings_pro.json" />
 	</ItemGroup>
 
@@ -42,9 +43,7 @@
 	</ItemGroup>
 
 	<ProjectExtensions>
-		<VisualStudio>
-			<UserProperties appsettings_1json__JsonSchema="" properties_4launchsettings_1json__JsonSchema="" />
-		</VisualStudio>
+		<VisualStudio><UserProperties appsettings_1json__JsonSchema="" properties_4launchsettings_1json__JsonSchema="" properties_4launchsettings_3pre_1json__JsonSchema="" /></VisualStudio>
 	</ProjectExtensions>
 
 	<ItemGroup>
@@ -52,10 +51,16 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<_WebToolingArtifacts Remove="Properties\launchSettings_pre.json" />
 		<_WebToolingArtifacts Remove="Properties\launchSettings_pro.json" />
 	</ItemGroup>
 
 	<ItemGroup>
+		<None Include="Properties\launchSettings_pre.json">
+		  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		  <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		  <CopyToPublishDirectory>Never</CopyToPublishDirectory>
+		</None>
 		<None Include="Properties\launchSettings_pro.json">
 			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>

@@ -1,9 +1,6 @@
 ﻿using customerportalapi.Entities;
 using customerportalapi.Repositories.Interfaces;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace customerportalapi.Services.Test.FakeData
@@ -24,6 +21,7 @@ namespace customerportalapi.Services.Test.FakeData
                 Admincontact = false,
                 Supercontact = false,
                 WebPortalAccess = false,
+                WebPortalUserName = "fake.fake"
             })).Verifiable();
 
             db.Setup(x => x.UpdateProfileAsync(It.IsAny<Profile>())).Returns(Task.FromResult(new Profile()
@@ -37,6 +35,7 @@ namespace customerportalapi.Services.Test.FakeData
                 Admincontact = false,
                 Supercontact = false,
                 WebPortalAccess = false,
+                WebPortalUserName = "fake.fake"
             })).Verifiable();
 
             db.Setup(x => x.GetProfilePermissionsAsync(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(new ProfilePermissions()
@@ -60,7 +59,7 @@ namespace customerportalapi.Services.Test.FakeData
             var db = new Mock<IProfileRepository>();
             db.Setup(x => x.GetAccountAsync(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(new AccountProfile()
             {
-                SmCustomerId =  "fake SM Customer Id",
+                SmCustomerId = "fake SM Customer Id",
                 Phone1 = "fake phone 1",
                 MobilePhone1 = "fake mobile phone 1",
                 EmailAddress1 = "fake email 2 modified",
@@ -69,7 +68,7 @@ namespace customerportalapi.Services.Test.FakeData
 
             db.Setup(x => x.GetAccountByDocumentNumberAsync(It.IsAny<string>())).Returns(Task.FromResult(new AccountProfile()
             {
-                SmCustomerId =  "fake SM Customer Id",
+                SmCustomerId = "fake SM Customer Id",
                 Phone1 = "fake phone 1",
                 MobilePhone1 = "fake mobile phone 1",
                 EmailAddress1 = "fake email 2 modified",

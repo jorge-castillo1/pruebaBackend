@@ -1,9 +1,8 @@
 ﻿using customerportalapi.Entities;
 using customerportalapi.Entities.Enums;
 using System;
-using System.Reflection;
 using System.Linq;
-using System.Collections.Generic;
+using System.Reflection;
 using System.Text.RegularExpressions;
 
 namespace customerportalapi.Services

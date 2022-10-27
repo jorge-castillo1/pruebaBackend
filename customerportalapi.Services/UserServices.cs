@@ -421,6 +421,7 @@ namespace customerportalapi.Services
 
                 // Update check in contact (Profile) in CRM
                 profile.WebPortalAccess = true;
+                profile.WebPortalUserName = userName;
                 await _profileRepository.UpdateProfileAsync(profile);
             }
             else
@@ -523,33 +524,39 @@ namespace customerportalapi.Services
         public async Task<Token> ConfirmAndChangeCredentialsAsync(string receivedToken, ResetPassword value)
         {
             // 1. Validate user
-            if (string.IsNullOrEmpty(receivedToken)) throw new ServiceException("User must have a received Token.", HttpStatusCode.BadRequest, FieldNames.ReceivedToken, ValidationMessages.EmptyFields);
+            if (string.IsNullOrEmpty(receivedToken))
+                throw new ServiceException("User must have a received Token.", HttpStatusCode.BadRequest, FieldNames.ReceivedToken, ValidationMessages.EmptyFields);
 
             var user = _userRepository.GetUserByInvitationToken(receivedToken);
-            if (user.Id == null) return new Token();
+            if (user.Id == null)
+                return new Token();
 
-            if (user.Password != value.OldPassword) throw new ServiceException("Wrong password.", HttpStatusCode.BadRequest);
+            if (user.Password != value.OldPassword)
+                throw new ServiceException("Wrong password.", HttpStatusCode.BadRequest);
             user.Password = value.NewPassword;
 
-            // 2. Get UserProfile (Contact) from CRM
-            var accountType = UserInvitationUtils.GetAccountType(user.Usertype);
-            var profile = await _profileRepository.GetProfileAsync(user.Dni, accountType);
-
-            // 3. Set all roles in CRM
-            profile.Admincontact = true;
-            profile.Supercontact = true;
-            profile.WebPortalAccess = true;
-            await _profileRepository.UpdateProfileAsync(profile);
-
-            // 4. Change username
+            // 2. Validate change username
             if (!string.IsNullOrEmpty(value.Username))
             {
                 if (value.Username.Contains('@'))
                     throw new ServiceException("Username must not include @", HttpStatusCode.BadRequest, "Username", "Must not include @");
 
-                if (ValidateUsername(value.Username)) user.Username = value.Username;
-                else throw new ServiceException("Username must be unique", HttpStatusCode.BadRequest, "Username", "Must be unique");
+                if (ValidateUsername(value.Username))
+                    user.Username = value.Username;
+                else
+                    throw new ServiceException("Username must be unique", HttpStatusCode.BadRequest, "Username", "Must be unique");
             }
+
+            // 3. Get UserProfile (Contact) from CRM
+            var accountType = UserInvitationUtils.GetAccountType(user.Usertype);
+            var profile = await _profileRepository.GetProfileAsync(user.Dni, accountType);
+
+            // 4. Set all roles in CRM
+            profile.Admincontact = true;
+            profile.Supercontact = true;
+            profile.WebPortalAccess = true;
+            profile.WebPortalUserName = value.Username;
+            await _profileRepository.UpdateProfileAsync(profile);
 
             // 5. Add user to Identity Server
             var newUser = await AddUserToIdentityServer(user);
@@ -643,6 +650,7 @@ namespace customerportalapi.Services
                 profile.Admincontact = true;
                 profile.Supercontact = true;
                 profile.WebPortalAccess = true;
+                profile.WebPortalUserName = user.Username;
                 await _profileRepository.UpdateProfileAsync(profile);
 
                 // 5. Add user to Identity Server

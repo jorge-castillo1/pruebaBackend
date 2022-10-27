@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace customerportalapi.Entities
+﻿namespace customerportalapi.Entities
 {
     public class Profile
     {
@@ -71,6 +69,8 @@ namespace customerportalapi.Entities
         public bool? Supercontact { get; set; }
         //Check WebPortal Access
         public bool? WebPortalAccess { get; set; }
+
+        public string WebPortalUserName { get; set; }
     }
 
     public class AccountCustomerType
