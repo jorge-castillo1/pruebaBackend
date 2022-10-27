@@ -263,7 +263,8 @@ namespace customerportalapi.Services.Test
                 EmailAddress1Principal = true,
                 EmailAddress2 = "fake email 2",
                 EmailAddress2Principal = false,
-                Avatar = "new profile image"
+                Avatar = "new profile image",
+                WebPortalUserName = "otro.fake",
             };
 
             //Act
@@ -297,6 +298,7 @@ namespace customerportalapi.Services.Test
             Assert.AreEqual("fake Address modified", result.Address);
             Assert.AreEqual("en", result.Language);
             Assert.AreEqual("fake email 1 modified", result.EmailAddress1);
+            Assert.AreEqual("fake.fake", result.WebPortalUserName);
             Assert.IsTrue(result.EmailAddress1Principal);
             Assert.IsFalse(result.EmailAddress2Principal);
         }

@@ -1,13 +1,13 @@
-﻿using customerportalapi.Repositories.Interfaces;
-using customerportalapi.Entities;
+﻿using customerportalapi.Entities;
+using customerportalapi.Repositories.Interfaces;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Net.Http;
-using System.Threading.Tasks;
 using System.Text;
-using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
 
 namespace customerportalapi.Repositories
 {
@@ -27,12 +27,12 @@ namespace customerportalapi.Repositories
         public async Task<Profile> GetProfileAsync(string dni, string accountType)
         {
             var httpClient = _clientFactory.CreateClient("httpClientCRM");
-            httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["ProfileAPI"]);
+            httpClient.BaseAddress = new Uri($"{_configuration["GatewayUrl"]}{_configuration["ProfileAPI"]}");
             _logger.LogWarning("Base Address: " + httpClient.BaseAddress.AbsolutePath);
 
             try
             {
-                var response = await httpClient.GetAsync(dni + "/" + accountType, HttpCompletionOption.ResponseHeadersRead);
+                var response = await httpClient.GetAsync($"{dni}/{accountType}", HttpCompletionOption.ResponseHeadersRead);
                 response.EnsureSuccessStatusCode();
                 var content = await response.Content.ReadAsStringAsync();
                 JObject result = JObject.Parse(content);
@@ -51,7 +51,7 @@ namespace customerportalapi.Repositories
             profile.Blue_updatewebportal = true;
             var httpClient = _clientFactory.CreateClient("httpClientCRM");
             var method = new HttpMethod("PATCH");
-            var request = new HttpRequestMessage(method, new Uri(_configuration["GatewayUrl"] + _configuration["ProfileAPI"]))
+            var request = new HttpRequestMessage(method, new Uri($"{_configuration["GatewayUrl"]}{_configuration["ProfileAPI"]}"))
             {
                 Content = new StringContent(JsonConvert.SerializeObject(profile), Encoding.UTF8, "application/json")
             };
@@ -69,7 +69,7 @@ namespace customerportalapi.Repositories
             var httpClient = _clientFactory.CreateClient("httpClientCRM");
             httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["AccountsAPI"]);
 
-            var response = await httpClient.GetAsync(dni + "/" + accountType, HttpCompletionOption.ResponseHeadersRead);
+            var response = await httpClient.GetAsync($"{dni}/{accountType}", HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
             var content = await response.Content.ReadAsStringAsync();
             JObject result = JObject.Parse(content);
@@ -82,7 +82,7 @@ namespace customerportalapi.Repositories
             var httpClient = _clientFactory.CreateClient("httpClientCRM");
             httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["AccountsAPI"]);
 
-            var response = await httpClient.GetAsync(documentNumber + "/Base", HttpCompletionOption.ResponseHeadersRead);
+            var response = await httpClient.GetAsync($"{documentNumber}/Base", HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
             var content = await response.Content.ReadAsStringAsync();
             JObject result = JObject.Parse(content);
@@ -94,7 +94,7 @@ namespace customerportalapi.Repositories
         {
             var httpClient = _clientFactory.CreateClient("httpClientCRM");
             var method = new HttpMethod("PATCH");
-            var request = new HttpRequestMessage(method, new Uri(_configuration["GatewayUrl"] + _configuration["AccountsAPI"]))
+            var request = new HttpRequestMessage(method, new Uri($"{_configuration["GatewayUrl"]}{_configuration["AccountsAPI"]}"))
             {
                 Content = new StringContent(JsonConvert.SerializeObject(account), Encoding.UTF8, "application/json")
             };
@@ -111,7 +111,7 @@ namespace customerportalapi.Repositories
         {
             var httpClient = _clientFactory.CreateClient("httpClientCRM");
             var method = new HttpMethod("PATCH");
-            var request = new HttpRequestMessage(method, new Uri(_configuration["GatewayUrl"] + _configuration["ProfileAPI"] + $"{dni}/{accountType}/invited"));
+            var request = new HttpRequestMessage(method, new Uri($"{_configuration["GatewayUrl"]}{_configuration["ProfileAPI"]}{dni}/{accountType}/invited"));
 
             var response = await httpClient.SendAsync(request);
             response.EnsureSuccessStatusCode();
@@ -125,7 +125,7 @@ namespace customerportalapi.Repositories
         {
             var httpClient = _clientFactory.CreateClient("httpClientCRM");
             var method = new HttpMethod("PATCH");
-            var request = new HttpRequestMessage(method, new Uri(_configuration["GatewayUrl"] + _configuration["ProfileAPI"] + $"{dni}/{accountType}/uninvited"));
+            var request = new HttpRequestMessage(method, new Uri($"{_configuration["GatewayUrl"]}{_configuration["ProfileAPI"]}{dni}/{accountType}/uninvited"));
 
             var response = await httpClient.SendAsync(request);
             response.EnsureSuccessStatusCode();
@@ -138,12 +138,12 @@ namespace customerportalapi.Repositories
         public async Task<ProfilePermissions> GetProfilePermissionsAsync(string dni, string accountType)
         {
             var httpClient = _clientFactory.CreateClient("httpClientCRM");
-            httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["ProfileAPI"]);
+            httpClient.BaseAddress = new Uri($"{_configuration["GatewayUrl"]}{_configuration["ProfileAPI"]}");
             _logger.LogWarning("Base Address: " + httpClient.BaseAddress.AbsolutePath);
 
             try
             {
-                var response = await httpClient.GetAsync(dni + "/" + accountType, HttpCompletionOption.ResponseHeadersRead);
+                var response = await httpClient.GetAsync($"{dni}/{accountType}", HttpCompletionOption.ResponseHeadersRead);
                 response.EnsureSuccessStatusCode();
                 var content = await response.Content.ReadAsStringAsync();
                 JObject result = JObject.Parse(content);
@@ -158,9 +158,9 @@ namespace customerportalapi.Repositories
         public async Task<AccountProfile> GetContactByMail(string email)
         {
             var httpClient = _clientFactory.CreateClient("httpClientCRM");
-            httpClient.BaseAddress = new Uri(_configuration["GatewayUrl"] + _configuration["AccountsAPI"]);
+            httpClient.BaseAddress = new Uri($"{_configuration["GatewayUrl"]}{_configuration["AccountsAPI"]}");
 
-            var response = await httpClient.GetAsync("email/" + email, HttpCompletionOption.ResponseHeadersRead);
+            var response = await httpClient.GetAsync($"email/{email}", HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
             var content = await response.Content.ReadAsStringAsync();
             JObject result = JObject.Parse(content);
