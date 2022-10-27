@@ -278,6 +278,7 @@ namespace customerportalapi.Controllers
         // PUT api/users/uninvite/{dni}
         [HttpPut("uninvite")]
         [AuthorizeApiKey]
+        [CustomLog]
         public async Task<ApiResponse> UnInvite([FromBody] Invitation value)
         {
             try

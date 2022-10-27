@@ -1,6 +1,7 @@
 ﻿using AutoWrapper.Wrappers;
 using customerportalapi.Entities;
 using customerportalapi.Entities.Enums;
+using customerportalapi.Loggers;
 using customerportalapi.Security;
 using customerportalapi.Services.Exceptions;
 using customerportalapi.Services.Interfaces;
@@ -9,7 +10,6 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace customerportalapi.Controllers
@@ -179,6 +179,7 @@ namespace customerportalapi.Controllers
         [HttpPost]
         [Route("invoice")]
         [AuthorizeToken]
+        [CustomLog]
         public async Task<ApiResponse> PayInvoice(PaymentMethodPayInvoice value)
         {
             try
