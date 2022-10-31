@@ -709,15 +709,15 @@ namespace customerportalapi.Services
             if (user.Id == null)
                 throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, "Dni", "Not exist");
 
-            //3. Confirm revocation access status to external system
-            _profileRepository.RevokedWebPortalAccessAsync(user.Dni, value.CustomerType);
-
-            //4. Delete from IS
+            //3. Delete from IS
             if (!string.IsNullOrEmpty(user.ExternalId))
                 _identityRepository.DeleteUser(user.ExternalId);
 
-            //5. Delete from Database
+            //4. Delete from Database
             _userRepository.Delete(user);
+
+            //5. CRM. Confirm revocation access status to external system & delete username in CRM
+            _profileRepository.RevokedWebPortalAccessAsync(user.Dni, value.CustomerType);
 
             return Task.FromResult(true);
         }
