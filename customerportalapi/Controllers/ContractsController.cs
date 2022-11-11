@@ -29,6 +29,12 @@ namespace customerportalapi.Controllers
         /// </summary>
         /// <param name="contractNumber">Contract number</param>
         /// <returns>Contract data model</returns>
+        /// <remarks>
+        /// This method calls the CRM API with the SM contract code, and gets the contract.
+        /// </remarks>
+        /// <response code = "200">Return CRM Contract</response>
+        /// <response code = "500">Internal Server Error</response>
+        /// <response code = "404">Handled error: Contract does not exist</response>
         [HttpGet("{contractNumber}")]
         [AuthorizeToken]
         public async Task<ApiResponse> GetAsync(string contractNumber)
@@ -56,6 +62,21 @@ namespace customerportalapi.Controllers
         /// <param name="dni">user document identification number</param>
         /// <param name="smContractCode">unique contract number from erp</param>
         /// <returns>base64 string document</returns>
+        /// <remarks>
+        /// This method makes a call to the crm API through the dni and the SM contract code returns a list of documents.
+        /// Calls the CRM API with the SM contract code, and gets the contract.
+        /// Sends mail with the template RequestDigitalContract to the store in the language of the store.
+        /// From the id of the CRM document, a call is made to the Documents API to obtain the document in base64 string.
+        /// </remarks>
+        /// <response code = "200">Return a document in base64 format</response>
+        /// <response code = "500">Error of type Internal Server Error</response>
+        /// <response code = "400">Handled error: More than one document was found</response>
+        /// <response code = "404">Handled errors:
+        /// - Email Template not exist
+        /// - Store mail not found
+        /// - Contract file does not exist
+        /// - Contract does not exist
+        /// </response>
         [HttpGet("{dni}/{smContractCode}/download")]
         [AuthorizeToken]
         public async Task<ApiResponse> GetDownloadContractAsync(string dni, string smContractCode)

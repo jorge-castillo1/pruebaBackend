@@ -23,17 +23,22 @@ namespace customerportalapi.Controllers
             _logger = logger;
         }
 
+        // POST api/auth/refreshtoken
         /// <summary>
         /// Obtain a new Token from refresh token
         /// </summary>
         /// <param name="value">Refresh token</param>
         /// <returns>Token access</returns>
-        // POST api/auth/refreshtoken
+        /// <remarks>
+        /// This method calls WSO2 Identity Server to refresh token and returns an updated token.
+        /// </remarks>
+        /// <response code = "200">Updated Token</response>
+        /// <response code = "500">Handled error of type Internal Server Error</response>
         [HttpPost("refreshtoken")]
         public async Task<ApiResponse> RefreshTokenAsync([FromBody] RefreshToken value)
         {
             try
-            {
+            {                
                 var entity = await _service.RefreshToken(value.token);
                 return new ApiResponse(entity);
             }
