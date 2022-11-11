@@ -38,7 +38,7 @@ namespace customerportalapi.Controllers
         public async Task<ApiResponse> RefreshTokenAsync([FromBody] RefreshToken value)
         {
             try
-            {                
+            {
                 var entity = await _service.RefreshToken(value.token);
                 return new ApiResponse(entity);
             }
