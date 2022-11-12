@@ -1,0 +1,71 @@
+﻿using Newtonsoft.Json;
+using System;
+
+namespace customerportalapi.Entities
+{
+    public class Store
+    {
+        public Guid StoreId { get; set; }
+
+        public string StoreName { get; set; }
+
+        public string StoreCode { get; set; }
+
+        public string Telephone { get; set; }
+
+        public string FullAddress { get; set; }
+
+        public string OpeningDaysFirst { get; set; }
+
+        public string OpeningDaysLast { get; set; }
+
+        public string TimeZone { get; set; }
+
+        public string OpeningHoursFrom { get; set; }
+
+        public string OpeningHoursTo { get; set; }
+
+        public string OpeningHoursFromSaturday { get; set; }
+
+        public string OpeningHoursToSaturday { get; set; }
+
+        public string City { get; set; }
+
+        public string Country { get; set; }
+
+        public string CountryCode { get; set; }
+
+        public string EmailAddress1 { get; set; }
+
+        public string EmailAddress2 { get; set; }
+
+        public string MapLink { get; set; }
+
+        public string CoordinatesLatitude { get; set; }
+
+        public string CoordinatesLongitude { get; set; }
+
+        public string CompanyName { get; set; }
+
+        public string CompanyCif { get; set; }
+
+        public string CompanySocialAddress { get; set; }
+
+        public string AccessType { get; set; }
+
+        public string StoreImage { get; set; }
+
+        public string DocumentRepositoryUrl { get; set; }
+
+        public string MailType { get; set; }
+
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public Timezoneid Timezoneid { get; set; }
+    }
+
+    public class Timezoneid
+    {
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public string MSTimeZone { get; set; }
+    }
+}

@@ -1,0 +1,22 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace customerportalapi.Entities
+{
+    public class ValidationMessages
+    {
+        public const string NotExist = "Not exist";
+        public const string InvitationNotAccepted = "Invitation not accepted yet";
+        public const string InUse = "In Use";
+        public const string EmptyFields = "Empty fields";
+        public const string LongerTo = "Longer to";
+        public const string Required = "Required";
+        public const string NotFound = "Not found";
+        public const string AlreadyInUse = "Already In Use";
+        public const string AlreadyInvited = "Already invited";
+        public const string NoInformationAvailable = "No information available";
+        public const string NoInformationAvailable_FR = "Contactez votre centre";
+        public const string IncorrectFormat = "Incorrect format";
+    }
+}

@@ -1,0 +1,405 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>customerportalapi</name>
+    </assembly>
+    <members>
+        <member name="M:customerportalapi.Controllers.AuthController.RefreshTokenAsync(customerportalapi.Entities.RefreshToken)">
+            <summary>
+            Obtain a new Token from refresh token
+            </summary>
+            <param name="value">Refresh token</param>
+            <returns>Token access</returns>
+        </member>
+        <member name="M:customerportalapi.Controllers.AuthController.LogoutAsync">
+            <summary>
+            Logout from autenticator system
+            </summary>
+            <returns>Boolean</returns>
+        </member>
+        <member name="M:customerportalapi.Controllers.ContractsController.GetAsync(System.String)">
+            <summary>
+            Obtain a contract from its contract number
+            </summary>
+            <param name="contractNumber">Contract number</param>
+            <returns>Contract data model</returns>
+        </member>
+        <member name="M:customerportalapi.Controllers.ContractsController.GetDownloadContractAsync(System.String,System.String)">
+            <summary>
+            Download contract
+            </summary>
+            <param name="dni">user document identification number</param>
+            <param name="smContractCode">unique contract number from erp</param>
+            <returns>base64 string document</returns>
+        </member>
+        <member name="M:customerportalapi.Controllers.ContractsController.GetDownloadInvoiceAsync(customerportalapi.Entities.InvoiceDownload)">
+            <summary>
+            Download invoice document
+            </summary>
+            <param name="invoiceDownload">Invoice information metadata</param>
+            <returns>base64 string document</returns>
+        </member>
+        <member name="M:customerportalapi.Controllers.ContractsController.GetFullContractAsync(System.String)">
+            <summary>
+            Obtain extended contract information from contract number
+            </summary>
+            <param name="contractNumber">friendly user contract number</param>
+            <returns>FullContract model data</returns>
+        </member>
+        <member name="M:customerportalapi.Controllers.ContractsController.UploadContractAsync(customerportalapi.Entities.Document)">
+            <summary>
+            Upload contract document to document repository
+            </summary>
+            <param name="document">Document content and metadata</param>
+            <returns>Unique document identification number</returns>
+        </member>
+        <member name="M:customerportalapi.Controllers.CountriesController.GetAsync">
+            <summary>
+            Get available countries
+            </summary>
+            <returns>List of Countries</returns>
+        </member>
+        <member name="M:customerportalapi.Controllers.EkomiWidgetController.GetEkomiWidget(System.String,System.String)">
+            <summary>
+            Get pending process from user, contract and process type
+            </summary>
+            <param name="siteId">siteId</param>
+            <param name="ekomiLanguage">EkomiLanguage</param>
+            <returns>Ekomiwidget data</returns>
+        </member>
+        <member name="M:customerportalapi.Controllers.EkomiWidgetController.CreateEkomiWidget(customerportalapi.Entities.EkomiWidget)">
+            <summary>
+            Create new ekomiWidget
+            </summary>
+            <param name="ekomkiWidget">Ekomiwidget</param>
+            <returns></returns>
+        </member>
+        <member name="M:customerportalapi.Controllers.EkomiWidgetController.CreateMultipleEkomiWidget(System.Collections.Generic.List{customerportalapi.Entities.EkomiWidget})">
+            <summary>
+            Create new multiple ekomiWidgets
+            </summary>
+            <param name="ekomkiWidgets">Ekomiwidget List</param>
+            <returns></returns>
+        </member>
+        <member name="M:customerportalapi.Controllers.EkomiWidgetController.UpdateEkomiWidget(customerportalapi.Entities.EkomiWidget)">
+            <summary>
+            Update ekomiWidget
+            </summary>
+            <param name="ekomkiWidget">Ekomiwidget</param>
+            <returns>EkomiWidget</returns>
+        </member>
+        <member name="M:customerportalapi.Controllers.EkomiWidgetController.DeleteEkomiWidget(System.String)">
+            <summary>
+            Delete ekomiWidget
+            </summary>
+            <param name="id">Ekomiwidget id</param>
+            <returns></returns>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:customerportalapi.Controllers.EkomiWidgetController.FindEkomiWidget(customerportalapi.Entities.EkomiWidgetSearchFilter)" -->
+        <member name="M:customerportalapi.Controllers.EventsController.SignatureStatus(customerportalapi.Entities.SignatureStatus)">
+            <summary>
+            Receive changes on signature process status
+            </summary>
+            <param name="value">Signature status data</param>
+            <returns>Ok</returns>
+        </member>
+        <member name="M:customerportalapi.Controllers.LanguagesController.GetLanguagesAsync">
+            <summary>
+            Get available countries
+            </summary>
+            <returns>List of Countries</returns>
+        </member>
+        <member name="M:customerportalapi.Controllers.LoginController.PostAsync(customerportalapi.Entities.Login)">
+            <summary>
+            Authenticate user against authenticator system
+            </summary>
+            <param name="value">Login credentials</param>
+            <returns>Access Token if succesfully logged</returns>
+        </member>
+        <member name="M:customerportalapi.Controllers.LoginController.PasswordResetAsync(customerportalapi.Entities.ResetPassword)">
+            <summary>
+            Change user password
+            </summary>
+            <param name="value">Old and New password data</param>
+            <returns>Access Token if succesfully changed password</returns>
+        </member>
+        <member name="M:customerportalapi.Controllers.LoginController.ForgotPassword(System.String)">
+            <summary>
+            Send mail to user with reset password instructions
+            </summary>
+            <param name="userName">Username</param>
+            <returns>Boolean if mail send</returns>
+        </member>
+        <member name="M:customerportalapi.Controllers.ProcessController.GetLastProcess(System.String,System.String,System.Nullable{System.Int32})">
+            <summary>
+            Get pending process from user, contract and process type
+            </summary>
+            <param name="user">userName</param>
+            <param name="smContractCode">Unique contract number from erp</param>
+            <param name="processtype">Type of process</param>
+            <returns>Process data or empty list</returns>
+        </member>
+        <member name="M:customerportalapi.Controllers.ProcessController.CancelSignature(System.String,System.Int32)">
+            <summary>
+            Cancels pending process matching contract and type
+            </summary>
+            <param name="smContractCode">Unique contract number from erp</param>
+            <param name="processtype">Type of process</param>
+            <returns></returns>
+        </member>
+        <member name="M:customerportalapi.Controllers.SitesController.GetAsync(System.String)">
+            <summary>
+            Get sites list where current user has active contracts
+            </summary>
+            <param name="username">Username</param>
+            <returns>Site list</returns>
+        </member>
+        <member name="M:customerportalapi.Controllers.SitesController.GetAsync(System.String,System.String,System.Int32,System.Nullable{System.Int32})">
+            <summary>
+            Search stores by country and/or city
+            </summary>
+            <param name="countryCode">Country code</param>
+            <param name="city">City</param>
+            <param name="skip">page number</param>
+            <param name="limit">page size</param>
+            <returns></returns>
+        </member>
+        <member name="M:customerportalapi.Controllers.SitesController.GetUnitAsync(System.Guid)">
+            <summary>
+            Get unit information from unique unit id
+            </summary>
+            <param name="id">Unit identification Id</param>
+            <returns>Unit data model</returns>
+        </member>
+        <member name="M:customerportalapi.Controllers.SitesController.GetUnitBySMIdAsync(System.String)">
+            <summary>
+            Get unit information from unique erp system unit id
+            </summary>
+            <param name="smid">ERP Unit identification Id </param>
+            <returns>Unit data model</returns>
+        </member>
+        <member name="M:customerportalapi.Controllers.SitesController.GetUnitContractAsync(System.String,System.String)">
+            <summary>
+            Get unit contract
+            </summary>
+            <param name="smid">ERP Unit identification Id</param>
+            <param name="contractnumber">ERP contract identification number</param>
+            <returns></returns>
+        </member>
+        <member name="M:customerportalapi.Controllers.SitesController.GetCountriesAsync">
+            <summary>
+            Get all available countries
+            </summary>
+            <returns>Country data model list</returns>
+        </member>
+        <member name="M:customerportalapi.Controllers.SitesController.GetCitiesAsync(System.String)">
+            <summary>
+            Get cities from country
+            </summary>
+            <param name="countryCode">Country code</param>
+            <returns>City data model list</returns>
+        </member>
+        <member name="M:customerportalapi.Controllers.SitesController.GetStoreAsync(System.String)">
+            <summary>
+            Get stores from store code
+            </summary>
+            <param name="storeCode">Store code</param>
+            <returns>Store data model</returns>
+        </member>
+        <member name="M:customerportalapi.Controllers.SitesController.GetAccessCodeAsync(customerportalapi.Entities.AccessCode)">
+            <summary>
+            Get site access code
+            </summary>
+            <param name="value">Access code credentials</param>
+            <returns>Site access code</returns>
+        </member>
+        <member name="M:customerportalapi.Controllers.SitesController.IsAccessCodeAvailableAsync">
+            <summary>
+            Checks if site access code is available due to invalid password attempts
+            </summary>
+            <returns>bool</returns>
+        </member>
+        <member name="M:customerportalapi.Controllers.SitesController.UpdateCodeAsync(customerportalapi.Entities.AccessCode)">
+            <summary>
+            Update access code
+            </summary>
+            <param name="value">Update Access code credentials</param>
+            <returns>Bool</returns>
+        </member>
+        <member name="M:customerportalapi.Controllers.SitesController.GetInvoicesAsync(System.String)">
+            <summary>
+            Get Last user invoices
+            </summary>
+            <param name="username">Username</param>
+            <returns>Last n user invoices</returns>
+        </member>
+        <member name="M:customerportalapi.Controllers.UsersController.GetAsync(System.String)">
+            <summary>
+            Get User Profile
+            </summary>
+            <param name="username">Username</param>
+            <returns>User profile data model</returns>
+        </member>
+        <member name="M:customerportalapi.Controllers.UsersController.GetUserByDniAndTypeAsync(System.String,System.String)">
+            <summary>
+            Get User Profile
+            </summary>
+            <param name="dni">User Document Identification Number</param>
+            <param name="accountType">Account type</param>
+            <returns>User profile data model</returns>
+        </member>
+        <member name="M:customerportalapi.Controllers.UsersController.PatchAsync(customerportalapi.Entities.Profile)">
+            <summary>
+            Update users profile
+            </summary>
+            <param name="value">Profile data to update</param>
+            <returns>Profile data updated</returns>
+        </member>
+        <member name="M:customerportalapi.Controllers.UsersController.Invite(customerportalapi.Entities.Invitation)">
+            <summary>
+            Invite users to customer portal
+            </summary>
+            <param name="value">Invitation data model</param>
+            <returns>Boolean</returns>
+            <remarks>Use API KEY for this api</remarks>
+        </member>
+        <member name="M:customerportalapi.Controllers.UsersController.ConfirmAndChangeCredentials(System.String,customerportalapi.Entities.ResetPassword)">
+            <summary>
+            Allow users to access customer portal after accepting invitation with new credentials
+            </summary>
+            <param name="receivedToken">Invitation token</param>
+            <param name="value">New user credentials</param>
+            <returns>Access Token</returns>
+        </member>
+        <member name="M:customerportalapi.Controllers.UsersController.Confirm(System.String)">
+            <summary>
+            Allow users to access customer portal after accepting invitation
+            </summary>
+            <param name="receivedToken">Invitation token</param>
+            <returns>Access Token</returns>
+        </member>
+        <member name="M:customerportalapi.Controllers.UsersController.UniqueUsername(System.String)">
+            <summary>
+            validate user from Access Token
+            </summary>
+            <param name="username">Username</param>
+            <returns>Boolean with result</returns>
+        </member>
+        <member name="M:customerportalapi.Controllers.UsersController.UnInvite(customerportalapi.Entities.Invitation)">
+            <summary>
+            Revoke customer portal access to users
+            </summary>
+            <param name="value">User invitation data to revoke</param>
+            <returns>Boolean with result</returns>
+            <remarks>Use API KEY for this api</remarks>
+        </member>
+        <member name="M:customerportalapi.Controllers.UsersController.GetAccountAsync(System.String)">
+            <summary>
+            Get customer information from username
+            </summary>
+            <param name="username">Username</param>
+            <returns>Customer data model</returns>
+        </member>
+        <member name="M:customerportalapi.Controllers.UsersController.GetAccountBydocumentNumberAsync(System.String)">
+            <summary>
+            Get customer information from document number
+            </summary>
+            <param name="documentNumber">Document Number</param>
+            <returns>Customer data model</returns>
+        </member>
+        <member name="M:customerportalapi.Controllers.UsersController.PatchAccountAsync(customerportalapi.Entities.Account,System.String)">
+            <summary>
+            Update customer information
+            </summary>
+            <param name="value">Account data model to update</param>
+            <param name="username">Username</param>
+            <returns>Account data updated</returns>
+        </member>
+        <member name="M:customerportalapi.Controllers.UsersController.Contact(customerportalapi.Entities.FormContact)">
+            <summary>
+            Associate contact information to user 
+            </summary>
+            <param name="value">Contact Information</param>
+            <returns>Boolean with result</returns>
+        </member>
+        <member name="M:customerportalapi.Controllers.UsersController.ChangeRole(System.String,System.String)">
+            <summary>
+            Update user roles
+            </summary>
+            <param name="username">Username</param>
+            <param name="role">role</param>
+            <returns></returns>
+            <remarks>Use API KEY for this api</remarks>
+        </member>
+        <member name="M:customerportalapi.Controllers.UsersController.RemoveRole(System.String,System.String)">
+            <summary>
+            Remove user role
+            </summary>
+            <param name="username">Username</param>
+            <param name="role">Role to remove</param>
+            <returns>Boolean with result</returns>  
+            <remarks>Use API KEY for this api</remarks>
+        </member>
+        <member name="M:customerportalapi.Controllers.WebTemplatesController.GetAsync">
+            <summary>
+            Get customer portal list templates
+            </summary>
+            <returns>Template data model list</returns>
+        </member>
+        <member name="M:customerportalapi.Controllers.WebTemplatesController.GetAsync(System.Int32,System.String)">
+            <summary>
+            Get customer portal template
+            </summary>
+            <param name="code">Template code</param>
+            <param name="language">Template language</param>
+            <returns>Template data model</returns>
+        </member>
+        <member name="T:customerportalapi.Program">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:customerportalapi.Program.Main(System.String[])">
+            <summary>
+            
+            </summary>
+            <param name="args"></param>
+        </member>
+        <member name="M:customerportalapi.Program.CreateWebHostBuilder(System.String[])">
+            <summary>
+            
+            </summary>
+            <param name="args"></param>
+            <returns></returns>
+        </member>
+        <member name="T:customerportalapi.Startup">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:customerportalapi.Startup.#ctor(Microsoft.Extensions.Configuration.IConfiguration,Microsoft.AspNetCore.Hosting.IHostingEnvironment)">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:customerportalapi.Startup.Configuration">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:customerportalapi.Startup.ConfigureServices(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            This method gets called by the runtime. Use this method to add services to the container.
+            </summary>
+            <param name="services"></param>
+        </member>
+        <member name="M:customerportalapi.Startup.Configure(Microsoft.AspNetCore.Builder.IApplicationBuilder,Microsoft.AspNetCore.Hosting.IHostingEnvironment,Microsoft.Extensions.Logging.ILoggerFactory)">
+            <summary>
+            This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+            </summary>
+            <param name="app"></param>
+            <param name="env"></param>
+            <param name="loggerFactory"></param>
+        </member>
+    </members>
+</doc>
