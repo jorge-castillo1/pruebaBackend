@@ -143,6 +143,13 @@ namespace customerportalapi.Controllers
         /// </summary>
         /// <param name="contractNumber">friendly user contract number</param>
         /// <returns>FullContract model data</returns>
+        /// <remarks>
+        /// This method calls the CRM API with the SM contract code, and gets extented information about the contract.
+        /// This extended information is the Opportunities and the payment methods.
+        /// </remarks>
+        /// <response code = "200">Return CRM Contract</response>
+        /// <response code = "500">Internal Server Error</response>
+        /// <response code = "404">Handled error: Contract does not exist</response>
         [HttpGet("full/{contractNumber}")]
         [AuthorizeToken]
         public async Task<ApiResponse> GetFullContractAsync(string contractNumber)
