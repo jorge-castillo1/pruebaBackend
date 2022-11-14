@@ -203,14 +203,16 @@ namespace customerportalapi.Controllers
         }
 
         /// <summary>
-        /// Obtain if document exists in sharepoint from contract number
+        /// Obtain if document exists in sharepoint from SM contract number
         /// </summary>
-        /// <param name="smContractCode">friendly user contract number</param>
-        /// <returns>boolean</returns>
+        /// <param name="smContractCode">SM Contract number</param>
+        /// <returns>Boolean</returns>
         /// <remarks>
-        /// This method checks if the Document exists in Sharepoint with the ContractCode
+        /// This method call to the CRM API by the SM contract code and returns a list of contracts
+        /// Filter with the type document = "0" (Contract).
+        /// If document exist return "true", if not it returns "false".
         /// </remarks>
-        /// <response code = "200">Return of the Contract</response>
+        /// <response code = "200">Return if the document exist or not</response>
         /// <response code = "500">Internal Server Error</response>
         [HttpGet("document/{smContractCode}/exists")]
         //[AuthorizeToken]
@@ -268,7 +270,13 @@ namespace customerportalapi.Controllers
         /// <summary>
         /// Update Contracts Urls in CRM
         /// </summary>
-        /// <returns>bolean</returns>
+        /// <returns>Object with the info of contracts updated</returns>
+        /// <remarks>
+        /// This method get the contracts in the CRM API (with optional limit of contracts and pagination)
+        /// For each contract, the fields of the ContractUrl are updated
+        /// </remarks>
+        /// <response code = "200">Object with the info of contracts updated</response>
+        /// <response code = "500">Internal Server Error</response>
         [HttpGet("UpdateContractsUrl")]
         public async Task<ApiResponse> UpdateContractUrlAsync(int? skip, int? limit)
         {
