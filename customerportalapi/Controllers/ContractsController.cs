@@ -104,10 +104,9 @@ namespace customerportalapi.Controllers
         /// <param name="invoiceDownload">Invoice information metadata</param>
         /// <returns>base64 string document</returns>
         /// <remarks>
-        /// This method makes a call to the crm API through the InvoiceDownload.
-        /// Calls the CRM API with the InvoiceDownload and the type of document of that.
+        /// This method makes a call to the crm API filter by the Invoice number and return a list of Invoice (DocumentMetadata)
         /// Sends mail with the template RequestDigitalContract to the store in the language of the store.
-        /// From the id of the CRM document, a call is made to the Documents API to obtain the document in base64 string.
+        /// From the first id of the CRM document, call to the Documents API to obtain the document in base64 string.
         /// </remarks>
         /// <response code = "200">Return a document in base64 format</response>
         /// <response code = "400">Handled error: More than one document was found</response>
@@ -141,11 +140,11 @@ namespace customerportalapi.Controllers
         /// <summary>
         /// Obtain extended contract information from contract number
         /// </summary>
-        /// <param name="contractNumber">friendly user contract number</param>
+        /// <param name="contractNumber">SM contract number</param>
         /// <returns>FullContract model data</returns>
         /// <remarks>
         /// This method calls the CRM API with the SM contract code, and gets extented information about the contract.
-        /// This extended information is the Opportunities and the payment methods.
+        /// This extended information includes the contract data with the TotalPrice, the Opportunity (with Expected move in, ... ) and payment methods.
         /// </remarks>
         /// <response code = "200">Return CRM Contract</response>
         /// <response code = "500">Internal Server Error</response>
@@ -177,7 +176,9 @@ namespace customerportalapi.Controllers
         /// <param name="document">Document content and metadata</param>
         /// <returns>Unique document identification number</returns>
         /// <remarks>
-        /// This method uploads a new contract document to the document repository
+        /// This method calls the DOC-API with the document and metadata information.
+        /// Obtains the contract from the CRP-API by the SM Contract Code.
+        /// Then updates the Contract in the CRM-API with a new composed ContractUrl.
         /// </remarks>
         /// <response code = "200">Upload succesfull</response>
         /// <response code = "500">Internal Server Error</response>
@@ -208,7 +209,7 @@ namespace customerportalapi.Controllers
         /// <param name="smContractCode">friendly user contract number</param>
         /// <returns>boolean</returns>
         /// <remarks>
-        /// This method checks if the Document exists in Sharepoint with the ContractCode
+        /// This method checks if the Document exists in Sharepoint with the SM contract code
         /// </remarks>
         /// <response code = "200">Return of the Contract</response>
         /// <response code = "500">Internal Server Error</response>
@@ -268,6 +269,8 @@ namespace customerportalapi.Controllers
         /// <summary>
         /// Update Contracts Urls in CRM
         /// </summary>
+        /// <param name="limit"></param>
+        /// <param name="skip"></param>
         /// <returns>bolean</returns>
         [HttpGet("UpdateContractsUrl")]
         public async Task<ApiResponse> UpdateContractUrlAsync(int? skip, int? limit)
