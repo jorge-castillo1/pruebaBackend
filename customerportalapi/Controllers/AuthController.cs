@@ -55,9 +55,14 @@ namespace customerportalapi.Controllers
         }
 
         /// <summary>
-        /// Logout from autenticator system
+        /// Logout from authenticator system
         /// </summary>
         /// <returns>Boolean</returns>
+        /// <remarks>
+        /// This method calls WSO2 Identity Server to identify the token from the user. Then logouts from the server.
+        /// </remarks>
+        /// <response code = "200">Logout Succesful</response>
+        /// <response code = "500">Handled error of type Internal Server Error</response>
         [HttpGet("logout")]
         public async Task<ApiResponse> LogoutAsync()
         {
