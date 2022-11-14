@@ -239,6 +239,11 @@ namespace customerportalapi.Controllers
         /// </summary>
         /// <param name="invoiceRequest">friendly user contract number</param>
         /// <returns>boolean</returns>
+        /// <remarks>
+        /// Checks if Invoice Exists from the contract number
+        /// </remarks>
+        /// <response code = "200">Return a contract if Invoice exists</response>
+        /// <response code = "500">Internal Server Error</response>
         [HttpPost("invoice/exists")]
         //[AuthorizeToken]
         public async Task<ApiResponse> InvoiceExists([FromBody] InvoiceRequest invoiceRequest)
