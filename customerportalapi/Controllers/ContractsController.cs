@@ -176,6 +176,11 @@ namespace customerportalapi.Controllers
         /// </summary>
         /// <param name="document">Document content and metadata</param>
         /// <returns>Unique document identification number</returns>
+        /// <remarks>
+        /// This method uploads a new contract document to the document repository
+        /// </remarks>
+        /// <response code = "200">Upload succesfull</response>
+        /// <response code = "500">Internal Server Error</response>
         [HttpPost]
         //[AuthorizeAzureAD(new[] { Entities.enums.RoleGroupTypes.StoreManager })]
         public async Task<ApiResponse> UploadContractAsync([FromBody] Document document)
