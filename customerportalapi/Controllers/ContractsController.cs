@@ -207,6 +207,11 @@ namespace customerportalapi.Controllers
         /// </summary>
         /// <param name="smContractCode">friendly user contract number</param>
         /// <returns>boolean</returns>
+        /// <remarks>
+        /// This method checks if the Document exists in Sharepoint with the ContractCode
+        /// </remarks>
+        /// <response code = "200">Return of the Contract</response>
+        /// <response code = "500">Internal Server Error</response>
         [HttpGet("document/{smContractCode}/exists")]
         //[AuthorizeToken]
         public async Task<ApiResponse> DocumentExists(string smContractCode)
