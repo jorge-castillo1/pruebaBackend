@@ -238,14 +238,16 @@ namespace customerportalapi.Controllers
 
 
         /// <summary>
-        /// Obtain if invoice exists in sharepoint from contract number
+        /// Obtain if invoice exists in sharepoint from SM contract number
         /// </summary>
-        /// <param name="invoiceRequest">friendly user contract number</param>
-        /// <returns>boolean</returns>
+        /// <param name="invoiceRequest">SM Contract number</param>
+        /// <returns>Boolean</returns>
         /// <remarks>
-        /// Checks if Invoice Exists from the contract number
+        /// This method call to the CRM API by the SM contract code and returns a list of documents
+        /// Filter with the type document = "3" (Invoice)
+        /// If document exist return "true", if not it returns "false".
         /// </remarks>
-        /// <response code = "200">Return a contract if Invoice exists</response>
+        /// <response code = "200">Return  if invoice exists or not</response>
         /// <response code = "500">Internal Server Error</response>
         [HttpPost("invoice/exists")]
         //[AuthorizeToken]
