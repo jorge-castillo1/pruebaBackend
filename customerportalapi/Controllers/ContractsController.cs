@@ -103,6 +103,20 @@ namespace customerportalapi.Controllers
         /// </summary>
         /// <param name="invoiceDownload">Invoice information metadata</param>
         /// <returns>base64 string document</returns>
+        /// <remarks>
+        /// This method makes a call to the crm API through the InvoiceDownload.
+        /// Calls the CRM API with the InvoiceDownload and the type of document of that.
+        /// Sends mail with the template RequestDigitalContract to the store in the language of the store.
+        /// From the id of the CRM document, a call is made to the Documents API to obtain the document in base64 string.
+        /// </remarks>
+        /// <response code = "200">Return a document in base64 format</response>
+        /// <response code = "400">Handled error: More than one document was found</response>
+        /// <response code = "404">Handled errors:
+        /// - Email Template not exist
+        /// - Store mail not found
+        /// - Invoice file does not exist
+        /// </response>
+        /// <response code = "500">Error of type Internal Server Error</response>
         [HttpPost("invoices/download")]
         [AuthorizeToken]
         public async Task<ApiResponse> GetDownloadInvoiceAsync([FromBody] InvoiceDownload invoiceDownload)
