@@ -26,11 +26,13 @@ namespace customerportalapi.Controllers
         }
 
         /// <summary>
-        /// Get pending process from user, contract and process type
+        /// Get an Ekomi Widget 
         /// </summary>
         /// <param name="storeCode">siteId</param>
-        /// <param name="ekomiLanguage">EkomiLanguage</param>
         /// <returns>Ekomiwidget data</returns>
+        /// <remarks>This method searches from the database the EkomiWidget with the storeCode</remarks>
+        /// <response code = "200">Return an EkomiWidget</response>
+        /// <response code = "500">Internal Server Error</response>
         [HttpGet("{storeCode}/{ekomiLanguage}")]
         public ApiResponse GetEkomiWidget(string storeCode)
         {
