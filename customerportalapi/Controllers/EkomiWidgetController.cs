@@ -56,8 +56,11 @@ namespace customerportalapi.Controllers
         /// <summary>
         /// Create new ekomiWidget
         /// </summary>
-        /// <param name="ekomkiWidget">Ekomiwidget</param>
+        /// <param name="ekomiWidget">Ekomiwidget</param>
         /// <returns></returns>
+        /// <remarks>This method inserts into the databse an EkomiWidget
+        /// 
+        /// </remarks>
         [HttpPost]
         public ApiResponse CreateEkomiWidget(EkomiWidget ekomiWidget)
         {
