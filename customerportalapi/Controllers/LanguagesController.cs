@@ -26,9 +26,15 @@ namespace customerportalapi.Controllers
 
 
         /// <summary>
-        /// Get available countries
+        /// Get available languages
         /// </summary>
-        /// <returns>List of Countries</returns>
+        /// <returns>List of languages</returns>        
+        /// <remarks>
+        /// This method call to the CRM API
+        /// Returns a list of languages
+        /// </remarks>
+        /// <response code = "200">Return a list of languages</response>
+        /// <response code = "500">Internal Server Error</response>
         [HttpGet]
         public async Task<ApiResponse> GetLanguagesAsync()
         {
