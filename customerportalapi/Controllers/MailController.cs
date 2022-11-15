@@ -38,7 +38,11 @@ namespace customerportalapi.Controllers
         /// Send email
         /// </summary>
         /// <param name="email"></param>
-        /// <returns></returns>
+        /// <remarks> This method sends an email 
+        /// </remarks>        
+        /// <response code = "200">Email sent</response>
+        /// <response code = "500">Internal Server Error</response>
+        
         [HttpPost]
         public ApiResponse SendEmail([FromBody] Entities.Email email)
         {
