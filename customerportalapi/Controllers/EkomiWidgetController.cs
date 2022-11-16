@@ -59,7 +59,14 @@ namespace customerportalapi.Controllers
         /// <param name="ekomiWidget">Ekomiwidget</param>
         /// <returns></returns>
         /// <remarks>This method inserts into the databse an EkomiWidget
-        /// 
+        /// <response code = "200"></response>
+        /// <response code = "400">Handled error
+        /// - SiteId required
+        /// - EkomicustomerId required
+        /// - EkomiWidgetTokens required
+        /// - EkomiWidget exist with same siteId and EkomiLanguage please update
+        /// </response>
+        /// <response code = "500">Error of type Internal Server Error</response>
         /// </remarks>
         [HttpPost]
         public ApiResponse CreateEkomiWidget(EkomiWidget ekomiWidget)
@@ -94,6 +101,9 @@ namespace customerportalapi.Controllers
         /// </summary>
         /// <param name="ekomkiWidgets">Ekomiwidget List</param>
         /// <returns></returns>
+        /// <response code = "200"></response>
+        /// <response code="400">Handled error: EkomiWidget exist with same siteId and EkomiLanguage please update</response>
+        /// <response code = "500">Error of type Internal Server Error</response>
         [HttpPost("multiple")]
         public ApiResponse CreateMultipleEkomiWidget(List<EkomiWidget> ekomiWidgets)
         {
@@ -127,6 +137,9 @@ namespace customerportalapi.Controllers
         /// </summary>
         /// <param name="ekomkiWidget">Ekomiwidget</param>
         /// <returns>EkomiWidget</returns>
+        /// <response code = "200"></response>
+        /// <response code="404">Handled Error: EkomiWidget by Id Not Found</response>
+        /// <response code = "500">Error of type Internal Server Error</response>
         [HttpPut]
         public ApiResponse UpdateEkomiWidget(EkomiWidget ekomiWidget)
         {
@@ -160,6 +173,9 @@ namespace customerportalapi.Controllers
         /// </summary>
         /// <param name="id">Ekomiwidget id</param>
         /// <returns></returns>
+        /// <response code = "200"></response>
+        /// <response code="400">Handled error: Id required</response>
+        /// <response code = "500">Error of type Internal Server Error</response>
         [HttpDelete("{id}")]
         public ApiResponse DeleteEkomiWidget(string id)
         {
@@ -185,6 +201,8 @@ namespace customerportalapi.Controllers
         /// </summary>
         /// <param name="ekomiWidgetSearchFilter">EkomiWidgetSearchFilter</param>
         /// <returns>List<EkomiWidgetSearchFilter></returns>
+        /// <response code = "200"></response>
+        /// <response code = "500">Error of type Internal Server Error</response>
         [HttpPost("search")]
         public ApiResponse FindEkomiWidget(EkomiWidgetSearchFilter ekomiWidgetSearchFilter)
         {
