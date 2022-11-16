@@ -54,12 +54,12 @@ namespace customerportalapi.Controllers
         }
 
         /// <summary>
-        /// Create new ekomiWidget
+        /// Create new EkomiWidget
         /// </summary>
         /// <param name="ekomiWidget">Ekomiwidget</param>
-        /// <returns></returns>
-        /// <remarks>This method inserts into the databse an EkomiWidget
-        /// <response code = "200"></response>
+        /// <returns>EkomiWidget</returns>
+        /// <remarks>This method first checks if an EkomiWidget already exists in the database, if it doesn't it creates it
+        /// <response code = "200">ekomiWidget created</response>
         /// <response code = "400">Handled error
         /// - SiteId required
         /// - EkomicustomerId required
@@ -100,10 +100,11 @@ namespace customerportalapi.Controllers
         /// Create new multiple ekomiWidgets
         /// </summary>
         /// <param name="ekomkiWidgets">Ekomiwidget List</param>
-        /// <returns></returns>
-        /// <response code = "200"></response>
+        /// <returns>EkomiWidget</returns>
+        /// <remarks>This method check first if exits some ekomiWidget with same SiteId and Language otherwise it creates multiple ekomiWidgets</remarks>
+        /// <response code= "200">Multiple ekomiWidgets created</response>
         /// <response code="400">Handled error: EkomiWidget exist with same siteId and EkomiLanguage please update</response>
-        /// <response code = "500">Error of type Internal Server Error</response>
+        /// <response code= "500">Error of type Internal Server Error</response>
         [HttpPost("multiple")]
         public ApiResponse CreateMultipleEkomiWidget(List<EkomiWidget> ekomiWidgets)
         {
@@ -135,9 +136,12 @@ namespace customerportalapi.Controllers
         /// <summary>
         /// Update ekomiWidget
         /// </summary>
-        /// <param name="ekomkiWidget">Ekomiwidget</param>
+        /// <param name="ekomiWidget">Ekomiwidget</param>
         /// <returns>EkomiWidget</returns>
-        /// <response code = "200"></response>
+        /// <remarks>This method first checks in the database if the EkomiWidget exists, if it does
+        /// it updates it with the information provided in the request.
+        /// </remarks>
+        /// <response code = "200">ekomiWidget updated</response>
         /// <response code="404">Handled Error: EkomiWidget by Id Not Found</response>
         /// <response code = "500">Error of type Internal Server Error</response>
         [HttpPut]
@@ -172,8 +176,9 @@ namespace customerportalapi.Controllers
         /// Delete ekomiWidget
         /// </summary>
         /// <param name="id">Ekomiwidget id</param>
-        /// <returns></returns>
-        /// <response code = "200"></response>
+        /// <returns>true</returns>
+        /// <remarks>This method first checks in the database if the EkomiWidget exists, if it exists, it deletes the record of this.</remarks>
+        /// <response code = "200">ekomiWidget deleted</response>
         /// <response code="400">Handled error: Id required</response>
         /// <response code = "500">Error of type Internal Server Error</response>
         [HttpDelete("{id}")]
@@ -200,8 +205,9 @@ namespace customerportalapi.Controllers
         /// Find ekomiWidget
         /// </summary>
         /// <param name="ekomiWidgetSearchFilter">EkomiWidgetSearchFilter</param>
-        /// <returns>List<EkomiWidgetSearchFilter></returns>
-        /// <response code = "200"></response>
+        /// <returns>List of EkomiWidgetSearchFilter</returns>
+        /// <remarks>This method searches the database for an EkomiWidget with the filters of storeCode, EkomiWidgetTokens and EkomiCustomerId</remarks>
+        /// <response code = "200">Return an ekomiWidget</response>
         /// <response code = "500">Error of type Internal Server Error</response>
         [HttpPost("search")]
         public ApiResponse FindEkomiWidget(EkomiWidgetSearchFilter ekomiWidgetSearchFilter)
