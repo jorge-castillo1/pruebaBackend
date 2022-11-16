@@ -38,11 +38,38 @@ namespace customerportalapi.Controllers
         /// Send email
         /// </summary>
         /// <param name="email"></param>
-        /// <remarks> This method sends an email 
-        /// </remarks>        
+        /// <remarks> First, this method checks in the configuration file is there any CC or CCO email 
+        /// defined for the type of email that is going to be sent (EmailFlowType): 
+        /// -DownloadContract 
+        /// -DownloadInvoice
+        /// -SendNewCredentials,
+        /// -UpdatePaymentCard,
+        /// -UpdateAccessCode,
+        /// -UpdatePayment,
+        /// -GetProfile,
+        /// -UpdateProfile,
+        /// -InviteUser,
+        /// -SendWelcome,
+        /// -UpdateAccount,
+        /// -ContactCall,
+        /// -ContactContact,
+        /// -Contact,
+        /// -SendMailInvitationError,
+        /// -SaveNewUser,
+        /// -ExceptionDocumetStoreApi,
+        /// -SendWelcomeCronJob
+        /// Example of emails defined in the configuration file by type (EmailFlowType): 
+        /// - Mail**DownloadContract**CC: support.bluespace@quantion.com
+        /// - Mail**DownloadContract**CCO: webportal@bluespace.eu
+        /// - Mail**DownloadInvoice**CC: support.bluespace@quantion.com
+        /// - Mail**DownloadInvoice**CCO: webportal@bluespace.eu
+        /// It is also verified that the emails are valid.
+        /// The email is sent with its recipients, subject and body of the message.
+        /// </remarks>
+        /// <example>**Pedro**</example>
         /// <response code = "200">Email sent</response>
         /// <response code = "500">Internal Server Error</response>
-        
+
         [HttpPost]
         public ApiResponse SendEmail([FromBody] Entities.Email email)
         {
