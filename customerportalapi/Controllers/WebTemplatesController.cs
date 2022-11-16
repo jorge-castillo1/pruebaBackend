@@ -27,6 +27,9 @@ namespace customerportalapi.Controllers
         /// Get customer portal list templates
         /// </summary>
         /// <returns>Template data model list</returns>
+        /// <remarks>This method searches the database for templates</remarks>
+        /// <remarks>Then returns a list of templates</remarks>
+        /// <response code = "200">Return a list of templates</response>
         //GET: api/templates
         [HttpGet]
         public async Task<ApiResponse> GetAsync()
@@ -49,6 +52,8 @@ namespace customerportalapi.Controllers
         /// <param name="code">Template code</param>
         /// <param name="language">Template language</param>
         /// <returns>Template data model</returns>
+        /// <remarks>This method searches the database for an specific template</remarks>
+        /// <remarks>It is required the code of the template and the language</remarks>
         // GET api/templates/{language}
         [HttpGet("{code}/{language}")]
         public async Task<ApiResponse> GetAsync(int code, string language)
