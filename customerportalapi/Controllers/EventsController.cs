@@ -32,6 +32,8 @@ namespace customerportalapi.Controllers
         /// </summary>
         /// <param name="value">Signature status data</param>
         /// <returns>Ok</returns>
+        /// <remarks>This method checks the status of signature.
+        /// </remarks>
         [HttpPost]
         public async Task<ActionResult> SignatureStatus([FromBody] SignatureStatus value)
         {
