@@ -211,6 +211,13 @@ namespace customerportalapi.Controllers
         /// <remarks>
         /// This method call to the CRM API by the SM contract code and returns a list of contracts
         /// Filter with the type document = "0" (Contract).
+        ///
+        /// List of document types:
+        /// - SEPA = 1
+        /// - Contract = 0
+        /// - Card = 2
+        /// - Invoice = 3
+        ///  
         /// If document exist return "true", if not it returns "false".
         /// </remarks>
         /// <response code = "200">Return if the document exist or not</response>
@@ -236,7 +243,6 @@ namespace customerportalapi.Controllers
             }
         }
 
-
         /// <summary>
         /// Obtain if invoice exists in sharepoint from SM contract number
         /// </summary>
@@ -245,6 +251,13 @@ namespace customerportalapi.Controllers
         /// <remarks>
         /// This method call to the CRM API by the SM contract code and returns a list of documents
         /// Filter with the type document = "3" (Invoice)
+        ///
+        /// List of document types:
+        /// - SEPA = 1
+        /// - Contract = 0
+        /// - Card = 2
+        /// - Invoice = 3
+        /// 
         /// If document exist return "true", if not it returns "false".
         /// </remarks>
         /// <response code = "200">Return  if invoice exists or not</response>
