@@ -33,6 +33,14 @@ namespace customerportalapi.Controllers
         /// </summary>
         /// <param name="username">Username</param>
         /// <returns>User profile data model</returns>
+        /// <remarks>
+        /// This method checks if the user exists in the database.
+        /// Check if the email is verified.
+        /// Get the user's profile from the CRM API
+        /// Check if the user's email is not repeated in the database. 
+        /// If there is any error send email to **mailIT**
+        /// Synchronize CRM profile data to the database
+        /// </remarks>
         // GET api/users/{dni}
         [HttpGet("{username}")]
         [AuthorizeToken]
@@ -61,6 +69,12 @@ namespace customerportalapi.Controllers
         /// <param name="dni">User Document Identification Number</param>
         /// <param name="accountType">Account type</param>
         /// <returns>User profile data model</returns>
+        /// <remarks>
+        /// This method checks if the user exists in the database.
+        /// Checks if the email is verified.
+        /// Obtains the crm profile by the dni and type of account.
+        /// Synchronize changes, including language and avatar.
+        /// </remarks>
         // GET api/users/{dni}
         [HttpGet("{dni}/{accountType}")]
         //[AuthorizeAzureAD(new[] { Entities.enums.RoleGroupTypes.StoreManager })]
@@ -88,6 +102,11 @@ namespace customerportalapi.Controllers
         /// </summary>
         /// <param name="value">Profile data to update</param>
         /// <returns>Profile data updated</returns>
+        /// <remarks>
+        /// This method first checks and sets the email.
+        /// Updates all the user profile in the database and also in the CRM.
+        /// Finally, it sends an email to the user informing that this has been updated
+        /// </remarks>
         // POST api/users
         [HttpPatch]
         [AuthorizeToken]
