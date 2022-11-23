@@ -28,6 +28,9 @@ namespace customerportalapi.Controllers
         /// </summary>
         /// <param name="value">Login credentials</param>
         /// <returns>Access Token if succesfully logged</returns>
+        /// <remarks>This method first searches the database by username if not by email
+        /// If the login exists, it authorizes in the Identity Server and returns a token, updating the login attempts
+        /// </remarks>
         // POST api/login
         [HttpPost]
         public async Task<ApiResponse> PostAsync([FromBody] Login value)
@@ -53,6 +56,11 @@ namespace customerportalapi.Controllers
         /// </summary>
         /// <param name="value">Old and New password data</param>
         /// <returns>Access Token if succesfully changed password</returns>
+        /// <remarks>
+        /// This method gets the user from the database, first checks if the old password is valid. 
+        /// If it is correct, it updates the user with the new password in the Identity Server.
+        /// Finally, it passes to null the password in our database.
+        /// </remarks>
         //POST api/login/passwordReset
         [HttpPost]
         [Route("passwordReset")]
@@ -81,6 +89,10 @@ namespace customerportalapi.Controllers
         /// </summary>
         /// <param name="credentials">Login data</param>
         /// <returns>Boolean if mail send</returns>
+        /// <remarks>
+        /// This method generates a random password and saves it in the database.
+        /// Email is sent in the language selected by the user with the password reminder.
+        /// </remarks>
         // POST api/login/forgotPassword
         [HttpPost("forgotPassword")]
         public async Task<ApiResponse> ForgotPassword([FromBody] Login credentials)
