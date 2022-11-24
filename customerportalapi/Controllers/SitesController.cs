@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
+using System.Reflection.Metadata;
 using System.Threading.Tasks;
 
 namespace customerportalapi.Controllers
@@ -32,6 +33,15 @@ namespace customerportalapi.Controllers
         /// </summary>
         /// <param name="username">Username</param>
         /// <returns>Site list</returns>
+        /// <remarks>
+        /// - Get the user from DB by `username` and it is verified that it exists.
+        /// - Get a list of contracts by DNI
+        /// - Get Banner from DB
+        /// - For each contract, it obtains its information in SM, and returns it.
+        /// </remarks>
+        /// <response code = "200">List of sites</response>
+        /// <response code = "404">User does not exist</response>
+        /// <response code = "500">Internal Server Error</response>
         [HttpGet("users/{username}")]
         [AuthorizeToken]
         public async Task<ApiResponse> GetAsync(string username)
@@ -58,6 +68,15 @@ namespace customerportalapi.Controllers
         /// </summary>
         /// <param name="username">Username</param>
         /// <returns>Site list</returns>
+        /// <remarks>
+        /// - Get the user from DB by `username` and it is verified that it exists.
+        /// - Get a list of contracts by DNI
+        /// - Get Banner from DB
+        /// - For each contract, it obtains its information in SM, and returns it.
+        /// </remarks>
+        /// <response code = "200">List of sites</response>
+        /// <response code = "404">User does not exist</response>
+        /// <response code = "500">Internal Server Error</response>
         [HttpGet("users/{username}/msadal")]
         //[AuthorizeAzureAD(new[] { Entities.enums.RoleGroupTypes.StoreManager })]
         public async Task<ApiResponse> GetContractsAsync(string username)
@@ -86,7 +105,12 @@ namespace customerportalapi.Controllers
         /// <param name="city">City</param>
         /// <param name="skip">page number</param>
         /// <param name="limit">page size</param>
-        /// <returns></returns>
+        /// <returns>List of stores</returns>
+        /// <remarks>
+        /// - Get a list of stores in CRM by country code or city
+        /// </remarks>
+        /// <response code = "200">List of stores</response>
+        /// <response code = "500">Internal Server Error</response>
         [HttpGet("stores")]
         //[AuthorizeToken]
         public async Task<ApiResponse> GetAsync(string countryCode, string city, int skip, int? limit)
@@ -116,6 +140,11 @@ namespace customerportalapi.Controllers
         /// </summary>
         /// <param name="id">Unit identification Id</param>
         /// <returns>Unit data model</returns>
+        /// <remarks>
+        /// Get unit information in CRM by id
+        /// </remarks>
+        /// <response code = "200">Unit information</response>
+        /// <response code = "500">Internal Server Error</response>
         [HttpGet("units/{id:guid}")]
         [AuthorizeToken]
         public async Task<ApiResponse> GetUnitAsync(Guid id)
@@ -137,6 +166,11 @@ namespace customerportalapi.Controllers
         /// </summary>
         /// <param name="smid">ERP Unit identification Id </param>
         /// <returns>Unit data model</returns>
+        /// <remarks>
+        /// Get unit information in CRM by SM id
+        /// </remarks>
+        /// <response code = "200">Unit information</response>
+        /// <response code = "500">Internal Server Error</response>
         [HttpGet("units/{smid}")]
         [AuthorizeToken]
         public async Task<ApiResponse> GetUnitBySMIdAsync(string smid)
@@ -158,7 +192,14 @@ namespace customerportalapi.Controllers
         /// </summary>
         /// <param name="smid">ERP Unit identification Id</param>
         /// <param name="contractnumber">ERP contract identification number</param>
-        /// <returns></returns>
+        /// <returns>Unit information</returns>
+        /// <remarks>
+        /// - Get unit information in CRM by SM id
+        /// - Get full contract information in CRM by contract number.
+        /// - Returns info of unit and contract
+        /// </remarks>
+        /// <response code = "200">Info of unit and contract</response>
+        /// <response code = "500">Internal Server Error</response>
         [HttpGet("units/{smid}/{contractnumber}")]
         [AuthorizeToken]
         public async Task<ApiResponse> GetUnitContractAsync(string smid, string contractnumber)
@@ -187,7 +228,12 @@ namespace customerportalapi.Controllers
         /// Save image unit category
         /// </summary>
         /// <param name="document"></param>
-        /// <returns></returns>
+        /// <returns>Document Id</returns>
+        /// <remarks>
+        /// Save the document in de Blob Storage (BlobStorageUnitImageContainer)
+        /// </remarks>
+        /// <response code = "200">Document Id</response>
+        /// <response code = "500">Internal Server Error</response>
         [HttpPost("units/category/image")]
         public async Task<ApiResponse> UploadImageUnitCategoryAsync([FromBody] Document document)
         {
@@ -209,10 +255,15 @@ namespace customerportalapi.Controllers
         }
 
         /// <summary>
-        /// Get Blob content
+        /// Get list Blob content of units from CRM
         /// </summary>
-        /// <param name="names"></param>
-        /// <returns></returns>
+        /// <param name="names">List of units</param>
+        /// <returns>List of units</returns>
+        /// <remarks>
+        /// Get a list of Blob units (`BlobStorageUnitImageContainer`)
+        /// </remarks>
+        /// <response code = "200">List of units</response>
+        /// <response code = "500">Internal Server Error</response>
         [HttpGet("units/category/image/info")]
         //[AuthorizeAzureAD(new[] { Entities.enums.RoleGroupTypes.StoreManager })]
         public async Task<ApiResponse> GetImageUnitCategoryAsync(string names)
@@ -235,9 +286,14 @@ namespace customerportalapi.Controllers
         }
 
         /// <summary>
-        /// Get all available countries
+        /// Get all available countries from CRM
         /// </summary>
         /// <returns>Country data model list</returns>
+        /// <remarks>
+        /// Get a list of countries
+        /// </remarks>
+        /// <response code = "200">List of countries</response>
+        /// <response code = "500">Internal Server Error</response>
         [HttpGet("countries")]
         //[AuthorizeToken]
         public async Task<ApiResponse> GetCountriesAsync()
@@ -255,10 +311,15 @@ namespace customerportalapi.Controllers
         }
 
         /// <summary>
-        /// Get cities from country
+        /// Get cities from country from CRM
         /// </summary>
         /// <param name="countryCode">Country code</param>
         /// <returns>City data model list</returns>
+        /// <remarks>
+        /// Get a list of cities from CRM
+        /// </remarks>
+        /// <response code = "200">List of cities</response>
+        /// <response code = "500">Internal Server Error</response>
         [HttpGet("cities")]
         //[AuthorizeToken]
         public async Task<ApiResponse> GetCitiesAsync(string countryCode)
@@ -276,10 +337,15 @@ namespace customerportalapi.Controllers
         }
 
         /// <summary>
-        /// Get stores from store code
+        /// Get a store from store code
         /// </summary>
         /// <param name="storeCode">Store code</param>
         /// <returns>Store data model</returns>
+        /// <remarks>
+        /// Get a store from CRM by store code
+        /// </remarks>
+        /// <response code = "200">Info of Store</response>
+        /// <response code = "500">Internal Server Error</response>
         [HttpGet("stores/{storeCode}")]
         [AuthorizeToken]
         public async Task<ApiResponse> GetStoreAsync(string storeCode)
@@ -301,6 +367,16 @@ namespace customerportalapi.Controllers
         /// </summary>
         /// <param name="value">Access code credentials</param>
         /// <returns>Site access code</returns>
+        /// <remarks>
+        /// - Gets the DB user from the user logged in the system.
+        /// - Logged user into the identity server
+        /// - The CRM contract and the SM Contract are obtained from the SM contract id
+        /// - SM contract password is retrieved
+        /// - The AccessCode entity is returned with the SM user data and password
+        /// </remarks>
+        /// <response code = "200">Access Code information and Password form SM</response>
+        /// <response code = "400">Password not valid</response> 
+        /// <response code = "500">Internal Server Error</response>
         [HttpPost("access-code")]
         [AuthorizeToken]
         public async Task<ApiResponse> GetAccessCodeAsync([FromBody] AccessCode value)
@@ -334,6 +410,13 @@ namespace customerportalapi.Controllers
         /// Checks if site access code is available due to invalid password attempts
         /// </summary>
         /// <returns>bool</returns>
+        /// <remarks>
+        /// - Gets the DB user from the user logged in the system.
+        /// - Return false if the user has exceeded the number of login attempts allowed and established by configuration
+        /// </remarks>
+        /// <response code = "200">True or False</response>
+        /// <response code = "400">Password not valid</response> 
+        /// <response code = "500">Internal Server Error</response>
         [HttpPost("access-code-available")]
         [AuthorizeToken]
         public async Task<ApiResponse> IsAccessCodeAvailableAsync()
@@ -360,6 +443,26 @@ namespace customerportalapi.Controllers
         /// </summary>
         /// <param name="value">Update Access code credentials</param>
         /// <returns>Bool</returns>
+        /// <remarks>
+        /// - Gets the DB user from the user logged in the system.
+        /// - Get SM contract by SM Contract id
+        /// - Gets the subcontract from SM
+        /// - Update the password in SM
+        /// - An email is sent to the user, in the user's language, with the EditAccessCode template
+        /// - CRM contract is obtained
+        /// - Mail is sent to the store, with the EditAccessCodeToStore template
+        /// - Returns "true" if the password has been updated in SM, or not, returns "false"
+        /// </remarks>
+        /// <response code = "200">True or False</response>
+        /// <response code = "400">Security access code error</response>
+        /// <response code = "404">
+        /// - Contract does not exist.
+        /// - SubContractId does not exist.
+        /// </response>
+        /// <response code = "500">
+        /// - Internal Server Error
+        /// - Error updating accessCode.
+        /// </response>
         [HttpPatch("access-code")]
         [AuthorizeToken]
         public async Task<ApiResponse> UpdateCodeAsync([FromBody] AccessCode value)
@@ -395,6 +498,17 @@ namespace customerportalapi.Controllers
         /// <param name="username">Username</param>
         /// <param name="contractNumber">Contract Number (Optional)</param>
         /// <returns>Last n user invoices</returns>
+        /// <remarks>
+        /// - Retrieves from the "Features" table the number of documents to be displayed
+        /// - Obtains the user by username and verifies that it exists
+        /// - Obtain CRM contracts by DNI
+        /// - For each CRM contract, you get the SM contract
+        /// - Retrieve invoices
+        /// - Returns the list of invoices grouped by contract
+        /// </remarks>
+        /// <response code = "200">Returns the list of invoices grouped by contract</response>
+        /// <response code = "404">User does not exist.</response>
+        /// <response code = "500">Internal Server Error</response>
         [HttpGet("invoices/{username}/{contractNumber?}")]
         public async Task<ApiResponse> GetInvoicesAsync(string username, string contractNumber = null)
         {
@@ -419,8 +533,14 @@ namespace customerportalapi.Controllers
         /// Get Blob content by store code
         /// </summary>
         /// <param name="storeCode"></param>
-        /// <returns></returns>
-        [HttpGet("stores/facade/image/info")]        
+        /// <returns>Image from Blob Storage</returns>
+        /// <remarks>
+        /// - The information of the image saved in the StoreImages table is obtained
+        /// - The Blob Storage image is returned (BlobStorageStoreFacadeImageContainer)
+        /// </remarks>
+        /// <response code = "200">Image from Blob Storage</response>
+        /// <response code = "500">Internal Server Error</response>
+        [HttpGet("stores/facade/image/info")]
         public async Task<ApiResponse> GetImageStoreFacadeAsync(string storeCode)
         {
             try
@@ -443,9 +563,22 @@ namespace customerportalapi.Controllers
         /// <summary>
         /// Save image unit category
         /// </summary>
-        /// <param name="document"></param>
-        /// <param name="storeCode"></param>
-        /// <returns></returns>
+        /// <param name="document">Document info</param>
+        /// <param name="storeCode">Store Code</param>
+        /// <returns>Boolean</returns>
+        /// <remarks>
+        /// - Check if image data exists before saving
+        /// - If they do not exist:
+        /// - It is recorded on BD
+        /// - uploaded to Blob Storage
+        /// - The url of the image is uploaded to CRM
+        /// - If data already exists:
+        /// - The name in DB is updated
+        /// - The old image is deleted from the BlobStorage and the new one is uploaded
+        /// - The url of the image is uploaded to CRM
+        /// </remarks>
+        /// <response code = "200">True if the image is uploaded, false if not.</response>
+        /// <response code = "500">Internal Server Error</response>
         [HttpPost("stores/facade/image")]
         public async Task<ApiResponse> UploadImageStoreFacadeAsync([FromBody] Document document, string storeCode)
         {
@@ -470,7 +603,14 @@ namespace customerportalapi.Controllers
         /// Delete image store facade
         /// </summary>
         /// <param name="storeCode">Store Code</param>
-        /// <returns></returns>
+        /// <returns>Boolean</returns>
+        /// <remarks>
+        /// - Check if image data exists
+        /// - The image of the BlobStorage and the associated data of the BD are deleted
+        /// - The image url field in CRM is set to null
+        /// </remarks>
+        /// <response code = "200">True if delete ok</response>
+        /// <response code = "500">Internal Server Error</response>
         [HttpDelete("stores/facade/image")]
         public async Task<ApiResponse> DeleteImageStoreFacadeAsync(string storeCode)
         {
