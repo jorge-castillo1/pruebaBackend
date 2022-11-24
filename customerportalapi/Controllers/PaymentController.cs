@@ -297,7 +297,8 @@ namespace customerportalapi.Controllers
         /// </summary>
         /// <param name="value">Info of payment</param>
         /// <returns>Info of Payment</returns>
-        /// <remarks>Paying an invoice
+        /// <remarks>
+        /// ### Paying an invoice
         /// - All SM invoices are obtained by the SMContractCode.
         /// - It is filtered by the invoice in question.
         /// - Obtains SM contract info.
