@@ -172,6 +172,17 @@ namespace customerportalapi.Controllers
         /// <param name="receivedToken">Invitation token</param>
         /// <param name="value">New user credentials</param>
         /// <returns>Access Token</returns>
+        /// <remarks>
+        /// This method verifies that the user has a valid token
+        /// Validates if the user is correct and unique
+        /// Set Admincontact, Supercontact and WebPortalAcces to true and WebPortalUsername to the value of the user
+        /// Updates the CRM profile.
+        /// Add the user to the Identity Server
+        /// Assign the groups to the user
+        /// Updates the database
+        /// Confirm acces to CRM
+        /// And finally authorizes the user in identity and returns a token
+        /// </remarks>
         [HttpPut("confirm/user/{receivedToken}")]
         public async Task<ApiResponse> ConfirmAndChangeCredentials(string receivedToken, [FromBody] ResetPassword value)
         {
@@ -197,6 +208,16 @@ namespace customerportalapi.Controllers
         /// </summary>
         /// <param name="receivedToken">Invitation token</param>
         /// <returns>Access Token</returns>
+        /// <remarks>
+        /// First validates if the recievedToken is not empty
+        /// Validates user by invitationToken or forgotPasswordToken
+        /// Get UserProfile from CRM
+        /// Set roles in CRM to true. Admincontact, Supercontact, WebPortalAccess
+        /// Add user to the IdentityServer
+        /// Assign groups/roles to the user
+        /// Update email verification data
+        /// Confirm acces status to external system
+        /// </remarks>
         // PUT api/users/confirm/{receivedToken}
         [HttpPut("confirm/{receivedToken}")]
         public async Task<ApiResponse> Confirm(string receivedToken)
@@ -223,6 +244,9 @@ namespace customerportalapi.Controllers
         /// </summary>
         /// <param name="username">Username</param>
         /// <returns>Boolean with result</returns>
+        /// <remarks>
+        /// This method searches the database and checks if the user exists.
+        /// </remarks>
         [HttpGet("{username}/validation")]
         public ApiResponse UniqueUsername(string username)
         {
@@ -244,6 +268,9 @@ namespace customerportalapi.Controllers
         /// </summary>
         /// <param name="email">Username</param>
         /// <returns>Boolean with result</returns>
+        /// <remarks>
+        /// This method searches the database and checks if the email exists.
+        /// </remarks>
         [HttpGet("{email}/validate")]
         public ApiResponse EmailExists(string email)
         {
@@ -259,6 +286,19 @@ namespace customerportalapi.Controllers
             }
         }
 
+        /// <summary>
+        /// Uninvite user
+        /// </summary>
+        /// <param name="dni"></param>
+        /// <returns></returns>
+        /// <remarks>
+        /// This method first creates an invitation with dni and customer type residential
+        /// Validates that the dni isn't empty
+        /// Validates the username
+        /// Deletes the user from Identity Server
+        /// Deletes the user from the database
+        /// Confirm revocation access status to external system & delete username in CRM
+        /// </remarks>
         // PUT api/users/uninvite/{dni}
         [HttpPut("uninvite/{dni}")]
         [AuthorizeApiKey]
