@@ -34,6 +34,7 @@ namespace customerportalapi.Controllers
         /// ### This method find and update the process document. Only update document status process with status distinct of:
         /// - `document_completed`, `document_canceled` or `audit_trail_completed`
         /// ---
+        /// ## ** Only on Payment method changes **
         /// ### If the change of payment method is made to Bank Transfer:
         /// - Search the user in DB.
         /// - Gets the information of the user's profile in CRM from the DNI.
@@ -46,6 +47,7 @@ namespace customerportalapi.Controllers
         /// - Contract data is updated in CRM.
         /// - Sent mail to the store.
         /// ---
+        /// ## ** Only on Payment method changes **
         /// ### If the change of payment method is made to Card:
         /// - Search the user in DB.
         /// - Gets the information of the user's profile in CRM from the DNI.
