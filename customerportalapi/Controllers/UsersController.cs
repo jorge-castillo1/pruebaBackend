@@ -333,7 +333,14 @@ namespace customerportalapi.Controllers
         /// </summary>
         /// <param name="value">User invitation data to revoke</param>
         /// <returns>Boolean with result</returns>
-        /// <remarks>Use API KEY for this api</remarks>
+        /// <remarks>
+        /// Use API KEY for this api.
+        /// Validates that the dni isn't empty.
+        /// Validates the username.
+        /// Deletes the user from Identity Server.
+        /// Deletes the user from the database.
+        /// Confirm revocation access status to external system & delete username in CRM.
+        /// </remarks>        
         // PUT api/users/uninvite/{dni}
         [HttpPut("uninvite")]
         [AuthorizeApiKey]
@@ -362,6 +369,11 @@ namespace customerportalapi.Controllers
         /// </summary>
         /// <param name="username">Username</param>
         /// <returns>Customer data model</returns>
+        /// <remarks>
+        /// Verifies that the username exists.
+        /// Checks the type of the account
+        /// Returns the info of the customer from the database
+        /// </remarks>
         // GET api/users/accounts/{username}
         [HttpGet("accounts/{username}")]
         public async Task<ApiResponse> GetAccountAsync(string username)
@@ -388,6 +400,10 @@ namespace customerportalapi.Controllers
         /// </summary>
         /// <param name="documentNumber">Document Number</param>
         /// <returns>Customer data model</returns>
+        /// <remarks>
+        /// This method searches the database via document number to find the information from the account
+        /// </remarks>
+        /// <response code = "404">Account not found</response>
         // GET api/users/accounts/{documentNumber}/base
         [HttpGet("accounts/{documentNumber}/base")]
         public async Task<ApiResponse> GetAccountBydocumentNumberAsync(string documentNumber)
@@ -416,6 +432,11 @@ namespace customerportalapi.Controllers
         /// <param name="value">Account data model to update</param>
         /// <param name="username">Username</param>
         /// <returns>Account data updated</returns>
+        /// <remarks>
+        /// This method is going to record by record updating with the new values introduced.
+        /// Then updates the customer in the CRM
+        /// </remarks>
+        /// <response code = "404">Account not found</response>
         // POST api/users/accounts
         [HttpPatch("accounts/{username}")]
         public async Task<ApiResponse> PatchAccountAsync([FromBody] Account value, string username)
@@ -450,6 +471,9 @@ namespace customerportalapi.Controllers
         /// </summary>
         /// <param name="value">Contact Information</param>
         /// <returns>Boolean with result</returns>
+        /// <remarks>
+        /// 
+        /// </remarks>
         // POST api/users/contact
         [HttpPost("contact")]
         [AuthorizeToken]
@@ -477,7 +501,13 @@ namespace customerportalapi.Controllers
         /// <param name="username">Username</param>
         /// <param name="role">role</param>
         /// <returns></returns>
-        /// <remarks>Use API KEY for this api</remarks>
+        /// <remarks>
+        /// Use API KEY for this api.
+        /// First checks if the user and role are valid.
+        /// Removes the user's current groups
+        /// Finally adds user to the groups assigned
+        /// </remarks>
+        /// <response code = "404">Not found</response>
         [HttpPatch("role/{username}/{role}")]
         [AuthorizeApiKey]
         public async Task<ApiResponse> ChangeRole(string username, string role)
@@ -504,7 +534,24 @@ namespace customerportalapi.Controllers
         /// </summary>
         /// <param name="changeRoles">User Name and the list of roles</param>
         /// <returns></returns>
-        /// <remarks>Use API KEY for this api</remarks>
+        /// <remarks>
+        /// Use API KEY for this api.
+        /// First validate the parameters
+        /// Get the user from the database
+        /// Get the user from Identity Server
+        /// Remove all groups/roles from the user
+        /// Validate name of the role
+        /// Get role from IdentityServer
+        /// Assign active roles to user
+        /// </remarks>
+        /// <response code = "400">Bad Request:
+        /// - User must have a valid email address.
+        /// - User must have a valid document number.
+        /// </response>
+        /// <response code = "404">Not Found:
+        /// - The role name cannot be empty
+        /// - No roles have been sent
+        /// </response>
         [HttpPatch("roles")]
         [AuthorizeApiKey]
         public async Task<ApiResponse> ChangeRoles([FromBody] ChangeRoles changeRoles)
@@ -533,6 +580,10 @@ namespace customerportalapi.Controllers
         /// <param name="dni">DNI</param>
         /// <param name="customerType">Customer Type, "Residential" or "Business"</param>
         /// <returns>True or False</returns>
+        /// <remarks>
+        /// This method first check the customertype of the user
+        /// Search the database by dni and email to see if the record exists
+        /// </remarks>
         [HttpGet("exist/{email}/{dni}/{customerType}")]
         public ApiResponse UserExistInDb(string email, string dni, string customerType = "Residential")
         {
@@ -559,7 +610,13 @@ namespace customerportalapi.Controllers
         /// <param name="username">Username</param>
         /// <param name="role">Role to remove</param>
         /// <returns>Boolean with result</returns>  
-        /// <remarks>Use API KEY for this api</remarks>
+        /// <remarks>Use API KEY for this api.
+        /// Gets the user
+        /// Gets the role
+        /// Fins the group with that role
+        /// Remove the user from the group
+        /// </remarks>
+        /// <response code = "404">User not found</response>
         [HttpPatch("role/remove/{username}/{role}")]
         [AuthorizeApiKey]
         public async Task<ApiResponse> RemoveRole(string username, string role)
@@ -610,6 +667,9 @@ namespace customerportalapi.Controllers
         /// Save new users inside the database
         /// </summary>
         /// <returns>Boolean</returns>
+        /// <remarks>
+        /// 
+        /// </remarks>
         // POST api/users/newUser
         [HttpPost("newuser")]
         public async Task<ApiResponse> SaveNewUser([FromBody] NewUser newUser)
