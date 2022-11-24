@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
-using System.Reflection.Metadata;
 using System.Threading.Tasks;
 
 namespace customerportalapi.Controllers
