@@ -61,8 +61,23 @@ namespace customerportalapi.Controllers
         /// <param name="smContractCode">Unique contract number from erp</param>
         /// <param name="processtype">Type of process</param>
         /// <returns></returns>
-        /// <remarks>
-        /// 
+        /// <remarks> 
+        /// Find the last process in the Process table            
+        /// The process in the DB is updated with the status Canceled 
+        /// ProcessStatuses:
+        /// - Pending = 0,
+        /// - Accepted = 1,
+        /// - Canceled = 2,
+        /// - Started = 3
+        /// ProcessTypes:
+        /// - PaymentMethodChangeBank = 0,
+        /// - PaymentMethodChangeCard = 1,
+        /// - PaymentMethodChangeCardSignature = 2,
+        /// - Payment = 3
+        /// If the process is PaymentMethodChangeBank, the signature and the document in Signaturit are cancelled.
+        /// If the process is PaymentMethodChangeCard, confirm the cancellation in Precognis, and also update the payment method change cancellation in Precognis.
+        /// If the process is PaymentMethodChangeCardSignature, confirm the cancellation in Precognis, and also update the payment method change cancellation in Precognis; and in addition, the signature and the document in Signaturit are canceled
+        /// Returns true if the process was successfully aborted, false otherwise.
         /// </remarks>
         /// <response code = "200"></response>
         /// <response code = "404">Process Not Found</response>
@@ -94,7 +109,10 @@ namespace customerportalapi.Controllers
         /// <param name="processtype">Type of process</param>
         /// <returns></returns>
         /// <remarks>
-        /// 
+        /// Search if there is any process for the user of the type informed by parameter
+        ///  For each process found, update the process in DB with the status `Canceled`
+        /// Confirm the cancellation in Precognis, and also update the cancellation of the payment method change in Precognis;
+        /// Returns the number of records processed 
         /// </remarks>
         /// <response code = "200"></response>
         /// <response code = "404">Process not found</response>
