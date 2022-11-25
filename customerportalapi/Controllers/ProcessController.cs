@@ -29,6 +29,12 @@ namespace customerportalapi.Controllers
         /// <param name="smContractCode">Unique contract number from erp</param>
         /// <param name="processtype">Type of process</param>
         /// <returns>Process data or empty list</returns>
+        /// <remarks>
+        /// This method searches for processes in the database filtering by user, smContractCode and processtype.
+        /// Returns the last process.
+        /// </remarks>
+        /// <response code = "200">Process data or empty list</response>        /// 
+        /// <response code = "500">Internal Server Error</response>
         [HttpGet]
         public ApiResponse GetLastProcess(string user, string smContractCode = null, int? processtype = null)
         {
@@ -55,6 +61,12 @@ namespace customerportalapi.Controllers
         /// <param name="smContractCode">Unique contract number from erp</param>
         /// <param name="processtype">Type of process</param>
         /// <returns></returns>
+        /// <remarks>
+        /// 
+        /// </remarks>
+        /// <response code = "200"></response>
+        /// <response code = "404">Process Not Found</response>
+        /// <response code = "500">Internal Server Error</response>
         [HttpPut("cancel/{smContractCode}/{processtype}")]
         public ApiResponse CancelSignature(string smContractCode, int processtype)
         {
@@ -81,6 +93,12 @@ namespace customerportalapi.Controllers
         /// <param name="username">Username</param>
         /// <param name="processtype">Type of process</param>
         /// <returns></returns>
+        /// <remarks>
+        /// 
+        /// </remarks>
+        /// <response code = "200"></response>
+        /// <response code = "404">Process not found</response>
+        /// <response code = "500">Internal Server Error</response>
         [HttpPut("cancel/{username}/{processtype}/all")]
         public ApiResponse CancelAllProcessByUsernameAndType(string username, int processtype)
         {
