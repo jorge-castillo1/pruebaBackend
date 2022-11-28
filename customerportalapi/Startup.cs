@@ -1,6 +1,5 @@
 ﻿using AutoWrapper;
 using customerportalapi.Entities;
-using customerportalapi.Loggers;
 using customerportalapi.Repositories;
 using customerportalapi.Repositories.Interfaces;
 using customerportalapi.Repositories.Utils;
@@ -14,7 +13,6 @@ using Microsoft.AspNetCore.Authentication.AzureAD.UI;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -348,6 +346,27 @@ namespace customerportalapi
                 AllowAutoRedirect = false,
                 AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip,
             });
+
+            // BearBox
+            services.AddHttpClient("httpClientBearBox", c =>
+            {
+                c.BaseAddress = new Uri(Configuration["BearBox:ServiceUrl"]);
+                c.Timeout = new TimeSpan(0, 2, 0); //2 minutes
+                //c.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                c.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue
+                {
+                    NoCache = true,
+                    NoStore = true,
+                    MaxAge = new TimeSpan(0),
+                    MustRevalidate = true
+                };
+                c.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", $"{Configuration["BearBox:Token"]}");
+            }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            {
+                AllowAutoRedirect = false,
+                AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip,
+            });
+
 
             services.AddAuthentication(AzureADDefaults.JwtBearerAuthenticationScheme)
                 .AddAzureADBearer(options => Configuration.Bind("AzureAd", options));
