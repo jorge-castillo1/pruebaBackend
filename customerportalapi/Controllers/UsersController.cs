@@ -41,6 +41,9 @@ namespace customerportalapi.Controllers
         /// If there is any error send email to **mailIT**
         /// Synchronize CRM profile data to the database
         /// </remarks>
+        /// <response code = "200">User profile data model</response>
+        /// <response code = "400"></response>
+        /// <response code = "500">Internal Server Error</response>
         // GET api/users/{dni}
         [HttpGet("{username}")]
         [AuthorizeToken]
@@ -75,6 +78,9 @@ namespace customerportalapi.Controllers
         /// Obtains the crm profile by the dni and type of account.
         /// Synchronize changes, including language and avatar.
         /// </remarks>
+        /// <response code = "200">User profile data model</response>
+        /// <response code = "400"></response>
+        /// <response code = "500">Internal Server Error</response>
         // GET api/users/{dni}
         [HttpGet("{dni}/{accountType}")]
         //[AuthorizeAzureAD(new[] { Entities.enums.RoleGroupTypes.StoreManager })]
@@ -107,6 +113,9 @@ namespace customerportalapi.Controllers
         /// Updates all the user profile in the database and also in the CRM.
         /// Finally, it sends an email to the user informing that this has been updated
         /// </remarks>
+        /// <response code = "200">Profile data updated</response>
+        /// <response code = "400"></response>
+        /// <response code = "500">Internal Server Error</response>
         // POST api/users
         [HttpPatch]
         [AuthorizeToken]
@@ -134,7 +143,34 @@ namespace customerportalapi.Controllers
         /// </summary>
         /// <param name="value">Invitation data model</param>
         /// <returns>Boolean</returns>
-        /// <remarks>Use API KEY for this api</remarks>
+        /// <remarks>
+        /// Use API KEY for this api.
+        /// Validate that the email and DNI fields are informed
+        /// Obtains the list of contracts associated with a DNI in CRM
+        /// Verify that the user does not already exist(by Email), if it exists, send an email to "MailIT" with the template "ErrorInvitationEmailAlreadyExists"
+        /// Check that the user exists in DB with that Email, Dni and CustomerType before continuing
+        /// Obtains the user's profile in CRM
+        /// Check and fill in the fields of all the systems involved: Contact(CRM), Contract(CRM, SM), Store(CRM), Unit(CRM), Opportunity(CRM)
+        /// Verify that the mandatory fields are filled in, if it does not send an error mail to the "MailIT" mailbox, with the "InvitationError" template and returns an exception: "required some fields"
+        /// Create the user or modify and establish a new temporary password
+        /// Sends the WelcomeEmail(short or extended) depending on the configuration of the Features table and who invoked the process.From CRM always the Short, The rest according to configuration.
+        /// Change the check of "WebPortalAccess" to true in CRM
+        /// </remarks>
+        /// <response code = "200">Boolean</response>
+        /// <response code = "400">Controled Error:
+        /// - User must have a valid email address.
+        /// - User must have a valid document number.
+        /// - Required some fields
+        /// </response>
+        /// <response code = "404"> Not found:
+        /// - Email template not found
+        /// - Store mail not found
+        /// - Invitation user fails. Email in use by another user
+        /// - Invitation user fails. User was activated before
+        /// - Contact required: user: {userIdentification}
+        /// - User without contract, user: {}userIdentification
+        /// </response>
+        /// <response code = "500">Internal Server Error</response>
         // POST api/users/invite
         [HttpPost("invite")]
         [CustomLog]
@@ -183,6 +219,9 @@ namespace customerportalapi.Controllers
         /// Confirm acces to CRM
         /// And finally authorizes the user in identity and returns a token
         /// </remarks>
+        /// <response code = "200">Access Token</response>
+        /// <response code = "400"></response>
+        /// <response code = "500">Internal Server Error</response>
         [HttpPut("confirm/user/{receivedToken}")]
         public async Task<ApiResponse> ConfirmAndChangeCredentials(string receivedToken, [FromBody] ResetPassword value)
         {
@@ -218,6 +257,9 @@ namespace customerportalapi.Controllers
         /// Update email verification data
         /// Confirm acces status to external system
         /// </remarks>
+        /// <response code = "200"></response>
+        /// <response code = "400"></response>
+        /// <response code = "500">Internal Server Error</response>
         // PUT api/users/confirm/{receivedToken}
         [HttpPut("confirm/{receivedToken}")]
         public async Task<ApiResponse> Confirm(string receivedToken)
@@ -247,6 +289,9 @@ namespace customerportalapi.Controllers
         /// <remarks>
         /// This method searches the database and checks if the user exists.
         /// </remarks>
+        /// <response code = "200">Boolean with result</response>
+        /// <response code = "400"></response>
+        /// <response code = "500">Internal Server Error</response>
         [HttpGet("{username}/validation")]
         public ApiResponse UniqueUsername(string username)
         {
@@ -271,6 +316,9 @@ namespace customerportalapi.Controllers
         /// <remarks>
         /// This method searches the database and checks if the email exists.
         /// </remarks>
+        /// <response code = "200">Boolean with result</response>
+        /// <response code = "400"></response>
+        /// <response code = "500">Internal Server Error</response>
         [HttpGet("{email}/validate")]
         public ApiResponse EmailExists(string email)
         {
@@ -299,6 +347,9 @@ namespace customerportalapi.Controllers
         /// Deletes the user from the database
         /// Confirm revocation access status to external system & delete username in CRM
         /// </remarks>
+        /// <response code = "200"></response>
+        /// <response code = "400"></response>
+        /// <response code = "500">Internal Server Error</response>
         // PUT api/users/uninvite/{dni}
         [HttpPut("uninvite/{dni}")]
         [AuthorizeApiKey]
@@ -341,6 +392,9 @@ namespace customerportalapi.Controllers
         /// Deletes the user from the database.
         /// Confirm revocation access status to external system & delete username in CRM.
         /// </remarks>        
+        /// <response code = "200">Boolean with result</response>
+        /// <response code = "400"></response>
+        /// <response code = "500">Internal Server Error</response>
         // PUT api/users/uninvite/{dni}
         [HttpPut("uninvite")]
         [AuthorizeApiKey]
@@ -374,6 +428,9 @@ namespace customerportalapi.Controllers
         /// Checks the type of the account
         /// Returns the info of the customer from the database
         /// </remarks>
+        /// <response code = "200">Customer data model</response>
+        /// <response code = "400"></response>
+        /// <response code = "500">Internal Server Error</response>
         // GET api/users/accounts/{username}
         [HttpGet("accounts/{username}")]
         public async Task<ApiResponse> GetAccountAsync(string username)
@@ -403,7 +460,10 @@ namespace customerportalapi.Controllers
         /// <remarks>
         /// This method searches the database via document number to find the information from the account
         /// </remarks>
+        /// <response code = "200">Customer data model</response>
+        /// <response code = "400"></response>
         /// <response code = "404">Account not found</response>
+        /// <response code = "500">Internal Server Error</response>
         // GET api/users/accounts/{documentNumber}/base
         [HttpGet("accounts/{documentNumber}/base")]
         public async Task<ApiResponse> GetAccountBydocumentNumberAsync(string documentNumber)
@@ -436,7 +496,10 @@ namespace customerportalapi.Controllers
         /// This method is going to record by record updating with the new values introduced.
         /// Then updates the customer in the CRM
         /// </remarks>
+        /// <response code = "200">Account data updated</response>
+        /// <response code = "400"></response>
         /// <response code = "404">Account not found</response>
+        /// <response code = "500">Internal Server Error</response>
         // POST api/users/accounts
         [HttpPatch("accounts/{username}")]
         public async Task<ApiResponse> PatchAccountAsync([FromBody] Account value, string username)
@@ -472,8 +535,10 @@ namespace customerportalapi.Controllers
         /// <param name="value">Contact Information</param>
         /// <returns>Boolean with result</returns>
         /// <remarks>
-        /// 
         /// </remarks>
+        /// <response code = "200">Boolean with result</response>
+        /// <response code = "400"></response>
+        /// <response code = "500">Internal Server Error</response>
         // POST api/users/contact
         [HttpPost("contact")]
         [AuthorizeToken]
@@ -507,7 +572,10 @@ namespace customerportalapi.Controllers
         /// Removes the user's current groups
         /// Finally adds user to the groups assigned
         /// </remarks>
+        /// <response code = "200"></response>
+        /// <response code = "400"></response>
         /// <response code = "404">Not found</response>
+        /// <response code = "500">Internal Server Error</response>
         [HttpPatch("role/{username}/{role}")]
         [AuthorizeApiKey]
         public async Task<ApiResponse> ChangeRole(string username, string role)
@@ -544,6 +612,7 @@ namespace customerportalapi.Controllers
         /// Get role from IdentityServer
         /// Assign active roles to user
         /// </remarks>
+        /// <response code = "200"></response>
         /// <response code = "400">Bad Request:
         /// - User must have a valid email address.
         /// - User must have a valid document number.
@@ -552,6 +621,7 @@ namespace customerportalapi.Controllers
         /// - The role name cannot be empty
         /// - No roles have been sent
         /// </response>
+        /// <response code = "500">Internal Server Error</response>
         [HttpPatch("roles")]
         [AuthorizeApiKey]
         public async Task<ApiResponse> ChangeRoles([FromBody] ChangeRoles changeRoles)
@@ -584,6 +654,9 @@ namespace customerportalapi.Controllers
         /// This method first check the customertype of the user
         /// Search the database by dni and email to see if the record exists
         /// </remarks>
+        /// <response code = "200">True or False</response>
+        /// <response code = "400"></response>
+        /// <response code = "500">Internal Server Error</response>
         [HttpGet("exist/{email}/{dni}/{customerType}")]
         public ApiResponse UserExistInDb(string email, string dni, string customerType = "Residential")
         {
@@ -616,7 +689,10 @@ namespace customerportalapi.Controllers
         /// Fins the group with that role
         /// Remove the user from the group
         /// </remarks>
+        /// <response code = "200">Boolean with result</response>
+        /// <response code = "400"></response>
         /// <response code = "404">User not found</response>
+        /// <response code = "500">Internal Server Error</response>
         [HttpPatch("role/remove/{username}/{role}")]
         [AuthorizeApiKey]
         public async Task<ApiResponse> RemoveRole(string username, string role)
@@ -643,6 +719,14 @@ namespace customerportalapi.Controllers
         /// </summary>
         /// <param name="receivedToken">Invitation token</param>
         /// <returns>Access Token</returns>
+        /// <remarks>
+        /// Validates that the token is not null
+        /// The user is searched in the DB for the token
+        /// Returns an object with the name of the user and their language</remarks>
+        /// <response code = "200">Access Token</response>
+        /// <response code = "400">User must have a recieved Token</response>
+        /// <response code = "404">User not found</response>
+        /// <response code = "500">Internal Server Error</response>
         [HttpGet("token/{receivedToken}")]
         public async Task<ApiResponse> GetUserByInvitationtokenAsync(string receivedToken)
         {
@@ -668,8 +752,14 @@ namespace customerportalapi.Controllers
         /// </summary>
         /// <returns>Boolean</returns>
         /// <remarks>
-        /// 
+        /// Insert the user in DB
+        /// Mail is sent to the "MailWP" mailbox with the "SaveNewUser" template
+        /// Returns true if it has been saved and false if not.
         /// </remarks>
+        /// <response code = "200"></response>
+        /// <response code = "400"></response>
+        /// <response code = "404">Store mail not found</response>
+        /// <response code = "500">Internal Server Error</response>
         // POST api/users/newUser
         [HttpPost("newuser")]
         public async Task<ApiResponse> SaveNewUser([FromBody] NewUser newUser)
@@ -696,6 +786,12 @@ namespace customerportalapi.Controllers
         /// Save new users inside the database
         /// </summary>
         /// <returns>Boolean</returns>
+        /// <remarks>- It makes a call to the Google Captcha service passing it a Token, 
+        /// if the answer is 200 Ok it returns true, if not, it returns false
+        /// </remarks>
+        /// <response code = "200">True or False</response>
+        /// <response code = "400"></response>
+        /// <response code = "500">Internal Server Error</response>
         // POST api/users/validatecaptcha
         [HttpPost("validatecaptcha")]
         public async Task<ApiResponse> ValidateCaptcha([FromBody] string token)
