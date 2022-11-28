@@ -42,7 +42,8 @@ namespace customerportalapi.Controllers
         /// Synchronize CRM profile data to the database
         /// </remarks>
         /// <response code = "200">User profile data model</response>
-        /// <response code = "400"></response>
+        /// <response code = "403">User is deactivated</response>
+        /// <response code = "404">User does not exist</response>
         /// <response code = "500">Internal Server Error</response>
         // GET api/users/{dni}
         [HttpGet("{username}")]
@@ -79,7 +80,8 @@ namespace customerportalapi.Controllers
         /// Synchronize changes, including language and avatar.
         /// </remarks>
         /// <response code = "200">User profile data model</response>
-        /// <response code = "400"></response>
+        /// <response code = "403">User is deactivated</response>
+        /// <response code = "404">User does not exist</response>
         /// <response code = "500">Internal Server Error</response>
         // GET api/users/{dni}
         [HttpGet("{dni}/{accountType}")]
@@ -114,7 +116,12 @@ namespace customerportalapi.Controllers
         /// Finally, it sends an email to the user informing that this has been updated
         /// </remarks>
         /// <response code = "200">Profile data updated</response>
-        /// <response code = "400"></response>
+        /// <response code = "400">Bad Request: 
+        /// - Email field can not be null
+        /// - Principal email can not be null
+        /// </response>
+        /// <response code = "403">User is deactivated</response>
+        /// <response code = "404">User does not exist</response>
         /// <response code = "500">Internal Server Error</response>
         // POST api/users
         [HttpPatch]
@@ -220,7 +227,12 @@ namespace customerportalapi.Controllers
         /// And finally authorizes the user in identity and returns a token
         /// </remarks>
         /// <response code = "200">Access Token</response>
-        /// <response code = "400"></response>
+        /// <response code = "400">Bad Request: 
+        /// - User must have a received Token
+        /// - Wrong password
+        /// - Username must not include @
+        /// - Username must be unique
+        /// </response>
         /// <response code = "500">Internal Server Error</response>
         [HttpPut("confirm/user/{receivedToken}")]
         public async Task<ApiResponse> ConfirmAndChangeCredentials(string receivedToken, [FromBody] ResetPassword value)
@@ -257,7 +269,7 @@ namespace customerportalapi.Controllers
         /// Update email verification data
         /// Confirm acces status to external system
         /// </remarks>
-        /// <response code = "200"></response>
+        /// <response code = "200">Access Token</response>
         /// <response code = "400"></response>
         /// <response code = "500">Internal Server Error</response>
         // PUT api/users/confirm/{receivedToken}
