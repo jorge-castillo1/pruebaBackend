@@ -270,7 +270,7 @@ namespace customerportalapi.Controllers
         /// Confirm acces status to external system
         /// </remarks>
         /// <response code = "200">Access Token</response>
-        /// <response code = "400"></response>
+        /// <response code = "400">User must have a receivedToken</response>
         /// <response code = "500">Internal Server Error</response>
         // PUT api/users/confirm/{receivedToken}
         [HttpPut("confirm/{receivedToken}")]
@@ -301,8 +301,7 @@ namespace customerportalapi.Controllers
         /// <remarks>
         /// This method searches the database and checks if the user exists.
         /// </remarks>
-        /// <response code = "200">Boolean with result</response>
-        /// <response code = "400"></response>
+        /// <response code = "200">Boolean with result</response>        
         /// <response code = "500">Internal Server Error</response>
         [HttpGet("{username}/validation")]
         public ApiResponse UniqueUsername(string username)
@@ -329,7 +328,6 @@ namespace customerportalapi.Controllers
         /// This method searches the database and checks if the email exists.
         /// </remarks>
         /// <response code = "200">Boolean with result</response>
-        /// <response code = "400"></response>
         /// <response code = "500">Internal Server Error</response>
         [HttpGet("{email}/validate")]
         public ApiResponse EmailExists(string email)
@@ -359,8 +357,9 @@ namespace customerportalapi.Controllers
         /// Deletes the user from the database
         /// Confirm revocation access status to external system & delete username in CRM
         /// </remarks>
-        /// <response code = "200"></response>
-        /// <response code = "400"></response>
+        /// <response code = "200">Return True or False</response>
+        /// <response code = "400">User must have a valid document number</response>
+        /// <response code = "404">User does not exist</response>
         /// <response code = "500">Internal Server Error</response>
         // PUT api/users/uninvite/{dni}
         [HttpPut("uninvite/{dni}")]
@@ -405,7 +404,8 @@ namespace customerportalapi.Controllers
         /// Confirm revocation access status to external system & delete username in CRM.
         /// </remarks>        
         /// <response code = "200">Boolean with result</response>
-        /// <response code = "400"></response>
+        /// <response code = "400">User must have a valid document number</response>
+        /// <response code = "404">User does not exist</response>
         /// <response code = "500">Internal Server Error</response>
         // PUT api/users/uninvite/{dni}
         [HttpPut("uninvite")]
@@ -441,7 +441,10 @@ namespace customerportalapi.Controllers
         /// Returns the info of the customer from the database
         /// </remarks>
         /// <response code = "200">Customer data model</response>
-        /// <response code = "400"></response>
+        /// <response code = "404">NotFound:
+        /// - User does not exists
+        /// - Account is not found
+        /// </response>
         /// <response code = "500">Internal Server Error</response>
         // GET api/users/accounts/{username}
         [HttpGet("accounts/{username}")]
@@ -473,7 +476,6 @@ namespace customerportalapi.Controllers
         /// This method searches the database via document number to find the information from the account
         /// </remarks>
         /// <response code = "200">Customer data model</response>
-        /// <response code = "400"></response>
         /// <response code = "404">Account not found</response>
         /// <response code = "500">Internal Server Error</response>
         // GET api/users/accounts/{documentNumber}/base
@@ -509,7 +511,6 @@ namespace customerportalapi.Controllers
         /// Then updates the customer in the CRM
         /// </remarks>
         /// <response code = "200">Account data updated</response>
-        /// <response code = "400"></response>
         /// <response code = "404">Account not found</response>
         /// <response code = "500">Internal Server Error</response>
         // POST api/users/accounts
@@ -549,7 +550,12 @@ namespace customerportalapi.Controllers
         /// <remarks>
         /// </remarks>
         /// <response code = "200">Boolean with result</response>
-        /// <response code = "400"></response>
+        /// <response code = "400">FormContact Type field can not be null</response>
+        /// <response code = "404">Not Found: 
+        /// - Error retrieving the current user
+        /// - User does not exist
+        /// - User Profile does not exist
+        /// </response>
         /// <response code = "500">Internal Server Error</response>
         // POST api/users/contact
         [HttpPost("contact")]
@@ -584,9 +590,11 @@ namespace customerportalapi.Controllers
         /// Removes the user's current groups
         /// Finally adds user to the groups assigned
         /// </remarks>
-        /// <response code = "200"></response>
-        /// <response code = "400"></response>
-        /// <response code = "404">Not found</response>
+        /// <response code = "200">True</response>
+        /// <response code = "404">Not found:
+        /// - User not found
+        /// - Role not found
+        /// </response>
         /// <response code = "500">Internal Server Error</response>
         [HttpPatch("role/{username}/{role}")]
         [AuthorizeApiKey]
@@ -624,7 +632,7 @@ namespace customerportalapi.Controllers
         /// Get role from IdentityServer
         /// Assign active roles to user
         /// </remarks>
-        /// <response code = "200"></response>
+        /// <response code = "200">True</response>
         /// <response code = "400">Bad Request:
         /// - User must have a valid email address.
         /// - User must have a valid document number.
@@ -667,7 +675,6 @@ namespace customerportalapi.Controllers
         /// Search the database by dni and email to see if the record exists
         /// </remarks>
         /// <response code = "200">True or False</response>
-        /// <response code = "400"></response>
         /// <response code = "500">Internal Server Error</response>
         [HttpGet("exist/{email}/{dni}/{customerType}")]
         public ApiResponse UserExistInDb(string email, string dni, string customerType = "Residential")
@@ -702,7 +709,6 @@ namespace customerportalapi.Controllers
         /// Remove the user from the group
         /// </remarks>
         /// <response code = "200">Boolean with result</response>
-        /// <response code = "400"></response>
         /// <response code = "404">User not found</response>
         /// <response code = "500">Internal Server Error</response>
         [HttpPatch("role/remove/{username}/{role}")]
@@ -768,8 +774,7 @@ namespace customerportalapi.Controllers
         /// Mail is sent to the "MailWP" mailbox with the "SaveNewUser" template
         /// Returns true if it has been saved and false if not.
         /// </remarks>
-        /// <response code = "200"></response>
-        /// <response code = "400"></response>
+        /// <response code = "200">True: User saved</response>
         /// <response code = "404">Store mail not found</response>
         /// <response code = "500">Internal Server Error</response>
         // POST api/users/newUser
@@ -802,7 +807,6 @@ namespace customerportalapi.Controllers
         /// if the answer is 200 Ok it returns true, if not, it returns false
         /// </remarks>
         /// <response code = "200">True or False</response>
-        /// <response code = "400"></response>
         /// <response code = "500">Internal Server Error</response>
         // POST api/users/validatecaptcha
         [HttpPost("validatecaptcha")]
