@@ -43,7 +43,11 @@ namespace customerportalapi.Controllers
         /// </remarks>
         /// <response code = "200">User profile data model</response>
         /// <response code = "403">User is deactivated</response>
-        /// <response code = "404">User does not exist</response>
+        /// <response code = "404">Not Found:
+        /// - User does not exist
+        /// - Store mail not found
+        /// - Email template not found
+        /// </response>
         /// <response code = "500">Internal Server Error</response>
         // GET api/users/{dni}
         [HttpGet("{username}")]
