@@ -22,7 +22,7 @@ namespace customerportalapi.Repositories
             _clientFactory = clientFactory;
             _logger = logger;
         }
-        public async Task<object> GetUser(string smCustomerId)
+        public async Task<BearBoxStorageUserResponse> GetUser(string smCustomerId)
         {
             var httpClient = _clientFactory.CreateClient("httpClientBearBox");
             httpClient.BaseAddress = new Uri($"{_configuration["BearBox:ServiceUrl"]}{_configuration["BearBox:User"]}");
@@ -37,16 +37,16 @@ namespace customerportalapi.Repositories
                 var content = await response.Content.ReadAsStringAsync();
                 JObject result = JObject.Parse(content);
 
-                return Newtonsoft.Json.JsonConvert.DeserializeObject<Profile>(result.GetValue("result").ToString());
+                return Newtonsoft.Json.JsonConvert.DeserializeObject<BearBoxStorageUserResponse>(result.GetValue("result").ToString());
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex.ToString());
-                return new Profile();
+                return new BearBoxStorageUserResponse();
             }
         }
 
-        public async Task<object> GetPIN(string userId)
+        public async Task<BearBoxPinResponse> GetPIN(string userId)
         {
             var httpClient = _clientFactory.CreateClient("httpClientBearBox");
             httpClient.BaseAddress = new Uri($"{_configuration["BearBox:ServiceUrl"]}{_configuration["BearBox:User"]}");
@@ -61,22 +61,22 @@ namespace customerportalapi.Repositories
                 var content = await response.Content.ReadAsStringAsync();
                 JObject result = JObject.Parse(content);
 
-                return Newtonsoft.Json.JsonConvert.DeserializeObject<Profile>(result.GetValue("result").ToString());
+                return Newtonsoft.Json.JsonConvert.DeserializeObject<BearBoxPinResponse>(result.GetValue("result").ToString());
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex.ToString());
-                return new Profile();
+                return new BearBoxPinResponse();
             }
         }
 
-        public async Task<object> UpdatePINAsync(object user)
+        public async Task<BearBoxPinResponse> UpdatePINAsync(BearBoxPinRequest pin)
         {
             var httpClient = _clientFactory.CreateClient("httpClientBearBox");
             var method = new HttpMethod("PATCH");
             var request = new HttpRequestMessage(method, new Uri($"{_configuration["BearBox:ServiceUrl"]}{_configuration["BearBox:Pin"]}/id"))
             {
-                Content = new StringContent(Newtonsoft.Json.JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json")
+                Content = new StringContent(Newtonsoft.Json.JsonConvert.SerializeObject(pin), Encoding.UTF8, "application/json")
             };
 
             var response = await httpClient.SendAsync(request);
@@ -84,7 +84,7 @@ namespace customerportalapi.Repositories
             var content = await response.Content.ReadAsStringAsync();
             JObject result = JObject.Parse(content);
 
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<Profile>(result.GetValue("result").ToString());
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<BearBoxPinResponse>(result.GetValue("result").ToString());
         }
     }
 }
