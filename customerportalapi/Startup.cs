@@ -352,7 +352,8 @@ namespace customerportalapi
             {
                 c.BaseAddress = new Uri(Configuration["BearBox:ServiceUrl"]);
                 c.Timeout = new TimeSpan(0, 2, 0); //2 minutes
-                //c.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                c.DefaultRequestHeaders.Add("Accept", "application/json");
+                c.DefaultRequestHeaders.Add("Connection", "keep-alive");
                 c.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue
                 {
                     NoCache = true,
@@ -366,7 +367,6 @@ namespace customerportalapi
                 AllowAutoRedirect = false,
                 AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip,
             });
-
 
             services.AddAuthentication(AzureADDefaults.JwtBearerAuthenticationScheme)
                 .AddAzureADBearer(options => Configuration.Bind("AzureAd", options));
