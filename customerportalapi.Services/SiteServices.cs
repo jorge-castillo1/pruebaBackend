@@ -500,7 +500,11 @@ namespace customerportalapi.Services
                         {
                             previousStoreId = site.StoreId;
                             invoicesByCustomerId = await _contractSMRepository.GetInvoicesByCustomerIdAsync(contractSM.Customerid);
-                            invoicesByCustomerIdOrdered.AddRange(invoicesByCustomerId.OrderByDescending(x => x.DocumentDate).ThenByDescending(x => x.OurReference));
+                            invoicesByCustomerIdOrdered.AddRange(
+                                invoicesByCustomerId.OrderByDescending(x =>
+                                    x.DocumentDate));
+
+                            //.ThenByDescending(x => x.OurReference));
                         }
 
                         // First, find unpaid invoices, invoice.OutStanding != 0
@@ -523,6 +527,91 @@ namespace customerportalapi.Services
                 }
 
                 site.Contracts.AddRange(contractInvoices);
+                siteInvoices.Add(site);
+            }
+
+            return siteInvoices;
+        }
+
+        public async Task<List<SiteInvoices>> GetLastDocuments(string username, string contractNumber = null)
+        {
+            // Recupera número de facturas por site a mostrar de la tabla de Features
+            var limitInvoices = _featureRepository.CheckFeature(FeatureNames.LimitInvoices, _config["Environment"], "", 24);
+
+            var siteInvoices = new List<SiteInvoices>();
+            //Add customer portal Business Logic
+            User user = _userRepository.GetCurrentUserByUsername(username);
+            if (user.Id == null)
+                throw new ServiceException("User does not exist.", HttpStatusCode.NotFound, FieldNames.Username, ValidationMessages.NotExist);
+
+            //2. If exist complete data from external repository
+            //Invoke repository
+            var accountType = (user.Usertype == (int)UserTypes.Business) ? AccountType.Business : AccountType.Residential;
+            var contracts = await _contractRepository.GetContractsAsync(user.Dni, accountType);
+            if (!string.IsNullOrEmpty(contractNumber))
+                contracts = contracts.Where(c => c.ContractNumber == contractNumber).ToList();
+
+            //3. From contracts get customer invoices
+            if (contracts == null || contracts.Count == 0)
+                return siteInvoices;
+
+            // Variable clave/valor para identificar los customers/stores repetidos y no volver a consultar sus documentos
+            var listCustomersSites = new List<KeyValuePair<string, string>>();
+
+            //4. Group contract by Store
+            foreach (var storegroup in contracts.GroupBy(x => new
+            {
+                Name = x.StoreData.StoreName,
+                x.StoreData.StoreCode,
+                x.StoreData.StoreId
+            }))
+            {
+                SiteInvoices site = new SiteInvoices
+                {
+                    Name = storegroup.Key.Name,
+                    StoreCode = storegroup.Key.StoreCode,
+                    StoreId = storegroup.Key.StoreId.ToString()
+                };
+
+                foreach (var contract in storegroup)
+                {
+                    site.ContractNumber = contract.ContractNumber;
+
+                    // Recupera el contrato y el customer ID de SM
+                    SMContract contractSM = null;
+                    if (contract?.Unit != null && !string.IsNullOrEmpty(contract.SmContractCode))
+                        contractSM = await _contractSMRepository.GetAccessCodeAsync(contract.SmContractCode);
+
+
+                    site.CustomerId = contractSM?.Customerid;
+
+                    // si existe la clave/valor no continua buscando documentos
+                    if (!listCustomersSites.Any() || !listCustomersSites.Contains(new KeyValuePair<string, string>(contractSM?.Customerid, site.StoreCode)))
+                    {
+                        listCustomersSites.Add(new KeyValuePair<string, string>(contractSM?.Customerid, site.StoreCode));
+
+                        if (string.IsNullOrEmpty(contractSM?.Leaving))
+                        {
+                            // Consulta de documentos en SM y los ordena por el campo Fecha en orden descendente
+                            var invoicesByCustomerId = (await _contractSMRepository.GetDocumentsByCustomerIdAsync(contractSM?.Customerid)).OrderByDescending(x => x.DocumentDate).ToList();
+
+                            // Filtra solo Payment and Invoice
+                            var invoicesFiltered = invoicesByCustomerId.Where(invoice =>
+                                    invoice.SiteID == site.StoreCode && invoice.DocumentType != null &&
+                                    (invoice.DocumentType.ToLower() == "invoice" ||
+                                     invoice.DocumentType.ToLower() == "payment"))
+                                .ToList();
+
+                            // Solo toma los primeros 24 documentos 
+                            if (invoicesFiltered.Count > limitInvoices)
+                                invoicesFiltered = invoicesFiltered.Take(limitInvoices).ToList();
+
+                            // Se devuelven
+                            site.Documents.AddRange(invoicesFiltered);
+                            site.Contracts = null;
+                        }
+                    }
+                }
                 siteInvoices.Add(site);
             }
 

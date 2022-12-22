@@ -1,5 +1,4 @@
-﻿using System;
-using customerportalapi.Entities;
+﻿using customerportalapi.Entities;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -10,6 +9,7 @@ namespace customerportalapi.Repositories.Interfaces
         Task<SMContract> GetAccessCodeAsync(string contractId);
         Task<List<Invoice>> GetInvoicesAsync(string contractId);
         Task<List<Invoice>> GetInvoicesByCustomerIdAsync(string cutomerId);
+        Task<List<Invoice>> GetDocumentsByCustomerIdAsync(string cutomerId);
         Task<bool> MakePayment(MakePayment makePayment);
         Task<SubContract> GetSubContractAsync(string contractId, string unitId);
         Task<bool> UpdateAccessCodeAsync(UpdateAccessCode updateAccessCode);

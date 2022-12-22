@@ -35,6 +35,7 @@
         "GatewayUrl": "https://localhost:44343/",
         "ConnectionStrings__customerportaldb": "mongodb://localhost:27017",
         "InvoiceByCustomerIdSMAPI": "smapi/Invoice/customer/",
+        "DocumentsByCustomerIdSMAPI": "smapi/Invoice/documents/",
         "MONGO_DATABASE": "customerportal",
         "RESET_PASSWORD_URL": "http://localhost:4200/reset-password/",
         "DatabaseName": "customerportal",

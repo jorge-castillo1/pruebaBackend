@@ -23,6 +23,7 @@ namespace customerportalapi.Services.Interfaces
         Task<List<BlobResult>> GetDocumentInfoBlobStorageUnitCategoryImageAsync(string name);
         Task<List<BlobResult>> GetDocumentInfoStoreFacadeAsync(string storeCode);
         Task<List<SiteInvoices>> GetLastInvoices(string username, string contractNumber = null);
+        Task<List<SiteInvoices>> GetLastDocuments(string username, string contractNumber = null);
         Task<bool> UpdateAccessCodeAsync(string contractId, string black);
     }
 }
