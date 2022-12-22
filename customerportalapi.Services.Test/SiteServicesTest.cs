@@ -272,5 +272,28 @@ namespace customerportalapi.Services.Test
             Assert.IsTrue(siteInvoices[0].Contracts[0].Invoices.Count(x => x.SiteID == "RI1BBFRI120920060001") == 3);
             Assert.IsTrue(siteInvoices[0].Contracts[1].Invoices.Count(x => x.SiteID == "RI1BBFRI120920060001") == 2);
         }
+
+        [TestMethod]
+        public async Task AlSolicitarInformacionDeUltimosDocumentos_DevuelveLos24Ultimos_PorSite()
+        {
+            //Arrange
+            string username = "fake user";
+            SiteServices service = new SiteServices(_userRepository.Object, _contractRepository.Object,
+                _storeRepository.Object, _distributedCache.Object, _identityRepository.Object,
+                _contractSMRepository.Object, _config, _mailRepository.Object, _emailTemplateRepository.Object,
+                _documentRepository.Object, _storeImageRepository.Object, _featureRepository.Object, _bannerRepository.Object, _logger.Object);
+
+            //Act
+            List<SiteInvoices> siteInvoices = await service.GetLastDocuments(username);
+
+            //Assert
+            Assert.IsTrue(siteInvoices.Count == 2);
+            Assert.IsTrue(siteInvoices[0].Documents.Count == 6);
+
+            //Invoices by Site & Contract
+            Assert.IsTrue(siteInvoices[0].Documents.Count(x => x.SiteID == "RI1BBFRI120920060001") == 6);
+            Assert.IsTrue(siteInvoices[0].Documents.Count(x => x.DocumentType == "Payment") == 1);
+            Assert.IsTrue(siteInvoices[0].Documents.Count(x => x.DocumentType == "Invoice") == 5);
+        }
     }
 }

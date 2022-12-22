@@ -1,13 +1,13 @@
-﻿using customerportalapi.Repositories.Interfaces;
-using customerportalapi.Entities;
+﻿using customerportalapi.Entities;
+using customerportalapi.Repositories.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Net.Http;
-using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace customerportalapi.Repositories
 {
@@ -54,6 +54,20 @@ namespace customerportalapi.Repositories
         {
             var httpClient = _clientFactory.CreateClient("httpClientSM");
             httpClient.BaseAddress = new Uri(_configuration["GatewaySmUrl"] + _configuration["InvoiceByCustomerIdSMAPI"] + cutomerId);
+
+            var response = await httpClient.GetAsync(cutomerId, HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode) return new List<Invoice>();
+            var content = await response.Content.ReadAsStringAsync();
+            JObject result = JObject.Parse(content);
+
+            return JsonConvert.DeserializeObject<List<Invoice>>(result.GetValue("result").ToString());
+        }
+
+        public async Task<List<Invoice>> GetDocumentsByCustomerIdAsync(string cutomerId)
+        {
+            var httpClient = _clientFactory.CreateClient("httpClientSM");
+            httpClient.BaseAddress = new Uri(_configuration["GatewaySmUrl"] + _configuration["DocumentsByCustomerIdSMAPI"] + cutomerId);
 
             var response = await httpClient.GetAsync(cutomerId, HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();

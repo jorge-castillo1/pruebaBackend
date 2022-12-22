@@ -400,7 +400,7 @@ namespace customerportalapi.Controllers
         {
             try
             {
-                var entity = await _services.GetLastInvoices(username, contractNumber);
+                var entity = await _services.GetLastDocuments(username, contractNumber);
                 return new ApiResponse(entity);
             }
             catch (ServiceException ex)
@@ -420,7 +420,7 @@ namespace customerportalapi.Controllers
         /// </summary>
         /// <param name="storeCode"></param>
         /// <returns></returns>
-        [HttpGet("stores/facade/image/info")]        
+        [HttpGet("stores/facade/image/info")]
         public async Task<ApiResponse> GetImageStoreFacadeAsync(string storeCode)
         {
             try
