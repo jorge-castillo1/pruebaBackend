@@ -12,5 +12,6 @@ namespace customerportalapi.Entities
         public decimal OutStanding { get; set; }
         public string SiteID { get; set; }
         public string DocumentId { get; set; }
+        public string ContractId { get; set; }
     }
 }
