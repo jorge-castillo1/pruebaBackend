@@ -582,35 +582,42 @@ namespace customerportalapi.Services
                     if (contract?.Unit != null && !string.IsNullOrEmpty(contract.SmContractCode))
                         contractSM = await _contractSMRepository.GetAccessCodeAsync(contract.SmContractCode);
 
-
                     site.CustomerId = contractSM?.Customerid;
 
-                    // si existe la clave/valor no continua buscando documentos
-                    if (!listCustomersSites.Any() || !listCustomersSites.Contains(new KeyValuePair<string, string>(contractSM?.Customerid, site.StoreCode)))
+                    if (string.IsNullOrEmpty(contractSM?.Leaving))
                     {
-                        listCustomersSites.Add(new KeyValuePair<string, string>(contractSM?.Customerid, site.StoreCode));
+                        // Consulta de documentos en SM y los ordena por el campo Fecha en orden descendente
+                        var invoicesByCustomerId = (await _contractSMRepository.GetDocumentsByCustomerIdAsync(contractSM?.Customerid)).OrderByDescending(x => x.DocumentDate).ToList();
 
-                        if (string.IsNullOrEmpty(contractSM?.Leaving))
-                        {
-                            // Consulta de documentos en SM y los ordena por el campo Fecha en orden descendente
-                            var invoicesByCustomerId = (await _contractSMRepository.GetDocumentsByCustomerIdAsync(contractSM?.Customerid)).OrderByDescending(x => x.DocumentDate).ToList();
+                        // Añadir número de contrato al documento
+                        var contractUnitName = contract?.Unit.UnitName;
+                        if (contractUnitName.Length == 3) contractUnitName = contractUnitName.PadLeft(4, '0');
+                        var invoicesWitContractId = invoicesByCustomerId.Where(a => GetUnitName(a.UnitDescription) == contractUnitName).ToList();
+                        var invoicesNotContractId = invoicesByCustomerId.Where(a => a.UnitDescription == string.Empty && (site.Documents.Where(b => b.DocumentId == a.DocumentId).FirstOrDefault() == null)).ToList();
+                        List<Invoice> invoiceList = new List<Invoice>();
+                        invoiceList.AddRange(invoicesWitContractId);
+                        invoiceList.AddRange(invoicesNotContractId);
+                        invoiceList = invoiceList.OrderByDescending(x => x.DocumentDate).ToList();
 
-                            // Filtra solo Payment and Invoice
-                            var invoicesFiltered = invoicesByCustomerId.Where(invoice =>
+                        //Se setea su ContractId
+                        invoiceList.ForEach(a => a.ContractId = contract.ContractNumber);
+
+                        // Filtra solo Payment and Invoice
+                        var invoicesFiltered = invoiceList.Where(invoice =>
                                     invoice.SiteID == site.StoreCode && invoice.DocumentType != null &&
                                     (invoice.DocumentType.ToLower() == "invoice" ||
                                      invoice.DocumentType.ToLower() == "payment"))
                                 .ToList();
 
-                            // Solo toma los primeros 24 documentos 
-                            if (invoicesFiltered.Count > limitInvoices)
-                                invoicesFiltered = invoicesFiltered.Take(limitInvoices).ToList();
+                        // Solo toma los primeros 24 documentos 
+                        if (invoicesFiltered.Count > limitInvoices)
+                            invoicesFiltered = invoicesFiltered.Take(limitInvoices).ToList();
 
-                            // Se devuelven
-                            site.Documents.AddRange(invoicesFiltered);
-                            site.Contracts = null;
-                        }
+                        // Se devuelven
+                        site.Documents.AddRange(invoicesFiltered);
+                        site.Contracts = null;
                     }
+                    // }
                 }
                 siteInvoices.Add(site);
             }
